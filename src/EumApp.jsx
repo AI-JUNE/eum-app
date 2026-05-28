@@ -23,9 +23,13 @@ const C = {
   brandDark: '#A04826',
   brandSoft: '#F7E9E1',
   brandBg: '#FCF3EE',
+  brandLight: '#E0936B',
   ink: '#1A1814',
   inkSoft: '#4A4540',
   mute: '#8A847A',
+  muteSoft: '#EFEBE3',
+  success: '#5F8556',
+  successSoft: '#E8EFE3',
   cream: '#FAF7F2',
   bg: '#F6F2EB',
   card: '#FFFFFF',
@@ -64,6 +68,32 @@ const SERIF_STACK = `"Source Serif Pro", "Noto Serif KR", Georgia, serif`;
 
 const TODAY = '2027-07-15'; // 데모용 가상 현재 날짜
 
+// 신청별 검증 단계 생성기 (코디 관제실 schema)
+const VERIF_STEPS = {
+  youth: ['interview', 'criminal_record', 'abuse_record', 'reference'],
+  senior: ['interview', 'criminal_record', 'abuse_record', 'reference'],
+  parent: ['interview', 'guardian_consent', 'document'],
+};
+const STEP_NOTE = {
+  interview: '대면 면접·오리엔테이션 완료', criminal_record: '경찰청 범죄경력 회보 확인',
+  abuse_record: '아동학대 전력 조회 확인', reference: '추천인 통화 완료',
+  guardian_consent: '보호자 동의서 5종 수령', document: '재직·신분 서류 확인',
+};
+let _vfSeq = 0;
+function buildVerifs(appId, type, statusMap) {
+  return (VERIF_STEPS[type] || []).map((step) => {
+    const status = statusMap[step] || 'pending';
+    _vfSeq += 1;
+    return {
+      id: `vf${String(_vfSeq).padStart(3, '0')}`, application_id: appId, step, status,
+      verified_by: status === 'passed' ? '코디 한가은' : null,
+      verified_at: status === 'passed' ? '2027-04-10' : null,
+      note: status === 'passed' ? STEP_NOTE[step] : status === 'in_progress' ? '진행 중 (회신 대기)' : status === 'failed' ? '결격 사유 확인' : '대기',
+    };
+  });
+}
+const ALL_PASS = (type) => Object.fromEntries((VERIF_STEPS[type] || []).map((s) => [s, 'passed']));
+
 const SEED_DATA = {
   participants: [
     // 청년 5명
@@ -72,6 +102,7 @@ const SEED_DATA = {
     { id: 'p003', name: '박서준', type: 'youth', age: 29, phone: '010-3456-7890', address: '강서구 화곡동', emergency_contact: '010-3333-4444 (형)', occupation: '디자이너', skills: ['디지털코칭', '예술교육', '사진'], interests: ['디자인', '사진', '카페'], availability: ['토요일', '일요일'], status: 'active', avatar_color: C.sage, joined_at: '2027-03-20', bio: 'UX 디자이너. 어르신께 스마트폰 사진을, 아이들에게 그림을 가르쳐요.' },
     { id: 'p004', name: '최예린', type: 'youth', age: 26, phone: '010-4567-8901', address: '강서구 우장산동', emergency_contact: '010-5555-6666 (모친)', occupation: '간호사', skills: ['건강관리', '응급처치', '돌봄'], interests: ['건강', '운동', '요리'], availability: ['평일저녁'], status: 'pending_match', avatar_color: C.sage, joined_at: '2027-04-01', bio: '대학병원 간호사. 어르신 건강 케어와 아이 안전에 강점이 있어요.' },
     { id: 'p005', name: '정태윤', type: 'youth', age: 28, phone: '010-5678-9012', address: '강서구 등촌동', emergency_contact: '010-7777-8888 (모친)', occupation: '회계사', skills: ['학습멘토', '수학교육'], interests: ['경제', '독서', '러닝'], availability: ['평일저녁', '토요일'], status: 'verifying', avatar_color: C.sage, joined_at: '2027-05-12', bio: '회계사. 아이들에게 수학과 경제 개념을 쉽게 알려주고 싶어요.' },
+    { id: 'p006', name: '강도현', type: 'youth', age: 24, phone: '010-6789-0123', address: '강서구 우장산동', emergency_contact: '010-9090-1212 (부친)', occupation: '대학생 (체육교육)', skills: ['체육지도', '학습멘토', '돌봄'], interests: ['운동', '축구', '게임'], availability: ['주말', '평일저녁'], status: 'verifying', avatar_color: C.sage, joined_at: '2027-05-20', bio: '체육교육과 4학년. 아이들과 몸으로 노는 활동, 어르신 가벼운 운동 코칭에 자신 있어요.' },
 
     // 어르신 5명
     { id: 'p101', name: '박순자', type: 'senior', age: 73, phone: '010-1111-1111', address: '강서구 우장산동 (42년 거주)', emergency_contact: '010-2222-3333 (딸)', occupation: '前 초등학교 교사', skills: ['독서지도', '서예', '동화구연'], interests: ['손주', '드라마', '꽃'], availability: ['평일오전', '평일오후'], status: 'active', avatar_color: C.lavender, joined_at: '2027-03-16', bio: '40년 교직 생활. 손주 같은 아이에게 옛이야기 들려주고 싶어요.' },
@@ -79,6 +110,7 @@ const SEED_DATA = {
     { id: 'p103', name: '이병호', type: 'senior', age: 71, phone: '010-3333-3333', address: '강서구 우장산동', emergency_contact: '010-6666-7777 (딸)', occupation: '前 공무원', skills: ['역사이야기', '바둑', '서예'], interests: ['역사', '바둑', '등산'], availability: ['평일오전', '토요일'], status: 'active', avatar_color: C.lavender, joined_at: '2027-03-25', bio: '공무원 40년 정년퇴직. 청년들에게 인생 조언을, 아이들에게 역사 이야기를 들려주고 싶어요.' },
     { id: 'p104', name: '정금자', type: 'senior', age: 75, phone: '010-4444-4444', address: '강서구 우장산동', emergency_contact: '010-8888-9999 (며느리)', occupation: '前 동네 식당 운영', skills: ['요리', '한식', '이야기'], interests: ['요리', '드라마', '꽃밭'], availability: ['평일오전', '평일오후'], status: 'active', avatar_color: C.lavender, joined_at: '2027-03-28', bio: '평생 식당. 아이들에게 손맛 김치 담그기를 가르쳐주고 싶어요.' },
     { id: 'p105', name: '윤석철', type: 'senior', age: 70, phone: '010-5555-5555', address: '강서구 우장산동', emergency_contact: '010-0000-1111 (아들)', occupation: '前 자영업', skills: ['장기', '한자', '경험담'], interests: ['장기', '뉴스', '걷기'], availability: ['평일오전'], status: 'pending_match', avatar_color: C.lavender, joined_at: '2027-04-05', bio: '동네 토박이. 청년에게 사업 경험을 나누고 아이와 장기 두고 싶어요.' },
+    { id: 'p106', name: '서말순', type: 'senior', age: 76, phone: '010-6666-1212', address: '강서구 우장산동 (50년 거주)', emergency_contact: '010-3434-5656 (딸)', occupation: '前 한복집 운영', skills: ['한복', '바느질', '옛이야기'], interests: ['드라마', '화초', '손주'], availability: ['평일오전', '평일오후'], status: 'verifying', avatar_color: C.lavender, joined_at: '2027-05-18', bio: '한복 짓는 일을 50년 했어요. 아이들에게 우리 옷의 아름다움을 알려주고 싶어요.' },
 
     // 양육가정 3가구
     { id: 'p201', name: '이서영', type: 'parent', age: 38, phone: '010-6666-7777', address: '강서구 우장산동', emergency_contact: '010-1010-2020 (배우자)', occupation: 'IT기업 PM (마곡)', skills: [], interests: [], availability: ['평일 저녁 7시 이후 픽업 가능'], status: 'active', avatar_color: C.peach, joined_at: '2027-03-19', child_id: 'p301', bio: '맞벌이라 퇴근 후 아이 돌봄 공백이 늘 걱정이에요.' },
@@ -89,33 +121,52 @@ const SEED_DATA = {
     { id: 'p301', name: '김유진', type: 'child', age: 8, phone: '', address: '강서구 우장산동', emergency_contact: '010-6666-7777 (모친 이서영)', occupation: '초2', skills: [], interests: ['그림', '책', '강아지'], availability: [], status: 'active', avatar_color: C.peach, joined_at: '2027-03-19', parent_id: 'p201', bio: '책 읽기를 좋아하고 그림 그리는 걸 즐겨요.' },
     { id: 'p302', name: '한도윤', type: 'child', age: 9, phone: '', address: '강서구 우장산동', emergency_contact: '010-7777-8888 (모친 한지영)', occupation: '초3', skills: [], interests: ['로봇', '레고', '축구'], availability: [], status: 'active', avatar_color: C.peach, joined_at: '2027-03-26', parent_id: 'p202', bio: '레고와 로봇을 좋아하고 축구를 잘해요.' },
     { id: 'p303', name: '김지안', type: 'child', age: 7, phone: '', address: '강서구 우장산동', emergency_contact: '010-8888-9999 (모친 김혜진)', occupation: '초1', skills: [], interests: ['공룡', '책', '노래'], availability: [], status: 'active', avatar_color: C.peach, joined_at: '2027-04-02', parent_id: 'p203', bio: '공룡에 푹 빠져 있고 노래 부르기를 좋아해요.' },
+
+    // 코디네이터 1명
+    { id: 'cdn001', name: '한가은', type: 'coordinator', age: 34, phone: '010-2345-6789', address: '강서구 우장산동', emergency_contact: '010-1212-3434 (배우자)', occupation: '우장산동 운영 코디네이터', skills: ['운영', '상담', '안전관리'], interests: [], availability: ['평일 9~21시', '주말 10~18시'], status: 'active', avatar_color: C.ink, joined_at: '2027-02-20', bio: '사회복지사 출신 코디네이터. 신청·검증·매칭·정산·안전을 한 손에 챙깁니다.' },
   ],
 
   applications: [
-    { id: 'a001', participant_id: 'p001', submitted_at: '2027-03-14', consent_criminal: true, consent_guardian: false, consent_data: true, consent_photo: true },
-    { id: 'a002', participant_id: 'p101', submitted_at: '2027-03-15', consent_criminal: true, consent_guardian: false, consent_data: true, consent_photo: true },
-    { id: 'a003', participant_id: 'p201', submitted_at: '2027-03-18', consent_criminal: false, consent_guardian: true, consent_data: true, consent_photo: true },
-    { id: 'a004', participant_id: 'p004', submitted_at: '2027-03-31', consent_criminal: true, consent_guardian: false, consent_data: true, consent_photo: true },
-    { id: 'a005', participant_id: 'p005', submitted_at: '2027-05-11', consent_criminal: true, consent_guardian: false, consent_data: true, consent_photo: true },
+    // 활동 시작 (completed)
+    { id: 'a001', participant_id: 'p001', type: 'youth', status: 'completed', applied_at: '2027-03-14', consent_data: true, consent_photo: true, consent_criminal: true, consent_guardian: false },
+    { id: 'a002', participant_id: 'p002', type: 'youth', status: 'completed', applied_at: '2027-03-18', consent_data: true, consent_photo: true, consent_criminal: true, consent_guardian: false },
+    { id: 'a003', participant_id: 'p003', type: 'youth', status: 'completed', applied_at: '2027-03-20', consent_data: true, consent_photo: true, consent_criminal: true, consent_guardian: false },
+    { id: 'a004', participant_id: 'p101', type: 'senior', status: 'completed', applied_at: '2027-03-15', consent_data: true, consent_photo: true, consent_criminal: true, consent_guardian: false },
+    { id: 'a005', participant_id: 'p102', type: 'senior', status: 'completed', applied_at: '2027-03-22', consent_data: true, consent_photo: true, consent_criminal: true, consent_guardian: false },
+    { id: 'a006', participant_id: 'p103', type: 'senior', status: 'completed', applied_at: '2027-03-25', consent_data: true, consent_photo: true, consent_criminal: true, consent_guardian: false },
+    { id: 'a007', participant_id: 'p201', type: 'parent', status: 'completed', applied_at: '2027-03-19', consent_data: true, consent_photo: true, consent_criminal: false, consent_guardian: true },
+    { id: 'a008', participant_id: 'p202', type: 'parent', status: 'completed', applied_at: '2027-03-26', consent_data: true, consent_photo: true, consent_criminal: false, consent_guardian: true },
+    { id: 'a009', participant_id: 'p203', type: 'parent', status: 'completed', applied_at: '2027-04-02', consent_data: true, consent_photo: true, consent_criminal: false, consent_guardian: true },
+    // 검증 완료 · 매칭 대기 (verified)
+    { id: 'a010', participant_id: 'p004', type: 'youth', status: 'verified', applied_at: '2027-03-31', consent_data: true, consent_photo: true, consent_criminal: true, consent_guardian: false },
+    { id: 'a011', participant_id: 'p105', type: 'senior', status: 'verified', applied_at: '2027-04-05', consent_data: true, consent_photo: true, consent_criminal: true, consent_guardian: false },
+    // 서류 검토 중 (screening)
+    { id: 'a012', participant_id: 'p005', type: 'youth', status: 'screening', applied_at: '2027-05-11', consent_data: true, consent_photo: true, consent_criminal: true, consent_guardian: false },
+    { id: 'a013', participant_id: 'p006', type: 'youth', status: 'screening', applied_at: '2027-05-20', consent_data: true, consent_photo: true, consent_criminal: true, consent_guardian: false },
+    { id: 'a014', participant_id: 'p106', type: 'senior', status: 'screening', applied_at: '2027-05-18', consent_data: true, consent_photo: true, consent_criminal: true, consent_guardian: false },
   ],
 
   verifications: [
-    { id: 'v001', participant_id: 'p001', status: 'passed', verified_at: '2027-03-28', verified_by: '코디 한가은', notes: '범죄경력 없음. 면접·오리엔테이션 완료.' },
-    { id: 'v002', participant_id: 'p002', status: 'passed', verified_at: '2027-03-29', verified_by: '코디 한가은', notes: '범죄경력 없음. 면접 우수.' },
-    { id: 'v003', participant_id: 'p003', status: 'passed', verified_at: '2027-03-30', verified_by: '코디 한가은', notes: '범죄경력 없음.' },
-    { id: 'v004', participant_id: 'p004', status: 'passed', verified_at: '2027-04-12', verified_by: '코디 한가은', notes: '범죄경력 없음. 병원 재직증명서 확인.' },
-    { id: 'v005', participant_id: 'p005', status: 'in_progress', verified_at: null, verified_by: null, notes: '경찰청 회신 대기 중 (5/12 신청, 평균 7~14일 소요).' },
-    { id: 'v101', participant_id: 'p101', status: 'passed', verified_at: '2027-03-28', verified_by: '코디 한가은', notes: '범죄경력 없음.' },
-    { id: 'v102', participant_id: 'p102', status: 'passed', verified_at: '2027-04-01', verified_by: '코디 한가은', notes: '범죄경력 없음.' },
-    { id: 'v103', participant_id: 'p103', status: 'passed', verified_at: '2027-04-02', verified_by: '코디 한가은', notes: '범죄경력 없음.' },
-    { id: 'v104', participant_id: 'p104', status: 'passed', verified_at: '2027-04-03', verified_by: '코디 한가은', notes: '범죄경력 없음.' },
-    { id: 'v105', participant_id: 'p105', status: 'in_progress', verified_at: null, verified_by: null, notes: '신청서 보완 요청 (비상연락처).' },
+    ...buildVerifs('a001', 'youth', ALL_PASS('youth')),
+    ...buildVerifs('a002', 'youth', ALL_PASS('youth')),
+    ...buildVerifs('a003', 'youth', ALL_PASS('youth')),
+    ...buildVerifs('a004', 'senior', ALL_PASS('senior')),
+    ...buildVerifs('a005', 'senior', ALL_PASS('senior')),
+    ...buildVerifs('a006', 'senior', ALL_PASS('senior')),
+    ...buildVerifs('a007', 'parent', ALL_PASS('parent')),
+    ...buildVerifs('a008', 'parent', ALL_PASS('parent')),
+    ...buildVerifs('a009', 'parent', ALL_PASS('parent')),
+    ...buildVerifs('a010', 'youth', ALL_PASS('youth')),
+    ...buildVerifs('a011', 'senior', ALL_PASS('senior')),
+    ...buildVerifs('a012', 'youth', { interview: 'passed', criminal_record: 'in_progress', abuse_record: 'in_progress', reference: 'pending' }),
+    ...buildVerifs('a013', 'youth', { interview: 'passed', criminal_record: 'pending', abuse_record: 'pending', reference: 'pending' }),
+    ...buildVerifs('a014', 'senior', { interview: 'in_progress', criminal_record: 'pending', abuse_record: 'pending', reference: 'pending' }),
   ],
 
   matches: [
-    { id: 'm001', youth_id: 'p001', senior_id: 'p101', child_id: 'p301', match_notes: '청년-어르신 모두 우장산동 거주. 어르신은 교사 출신, 청년은 IT — 디지털 코칭 시너지. 아동은 책·그림 좋아함.', status: 'active', started_at: '2027-05-01' },
-    { id: 'm002', youth_id: 'p002', senior_id: 'p102', child_id: 'p302', match_notes: '대학원생 청년-어르신 모두 손글씨/바느질 관심. 아동은 만들기 좋아함.', status: 'active', started_at: '2027-05-01' },
-    { id: 'm003', youth_id: 'p003', senior_id: 'p103', child_id: 'p303', match_notes: '디자이너 청년-역사 좋아하는 어르신. 아동은 공룡, 호기심 많음.', status: 'active', started_at: '2027-05-08' },
+    { id: 'm001', youth_id: 'p001', senior_id: 'p101', child_id: 'p301', match_notes: '청년-어르신 모두 우장산동 거주. 어르신은 교사 출신, 청년은 IT — 디지털 코칭 시너지. 아동은 책·그림 좋아함.', coordinator_note: '청년-어르신 모두 우장산동 거주. 어르신은 교사 출신, 청년은 IT — 디지털 코칭 시너지. 아동은 책·그림 좋아함. 활발하게 진행 중이며 별 이슈 없음.', score: 92, status: 'active', started_at: '2027-05-01', ended_at: null },
+    { id: 'm002', youth_id: 'p002', senior_id: 'p102', child_id: 'p302', match_notes: '대학원생 청년-어르신 모두 손글씨/바느질 관심. 아동은 만들기 좋아함.', coordinator_note: '대학원생 청년-어르신 모두 손글씨/바느질 관심. 아동은 만들기 좋아함. 도윤이 학습 성취가 눈에 띄게 향상.', score: 88, status: 'active', started_at: '2027-05-01', ended_at: null },
+    { id: 'm003', youth_id: 'p003', senior_id: 'p103', child_id: 'p303', match_notes: '디자이너 청년-역사 좋아하는 어르신. 아동은 공룡, 호기심 많음.', coordinator_note: '디자이너 청년-역사 좋아하는 어르신. 아동은 공룡, 호기심 많음. 어르신의 역사 이야기와 아이 호기심이 잘 맞음.', score: 85, status: 'active', started_at: '2027-05-08', ended_at: null },
   ],
 
   activities: [
@@ -280,6 +331,16 @@ const fmtRelativeDate = (s) => {
 };
 const initials = (name) => (name || '?').slice(0, 1);
 const uid = (prefix) => `${prefix}${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
+
+// --- Schema derivation helpers (single source of truth = SEED schema) ---
+const dateOf = (s) => (s || '').split(' ')[0];               // 'YYYY-MM-DD HH:MM' -> 'YYYY-MM-DD'
+const timeOf = (s) => (s || '').split(' ')[1] || '';          // -> 'HH:MM'
+const actDate = (a) => (a ? dateOf(a.scheduled_at) : '');
+const actTime = (a) => (a ? timeOf(a.scheduled_at) : '');
+const findAct = (state, log) => state.activities.find((a) => a.id === log.activity_id);
+const logDate = (state, log) => { const a = findAct(state, log); return a ? actDate(a) : (log.approved_at || ''); };
+const logMonth = (state, log) => (logDate(state, log) || '').slice(0, 7);
+const RATE_PER_HOUR = 11460; // 월 275,000원 / 24시간 ≈ 시급 (플레이북 9.1 산출근거)
 
 // ============================================================================
 // 5. UI PRIMITIVES
@@ -654,6 +715,7 @@ function Sidebar({ role, currentView, onNavigate, onLogout, userName, dataCount 
   const items = navByRole[role] || [];
   const persona = PERSONA[role];
   const isSenior = role === 'senior';
+  const homeView = items[0]?.id || 'dashboard';
 
   return (
     <div style={{
@@ -662,7 +724,17 @@ function Sidebar({ role, currentView, onNavigate, onLogout, userName, dataCount 
       display: 'flex', flexDirection: 'column', flexShrink: 0,
       position: 'sticky', top: 0,
     }}>
-      <div style={{ padding: '22px 20px 18px', borderBottom: `1px solid ${C.borderSoft}` }}>
+      <button
+        onClick={() => onNavigate(homeView)}
+        title="홈으로 이동"
+        style={{
+          padding: '22px 20px 18px', borderBottom: `1px solid ${C.borderSoft}`,
+          background: 'transparent', border: 'none', borderBottomLeftRadius: 0,
+          cursor: 'pointer', width: '100%', textAlign: 'left', transition: 'background 0.12s',
+        }}
+        onMouseEnter={(e) => e.currentTarget.style.background = C.cream}
+        onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+      >
         <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
           <div style={{
             width: 32, height: 32, borderRadius: 9,
@@ -677,7 +749,7 @@ function Sidebar({ role, currentView, onNavigate, onLogout, userName, dataCount 
             <div style={{ fontSize: 10, color: C.mute, letterSpacing: '0.08em', fontWeight: 600, marginTop: 2 }}>EUM · 세대를 잇다</div>
           </div>
         </div>
-      </div>
+      </button>
 
       <div style={{ flex: 1, padding: '14px 12px', overflowY: 'auto' }}>
         <div style={{ fontSize: 10, color: C.mute, fontWeight: 700, letterSpacing: '0.1em', padding: '4px 10px 8px' }}>
@@ -1321,6 +1393,7 @@ function YouthSchedule({ match, activities, state }) {
 
 function YouthLogs({ state, user, match, myLogs, myActivities, dispatch, showToast }) {
   const [open, setOpen] = useState(false);
+  const [logTab, setLogTab] = useState('all');
   const [form, setForm] = useState({ activity_id: '', summary: '', mood: 5, has_photo: false });
 
   const writableActs = myActivities.filter(a => a.status === 'completed' || a.status === 'scheduled');
@@ -1364,11 +1437,15 @@ function YouthLogs({ state, user, match, myLogs, myActivities, dispatch, showToa
           { id: 'all', label: '전체', count: myLogs.length },
           { id: 'approved', label: '승인', count: myLogs.filter(l => l.approved).length },
           { id: 'pending', label: '대기', count: myLogs.filter(l => !l.approved).length },
-        ]} active="all" onChange={() => {}} style={{ padding: '0 16px' }} />
+        ]} active={logTab} onChange={setLogTab} style={{ padding: '0 16px' }} />
         <div style={{ padding: 12 }}>
-          {myLogs.length === 0 ? (
-            <Empty icon={<PenLine size={42} />} title="아직 기록이 없습니다" sub="활동 후 그날의 인상적이었던 순간을 적어주세요" />
-          ) : myLogs.map((log) => {
+          {(() => {
+            const shown = logTab === 'approved' ? myLogs.filter(l => l.approved)
+              : logTab === 'pending' ? myLogs.filter(l => !l.approved) : myLogs;
+            if (shown.length === 0) return (
+              <Empty icon={<PenLine size={42} />} title={logTab === 'pending' ? '승인 대기 중인 기록이 없습니다' : logTab === 'approved' ? '승인된 기록이 없습니다' : '아직 기록이 없습니다'} sub="활동 후 그날의 인상적이었던 순간을 적어주세요" />
+            );
+            return shown.map((log) => {
             const act = state.activities.find(a => a.id === log.activity_id);
             return (
               <div key={log.id} style={{ padding: 16, borderBottom: `1px solid ${C.borderSoft}` }}>
@@ -1388,7 +1465,8 @@ function YouthLogs({ state, user, match, myLogs, myActivities, dispatch, showToa
                 <div style={{ fontSize: 14, color: C.inkSoft, lineHeight: 1.65 }}>{log.summary}</div>
               </div>
             );
-          })}
+          });
+          })()}
         </div>
       </Card>
 
@@ -1755,21 +1833,21 @@ function Layout({ role, view, setView, user, dispatch, children, state }) {
 function ParentApp({ state, user, dispatch, showToast }) {
   const [view, setView] = useState('dashboard');
 
-  const myChildren = state.participants.filter(p => p.type === 'child' && p.guardian_id === user.id);
+  const myChildren = state.participants.filter(p => p.type === 'child' && p.parent_id === user.id);
   const myMatches = state.matches.filter(m => myChildren.some(c => c.id === m.child_id) && m.status === 'active');
   const childIds = myChildren.map(c => c.id);
 
   const todayActivities = state.activities.filter(a =>
-    a.date === TODAY && myMatches.some(m => m.id === a.match_id)
+    actDate(a) === TODAY && myMatches.some(m => m.id === a.match_id)
   );
   const upcomingActivities = state.activities
-    .filter(a => a.date >= TODAY && a.status === 'scheduled' && myMatches.some(m => m.id === a.match_id))
-    .sort((a, b) => a.date.localeCompare(b.date))
+    .filter(a => actDate(a) >= TODAY && a.status === 'scheduled' && myMatches.some(m => m.id === a.match_id))
+    .sort((a, b) => a.scheduled_at.localeCompare(b.scheduled_at))
     .slice(0, 5);
 
   const recentLogs = state.activity_logs
     .filter(l => state.activities.find(a => a.id === l.activity_id && myMatches.some(m => m.id === a.match_id)))
-    .sort((a, b) => b.created_at.localeCompare(a.created_at))
+    .sort((a, b) => logDate(state, b).localeCompare(logDate(state, a)))
     .slice(0, 6);
 
   const myIncidents = state.safety_incidents.filter(i => myMatches.some(m => m.id === i.match_id));
@@ -1803,7 +1881,7 @@ function ParentDashboard({ user, myChildren, myMatches, todayActivities, upcomin
   const senior = match ? state.participants.find(p => p.id === match.senior_id) : null;
   const openIssues = myIncidents.filter(i => i.status === 'open' || i.status === 'in_progress').length;
   const totalHoursThisMonth = state.activity_logs
-    .filter(l => l.approved && l.date.startsWith(TODAY.slice(0, 7)) &&
+    .filter(l => l.approved && logMonth(state, l) === TODAY.slice(0, 7) &&
       state.activities.find(a => a.id === l.activity_id && myMatches.some(m => m.id === a.match_id)))
     .reduce((sum, l) => sum + l.hours, 0);
 
@@ -1856,11 +1934,11 @@ function ParentDashboard({ user, myChildren, myMatches, todayActivities, upcomin
                 return (
                   <div key={act.id} style={{ padding: 14, background: C.bg, borderRadius: 10, border: `1px solid ${C.borderSoft}` }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-                      <div style={{ fontWeight: 700, fontSize: 14, color: C.ink }}>{act.title}</div>
+                      <div style={{ fontWeight: 700, fontSize: 14, color: C.ink }}>{act.type}</div>
                       <Badge color={C.sage} soft={C.sageSoft}>{act.type}</Badge>
                     </div>
                     <div style={{ display: 'flex', gap: 14, fontSize: 12, color: C.inkSoft }}>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Clock size={11} /> {act.time}</span>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Clock size={11} /> {actTime(act)}</span>
                       <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><MapPin size={11} /> {act.location}</span>
                       <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Users size={11} /> {y?.name}</span>
                     </div>
@@ -1905,11 +1983,11 @@ function ParentDashboard({ user, myChildren, myMatches, todayActivities, upcomin
               return (
                 <div key={act.id} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '10px 12px', borderRadius: 8, background: C.bg }}>
                   <div style={{ minWidth: 64, textAlign: 'center', padding: '6px 8px', background: C.card, borderRadius: 6, border: `1px solid ${C.borderSoft}` }}>
-                    <div style={{ fontSize: 10, color: C.mute, fontWeight: 600 }}>{fmtRelativeDate(act.date)}</div>
-                    <div style={{ fontSize: 14, fontWeight: 700, color: C.ink, marginTop: 1 }}>{act.time.slice(0, 5)}</div>
+                    <div style={{ fontSize: 10, color: C.mute, fontWeight: 600 }}>{fmtRelativeDate(actDate(act))}</div>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: C.ink, marginTop: 1 }}>{actTime(act)}</div>
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: C.ink, marginBottom: 2 }}>{act.title}</div>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: C.ink, marginBottom: 2 }}>{act.type}</div>
                     <div style={{ fontSize: 11, color: C.inkSoft }}>{act.location} · {y?.name}</div>
                   </div>
                   <Badge color={C.sage} soft={C.sageSoft} size="sm">{act.type}</Badge>
@@ -1936,7 +2014,7 @@ function ParentDashboard({ user, myChildren, myMatches, todayActivities, upcomin
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                       <span style={{ fontSize: 13, fontWeight: 700, color: C.ink }}>{author?.name}</span>
-                      <span style={{ fontSize: 11, color: C.mute }}>· {fmtDate(log.date)} · {act?.title}</span>
+                      <span style={{ fontSize: 11, color: C.mute }}>· {fmtDate(logDate(state, log))} · {act?.type}</span>
                       {log.approved && <Badge color={C.success} soft={C.successSoft} size="sm">승인</Badge>}
                     </div>
                     <div style={{ fontSize: 13, color: C.inkSoft, lineHeight: 1.5 }}>{log.summary}</div>
@@ -1985,11 +2063,11 @@ function ActivityCard({ activity, state }) {
   return (
     <div style={{ padding: 14, borderRadius: 10, border: `1px solid ${C.borderSoft}`, background: C.bg }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-        <div style={{ fontWeight: 700, fontSize: 14, color: C.ink }}>{activity.title}</div>
-        <Badge color={C.sage} soft={C.sageSoft}>{activity.type}</Badge>
+        <div style={{ fontWeight: 700, fontSize: 14, color: C.ink }}>{activity.type}</div>
+        <Badge color={C.sage} soft={C.sageSoft}>{activity.status === 'completed' ? '완료' : '예정'}</Badge>
       </div>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14, fontSize: 12, color: C.inkSoft, marginBottom: 10 }}>
-        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Calendar size={11} /> {fmtRelativeDate(activity.date)} {activity.time.slice(0, 5)}</span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Calendar size={11} /> {fmtRelativeDate(actDate(activity))} {actTime(activity)}</span>
         <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><MapPin size={11} /> {activity.location}</span>
         <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Clock size={11} /> {activity.duration_hours}시간</span>
       </div>
@@ -2223,14 +2301,14 @@ function CoordinatorApp({ state, user, dispatch, showToast }) {
 
 function CoordOverview({ state, setView }) {
   const kpis = useMemo(() => {
-    const totalParticipants = state.participants.length;
+    const totalParticipants = state.participants.filter(p => p.type !== 'coordinator').length;
     const youthCount = state.participants.filter(p => p.type === 'youth' && p.status === 'active').length;
     const seniorCount = state.participants.filter(p => p.type === 'senior' && p.status === 'active').length;
     const parentCount = state.participants.filter(p => p.type === 'parent' && p.status === 'active').length;
     const childCount = state.participants.filter(p => p.type === 'child').length;
     const activeMatches = state.matches.filter(m => m.status === 'active').length;
     const totalHours = state.activity_logs.filter(l => l.approved).reduce((s, l) => s + l.hours, 0);
-    const totalSettled = state.settlements.filter(s => s.status === 'issued').reduce((s, x) => s + x.amount, 0);
+    const totalSettled = state.settlements.filter(s => s.status === 'paid').reduce((s, x) => s + x.amount_krw, 0);
     const pendingLogs = state.activity_logs.filter(l => !l.approved).length;
     const openIncidents = state.safety_incidents.filter(i => i.status === 'open' || i.status === 'in_progress').length;
     const pendingApps = state.applications.filter(a => a.status === 'screening' || a.status === 'verified').length;
@@ -2241,7 +2319,8 @@ function CoordOverview({ state, setView }) {
   const monthlyChart = useMemo(() => {
     const months = {};
     state.activity_logs.filter(l => l.approved).forEach(l => {
-      const m = l.date.slice(0, 7);
+      const m = logMonth(state, l);
+      if (!m) return;
       if (!months[m]) months[m] = { month: m, hours: 0, count: 0 };
       months[m].hours += l.hours;
       months[m].count += 1;
@@ -2255,7 +2334,7 @@ function CoordOverview({ state, setView }) {
   const typeChart = useMemo(() => {
     const types = {};
     state.activities.forEach(a => { types[a.type] = (types[a.type] || 0) + 1; });
-    const colors = { 돌봄: C.peach, 학습: C.sage, 동행: C.lavender, 생활: C.brand, 디지털: C.brandLight };
+    const colors = { 디지털코칭: C.lavender, 학습멘토: C.peach, 진로조언받기: C.brand, 기억아카이브: C.gold };
     return Object.entries(types).map(([type, count]) => ({ name: type, value: count, color: colors[type] || C.mute }));
   }, [state]);
 
@@ -2283,7 +2362,7 @@ function CoordOverview({ state, setView }) {
         <StatCard label="참여자" value={kpis.totalParticipants} sub={`청년 ${kpis.youthCount} / 어르신 ${kpis.seniorCount} / 양육 ${kpis.parentCount}`} color={C.brand} icon={<Users size={18} />} />
         <StatCard label="활성 매칭" value={kpis.activeMatches} sub={`목표 8건 중 ${kpis.activeMatches}건 진행`} color={C.sage} icon={<Heart size={18} />} trend={kpis.activeMatches >= 3 ? `+${kpis.activeMatches - 0}` : null} />
         <StatCard label="누적 활동시간" value={`${kpis.totalHours}h`} sub={`목표 1,440시간 중 ${Math.round(kpis.totalHours / 1440 * 100)}%`} color={C.lavender} icon={<Clock size={18} />} />
-        <StatCard label="지급 정산" value={krw(kpis.totalSettled)} sub={`${state.settlements.filter(s => s.status === 'issued').length}건 발급 완료`} color={C.gold} icon={<Wallet size={18} />} />
+        <StatCard label="지급 정산" value={krw(kpis.totalSettled)} sub={`${state.settlements.filter(s => s.status === 'paid').length}건 발급 완료`} color={C.gold} icon={<Wallet size={18} />} />
       </div>
 
       {/* 차트 */}
@@ -2340,8 +2419,8 @@ function CoordOverview({ state, setView }) {
               <div key={log.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 0', borderBottom: `1px solid ${C.borderSoft}` }}>
                 <Avatar name={author?.name} size={32} color={PERSONA[author?.type]?.color || C.brand} />
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: C.ink, textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>{author?.name} · {act?.title}</div>
-                  <div style={{ fontSize: 11, color: C.mute }}>{fmtDate(log.date)} · {log.hours}시간</div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: C.ink, textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>{author?.name} · {act?.type}</div>
+                  <div style={{ fontSize: 11, color: C.mute }}>{fmtDate(logDate(state, log))} · {log.hours}시간</div>
                 </div>
                 {log.approved ? <Badge color={C.success} soft={C.successSoft} size="sm">승인</Badge> : <Badge color={C.amber} soft={C.amberSoft} size="sm">대기</Badge>}
               </div>
@@ -2351,18 +2430,18 @@ function CoordOverview({ state, setView }) {
         <Card padding={22}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
             <div style={{ fontSize: 14, fontWeight: 700, color: C.ink }}>오늘의 활동 일정</div>
-            <Badge color={C.brand} soft={C.brandSoft}>{state.activities.filter(a => a.date === TODAY).length}건</Badge>
+            <Badge color={C.brand} soft={C.brandSoft}>{state.activities.filter(a => actDate(a) === TODAY).length}건</Badge>
           </div>
-          {state.activities.filter(a => a.date === TODAY).length === 0 ? (
+          {state.activities.filter(a => actDate(a) === TODAY).length === 0 ? (
             <Empty icon={<Calendar size={24} />} title="오늘은 예정된 활동이 없습니다" />
-          ) : state.activities.filter(a => a.date === TODAY).map(act => {
+          ) : state.activities.filter(a => actDate(a) === TODAY).map(act => {
             const m = state.matches.find(mm => mm.id === act.match_id);
             const y = state.participants.find(p => p.id === m?.youth_id);
             return (
               <div key={act.id} style={{ display: 'flex', gap: 12, padding: '10px 0', borderBottom: `1px solid ${C.borderSoft}` }}>
-                <div style={{ minWidth: 50, fontSize: 13, fontWeight: 700, color: C.brand, fontFamily: SERIF_STACK }}>{act.time.slice(0, 5)}</div>
+                <div style={{ minWidth: 50, fontSize: 13, fontWeight: 700, color: C.brand, fontFamily: SERIF_STACK }}>{actTime(act)}</div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: C.ink, marginBottom: 2 }}>{act.title}</div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: C.ink, marginBottom: 2 }}>{act.type}</div>
                   <div style={{ fontSize: 11, color: C.mute }}>{act.location} · {y?.name}</div>
                 </div>
               </div>
@@ -2477,7 +2556,7 @@ function CoordApplicants({ state, dispatch, showToast, user }) {
                 <Avatar name={p?.name} size={64} color={PERSONA[p?.type]?.color || C.brand} />
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 18, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK }}>{p?.name}</div>
-                  <div style={{ fontSize: 12, color: C.inkSoft, marginTop: 4 }}>{PERSONA[p?.type]?.label} · {p?.age}세 · {p?.gender === 'M' ? '남성' : '여성'}</div>
+                  <div style={{ fontSize: 12, color: C.inkSoft, marginTop: 4 }}>{PERSONA[p?.type]?.label} · {p?.age}세{p?.occupation ? ` · ${p.occupation}` : ''}</div>
                   <div style={{ fontSize: 12, color: C.inkSoft, marginTop: 2 }}>{p?.phone} · {p?.address}</div>
                 </div>
               </div>
@@ -2871,7 +2950,7 @@ function CoordActivities({ state, dispatch, showToast, user }) {
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                     <span style={{ fontSize: 13, fontWeight: 700, color: C.ink }}>{author?.name}</span>
-                    <span style={{ fontSize: 11, color: C.mute }}>· {fmtDate(log.date)} · {act?.title}</span>
+                    <span style={{ fontSize: 11, color: C.mute }}>· {fmtDate(logDate(state, log))} · {act?.type}</span>
                     {log.has_photo && <Camera size={12} style={{ color: C.sage }} />}
                     {log.mood && <span style={{ fontSize: 12 }}>{moodEmoji(log.mood)}</span>}
                   </div>
@@ -2905,8 +2984,8 @@ function CoordActivities({ state, dispatch, showToast, user }) {
                 </div>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 14 }}>
-                <div style={{ padding: 10, background: C.bg, borderRadius: 6 }}><div style={{ fontSize: 11, color: C.mute }}>활동</div><div style={{ fontSize: 13, fontWeight: 700, color: C.ink, marginTop: 2 }}>{act?.title}</div></div>
-                <div style={{ padding: 10, background: C.bg, borderRadius: 6 }}><div style={{ fontSize: 11, color: C.mute }}>날짜·시간</div><div style={{ fontSize: 13, fontWeight: 700, color: C.ink, marginTop: 2 }}>{fmtDate(detailLog.date)} · {detailLog.hours}h</div></div>
+                <div style={{ padding: 10, background: C.bg, borderRadius: 6 }}><div style={{ fontSize: 11, color: C.mute }}>활동</div><div style={{ fontSize: 13, fontWeight: 700, color: C.ink, marginTop: 2 }}>{act?.type}</div></div>
+                <div style={{ padding: 10, background: C.bg, borderRadius: 6 }}><div style={{ fontSize: 11, color: C.mute }}>날짜·시간</div><div style={{ fontSize: 13, fontWeight: 700, color: C.ink, marginTop: 2 }}>{fmtDate(logDate(state, detailLog))} · {detailLog.hours}h</div></div>
               </div>
               <div style={{ fontSize: 12, color: C.mute, fontWeight: 700, marginBottom: 6 }}>활동 내용</div>
               <div style={{ padding: 14, background: C.bg, borderRadius: 8, fontSize: 13, color: C.inkSoft, lineHeight: 1.7, marginBottom: 14 }}>{detailLog.summary}</div>
@@ -2935,43 +3014,37 @@ function CoordSettlements({ state, dispatch, showToast, user }) {
 
   // 월별 정산 가능 항목 (승인된 로그 합산)
   const calculatedSettlements = useMemo(() => {
-    const RATE_YOUTH = 12500;
-    const RATE_SENIOR = 12500;
     const map = new Map();
-    state.activity_logs.filter(l => l.approved && l.date.startsWith(monthFilter)).forEach(log => {
+    state.activity_logs.filter(l => l.approved && logMonth(state, l) === monthFilter).forEach(log => {
       const p = state.participants.find(pp => pp.id === log.participant_id);
       if (!p || (p.type !== 'youth' && p.type !== 'senior')) return;
       const key = `${log.participant_id}:${monthFilter}`;
-      if (!map.has(key)) map.set(key, { participant: p, period: monthFilter, hours: 0, count: 0 });
+      if (!map.has(key)) map.set(key, { participant: p, month: monthFilter, hours: 0, count: 0 });
       const item = map.get(key);
       item.hours += log.hours;
       item.count += 1;
     });
-    // 매칭당 어르신은 매칭 단위로 처리되지만 단순화: 참여자별 합산
-    const arr = Array.from(map.values()).map(it => ({
+    return Array.from(map.values()).map(it => ({
       ...it,
-      amount: it.hours * (it.participant.type === 'youth' ? RATE_YOUTH : RATE_SENIOR),
-      existing: state.settlements.find(s => s.participant_id === it.participant.id && s.period === monthFilter),
+      amount: Math.round(it.hours * RATE_PER_HOUR),
+      existing: state.settlements.find(s => s.participant_id === it.participant.id && s.month === monthFilter),
     }));
-    return arr;
   }, [state, monthFilter]);
 
-  const issued = state.settlements.filter(s => s.period === monthFilter && s.status === 'issued');
-  const pending = calculatedSettlements.filter(c => !c.existing || c.existing.status === 'pending');
+  const issued = state.settlements.filter(s => s.month === monthFilter && s.status === 'paid');
+  const pending = calculatedSettlements.filter(c => !c.existing);
 
   const issueOne = (calc) => {
+    const seq = String(state.settlements.length + 1).padStart(3, '0');
     const newSettlement = {
       id: uid('st'),
       participant_id: calc.participant.id,
-      match_id: null,
-      period: calc.period,
-      type: calc.participant.type === 'youth' ? 'youth_stipend' : 'senior_voucher',
-      amount: calc.amount,
-      hours: calc.hours,
-      status: 'issued',
-      method: calc.participant.type === 'youth' ? 'bank' : 'voucher',
+      month: calc.month,
+      total_hours: calc.hours,
+      amount_krw: calc.amount,
+      voucher_code: `KSL-${calc.month.slice(2).replace('-', '')}-${seq}`,
       issued_at: new Date().toISOString().slice(0, 10),
-      issued_by: user.id,
+      status: 'paid',
     };
     dispatch({ type: 'ADD_SETTLEMENT', payload: newSettlement });
   };
@@ -2986,36 +3059,36 @@ function CoordSettlements({ state, dispatch, showToast, user }) {
   };
 
   const totalAmount = calculatedSettlements.reduce((sum, c) => sum + c.amount, 0);
-  const issuedAmount = issued.reduce((sum, s) => sum + s.amount, 0);
+  const issuedAmount = issued.reduce((sum, s) => sum + s.amount_krw, 0);
 
   return (
     <>
       <PageHeader title="정산"
-        subtitle={`청년 활동급여 · 어르신 상품권 자동 산정 (시급 12,500원)`}
+        subtitle={`승인된 활동시간 × 시급 ${RATE_PER_HOUR.toLocaleString('ko-KR')}원 → 강서사랑상품권 자동 산정`}
         right={<Button variant="brand" icon={<Wallet size={16} />} onClick={issueAll} disabled={generating || pending.length === 0}>{generating ? '발급 중…' : `${pending.length}건 일괄 발급`}</Button>} />
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 18 }}>
         <StatCard label="이번 달 산정액" value={krw(totalAmount)} sub={`${calculatedSettlements.length}명`} color={C.brand} icon={<Wallet size={18} />} />
         <StatCard label="발급 완료" value={krw(issuedAmount)} sub={`${issued.length}건`} color={C.success} icon={<CheckCircle2 size={18} />} />
         <StatCard label="발급 대기" value={krw(totalAmount - issuedAmount)} sub={`${pending.length}건`} color={C.amber} icon={<Clock size={18} />} />
-        <StatCard label="누적 지급" value={krw(state.settlements.filter(s => s.status === 'issued').reduce((sum, s) => sum + s.amount, 0))} sub={`${state.settlements.filter(s => s.status === 'issued').length}건`} color={C.gold} icon={<Award size={18} />} />
+        <StatCard label="누적 지급" value={krw(state.settlements.filter(s => s.status === 'paid').reduce((sum, s) => sum + s.amount_krw, 0))} sub={`${state.settlements.filter(s => s.status === 'paid').length}건`} color={C.gold} icon={<Award size={18} />} />
       </div>
 
       <Card padding={20} style={{ marginBottom: 16 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <span style={{ fontSize: 12, color: C.mute, fontWeight: 700 }}>정산 월</span>
           <Select value={monthFilter} onChange={setMonthFilter}
-            options={['2027-05', '2027-06', '2027-07'].map(m => ({ value: m, label: m + '월' }))}
-            style={{ width: 160 }} />
+            options={['2027-05', '2027-06', '2027-07'].map(m => ({ value: m, label: m.slice(0, 4) + '년 ' + m.slice(5) + '월' }))}
+            style={{ width: 180 }} />
         </div>
       </Card>
 
       <Card padding={0}>
-        <div style={{ padding: '14px 18px', borderBottom: `1px solid ${C.borderSoft}`, display: 'grid', gridTemplateColumns: '1fr 100px 100px 120px 130px 100px', gap: 12, fontSize: 11, color: C.mute, fontWeight: 700, letterSpacing: '0.06em', background: C.bg }}>
-          <div>참여자</div><div>활동</div><div>시간</div><div>금액</div><div>방법</div><div style={{ textAlign: 'right' }}>상태</div>
+        <div style={{ padding: '14px 18px', borderBottom: `1px solid ${C.borderSoft}`, display: 'grid', gridTemplateColumns: '1.4fr 80px 80px 120px 140px 90px', gap: 12, fontSize: 11, color: C.mute, fontWeight: 700, letterSpacing: '0.06em', background: C.bg }}>
+          <div>참여자</div><div>활동</div><div>시간</div><div>상품권</div><div>상품권 번호</div><div style={{ textAlign: 'right' }}>상태</div>
         </div>
-        {calculatedSettlements.length === 0 ? <Empty icon={<Wallet size={28} />} title="이번 달 산정 대상이 없습니다" /> : calculatedSettlements.map((calc) => (
-          <div key={calc.participant.id} style={{ padding: '14px 18px', borderBottom: `1px solid ${C.borderSoft}`, display: 'grid', gridTemplateColumns: '1fr 100px 100px 120px 130px 100px', gap: 12, alignItems: 'center' }}>
+        {calculatedSettlements.length === 0 ? <Empty icon={<Wallet size={28} />} title="이번 달 산정 대상이 없습니다" sub="승인된 활동 기록이 쌓이면 자동으로 산정됩니다" /> : calculatedSettlements.map((calc) => (
+          <div key={calc.participant.id} style={{ padding: '14px 18px', borderBottom: `1px solid ${C.borderSoft}`, display: 'grid', gridTemplateColumns: '1.4fr 80px 80px 120px 140px 90px', gap: 12, alignItems: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <Avatar name={calc.participant.name} size={32} color={PERSONA[calc.participant.type]?.color || C.brand} />
               <div>
@@ -3026,9 +3099,9 @@ function CoordSettlements({ state, dispatch, showToast, user }) {
             <div style={{ fontSize: 13, color: C.inkSoft }}>{calc.count}회</div>
             <div style={{ fontSize: 13, fontWeight: 700, color: C.ink, fontFamily: SERIF_STACK }}>{calc.hours}h</div>
             <div style={{ fontSize: 13, fontWeight: 800, color: C.gold, fontFamily: SERIF_STACK }}>{krw(calc.amount)}</div>
-            <div style={{ fontSize: 12, color: C.inkSoft }}>{calc.participant.type === 'youth' ? '계좌이체' : '온누리상품권'}</div>
+            <div style={{ fontSize: 11, color: C.inkSoft, fontFamily: 'monospace' }}>{calc.existing?.voucher_code || '—'}</div>
             <div style={{ textAlign: 'right' }}>
-              {calc.existing?.status === 'issued' ? <Badge color={C.success} soft={C.successSoft} size="sm">발급</Badge> :
+              {calc.existing?.status === 'paid' ? <Badge color={C.success} soft={C.successSoft} size="sm"><Check size={11} /> 발급</Badge> :
                 <Button variant="brand" size="sm" onClick={() => { issueOne(calc); showToast({ type: 'success', message: `${calc.participant.name}님께 발급되었습니다.` }); }}>발급</Button>}
             </div>
           </div>
@@ -3162,13 +3235,13 @@ function CoordReports({ state, dispatch, showToast }) {
   const [aiError, setAiError] = useState(null);
 
   const stats = useMemo(() => {
-    const monthLogs = state.activity_logs.filter(l => l.date.startsWith(period));
+    const monthLogs = state.activity_logs.filter(l => logMonth(state, l) === period);
     const approvedLogs = monthLogs.filter(l => l.approved);
     const activeMatches = state.matches.filter(m => m.status === 'active').length;
     const totalHours = approvedLogs.reduce((s, l) => s + l.hours, 0);
-    const settlements = state.settlements.filter(s => s.period === period && s.status === 'issued');
-    const settlementAmount = settlements.reduce((s, x) => s + x.amount, 0);
-    const incidents = state.safety_incidents.filter(i => i.reported_at?.startsWith(period));
+    const settlements = state.settlements.filter(s => s.month === period && s.status === 'paid');
+    const settlementAmount = settlements.reduce((s, x) => s + x.amount_krw, 0);
+    const incidents = state.safety_incidents.filter(i => (i.reported_at || '').startsWith(period));
     const surveys = state.surveys?.filter(sv => sv.month === period) || [];
     const avgScore = surveys.length ? (surveys.reduce((s, x) => s + (x.satisfaction || 0), 0) / surveys.length).toFixed(1) : 'N/A';
     const matchHours = {};
@@ -3417,6 +3490,151 @@ function appReducer(state, action) {
 }
 
 // ============================================================================
+// 12.5 LOGIN PAGE (로그인 → 역할 진입)
+// ============================================================================
+
+const DEMO_ACCOUNTS = [
+  { username: 'admin', role: 'coordinator', id: 'cdn001', name: '한가은', subtitle: '코디네이터 · 우장산동', desc: '신청·검증·매칭·정산·안전을 한눈에 관리합니다.', color: C.ink, gradient: 'linear-gradient(135deg, #1A1814 0%, #3A352F 100%)' },
+  { username: 'minjun', role: 'youth', id: 'p001', name: '김민준', subtitle: '27세 · 스타트업 개발자', desc: '어르신께 디지털을 알려드리고, 진로 조언을 받습니다.', color: C.sage, gradient: 'linear-gradient(135deg, #6B8E5A 0%, #8FB47E 100%)' },
+  { username: 'soonja', role: 'senior', id: 'p101', name: '박순자', subtitle: '73세 · 前 교사', desc: '청년과 디지털을 익히고, 아이에게 옛이야기를 들려줘요.', color: C.lavender, gradient: 'linear-gradient(135deg, #7F6FA0 0%, #A797C0 100%)' },
+  { username: 'seoyoung', role: 'parent', id: 'p201', name: '이서영', subtitle: '38세 · 유진(8세) 보호자', desc: '아이가 어르신·청년과 만나는 안전한 공간을 신뢰해요.', color: C.peach, gradient: 'linear-gradient(135deg, #D89368 0%, #E8B58F 100%)' },
+];
+const DEMO_PW = 'eum2027';
+
+function LoginPage({ onSelectRole, onShowApplication }) {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPw, setShowPw] = useState(false);
+  const [error, setError] = useState('');
+  const [loadingId, setLoadingId] = useState(null);
+
+  const doLogin = (acct) => {
+    setLoadingId(acct.id);
+    setTimeout(() => onSelectRole(acct.role, acct.id), 320);
+  };
+
+  const submit = () => {
+    const acct = DEMO_ACCOUNTS.find(a => a.username === username.trim().toLowerCase());
+    if (!acct) { setError('등록되지 않은 아이디입니다. 아래 체험 계정을 이용해 주세요.'); return; }
+    if (password !== DEMO_PW) { setError('비밀번호가 올바르지 않습니다. (데모: eum2027)'); return; }
+    setError('');
+    doLogin(acct);
+  };
+
+  return (
+    <div style={{
+      minHeight: '100vh', background: C.bg, fontFamily: FONT_STACK, color: C.ink,
+      display: 'flex', flexWrap: 'wrap',
+      backgroundImage: `radial-gradient(circle at 18% 0%, ${C.brandSoft} 0%, transparent 42%), radial-gradient(circle at 85% 90%, ${C.peachSoft} 0%, transparent 48%)`,
+    }}>
+      {/* 좌측 브랜드 히어로 */}
+      <div style={{ flex: '1 1 460px', minWidth: 320, padding: '64px 56px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+        <div style={{ maxWidth: 520 }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 12, marginBottom: 28 }}>
+            <div style={{ width: 52, height: 52, borderRadius: 14, background: `linear-gradient(135deg, ${C.brand} 0%, ${C.peach} 100%)`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 27, fontWeight: 800, fontFamily: SERIF_STACK, boxShadow: `0 8px 24px ${C.brand}40`, letterSpacing: '-0.02em' }}>이</div>
+            <div>
+              <div style={{ fontSize: 22, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK, letterSpacing: '-0.03em', lineHeight: 1 }}>이음 <span style={{ fontSize: 12, color: C.mute, fontWeight: 600, letterSpacing: '0.08em' }}>EUM</span></div>
+              <div style={{ fontSize: 11, color: C.mute, letterSpacing: '0.06em', fontWeight: 600, marginTop: 3 }}>강서구 3세대 상생 품앗이 플랫폼</div>
+            </div>
+          </div>
+          <h1 style={{ fontSize: 'clamp(32px, 4.4vw, 50px)', fontWeight: 700, color: C.ink, letterSpacing: '-0.04em', margin: '0 0 16px', fontFamily: SERIF_STACK, lineHeight: 1.08 }}>
+            세대를 잇다,<br /><span style={{ color: C.brand, fontStyle: 'italic' }}>서로의 곁이 되다</span>
+          </h1>
+          <p style={{ fontSize: 16, color: C.inkSoft, lineHeight: 1.7, margin: '0 0 28px', maxWidth: 460 }}>
+            청년·어르신·아동 세 세대가 서로 돕고 <strong style={{ color: C.ink }}>모두 보상받는</strong> 강서구형 품앗이.
+            일방적 봉사가 아닌 상호 가치 교환으로 지속 가능한 돌봄을 만듭니다.
+          </p>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 8 }}>
+            <Badge color={C.sage} soft={C.sageSoft} size="md">청년 멘토</Badge>
+            <Badge color={C.lavender} soft={C.lavenderSoft} size="md">어르신 멘토</Badge>
+            <Badge color={C.peach} soft={C.peachSoft} size="md">아동 돌봄</Badge>
+            <Badge color={C.gold} soft={C.goldSoft} size="md">강서사랑상품권</Badge>
+          </div>
+          <div style={{ marginTop: 28, display: 'flex', gap: 22, flexWrap: 'wrap' }}>
+            {[['3', '세대 매칭 트리오'], ['15쌍', '우장산동 파일럿'], ['월 27.5만', '활동 상품권']].map(([v, l]) => (
+              <div key={l}>
+                <div style={{ fontSize: 22, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK, letterSpacing: '-0.02em' }}>{v}</div>
+                <div style={{ fontSize: 12, color: C.mute, marginTop: 2 }}>{l}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* 우측 로그인 카드 */}
+      <div style={{ flex: '1 1 420px', minWidth: 320, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 32px' }}>
+        <div style={{ width: '100%', maxWidth: 400, background: C.card, border: `1px solid ${C.border}`, borderRadius: 20, padding: 30, boxShadow: '0 20px 60px rgba(26,24,20,0.10)' }}>
+          <div style={{ fontSize: 20, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK, letterSpacing: '-0.02em', marginBottom: 4 }}>로그인</div>
+          <div style={{ fontSize: 13, color: C.mute, marginBottom: 20 }}>이음 파일럿 운영 콘솔에 오신 것을 환영합니다.</div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div>
+              <div style={{ fontSize: 12, fontWeight: 600, color: C.inkSoft, marginBottom: 6 }}>아이디</div>
+              <Input value={username} onChange={(v) => { setUsername(v); setError(''); }} placeholder="admin" icon={<Mail size={15} />} />
+            </div>
+            <div>
+              <div style={{ fontSize: 12, fontWeight: 600, color: C.inkSoft, marginBottom: 6 }}>비밀번호</div>
+              <div style={{ position: 'relative' }}>
+                <Input value={password} onChange={(v) => { setPassword(v); setError(''); }} placeholder="eum2027" type={showPw ? 'text' : 'password'} icon={<ShieldCheck size={15} />} style={{ paddingRight: 40 }} />
+                <button type="button" onClick={() => setShowPw(s => !s)} style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: C.mute, display: 'flex' }}>
+                  {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+            </div>
+            {error && (
+              <div style={{ fontSize: 12, color: C.red, background: C.redSoft, padding: '8px 10px', borderRadius: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <AlertCircle size={14} /> {error}
+              </div>
+            )}
+            <Button variant="brand" size="lg" fullWidth onClick={submit} iconRight={<ArrowRight size={16} />} disabled={!!loadingId}>
+              {loadingId ? '입장 중…' : '로그인'}
+            </Button>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '20px 0 14px' }}>
+            <div style={{ flex: 1, height: 1, background: C.border }} />
+            <span style={{ fontSize: 11, color: C.mute, fontWeight: 600 }}>체험 계정으로 바로 입장</span>
+            <div style={{ flex: 1, height: 1, background: C.border }} />
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+            {DEMO_ACCOUNTS.map((a) => (
+              <button key={a.id} onClick={() => doLogin(a)} disabled={!!loadingId}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 9, padding: '9px 11px',
+                  border: `1px solid ${C.border}`, borderRadius: 11, background: C.card,
+                  cursor: loadingId ? 'default' : 'pointer', textAlign: 'left', fontFamily: FONT_STACK,
+                  opacity: loadingId && loadingId !== a.id ? 0.5 : 1, transition: 'all 0.12s',
+                }}
+                onMouseEnter={(e) => !loadingId && (e.currentTarget.style.borderColor = a.color, e.currentTarget.style.background = C.cream)}
+                onMouseLeave={(e) => (e.currentTarget.style.borderColor = C.border, e.currentTarget.style.background = C.card)}
+              >
+                <div style={{ width: 30, height: 30, borderRadius: 8, background: a.gradient, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700, fontFamily: SERIF_STACK, flexShrink: 0 }}>{a.name.slice(0, 1)}</div>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontSize: 12.5, fontWeight: 700, color: C.ink, lineHeight: 1.2 }}>{a.name}</div>
+                  <div style={{ fontSize: 10.5, color: C.mute, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{PERSONA[a.role].label}</div>
+                </div>
+              </button>
+            ))}
+          </div>
+
+          <div style={{ marginTop: 16, paddingTop: 16, borderTop: `1px solid ${C.borderSoft}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+            <div style={{ fontSize: 12, color: C.mute }}>처음 오셨나요?</div>
+            <button onClick={onShowApplication} style={{ background: 'none', border: 'none', color: C.brand, fontWeight: 700, fontSize: 13, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 4, fontFamily: FONT_STACK }}>
+              <UserPlus size={14} /> 참여 신청하기
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ position: 'fixed', bottom: 14, width: '100%', textAlign: 'center', color: C.mute, fontSize: 11, pointerEvents: 'none' }}>
+        이음 MVP · 강서구청 주민참여예산 시범사업 · 2027 우장산동 파일럿 · 데모 비밀번호 <strong>eum2027</strong>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
 // 13. MAIN APP (인증 · 라우팅 · 영속화 · Toast)
 // ============================================================================
 
@@ -3566,8 +3784,12 @@ function App() {
 
       {!role || !user ? (
         <>
-          <RoleSelect state={state} onSelectRole={handleSelectRole} onShowApplication={() => setShowApplication(true)} />
-          {showApplication && <ApplicationForm onClose={() => setShowApplication(false)} onSubmit={handleSubmitApplication} />}
+          <LoginPage onSelectRole={handleSelectRole} onShowApplication={() => setShowApplication(true)} />
+          {showApplication && (
+            <Modal open={showApplication} onClose={() => setShowApplication(false)} title="이음 참여 신청" size="md">
+              <ApplicationForm onClose={() => setShowApplication(false)} onSubmit={handleSubmitApplication} />
+            </Modal>
+          )}
         </>
       ) : (
         <>
