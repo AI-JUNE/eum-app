@@ -223,6 +223,26 @@ const SEED_DATA = {
 
 const STORAGE_KEY = 'eum:appdata:v1';
 
+// 시드/스키마 불일치 보정: 활동 date/time, 로그 date, 자녀 guardian_id 채우기
+function normalizeState(s) {
+  if (!s) return s;
+  const activities = (s.activities || []).map(a => ({
+    ...a,
+    date: a.date || (a.scheduled_at || '').slice(0, 10),
+    time: a.time || (a.scheduled_at || '').slice(11, 16),
+  }));
+  const actById = {};
+  activities.forEach(a => { actById[a.id] = a; });
+  const activity_logs = (s.activity_logs || []).map(l => ({
+    ...l,
+    date: l.date || l.approved_at || (actById[l.activity_id]?.scheduled_at || '').slice(0, 10) || '',
+  }));
+  const participants = (s.participants || []).map(p =>
+    p.type === 'child' ? { ...p, guardian_id: p.guardian_id || p.parent_id } : p
+  );
+  return { ...s, activities, activity_logs, participants };
+}
+
 async function loadState() {
   try {
     const raw = (typeof localStorage !== 'undefined') ? localStorage.getItem(STORAGE_KEY) : null;
@@ -887,7 +907,7 @@ function Sidebar({ role, currentView, onNavigate, onLogout, userName, dataCount 
       position: 'sticky', top: 0,
     }}>
       <div style={{ padding: '22px 20px 18px', borderBottom: `1px solid ${C.borderSoft}` }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 9, cursor: 'pointer' }} onClick={() => onNavigate('overview')} role="button" aria-label="대시보드로">
           <div style={{ borderRadius: 9, boxShadow: `0 2px 8px ${C.brand}40`, display: 'flex' }}>
             <EumLogo size={32} />
           </div>
@@ -2012,7 +2032,7 @@ function ConsumerLayout({ role, view, setView, user, dispatch, children }) {
       <div style={{ width: '100%', maxWidth: isSenior ? 840 : 700, minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'transparent', position: 'relative' }}>
         {/* 상단 앱바 */}
         <div style={{ position: 'sticky', top: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: isSenior ? '15px 22px' : '12px 18px', background: 'rgba(250,247,242,0.82)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderBottom: `1px solid ${C.borderSoft}` }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 9, cursor: 'pointer' }} onClick={() => setView(items[0]?.id || 'dashboard')} role="button" aria-label="홈으로">
             <div style={{ display: 'flex', borderRadius: 8, boxShadow: `0 2px 8px ${C.brand}33` }}><EumLogo size={isSenior ? 34 : 28} /></div>
             <div>
               <div style={{ fontSize: isSenior ? 17 : 15, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK, letterSpacing: '-0.02em', lineHeight: 1.1 }}>이음</div>
@@ -2080,7 +2100,7 @@ function Layout({ role, view, setView, user, dispatch, children, state }) {
 function ParentApp({ state, user, dispatch, showToast }) {
   const [view, setView] = useState('dashboard');
 
-  const myChildren = state.participants.filter(p => p.type === 'child' && p.guardian_id === user.id);
+  const myChildren = state.participants.filter(p => p.type === 'child' && (p.guardian_id === user.id || p.parent_id === user.id || user.child_id === p.id));
   const myMatches = state.matches.filter(m => myChildren.some(c => c.id === m.child_id) && m.status === 'active');
   const childIds = myChildren.map(c => c.id);
 
@@ -2604,15 +2624,49 @@ function CoordOverview({ state, setView }) {
       )}
 
       {/* KPI 그리드 */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14, marginBottom: 18 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 14, marginBottom: 18 }}>
         <StatCard label="참여자" value={kpis.totalParticipants} sub={`청년 ${kpis.youthCount} / 어르신 ${kpis.seniorCount} / 양육 ${kpis.parentCount}`} color={C.brand} icon={<Users size={18} />} />
         <StatCard label="활성 매칭" value={kpis.activeMatches} sub={`목표 8건 중 ${kpis.activeMatches}건 진행`} color={C.sage} icon={<Heart size={18} />} trend={kpis.activeMatches >= 3 ? `+${kpis.activeMatches - 0}` : null} />
         <StatCard label="누적 활동시간" value={`${kpis.totalHours}h`} sub={`목표 1,440시간 중 ${Math.round(kpis.totalHours / 1440 * 100)}%`} color={C.lavender} icon={<Clock size={18} />} />
         <StatCard label="지급 정산" value={krw(kpis.totalSettled)} sub={`${state.settlements.filter(s => s.status === 'issued').length}건 발급 완료`} color={C.gold} icon={<Wallet size={18} />} />
       </div>
 
+      {/* 움직이는 인포그래픽 밴드 */}
+      <Reveal>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 14, marginBottom: 18 }}>
+          <Card padding={20} style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
+            <Ring value={kpis.activeMatches} max={8} size={92} stroke={10} color={C.sage} label={kpis.activeMatches} sublabel="/ 8쌍" />
+            <div>
+              <div style={{ fontSize: 12, fontWeight: 700, color: C.sage, letterSpacing: '0.06em', marginBottom: 4 }}>매칭 목표</div>
+              <div style={{ fontSize: 19, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK, letterSpacing: '-0.02em' }}><CountUp value={Math.round(kpis.activeMatches / 8 * 100)} suffix="%" /> 달성</div>
+              <div style={{ fontSize: 12, color: C.mute, marginTop: 4 }}>활성 트리오 {kpis.activeMatches}쌍 운영 중</div>
+            </div>
+          </Card>
+          <Card padding={20} style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
+            <Ring value={kpis.totalHours} max={1440} size={92} stroke={10} color={C.brand} label={`${Math.round(kpis.totalHours / 1440 * 100)}%`} sublabel="연 목표" />
+            <div>
+              <div style={{ fontSize: 12, fontWeight: 700, color: C.brand, letterSpacing: '0.06em', marginBottom: 4 }}>누적 활동시간</div>
+              <div style={{ fontSize: 19, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK, letterSpacing: '-0.02em' }}><CountUp value={kpis.totalHours} suffix="시간" /></div>
+              <div style={{ fontSize: 12, color: C.mute, marginTop: 4 }}>연 목표 1,440시간</div>
+            </div>
+          </Card>
+          <Card padding={20}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: C.lavender, letterSpacing: '0.06em', marginBottom: 12 }}>세대 구성</div>
+            {[['청년', kpis.youthCount, C.sage], ['어르신', kpis.seniorCount, C.lavender], ['양육가정', kpis.parentCount, C.peach], ['아동', kpis.childCount, C.gold]].map(([lab, val, col], i) => (
+              <div key={lab} style={{ marginBottom: i < 3 ? 9 : 0 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 4 }}>
+                  <span style={{ color: C.inkSoft, fontWeight: 600 }}>{lab}</span>
+                  <span style={{ color: col, fontWeight: 800 }}><CountUp value={val} />명</span>
+                </div>
+                <AnimatedBar value={val} max={Math.max(kpis.youthCount, kpis.seniorCount, kpis.parentCount, kpis.childCount, 1)} color={col} height={7} delay={i * 110} />
+              </div>
+            ))}
+          </Card>
+        </div>
+      </Reveal>
+
       {/* 차트 */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr', gap: 18, marginBottom: 18 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 18, marginBottom: 18 }}>
         <Card padding={22}>
           <div style={{ fontSize: 14, fontWeight: 700, color: C.ink, marginBottom: 4 }}>월별 활동 추이</div>
           <div style={{ fontSize: 12, color: C.mute, marginBottom: 14 }}>승인된 활동 기록 기준</div>
@@ -2652,7 +2706,7 @@ function CoordOverview({ state, setView }) {
       </div>
 
       {/* 최근 활동 + 미처리 항목 */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 18 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 18 }}>
         <Card padding={22}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
             <div style={{ fontSize: 14, fontWeight: 700, color: C.ink }}>최근 활동 기록</div>
@@ -3750,7 +3804,7 @@ function appReducer(state, action) {
 
 function App() {
   const [state, setState] = useState(() => {
-    return { ...SEED_DATA, currentUserId: null, currentRole: null };
+    return normalizeState({ ...SEED_DATA, currentUserId: null, currentRole: null });
   });
   const [loading, setLoading] = useState(true);
   const [showApplication, setShowApplication] = useState(false);
@@ -3765,7 +3819,7 @@ function App() {
       try {
         const stored = await loadState();
         if (mounted && stored) {
-          setState(prev => ({ ...prev, ...stored, currentUserId: null, currentRole: null }));
+          setState(prev => normalizeState({ ...prev, ...stored, currentUserId: null, currentRole: null }));
         }
       } catch (e) {
         console.warn('Storage load failed, using seed data:', e);
@@ -3789,6 +3843,20 @@ function App() {
   const dispatch = useCallback((action) => {
     setState(prev => appReducer(prev, action));
   }, []);
+
+  // 브라우저 뒤로가기 시 사이트 밖으로 나가지 않도록 트랩 (앱 내부 → 역할 선택으로)
+  useEffect(() => {
+    try { window.history.pushState({ eum: true }, ''); } catch (e) {}
+    const onPop = () => {
+      const cur = stateRef.current;
+      if (cur.currentRole) {
+        dispatch({ type: 'LOGOUT' });
+      }
+      try { window.history.pushState({ eum: true }, ''); } catch (e) {}
+    };
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, [dispatch]);
 
   const showToast = useCallback((toast) => {
     const id = uid('toast');
@@ -3865,7 +3933,10 @@ function App() {
     );
   }
 
-  const user = state.currentUserId ? state.participants.find(p => p.id === state.currentUserId) : null;
+  const user = state.currentUserId
+    ? (state.participants.find(p => p.id === state.currentUserId)
+        || (state.currentRole === 'coordinator' ? { id: state.currentUserId, name: '한가은', type: 'coordinator' } : null))
+    : null;
   const role = state.currentRole;
 
   return (
