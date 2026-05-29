@@ -2148,7 +2148,7 @@ function ParentDashboard({ user, myChildren, myMatches, todayActivities, upcomin
   const senior = match ? state.participants.find(p => p.id === match.senior_id) : null;
   const openIssues = myIncidents.filter(i => i.status === 'open' || i.status === 'in_progress').length;
   const totalHoursThisMonth = state.activity_logs
-    .filter(l => l.approved && l.date.startsWith(TODAY.slice(0, 7)) &&
+    .filter(l => l.approved && (l.date || '').startsWith(TODAY.slice(0, 7)) &&
       state.activities.find(a => a.id === l.activity_id && myMatches.some(m => m.id === a.match_id)))
     .reduce((sum, l) => sum + l.hours, 0);
 
@@ -2205,7 +2205,7 @@ function ParentDashboard({ user, myChildren, myMatches, todayActivities, upcomin
                       <Badge color={C.sage} soft={C.sageSoft}>{act.type}</Badge>
                     </div>
                     <div style={{ display: 'flex', gap: 14, fontSize: 12, color: C.inkSoft }}>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Clock size={11} /> {act.time}</span>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Clock size={11} /> {act.time || ''}</span>
                       <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><MapPin size={11} /> {act.location}</span>
                       <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Users size={11} /> {y?.name}</span>
                     </div>
@@ -2251,7 +2251,7 @@ function ParentDashboard({ user, myChildren, myMatches, todayActivities, upcomin
                 <div key={act.id} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '10px 12px', borderRadius: 8, background: C.bg }}>
                   <div style={{ minWidth: 64, textAlign: 'center', padding: '6px 8px', background: C.card, borderRadius: 6, border: `1px solid ${C.borderSoft}` }}>
                     <div style={{ fontSize: 10, color: C.mute, fontWeight: 600 }}>{fmtRelativeDate(act.date)}</div>
-                    <div style={{ fontSize: 14, fontWeight: 700, color: C.ink, marginTop: 1 }}>{act.time.slice(0, 5)}</div>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: C.ink, marginTop: 1 }}>{(act.time || '').slice(0, 5)}</div>
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: 13, fontWeight: 600, color: C.ink, marginBottom: 2 }}>{act.title}</div>
@@ -2334,7 +2334,7 @@ function ActivityCard({ activity, state }) {
         <Badge color={C.sage} soft={C.sageSoft}>{activity.type}</Badge>
       </div>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14, fontSize: 12, color: C.inkSoft, marginBottom: 10 }}>
-        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Calendar size={11} /> {fmtRelativeDate(activity.date)} {activity.time.slice(0, 5)}</span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Calendar size={11} /> {fmtRelativeDate(activity.date)} {(activity.time || '').slice(0, 5)}</span>
         <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><MapPin size={11} /> {activity.location}</span>
         <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Clock size={11} /> {activity.duration_hours}시간</span>
       </div>
@@ -2575,18 +2575,21 @@ function CoordOverview({ state, setView }) {
     const childCount = state.participants.filter(p => p.type === 'child').length;
     const activeMatches = state.matches.filter(m => m.status === 'active').length;
     const totalHours = state.activity_logs.filter(l => l.approved).reduce((s, l) => s + l.hours, 0);
-    const totalSettled = state.settlements.filter(s => s.status === 'issued').reduce((s, x) => s + x.amount, 0);
+    const totalSettled = state.settlements.filter(s => s.status === 'paid' || s.status === 'issued').reduce((s, x) => s + (x.amount_krw || x.amount || 0), 0);
     const pendingLogs = state.activity_logs.filter(l => !l.approved).length;
     const openIncidents = state.safety_incidents.filter(i => i.status === 'open' || i.status === 'in_progress').length;
     const pendingApps = state.applications.filter(a => a.status === 'screening' || a.status === 'verified').length;
-    return { totalParticipants, youthCount, seniorCount, parentCount, childCount, activeMatches, totalHours, totalSettled, pendingLogs, openIncidents, pendingApps };
+    const surveyCount = state.surveys.length;
+    const avgSatisfaction = surveyCount ? state.surveys.reduce((s, x) => s + (x.satisfaction || 0), 0) / surveyCount : 0;
+    const continueRate = surveyCount ? Math.round(state.surveys.filter(x => x.would_continue).length / surveyCount * 100) : 0;
+    return { totalParticipants, youthCount, seniorCount, parentCount, childCount, activeMatches, totalHours, totalSettled, pendingLogs, openIncidents, pendingApps, surveyCount, avgSatisfaction, continueRate };
   }, [state]);
 
   // 월별 활동 차트 데이터
   const monthlyChart = useMemo(() => {
     const months = {};
     state.activity_logs.filter(l => l.approved).forEach(l => {
-      const m = l.date.slice(0, 7);
+      const m = (l.date || '').slice(0, 7);
       if (!months[m]) months[m] = { month: m, hours: 0, count: 0 };
       months[m].hours += l.hours;
       months[m].count += 1;
@@ -2662,10 +2665,16 @@ function CoordOverview({ state, setView }) {
               </div>
             ))}
           </Card>
+          <Card padding={20} style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
+            <Ring value={kpis.avgSatisfaction} max={5} size={92} stroke={10} color={C.gold} label={kpis.avgSatisfaction.toFixed(1)} sublabel="/ 5.0" />
+            <div>
+              <div style={{ fontSize: 12, fontWeight: 700, color: C.gold, letterSpacing: '0.06em', marginBottom: 4 }}>프로그램 만족도</div>
+              <div style={{ fontSize: 19, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK, letterSpacing: '-0.02em' }}>지속의향 <CountUp value={kpis.continueRate} suffix="%" /></div>
+              <div style={{ fontSize: 12, color: C.mute, marginTop: 4 }}>설문 {kpis.surveyCount}건 기준</div>
+            </div>
+          </Card>
         </div>
       </Reveal>
-
-      {/* 차트 */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 18, marginBottom: 18 }}>
         <Card padding={22}>
           <div style={{ fontSize: 14, fontWeight: 700, color: C.ink, marginBottom: 4 }}>월별 활동 추이</div>
@@ -2739,7 +2748,7 @@ function CoordOverview({ state, setView }) {
             const y = state.participants.find(p => p.id === m?.youth_id);
             return (
               <div key={act.id} style={{ display: 'flex', gap: 12, padding: '10px 0', borderBottom: `1px solid ${C.borderSoft}` }}>
-                <div style={{ minWidth: 50, fontSize: 13, fontWeight: 700, color: C.brand, fontFamily: SERIF_STACK }}>{act.time.slice(0, 5)}</div>
+                <div style={{ minWidth: 50, fontSize: 13, fontWeight: 700, color: C.brand, fontFamily: SERIF_STACK }}>{(act.time || '').slice(0, 5)}</div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 12, fontWeight: 600, color: C.ink, marginBottom: 2 }}>{act.title}</div>
                   <div style={{ fontSize: 11, color: C.mute }}>{act.location} · {y?.name}</div>
@@ -3320,7 +3329,7 @@ function CoordSettlements({ state, dispatch, showToast, user }) {
     const RATE_YOUTH = 12500;
     const RATE_SENIOR = 12500;
     const map = new Map();
-    state.activity_logs.filter(l => l.approved && l.date.startsWith(monthFilter)).forEach(log => {
+    state.activity_logs.filter(l => l.approved && (l.date || '').startsWith(monthFilter)).forEach(log => {
       const p = state.participants.find(pp => pp.id === log.participant_id);
       if (!p || (p.type !== 'youth' && p.type !== 'senior')) return;
       const key = `${log.participant_id}:${monthFilter}`;
@@ -3544,7 +3553,7 @@ function CoordReports({ state, dispatch, showToast }) {
   const [aiError, setAiError] = useState(null);
 
   const stats = useMemo(() => {
-    const monthLogs = state.activity_logs.filter(l => l.date.startsWith(period));
+    const monthLogs = state.activity_logs.filter(l => (l.date || '').startsWith(period));
     const approvedLogs = monthLogs.filter(l => l.approved);
     const activeMatches = state.matches.filter(m => m.status === 'active').length;
     const totalHours = approvedLogs.reduce((s, l) => s + l.hours, 0);
@@ -3986,4 +3995,33 @@ function App() {
   );
 }
 
-export default App;
+class EumErrorBoundary extends React.Component {
+  constructor(props) { super(props); this.state = { error: null }; }
+  static getDerivedStateFromError(error) { return { error }; }
+  componentDidCatch(error, info) { console.error('이음 렌더 오류:', error, info); }
+  render() {
+    if (this.state.error) {
+      return (
+        <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: C.bg, fontFamily: FONT_STACK, padding: 24 }}>
+          <div style={{ maxWidth: 420, textAlign: 'center', background: C.card, border: `1px solid ${C.border}`, borderRadius: 16, padding: 32 }}>
+            <div style={{ width: 52, height: 52, borderRadius: 14, margin: '0 auto 16px', display: 'flex' }}><EumLogo size={52} /></div>
+            <div style={{ fontSize: 18, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK, marginBottom: 8 }}>일시적인 오류가 발생했어요</div>
+            <div style={{ fontSize: 13, color: C.inkSoft, lineHeight: 1.6, marginBottom: 20 }}>화면을 불러오는 중 문제가 생겼습니다. 다시 시도해 주세요.</div>
+            <button onClick={() => { this.setState({ error: null }); window.location.reload(); }} style={{ background: C.brand, color: '#fff', border: 'none', borderRadius: 10, padding: '11px 20px', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: FONT_STACK }}>처음으로 돌아가기</button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+function AppWithBoundary() {
+  return (
+    <EumErrorBoundary>
+      <App />
+    </EumErrorBoundary>
+  );
+}
+
+export default AppWithBoundary;
