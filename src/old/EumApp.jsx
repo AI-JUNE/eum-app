@@ -657,7 +657,7 @@ function StatCard({ label, value, sub, color = C.ink, icon, trend }) {
         {icon && <div style={{ background: C.bg, padding: 6, borderRadius: 8, display: 'flex' }}>{icon}</div>}
       </div>
       <div style={{ fontSize: 26, fontWeight: 700, color, letterSpacing: '-0.03em', lineHeight: 1.1, fontFamily: SERIF_STACK }}>
-        {typeof value === 'number' ? <CountUp value={value} /> : value}
+        {value}
       </div>
       {sub && (
         <div style={{ fontSize: 12, color: trend === 'up' ? C.sage : trend === 'down' ? C.red : C.mute, marginTop: 6, display: 'flex', alignItems: 'center', gap: 3 }}>
@@ -667,110 +667,6 @@ function StatCard({ label, value, sub, color = C.ink, icon, trend }) {
       )}
     </Card>
   );
-}
-
-// ── 모션 · 인포그래픽 툴킷 ────────────────────────────────────────────────
-function useCountUp(target, duration = 950) {
-  const [val, setVal] = useState(0);
-  const raf = useRef();
-  useEffect(() => {
-    const num = typeof target === 'number' ? target : parseFloat(String(target).replace(/[^0-9.-]/g, '')) || 0;
-    let start;
-    const tick = (t) => {
-      if (start === undefined) start = t;
-      const p = Math.min((t - start) / duration, 1);
-      const eased = 1 - Math.pow(1 - p, 3);
-      setVal(num * eased);
-      if (p < 1) raf.current = requestAnimationFrame(tick);
-    };
-    raf.current = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf.current);
-  }, [target, duration]);
-  return val;
-}
-
-function CountUp({ value, decimals = 0, prefix = '', suffix = '', duration = 950 }) {
-  const v = useCountUp(value, duration);
-  const n = (decimals > 0 ? v : Math.round(v)).toLocaleString('ko-KR', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
-  return <>{prefix}{n}{suffix}</>;
-}
-
-// 애니메이션 진행 도넛(링)
-function Ring({ value, max = 100, size = 96, stroke = 9, color = C.brand, track = C.borderSoft, label, sublabel, duration = 1100 }) {
-  const pct = max > 0 ? Math.max(0, Math.min(1, value / max)) : 0;
-  const r = (size - stroke) / 2;
-  const circ = 2 * Math.PI * r;
-  const [draw, setDraw] = useState(0);
-  useEffect(() => { const id = requestAnimationFrame(() => setDraw(pct)); return () => cancelAnimationFrame(id); }, [pct]);
-  return (
-    <div style={{ position: 'relative', width: size, height: size, flexShrink: 0 }}>
-      <svg width={size} height={size} style={{ transform: 'rotate(-90deg)', display: 'block' }}>
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={track} strokeWidth={stroke} />
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={color} strokeWidth={stroke} strokeLinecap="round"
-          strokeDasharray={circ} strokeDashoffset={circ * (1 - draw)}
-          style={{ transition: `stroke-dashoffset ${duration}ms cubic-bezier(0.22,1,0.36,1)` }} />
-      </svg>
-      <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-        {label != null && <div style={{ fontSize: Math.round(size * 0.27), fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK, letterSpacing: '-0.02em', lineHeight: 1 }}>{label}</div>}
-        {sublabel && <div style={{ fontSize: Math.max(10, Math.round(size * 0.12)), color: C.mute, marginTop: 3, fontWeight: 600 }}>{sublabel}</div>}
-      </div>
-    </div>
-  );
-}
-
-// 애니메이션 막대
-function AnimatedBar({ value, max = 100, color = C.brand, height = 8, track = C.borderSoft, duration = 850, delay = 0 }) {
-  const pct = max > 0 ? Math.max(0, Math.min(1, value / max)) : 0;
-  const [w, setW] = useState(0);
-  useEffect(() => { const id = setTimeout(() => setW(pct), delay + 30); return () => clearTimeout(id); }, [pct, delay]);
-  return (
-    <div style={{ height, background: track, borderRadius: height, overflow: 'hidden', width: '100%' }}>
-      <div style={{ width: `${w * 100}%`, height: '100%', background: color, borderRadius: height, transition: `width ${duration}ms cubic-bezier(0.22,1,0.36,1)` }} />
-    </div>
-  );
-}
-
-// 진입 애니메이션 래퍼 (마운트 시 fade + slide)
-function Reveal({ children, delay = 0, y = 10, style = {} }) {
-  const [shown, setShown] = useState(false);
-  useEffect(() => { const id = setTimeout(() => setShown(true), delay); return () => clearTimeout(id); }, [delay]);
-  return (
-    <div style={{ opacity: shown ? 1 : 0, transform: shown ? 'none' : `translateY(${y}px)`, transition: 'opacity 0.5s ease, transform 0.55s cubic-bezier(0.22,1,0.36,1)', ...style }}>
-      {children}
-    </div>
-  );
-}
-
-// 신뢰 배지 (Care.com식 검증 표시)
-const TRUST_META = {
-  verified: { c: C.sage, soft: C.sageSoft, icon: ShieldCheck, text: '검증 완료' },
-  pending: { c: C.amber, soft: C.amberSoft, icon: Clock, text: '검증 중' },
-  none: { c: C.mute, soft: C.muteSoft, icon: ShieldAlert, text: '미검증' },
-};
-function TrustBadge({ status = 'verified', label, size = 'sm' }) {
-  const m = TRUST_META[status] || TRUST_META.none;
-  const Icon = m.icon;
-  const lg = size === 'lg';
-  return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: lg ? 6 : 4, background: m.soft, color: m.c, padding: lg ? '5px 11px' : '3px 8px', borderRadius: 999, fontSize: lg ? 13 : 11, fontWeight: 700, lineHeight: 1, whiteSpace: 'nowrap' }}>
-      <Icon size={lg ? 15 : 12} strokeWidth={2.4} />
-      {label || m.text}
-    </span>
-  );
-}
-
-// 참가자 신뢰 상태 계산 (시드 participant 검증 + 신청서 단계 검증 종합)
-function trustStatus(state, participantId) {
-  if (!state || !participantId) return 'none';
-  const pv = (state.verifications || []).find(v => v.participant_id === participantId);
-  if (pv) return pv.status === 'passed' ? 'verified' : 'pending';
-  const app = (state.applications || []).find(a => a.participant_id === participantId);
-  if (app) {
-    const vs = (state.verifications || []).filter(v => v.application_id === app.id);
-    if (vs.length && vs.every(v => v.status === 'passed')) return 'verified';
-    if (vs.length) return 'pending';
-  }
-  return 'none';
 }
 
 function Tabs({ tabs, active, onChange, style = {} }) {
@@ -1406,11 +1302,11 @@ function YouthApp({ state, user, dispatch, showToast }) {
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 18, flexWrap: 'wrap' }}>
-                  <TrioMember person={senior} sub="멘토" color={C.lavender} trust={trustStatus(state, senior?.id)} />
+                  <TrioMember person={senior} sub="멘토" color={C.lavender} />
                   <div style={{ display: 'flex', alignItems: 'center', color: C.brand, fontSize: 20 }}>↔</div>
                   <TrioMember person={user} sub="나" color={C.sage} highlight />
                   <div style={{ display: 'flex', alignItems: 'center', color: C.brand, fontSize: 20 }}>↔</div>
-                  <TrioMember person={child} sub="멘티" color={C.peach} trust={trustStatus(state, child?.id)} />
+                  <TrioMember person={child} sub="멘티" color={C.peach} />
                 </div>
 
                 {match.match_notes && (
@@ -1422,25 +1318,6 @@ function YouthApp({ state, user, dispatch, showToast }) {
               </div>
             </Card>
           )}
-
-          {/* 이번 달 목표 — 움직이는 도넛 인포그래픽 */}
-          <Reveal>
-            <Card padding={20} style={{ marginBottom: 20, display: 'flex', alignItems: 'center', gap: 22, background: `linear-gradient(135deg, ${C.cream} 0%, ${C.sageSoft} 140%)`, flexWrap: 'wrap' }}>
-              <Ring value={monthHours} max={24} size={104} stroke={11} color={C.sage} label={`${Math.round(monthHours / 24 * 100)}%`} sublabel="달성" />
-              <div style={{ flex: 1, minWidth: 180 }}>
-                <div style={{ fontSize: 12, fontWeight: 700, color: C.sage, letterSpacing: '0.08em', marginBottom: 6 }}>이번 달 활동 목표</div>
-                <div style={{ fontSize: 22, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK, letterSpacing: '-0.02em', lineHeight: 1.2 }}>
-                  <CountUp value={monthHours} suffix="시간" /> <span style={{ fontSize: 15, color: C.mute, fontWeight: 600 }}>/ 24시간</span>
-                </div>
-                <div style={{ fontSize: 13, color: C.inkSoft, marginTop: 6, lineHeight: 1.5 }}>
-                  {monthHours >= 24 ? '이번 달 목표를 달성했어요! 🎉' : `목표까지 ${24 - monthHours}시간 남았어요. 꾸준히 잇고 있어요.`}
-                </div>
-                <div style={{ marginTop: 12 }}>
-                  <AnimatedBar value={monthHours} max={24} color={C.sage} height={8} />
-                </div>
-              </div>
-            </Card>
-          </Reveal>
 
           {/* Stats Row */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12, marginBottom: 20 }}>
@@ -1507,7 +1384,7 @@ function YouthApp({ state, user, dispatch, showToast }) {
   );
 }
 
-function TrioMember({ person, sub, color, highlight, trust }) {
+function TrioMember({ person, sub, color, highlight }) {
   if (!person) return null;
   return (
     <div style={{ textAlign: 'center', minWidth: 110 }}>
@@ -1515,9 +1392,6 @@ function TrioMember({ person, sub, color, highlight, trust }) {
         <Avatar type={person?.type} gender={person?.gender} name={person.name} color={color} size={highlight ? 64 : 56} ring={highlight} />
         {highlight && <div style={{ position: 'absolute', bottom: -3, right: -3, background: C.brand, color: '#fff', borderRadius: '50%', width: 22, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', border: `2px solid ${C.card}` }}>
           <Check size={12} strokeWidth={3} />
-        </div>}
-        {trust === 'verified' && !highlight && <div style={{ position: 'absolute', bottom: -2, right: -2, background: C.sage, color: '#fff', borderRadius: '50%', width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', border: `2px solid ${C.card}` }} title="검증 완료">
-          <ShieldCheck size={11} strokeWidth={3} />
         </div>}
       </div>
       <div style={{ fontSize: 14, fontWeight: 700, color: C.ink, letterSpacing: '-0.01em' }}>{person.name}</div>
@@ -1984,80 +1858,16 @@ function SeniorSosCard({ user, dispatch, showToast, match }) {
 // 8. LAYOUT WRAPPER
 // ============================================================================
 
-// 참여자(소비자) 하단 탭 네비
-const PARTICIPANT_NAV = {
-  youth: [
-    { id: 'dashboard', label: '홈', icon: Home }, { id: 'schedule', label: '일정', icon: Calendar },
-    { id: 'logs', label: '기록', icon: PenLine }, { id: 'mentor', label: '멘토', icon: GraduationCap },
-    { id: 'archive', label: '기억', icon: BookOpen }, { id: 'settlement', label: '정산', icon: Wallet },
-  ],
-  senior: [
-    { id: 'dashboard', label: '홈', icon: Home }, { id: 'schedule', label: '다음 만남', icon: Calendar },
-    { id: 'settlement', label: '상품권', icon: Wallet },
-  ],
-  parent: [
-    { id: 'dashboard', label: '홈', icon: Home }, { id: 'today', label: '오늘', icon: Activity },
-    { id: 'match', label: '매칭', icon: Users }, { id: 'safety', label: '안전', icon: ShieldCheck },
-  ],
-};
-
-// 소비자(참여자) 셸 — 상단 앱바 + 하단 탭, 따뜻한 캔버스 (관리자 콘솔과 구분)
-function ConsumerLayout({ role, view, setView, user, dispatch, children }) {
-  const persona = PERSONA[role] || PERSONA.youth;
-  const isSenior = role === 'senior';
-  const items = PARTICIPANT_NAV[role] || [];
-  const handleLogout = () => dispatch({ type: 'LOGOUT' });
-  return (
-    <div style={{ minHeight: '100vh', background: `linear-gradient(180deg, ${persona.soft} 0%, ${C.bg} 240px)`, fontFamily: FONT_STACK, color: C.ink, display: 'flex', justifyContent: 'center' }}>
-      <div style={{ width: '100%', maxWidth: isSenior ? 840 : 700, minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'transparent', position: 'relative' }}>
-        {/* 상단 앱바 */}
-        <div style={{ position: 'sticky', top: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: isSenior ? '15px 22px' : '12px 18px', background: 'rgba(250,247,242,0.82)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderBottom: `1px solid ${C.borderSoft}` }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
-            <div style={{ display: 'flex', borderRadius: 8, boxShadow: `0 2px 8px ${C.brand}33` }}><EumLogo size={isSenior ? 34 : 28} /></div>
-            <div>
-              <div style={{ fontSize: isSenior ? 17 : 15, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK, letterSpacing: '-0.02em', lineHeight: 1.1 }}>이음</div>
-              <div style={{ fontSize: isSenior ? 12.5 : 10.5, color: persona.color, fontWeight: 700, letterSpacing: '0.01em', marginTop: 1 }}>{persona.label} · {user?.name}님</div>
-            </div>
-          </div>
-          <button onClick={handleLogout} aria-label="로그아웃" style={{ display: 'flex', alignItems: 'center', gap: 6, border: `1px solid ${C.border}`, background: C.card, color: C.inkSoft, borderRadius: 11, padding: isSenior ? '9px 15px' : '7px 11px', fontSize: isSenior ? 14 : 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: FONT_STACK }}>
-            <LogOut size={isSenior ? 18 : 15} />{isSenior && ' 나가기'}
-          </button>
-        </div>
-        {/* 본문 (탭 전환 시 부드러운 진입) */}
-        <div key={view} style={{ flex: 1, padding: isSenior ? '22px 22px 100px' : '20px 18px 92px', overflowX: 'hidden', animation: 'fadeUp 0.42s cubic-bezier(0.22,1,0.36,1)' }}>
-          {children}
-        </div>
-        {/* 하단 탭 네비 */}
-        <div style={{ position: 'sticky', bottom: 0, zIndex: 50, display: 'flex', background: 'rgba(255,255,255,0.93)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderTop: `1px solid ${C.border}`, padding: isSenior ? '8px 6px' : '6px 4px' }}>
-          {items.map((it) => {
-            const active = view === it.id;
-            const Icon = it.icon;
-            return (
-              <button key={it.id} onClick={() => setView(it.id)} style={{ position: 'relative', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: isSenior ? 5 : 3, padding: isSenior ? '9px 2px' : '7px 2px', border: 'none', background: 'none', cursor: 'pointer', color: active ? persona.color : C.mute, fontFamily: FONT_STACK, transition: 'color 0.15s' }}>
-                <div style={{ display: 'flex', transform: active ? 'translateY(-1px) scale(1.06)' : 'none', transition: 'transform 0.25s cubic-bezier(0.34,1.56,0.64,1)' }}>
-                  <Icon size={isSenior ? 26 : 21} strokeWidth={active ? 2.5 : 1.9} />
-                </div>
-                <span style={{ fontSize: isSenior ? 12.5 : 10.5, fontWeight: active ? 700 : 600, whiteSpace: 'nowrap' }}>{it.label}</span>
-                <div style={{ width: active ? (isSenior ? 18 : 15) : 0, height: 3, borderRadius: 3, background: persona.color, transition: 'width 0.28s cubic-bezier(0.22,1,0.36,1)' }} />
-              </button>
-            );
-          })}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function Layout({ role, view, setView, user, dispatch, children, state }) {
-  if (role !== 'coordinator') {
-    return <ConsumerLayout role={role} view={view} setView={setView} user={user} dispatch={dispatch}>{children}</ConsumerLayout>;
-  }
-  const dataCount = {
+  const dataCount = useMemo(() => {
+    if (role !== 'coordinator') return {};
+    return {
       applicants: state?.applications?.filter(a => a.status === 'screening' || a.status === 'verified').length || 0,
       matches: state?.matches?.filter(m => m.status === 'active').length || 0,
       pendingLogs: state?.activity_logs?.filter(l => !l.approved).length || 0,
       openIncidents: state?.safety_incidents?.filter(i => i.status === 'open' || i.status === 'in_progress').length || 0,
     };
+  }, [role, state]);
 
   const handleLogout = () => dispatch({ type: 'LOGOUT' });
 
@@ -2144,9 +1954,9 @@ function ParentDashboard({ user, myChildren, myMatches, todayActivities, upcomin
             <div style={{ fontSize: 13, fontWeight: 700, color: C.brand, letterSpacing: '0.08em' }}>우리 아이의 트리오</div>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
-            <TrioMember person={child} sub="자녀" color={C.peach} trust={trustStatus(state, child?.id)} />
-            <TrioMember person={youth} sub={`청년 멘토 · ${youth?.skills?.[0] || '활동'}`} color={C.sage} trust={trustStatus(state, youth?.id)} />
-            <TrioMember person={senior} sub={`동네 어르신 · ${senior?.skills?.[0] || ''}`} color={C.lavender} trust={trustStatus(state, senior?.id)} />
+            <TrioMember person={child} sub="자녀" color={C.peach} />
+            <TrioMember person={youth} sub={`청년 멘토 · ${youth?.skills?.[0] || '활동'}`} color={C.sage} />
+            <TrioMember person={senior} sub={`동네 어르신 · ${senior?.skills?.[0] || ''}`} color={C.lavender} />
           </div>
           <div style={{ display: 'flex', gap: 12, marginTop: 20, paddingTop: 18, borderTop: `1px solid ${C.borderSoft}` }}>
             <div style={{ flex: 1 }}>
@@ -2801,10 +2611,7 @@ function CoordApplicants({ state, dispatch, showToast, user }) {
               <div style={{ display: 'flex', gap: 16, padding: 16, background: C.bg, borderRadius: 10, marginBottom: 20 }}>
                 <Avatar type={p?.type} gender={p?.gender} name={p?.name} size={64} color={PERSONA[p?.type]?.color || C.brand} />
                 <div style={{ flex: 1 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                    <div style={{ fontSize: 18, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK }}>{p?.name}</div>
-                    <TrustBadge status={trustStatus(state, p?.id)} />
-                  </div>
+                  <div style={{ fontSize: 18, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK }}>{p?.name}</div>
                   <div style={{ fontSize: 12, color: C.inkSoft, marginTop: 4 }}>{PERSONA[p?.type]?.label} · {p?.age}세 · {p?.gender === 'M' ? '남성' : '여성'}</div>
                   <div style={{ fontSize: 12, color: C.inkSoft, marginTop: 2 }}>{p?.phone} · {p?.address}</div>
                 </div>
@@ -3874,7 +3681,6 @@ function App() {
         @keyframes spin { from { transform: rotate(0); } to { transform: rotate(360deg); } }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes slideInRight { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
         @keyframes modalIn { from { opacity: 0; transform: translate(-50%, -48%) scale(0.97); } to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
         @keyframes overlayIn { from { opacity: 0; } to { opacity: 1; } }
