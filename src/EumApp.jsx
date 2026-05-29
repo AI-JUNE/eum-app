@@ -717,6 +717,28 @@ function Empty({ icon, title, sub, action }) {
 // 6. LAYOUT — SIDEBAR + HEADER
 // ============================================================================
 
+// 이음 로고 — 세대가 이어지는 두 인물(큰=어른, 작은=청년·아이)
+function EumLogo({ size = 32, variant = 'badge' }) {
+  const badge = variant === 'badge';
+  const gid = `eumGrad-${size}-${variant}`;
+  return (
+    <svg width={size} height={size} viewBox="0 0 100 100" style={{ display: 'block', flexShrink: 0 }} role="img" aria-label="이음 로고">
+      <defs>
+        <linearGradient id={gid} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor={C.brand} />
+          <stop offset="100%" stopColor={C.peach} />
+        </linearGradient>
+      </defs>
+      {badge && <rect width="100" height="100" rx="26" fill={`url(#${gid})`} />}
+      <g fill="none" stroke={badge ? '#fff' : `url(#${gid})`} strokeWidth="8" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="34" cy="36" r="12.5" />
+        <circle cx="68" cy="40" r="9" />
+        <path d="M18 78 C18 61 26 53 34 53 C41 53 45 59 50 60 C54 60.8 58 56 68 56 C75 56 82 62 82 78" />
+      </g>
+    </svg>
+  );
+}
+
 function Sidebar({ role, currentView, onNavigate, onLogout, userName, dataCount }) {
   const navByRole = {
     coordinator: [
@@ -762,14 +784,9 @@ function Sidebar({ role, currentView, onNavigate, onLogout, userName, dataCount 
     }}>
       <div style={{ padding: '22px 20px 18px', borderBottom: `1px solid ${C.borderSoft}` }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
-          <div style={{
-            width: 32, height: 32, borderRadius: 9,
-            background: `linear-gradient(135deg, ${C.brand} 0%, ${C.peach} 100%)`,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            color: '#fff', fontWeight: 800, fontSize: 17,
-            fontFamily: SERIF_STACK, letterSpacing: '-0.02em',
-            boxShadow: `0 2px 8px ${C.brand}40`,
-          }}>이</div>
+          <div style={{ borderRadius: 9, boxShadow: `0 2px 8px ${C.brand}40`, display: 'flex' }}>
+            <EumLogo size={32} />
+          </div>
           <div>
             <div style={{ fontSize: 17, fontWeight: 800, color: C.ink, letterSpacing: '-0.03em', fontFamily: SERIF_STACK, lineHeight: 1 }}>이음</div>
             <div style={{ fontSize: 10, color: C.mute, letterSpacing: '0.08em', fontWeight: 600, marginTop: 2 }}>EUM · 세대를 잇다</div>
@@ -876,14 +893,9 @@ function RoleSelect({ state, onSelectRole, onShowApplication }) {
         {/* 헤더 */}
         <div style={{ marginBottom: 56, textAlign: 'center' }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-            <div style={{
-              width: 54, height: 54, borderRadius: 14,
-              background: `linear-gradient(135deg, ${C.brand} 0%, ${C.peach} 100%)`,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: '#fff', fontSize: 28, fontWeight: 800, fontFamily: SERIF_STACK,
-              boxShadow: `0 8px 24px ${C.brand}40`,
-              letterSpacing: '-0.02em',
-            }}>이</div>
+            <div style={{ width: 54, height: 54, borderRadius: 14, boxShadow: `0 8px 24px ${C.brand}40`, display: 'flex' }}>
+              <EumLogo size={54} />
+            </div>
           </div>
           <h1 style={{ fontSize: 44, fontWeight: 700, color: C.ink, letterSpacing: '-0.04em', margin: '0 0 10px', fontFamily: SERIF_STACK, lineHeight: 1.1 }}>
             세대를 잇다, <span style={{ color: C.brand, fontStyle: 'italic' }}>이음</span>
@@ -999,7 +1011,9 @@ function ApplicationForm({ onClose, onSubmit }) {
 
   if (submitted) {
     return (
-      <div style={{ textAlign: 'center', padding: '40px 20px' }}>
+      <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(26,24,20,0.55)', backdropFilter: 'blur(4px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, animation: 'fadeIn 0.15s ease' }}>
+        <div onClick={(e) => e.stopPropagation()} style={{ background: C.card, borderRadius: 18, maxWidth: 460, width: '100%', boxShadow: '0 24px 70px rgba(0,0,0,0.28)', animation: 'slideUp 0.22s ease' }}>
+          <div style={{ textAlign: 'center', padding: '44px 28px' }}>
         <div style={{ width: 72, height: 72, borderRadius: '50%', background: C.sageSoft, color: C.sage, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
           <Check size={36} strokeWidth={3} />
         </div>
@@ -1010,6 +1024,8 @@ function ApplicationForm({ onClose, onSubmit }) {
           코디네이터가 1~3일 내에 카카오톡으로 면접 일정을 안내드립니다.
         </div>
         <Button variant="primary" onClick={onClose}>확인</Button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -1023,9 +1039,19 @@ function ApplicationForm({ onClose, onSubmit }) {
   ];
 
   return (
-    <div>
-      {/* Stepper */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 24, padding: '0 4px' }}>
+    <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(26,24,20,0.55)', backdropFilter: 'blur(4px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, animation: 'fadeIn 0.15s ease' }}>
+      <div onClick={(e) => e.stopPropagation()} style={{ background: C.card, borderRadius: 18, maxWidth: 600, width: '100%', maxHeight: '92vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 24px 70px rgba(0,0,0,0.28)', animation: 'slideUp 0.22s ease' }}>
+        {/* Header */}
+        <div style={{ padding: '18px 24px 16px', borderBottom: `1px solid ${C.border}`, flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+              <EumLogo size={26} />
+              <div style={{ fontSize: 16, fontWeight: 800, color: C.ink, letterSpacing: '-0.02em', fontFamily: SERIF_STACK }}>이음 참여 신청</div>
+            </div>
+            <button onClick={onClose} aria-label="닫기" style={{ background: 'none', border: 'none', cursor: 'pointer', color: C.mute, padding: 4, display: 'flex', borderRadius: 8 }}><X size={20} /></button>
+          </div>
+          {/* Stepper */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '0 2px' }}>
         {['신청유형', '기본정보', form.type === 'parent' ? '자녀정보' : '경험·가능시간', '동의·제출'].map((label, i) => {
           const sNum = i + 1;
           const active = step === sNum;
@@ -1046,7 +1072,10 @@ function ApplicationForm({ onClose, onSubmit }) {
             </React.Fragment>
           );
         })}
-      </div>
+          </div>
+        </div>
+        {/* Scrollable body */}
+        <div style={{ padding: '22px 24px 8px', overflowY: 'auto', flex: 1 }}>
 
       {/* Step 1: Type */}
       {step === 1 && (
@@ -1160,8 +1189,9 @@ function ApplicationForm({ onClose, onSubmit }) {
         </div>
       )}
 
-      {/* Footer */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 28, paddingTop: 16, borderTop: `1px solid ${C.border}` }}>
+        </div>
+        {/* Footer */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, padding: '14px 20px', borderTop: `1px solid ${C.border}`, background: C.cream, flexShrink: 0 }}>
         <Button variant="secondary" onClick={() => step === 1 ? onClose() : setStep(step - 1)} icon={<ChevronLeft size={16} />}>
           {step === 1 ? '취소' : '이전'}
         </Button>
@@ -1170,6 +1200,7 @@ function ApplicationForm({ onClose, onSubmit }) {
         ) : (
           <Button variant="brand" onClick={submit} disabled={!canProceed} icon={<Send size={16} />}>신청서 제출</Button>
         )}
+        </div>
       </div>
     </div>
   );
@@ -3632,14 +3663,9 @@ function App() {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: C.bg, fontFamily: FONT_STACK }}>
         <div style={{ textAlign: 'center' }}>
-          <div style={{
-            width: 56, height: 56, borderRadius: 14,
-            background: `linear-gradient(135deg, ${C.brand} 0%, ${C.peach} 100%)`,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            color: '#fff', fontWeight: 800, fontSize: 28,
-            fontFamily: SERIF_STACK, margin: '0 auto 16px',
-            boxShadow: `0 8px 24px ${C.brand}40`,
-          }}>이</div>
+          <div style={{ width: 56, height: 56, borderRadius: 14, margin: '0 auto 16px', boxShadow: `0 8px 24px ${C.brand}40`, display: 'flex', animation: 'slideUp 0.4s ease' }}>
+            <EumLogo size={56} />
+          </div>
           <div style={{ fontSize: 14, color: C.inkSoft }}>이음을 불러오고 있습니다…</div>
         </div>
       </div>
