@@ -236,6 +236,7 @@ function normalizeState(s) {
   const activity_logs = (s.activity_logs || []).map(l => ({
     ...l,
     date: l.date || l.approved_at || (actById[l.activity_id]?.scheduled_at || '').slice(0, 10) || '',
+    created_at: l.created_at || l.approved_at || (actById[l.activity_id]?.scheduled_at || '') || '',
   }));
   const participants = (s.participants || []).map(p =>
     p.type === 'child' ? { ...p, guardian_id: p.guardian_id || p.parent_id } : p
@@ -793,6 +794,195 @@ function trustStatus(state, participantId) {
   return 'none';
 }
 
+// ── 상용 기능: 모바일 감지 · 검색 · 알림 · 체크인아웃 ────────────────────────
+function useIsMobile(bp = 880) {
+  const [m, setM] = useState(typeof window !== 'undefined' ? window.innerWidth <= bp : false);
+  useEffect(() => {
+    const on = () => setM(window.innerWidth <= bp);
+    on();
+    window.addEventListener('resize', on);
+    return () => window.removeEventListener('resize', on);
+  }, [bp]);
+  return m;
+}
+
+function SearchBar({ value, onChange, placeholder = '검색…', style = {} }) {
+  return (
+    <div style={{ position: 'relative', ...style }}>
+      <Search size={15} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: C.mute, pointerEvents: 'none' }} />
+      <input
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        style={{ width: '100%', padding: '9px 12px 9px 34px', borderRadius: 10, border: `1px solid ${C.border}`, background: C.card, fontSize: 13.5, color: C.ink, fontFamily: FONT_STACK, outline: 'none', boxSizing: 'border-box' }}
+      />
+      {value && (
+        <button onClick={() => onChange('')} aria-label="지우기" style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: C.mute, display: 'flex', padding: 2 }}>
+          <X size={14} />
+        </button>
+      )}
+    </div>
+  );
+}
+
+// 상태에서 역할별 알림 도출
+function buildNotifications(state, role, user) {
+  const out = [];
+  if (role === 'coordinator') {
+    const pendingApps = state.applications.filter(a => a.status === 'screening' || a.status === 'verified');
+    if (pendingApps.length) out.push({ id: 'n-apps', icon: UserPlus, color: C.brand, title: `검토 대기 신청서 ${pendingApps.length}건`, desc: '서류 검토가 필요합니다', view: 'applicants' });
+    const pendingLogs = state.activity_logs.filter(l => !l.approved);
+    if (pendingLogs.length) out.push({ id: 'n-logs', icon: ClipboardCheck, color: C.sage, title: `승인 대기 활동기록 ${pendingLogs.length}건`, desc: '정산 전 승인이 필요합니다', view: 'activities' });
+    const openInc = state.safety_incidents.filter(i => i.status === 'open' || i.status === 'in_progress');
+    if (openInc.length) out.push({ id: 'n-inc', icon: ShieldAlert, color: C.red, title: `미처리 안전 이슈 ${openInc.length}건`, desc: '즉시 확인이 필요합니다', view: 'safety', urgent: true });
+  } else if (user) {
+    const myMatch = state.matches.find(m => [m.youth_id, m.senior_id, m.child_id].includes(user.id) && m.status === 'active')
+      || state.matches.find(m => state.participants.some(c => c.parent_id === user.id && c.id === m.child_id) && m.status === 'active');
+    if (myMatch) {
+      const next = state.activities
+        .filter(a => a.match_id === myMatch.id && a.status === 'scheduled' && (a.date || '') >= TODAY)
+        .sort((x, y) => (x.scheduled_at || '').localeCompare(y.scheduled_at || ''))[0];
+      if (next) out.push({ id: 'n-next', icon: Calendar, color: C.lavender, title: '다음 활동 일정', desc: `${fmtRelativeDate(next.scheduled_at)} ${(next.time || '')} · ${next.type || ''}`, view: 'schedule' });
+    }
+    const approved = state.activity_logs.filter(l => l.participant_id === user.id && l.approved).length;
+    if (approved) out.push({ id: 'n-appr', icon: CheckCircle2, color: C.sage, title: `승인된 활동 ${approved}건`, desc: '정산에 반영되었습니다', view: 'settlement' });
+  }
+  return out;
+}
+
+function NotificationBell({ state, role, user, onNavigate, dark }) {
+  const [open, setOpen] = useState(false);
+  const items = useMemo(() => buildNotifications(state, role, user), [state, role, user]);
+  const ref = useRef();
+  useEffect(() => {
+    const onDoc = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener('mousedown', onDoc);
+    return () => document.removeEventListener('mousedown', onDoc);
+  }, []);
+  const urgent = items.some(i => i.urgent);
+  return (
+    <div ref={ref} style={{ position: 'relative' }}>
+      <button onClick={() => setOpen(o => !o)} aria-label="알림" style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', width: 38, height: 38, borderRadius: 10, border: `1px solid ${dark ? 'rgba(255,255,255,0.15)' : C.border}`, background: dark ? 'rgba(255,255,255,0.06)' : C.card, color: dark ? '#fff' : C.inkSoft, cursor: 'pointer' }}>
+        <Bell size={18} />
+        {items.length > 0 && (
+          <span style={{ position: 'absolute', top: -4, right: -4, minWidth: 17, height: 17, padding: '0 4px', borderRadius: 9, background: urgent ? C.red : C.brand, color: '#fff', fontSize: 10, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', border: `2px solid ${dark ? '#1A1814' : C.card}` }}>{items.length}</span>
+        )}
+      </button>
+      {open && (
+        <div style={{ position: 'absolute', top: 46, right: 0, width: 320, maxWidth: '86vw', background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, boxShadow: '0 16px 48px rgba(26,24,20,0.18)', zIndex: 200, overflow: 'hidden', animation: 'slideUp 0.18s ease', textAlign: 'left' }}>
+          <div style={{ padding: '13px 16px', borderBottom: `1px solid ${C.borderSoft}`, fontSize: 13, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK }}>알림 {items.length > 0 && `(${items.length})`}</div>
+          {items.length === 0 ? (
+            <div style={{ padding: '28px 16px', textAlign: 'center', color: C.mute, fontSize: 13 }}>새로운 알림이 없습니다</div>
+          ) : items.map(it => {
+            const Icon = it.icon;
+            return (
+              <button key={it.id} onClick={() => { setOpen(false); onNavigate && onNavigate(it.view); }} style={{ width: '100%', display: 'flex', alignItems: 'flex-start', gap: 11, padding: '12px 16px', border: 'none', borderBottom: `1px solid ${C.borderSoft}`, background: 'none', cursor: 'pointer', textAlign: 'left', fontFamily: FONT_STACK }}>
+                <div style={{ width: 32, height: 32, borderRadius: 9, background: it.color + '18', color: it.color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><Icon size={16} /></div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: C.ink }}>{it.title}</div>
+                  <div style={{ fontSize: 12, color: C.mute, marginTop: 1 }}>{it.desc}</div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// 활동 체크인/아웃 + 후기 (Papa식)
+function CheckInOutCard({ activity, user, dispatch, showToast, color = C.sage }) {
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [mood, setMood] = useState(5);
+  const [summary, setSummary] = useState('');
+  const [computedHours, setComputedHours] = useState(0);
+  const [, force] = useState(0);
+
+  // 진행 중이면 1초마다 경과시간 갱신
+  useEffect(() => {
+    if (activity.status !== 'in_progress') return;
+    const id = setInterval(() => force(n => n + 1), 1000);
+    return () => clearInterval(id);
+  }, [activity.status]);
+
+  const checkIn = () => {
+    dispatch({ type: 'CHECK_IN', payload: { id: activity.id, at: new Date().toISOString() } });
+    showToast && showToast({ type: 'success', title: '체크인 완료', message: '활동이 시작되었습니다. 끝나면 체크아웃해 주세요.' });
+  };
+  const checkOut = () => {
+    const start = activity.checkin_at ? new Date(activity.checkin_at) : new Date();
+    const hrs = Math.max(0.5, Math.round((Date.now() - start.getTime()) / 360000) / 10);
+    setComputedHours(hrs);
+    dispatch({ type: 'CHECK_OUT', payload: { id: activity.id, at: new Date().toISOString(), hours: hrs } });
+    setFeedbackOpen(true);
+  };
+  const submitFeedback = () => {
+    dispatch({ type: 'ADD_LOG', payload: { id: uid('log'), activity_id: activity.id, participant_id: user.id, hours: computedHours || activity.actual_hours || activity.duration_hours || 1, summary: summary || '활동을 완료했습니다.', approved: false, has_photo: false, mood } });
+    setFeedbackOpen(false);
+    showToast && showToast({ type: 'success', title: '후기 제출 완료', message: '코디 승인 후 정산에 반영됩니다.' });
+  };
+
+  const elapsed = activity.checkin_at ? Math.max(0, Date.now() - new Date(activity.checkin_at).getTime()) : 0;
+  const mm = Math.floor(elapsed / 60000);
+  const elapsedStr = `${String(Math.floor(mm / 60)).padStart(2, '0')}:${String(mm % 60).padStart(2, '0')}`;
+
+  return (
+    <>
+      <Card padding={18} style={{ border: `1.5px solid ${activity.status === 'in_progress' ? color : C.border}`, background: activity.status === 'in_progress' ? color + '0C' : C.card }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+              <Badge color={color} soft={color + '1A'}>{activity.type || '활동'}</Badge>
+              <span style={{ fontSize: 12, color: C.mute }}>{fmtRelativeDate(activity.scheduled_at)} {activity.time || ''}</span>
+            </div>
+            <div style={{ fontSize: 14.5, fontWeight: 700, color: C.ink }}>{activity.title || activity.type || '오늘의 활동'}</div>
+            <div style={{ fontSize: 12, color: C.inkSoft, marginTop: 2, display: 'flex', alignItems: 'center', gap: 4 }}><MapPin size={11} /> {activity.location || '장소 미정'}</div>
+          </div>
+          <div style={{ flexShrink: 0 }}>
+            {activity.status === 'scheduled' && (
+              <Button variant="brand" icon={<Clock size={15} />} onClick={checkIn}>체크인</Button>
+            )}
+            {activity.status === 'in_progress' && (
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ fontSize: 22, fontWeight: 800, color, fontFamily: SERIF_STACK, fontVariantNumeric: 'tabular-nums', lineHeight: 1 }}>{elapsedStr}</div>
+                <div style={{ fontSize: 10, color: C.mute, marginBottom: 8 }}>진행 중</div>
+                <Button variant="primary" size="sm" icon={<Check size={14} />} onClick={checkOut}>체크아웃</Button>
+              </div>
+            )}
+            {activity.status === 'completed' && (
+              <Badge color={C.sage} soft={C.sageSoft}><Check size={11} /> 완료</Badge>
+            )}
+          </div>
+        </div>
+      </Card>
+
+      {feedbackOpen && (
+        <div onClick={() => setFeedbackOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(26,24,20,0.55)', backdropFilter: 'blur(4px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+          <div onClick={(e) => e.stopPropagation()} style={{ background: C.card, borderRadius: 18, maxWidth: 440, width: '100%', padding: 28, boxShadow: '0 24px 70px rgba(0,0,0,0.28)', animation: 'slideUp 0.22s ease', textAlign: 'left' }}>
+            <div style={{ fontSize: 18, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK, marginBottom: 4 }}>활동 후기</div>
+            <div style={{ fontSize: 13, color: C.inkSoft, marginBottom: 18 }}>약 <strong style={{ color }}>{computedHours}시간</strong> 활동했어요. 오늘 어땠는지 남겨주세요.</div>
+            <div style={{ fontSize: 12, fontWeight: 700, color: C.mute, marginBottom: 8 }}>오늘 만족도</div>
+            <div style={{ display: 'flex', gap: 8, marginBottom: 18 }}>
+              {[1, 2, 3, 4, 5].map(n => (
+                <button key={n} onClick={() => setMood(n)} aria-label={`${n}점`} style={{ flex: 1, padding: '10px 0', borderRadius: 10, border: `1.5px solid ${mood >= n ? C.gold : C.border}`, background: mood >= n ? C.goldSoft : C.card, cursor: 'pointer', display: 'flex', justifyContent: 'center' }}>
+                  <Star size={20} color={mood >= n ? C.gold : C.mute} fill={mood >= n ? C.gold : 'none'} />
+                </button>
+              ))}
+            </div>
+            <div style={{ fontSize: 12, fontWeight: 700, color: C.mute, marginBottom: 8 }}>활동 내용</div>
+            <Textarea value={summary} onChange={setSummary} placeholder="무엇을 함께 했는지, 기억에 남는 순간을 적어주세요." rows={3} />
+            <div style={{ display: 'flex', gap: 8, marginTop: 20 }}>
+              <Button variant="secondary" onClick={() => setFeedbackOpen(false)} fullWidth>나중에</Button>
+              <Button variant="brand" icon={<Send size={15} />} onClick={submitFeedback} fullWidth>후기 제출</Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
 function Tabs({ tabs, active, onChange, style = {} }) {
   return (
     <div style={{ display: 'flex', gap: 4, borderBottom: `1px solid ${C.border}`, ...style }}>
@@ -1026,7 +1216,7 @@ function RoleSelect({ state, onSelectRole, onShowApplication }) {
           </h1>
           <p style={{ fontSize: 16, color: C.inkSoft, maxWidth: 560, margin: '0 auto', lineHeight: 1.6 }}>
             청년·어르신·아동 세 세대가 서로 돕고 모두 보상받는<br />
-            <span style={{ color: C.ink, fontWeight: 600 }}>강서구형 3세대 상생 품앗이 플랫폼</span>
+            <span style={{ color: C.ink, fontWeight: 600 }}>우리동네 3세대 상생 품앗이 플랫폼</span>
           </p>
           <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 24, flexWrap: 'wrap' }}>
             <Badge color={C.blue} soft={C.blueSoft} size="md">청소년</Badge>
@@ -1388,7 +1578,7 @@ function YouthApp({ state, user, dispatch, showToast }) {
 
   const myActivities = useMemo(() => {
     if (!match) return [];
-    return state.activities.filter((a) => a.match_id === match.id).sort((a, b) => a.scheduled_at.localeCompare(b.scheduled_at));
+    return state.activities.filter((a) => a.match_id === match.id).sort((a, b) => (a.scheduled_at || '').localeCompare(b.scheduled_at || ''));
   }, [state.activities, match]);
 
   const myLogs = useMemo(() => state.activity_logs.filter((l) => l.participant_id === user.id), [state.activity_logs, user.id]);
@@ -1406,7 +1596,7 @@ function YouthApp({ state, user, dispatch, showToast }) {
   const totalEarned = mySettlements.filter((s) => s.status === 'paid').reduce((s, x) => s + x.amount_krw, 0);
 
   return (
-    <Layout role="youth" view={view} setView={setView} user={user} dispatch={dispatch}
+    <Layout role="youth" view={view} setView={setView} user={user} dispatch={dispatch} state={state}
       data={{ pendingLogs: state.activity_logs.filter(l => l.participant_id === user.id && !l.approved).length }}>
       {view === 'dashboard' && (
         <>
@@ -1518,7 +1708,7 @@ function YouthApp({ state, user, dispatch, showToast }) {
         </>
       )}
 
-      {view === 'schedule' && <YouthSchedule match={match} activities={myActivities} state={state} />}
+      {view === 'schedule' && <YouthSchedule match={match} activities={myActivities} state={state} user={user} dispatch={dispatch} showToast={showToast} />}
       {view === 'logs' && <YouthLogs state={state} user={user} match={match} myLogs={myLogs} myActivities={myActivities} dispatch={dispatch} showToast={showToast} />}
       {view === 'mentor' && <YouthMentor senior={senior} myLogs={myLogs} state={state} />}
       {view === 'archive' && <ArchiveView state={state} />}
@@ -1559,10 +1749,24 @@ function ActivityTypeCard({ type, icon, desc, color, count }) {
   );
 }
 
-function YouthSchedule({ match, activities, state }) {
+function YouthSchedule({ match, activities, state, user, dispatch, showToast }) {
+  const actionable = activities
+    .filter(a => a.status === 'in_progress' || (a.status === 'scheduled' && (a.date || '') >= TODAY))
+    .sort((a, b) => (a.scheduled_at || '').localeCompare(b.scheduled_at || ''))
+    .slice(0, 3);
   return (
     <>
       <PageHeader title="활동 일정" subtitle="매칭 트리오와의 격주 활동 일정입니다" />
+      {actionable.length > 0 && (
+        <div style={{ marginBottom: 22 }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: C.brand, letterSpacing: '0.04em', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}><Clock size={15} /> 오늘 활동 — 체크인하세요</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {actionable.map(act => (
+              <CheckInOutCard key={act.id} activity={act} user={user} dispatch={dispatch} showToast={showToast} color={C.sage} />
+            ))}
+          </div>
+        </div>
+      )}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {activities.map((act) => {
           const isPast = act.status === 'completed';
@@ -1849,14 +2053,14 @@ function SeniorApp({ state, user, dispatch, showToast }) {
 
   const myActivities = useMemo(() => {
     if (!match) return [];
-    return state.activities.filter((a) => a.match_id === match.id).sort((a, b) => a.scheduled_at.localeCompare(b.scheduled_at));
+    return state.activities.filter((a) => a.match_id === match.id).sort((a, b) => (a.scheduled_at || '').localeCompare(b.scheduled_at || ''));
   }, [state.activities, match]);
   const nextActivity = myActivities.find((a) => a.status === 'scheduled');
   const mySettlements = useMemo(() => state.settlements.filter((s) => s.participant_id === user.id), [state.settlements, user.id]);
   const totalEarned = mySettlements.filter((s) => s.status === 'paid').reduce((s, x) => s + x.amount_krw, 0);
 
   return (
-    <Layout role="senior" view={view} setView={setView} user={user} dispatch={dispatch}>
+    <Layout role="senior" view={view} setView={setView} user={user} dispatch={dispatch} state={state}>
       {view === 'dashboard' && (
         <>
           <div style={{ marginBottom: 24 }}>
@@ -2022,7 +2226,7 @@ const PARTICIPANT_NAV = {
 };
 
 // 소비자(참여자) 셸 — 상단 앱바 + 하단 탭, 따뜻한 캔버스 (관리자 콘솔과 구분)
-function ConsumerLayout({ role, view, setView, user, dispatch, children }) {
+function ConsumerLayout({ role, view, setView, user, dispatch, state, children }) {
   const persona = PERSONA[role] || PERSONA.youth;
   const isSenior = role === 'senior';
   const items = PARTICIPANT_NAV[role] || [];
@@ -2039,9 +2243,12 @@ function ConsumerLayout({ role, view, setView, user, dispatch, children }) {
               <div style={{ fontSize: isSenior ? 12.5 : 10.5, color: persona.color, fontWeight: 700, letterSpacing: '0.01em', marginTop: 1 }}>{persona.label} · {user?.name}님</div>
             </div>
           </div>
-          <button onClick={handleLogout} aria-label="로그아웃" style={{ display: 'flex', alignItems: 'center', gap: 6, border: `1px solid ${C.border}`, background: C.card, color: C.inkSoft, borderRadius: 11, padding: isSenior ? '9px 15px' : '7px 11px', fontSize: isSenior ? 14 : 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: FONT_STACK }}>
-            <LogOut size={isSenior ? 18 : 15} />{isSenior && ' 나가기'}
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <NotificationBell state={state} role={role} user={user} onNavigate={setView} />
+            <button onClick={handleLogout} aria-label="로그아웃" style={{ display: 'flex', alignItems: 'center', gap: 6, border: `1px solid ${C.border}`, background: C.card, color: C.inkSoft, borderRadius: 11, padding: isSenior ? '9px 15px' : '7px 11px', fontSize: isSenior ? 14 : 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: FONT_STACK }}>
+              <LogOut size={isSenior ? 18 : 15} />{isSenior && ' 나가기'}
+            </button>
+          </div>
         </div>
         {/* 본문 (탭 전환 시 부드러운 진입) */}
         <div key={view} style={{ flex: 1, padding: isSenior ? '22px 22px 100px' : '20px 18px 92px', overflowX: 'hidden', animation: 'fadeUp 0.42s cubic-bezier(0.22,1,0.36,1)' }}>
@@ -2070,7 +2277,7 @@ function ConsumerLayout({ role, view, setView, user, dispatch, children }) {
 
 function Layout({ role, view, setView, user, dispatch, children, state }) {
   if (role !== 'coordinator') {
-    return <ConsumerLayout role={role} view={view} setView={setView} user={user} dispatch={dispatch}>{children}</ConsumerLayout>;
+    return <ConsumerLayout role={role} view={view} setView={setView} user={user} dispatch={dispatch} state={state}>{children}</ConsumerLayout>;
   }
   const dataCount = {
       applicants: state?.applications?.filter(a => a.status === 'screening' || a.status === 'verified').length || 0,
@@ -2080,13 +2287,48 @@ function Layout({ role, view, setView, user, dispatch, children, state }) {
     };
 
   const handleLogout = () => dispatch({ type: 'LOGOUT' });
+  const isMobile = useIsMobile(900);
+  const [drawer, setDrawer] = useState(false);
+
+  if (isMobile) {
+    return (
+      <div style={{ minHeight: '100vh', background: C.bg, fontFamily: FONT_STACK, color: C.ink }}>
+        {/* 모바일 상단바 */}
+        <div style={{ position: 'sticky', top: 0, zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '11px 16px', background: 'rgba(250,247,242,0.92)', backdropFilter: 'blur(12px)', borderBottom: `1px solid ${C.borderSoft}` }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <button onClick={() => setDrawer(true)} aria-label="메뉴" style={{ display: 'flex', border: `1px solid ${C.border}`, background: C.card, borderRadius: 10, padding: 8, cursor: 'pointer', color: C.ink }}><Menu size={18} /></button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }} onClick={() => setView('overview')}>
+              <EumLogo size={26} />
+              <span style={{ fontSize: 15, fontWeight: 800, fontFamily: SERIF_STACK, color: C.ink }}>이음 <span style={{ fontSize: 11, color: C.mute, fontWeight: 600 }}>관리자</span></span>
+            </div>
+          </div>
+          <NotificationBell state={state} role="coordinator" user={user} onNavigate={setView} />
+        </div>
+        {/* 드로어 */}
+        {drawer && (
+          <div onClick={() => setDrawer(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(26,24,20,0.45)', zIndex: 70, animation: 'fadeIn 0.15s ease' }}>
+            <div onClick={(e) => e.stopPropagation()} style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 260, animation: 'slideInLeft 0.22s ease' }}>
+              <Sidebar role={role} currentView={view} onNavigate={(v) => { setView(v); setDrawer(false); }} onLogout={handleLogout} userName={user?.name} dataCount={dataCount} />
+            </div>
+          </div>
+        )}
+        <div style={{ padding: '18px 16px 40px', overflowX: 'hidden' }}>{children}</div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: C.bg, fontFamily: FONT_STACK, color: C.ink }}>
       <Sidebar role={role} currentView={view} onNavigate={setView} onLogout={handleLogout} userName={user?.name} dataCount={dataCount} />
-      <div style={{ flex: 1, minWidth: 0, padding: role === 'senior' ? '32px 40px' : '28px 36px', overflowX: 'hidden' }}>
-        <div style={{ maxWidth: role === 'senior' ? 880 : 1280, margin: '0 auto' }}>
-          {children}
+      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', overflowX: 'hidden' }}>
+        {/* 데스크톱 상단바 (알림) */}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', padding: '16px 36px 0' }}>
+          <NotificationBell state={state} role="coordinator" user={user} onNavigate={setView} />
+        </div>
+        <div style={{ flex: 1, padding: '16px 36px 36px' }}>
+          <div style={{ maxWidth: 1320, margin: '0 auto' }}>
+            {children}
+          </div>
         </div>
       </div>
     </div>
@@ -2109,12 +2351,12 @@ function ParentApp({ state, user, dispatch, showToast }) {
   );
   const upcomingActivities = state.activities
     .filter(a => a.date >= TODAY && a.status === 'scheduled' && myMatches.some(m => m.id === a.match_id))
-    .sort((a, b) => a.date.localeCompare(b.date))
+    .sort((a, b) => (a.date || '').localeCompare(b.date || ''))
     .slice(0, 5);
 
   const recentLogs = state.activity_logs
     .filter(l => state.activities.find(a => a.id === l.activity_id && myMatches.some(m => m.id === a.match_id)))
-    .sort((a, b) => b.created_at.localeCompare(a.created_at))
+    .sort((a, b) => (b.created_at || '').localeCompare(a.created_at || ''))
     .slice(0, 6);
 
   const myIncidents = state.safety_incidents.filter(i => myMatches.some(m => m.id === i.match_id));
@@ -2767,6 +3009,8 @@ function CoordOverview({ state, setView }) {
 function CoordApplicants({ state, dispatch, showToast, user }) {
   const [activeTab, setActiveTab] = useState('screening');
   const [selectedApp, setSelectedApp] = useState(null);
+  const [query, setQuery] = useState('');
+  const [typeFilter, setTypeFilter] = useState('all');
 
   const counts = useMemo(() => ({
     screening: state.applications.filter(a => a.status === 'screening').length,
@@ -2775,7 +3019,21 @@ function CoordApplicants({ state, dispatch, showToast, user }) {
     rejected: state.applications.filter(a => a.status === 'rejected').length,
   }), [state]);
 
-  const filtered = state.applications.filter(a => a.status === activeTab);
+  const pById = useMemo(() => {
+    const m = {}; state.participants.forEach(p => { m[p.id] = p; }); return m;
+  }, [state.participants]);
+
+  const filtered = state.applications.filter(a => {
+    if (a.status !== activeTab) return false;
+    const p = pById[a.participant_id];
+    if (typeFilter !== 'all' && p?.type !== typeFilter) return false;
+    if (query.trim()) {
+      const q = query.trim().toLowerCase();
+      const hay = `${p?.name || ''} ${p?.phone || ''} ${p?.address || ''} ${(p?.skills || []).join(' ')}`.toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
 
   const updateVerif = (appId, stepKey, status) => {
     dispatch({ type: 'UPDATE_VERIFICATION', payload: { application_id: appId, step: stepKey, status, verified_by: user.id } });
@@ -2805,10 +3063,19 @@ function CoordApplicants({ state, dispatch, showToast, user }) {
         ]}
         active={activeTab}
         onChange={setActiveTab}
-        style={{ marginBottom: 18 }}
+        style={{ marginBottom: 14 }}
       />
 
-      {filtered.length === 0 ? <Empty icon={<UserPlus size={32} />} title={`${activeTab === 'screening' ? '검토 대기' : activeTab === 'verified' ? '검증 중인' : activeTab === 'completed' ? '활동 중인' : '반려된'} 신청자가 없습니다`} /> : (
+      <div style={{ display: 'flex', gap: 10, marginBottom: 18, flexWrap: 'wrap', alignItems: 'center' }}>
+        <SearchBar value={query} onChange={setQuery} placeholder="이름·연락처·동·강점 검색" style={{ flex: 1, minWidth: 220 }} />
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          {[['all', '전체'], ['teen', '청소년'], ['youth', '청년'], ['adult', '중년'], ['senior', '어르신'], ['parent', '양육가정']].map(([id, lab]) => (
+            <button key={id} onClick={() => setTypeFilter(id)} style={{ padding: '7px 13px', borderRadius: 999, border: `1.5px solid ${typeFilter === id ? (PERSONA[id]?.color || C.ink) : C.border}`, background: typeFilter === id ? (PERSONA[id]?.soft || C.bg) : C.card, color: typeFilter === id ? (PERSONA[id]?.color || C.ink) : C.inkSoft, fontSize: 12.5, fontWeight: typeFilter === id ? 700 : 500, cursor: 'pointer', fontFamily: FONT_STACK }}>{lab}</button>
+          ))}
+        </div>
+      </div>
+
+      {filtered.length === 0 ? <Empty icon={<UserPlus size={32} />} title={query || typeFilter !== 'all' ? '조건에 맞는 신청자가 없습니다' : `${activeTab === 'screening' ? '검토 대기' : activeTab === 'verified' ? '검증 중인' : activeTab === 'completed' ? '활동 중인' : '반려된'} 신청자가 없습니다`} /> : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: 14 }}>
           {filtered.map(app => {
             const p = state.participants.find(pp => pp.id === app.participant_id);
@@ -3743,6 +4010,22 @@ function appReducer(state, action) {
     case 'LOGOUT': {
       return { ...state, currentUserId: null, currentRole: null };
     }
+    case 'CHECK_IN': {
+      return {
+        ...state,
+        activities: state.activities.map(a => a.id === action.payload.id
+          ? { ...a, status: 'in_progress', checkin_at: action.payload.at }
+          : a)
+      };
+    }
+    case 'CHECK_OUT': {
+      return {
+        ...state,
+        activities: state.activities.map(a => a.id === action.payload.id
+          ? { ...a, status: 'completed', checkout_at: action.payload.at, actual_hours: action.payload.hours }
+          : a)
+      };
+    }
     case 'ADD_LOG': {
       return { ...state, activity_logs: [...state.activity_logs, { ...action.payload, created_at: new Date().toISOString().slice(0, 16).replace('T', ' ') }] };
     }
@@ -3949,16 +4232,18 @@ function App() {
   const role = state.currentRole;
 
   return (
-    <div>
+    <div style={{ textAlign: 'left' }}>
       <style>{`
         @keyframes spin { from { transform: rotate(0); } to { transform: rotate(360deg); } }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes slideInRight { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes slideInLeft { from { opacity: 0; transform: translateX(-24px); } to { opacity: 1; transform: translateX(0); } }
         @keyframes modalIn { from { opacity: 0; transform: translate(-50%, -48%) scale(0.97); } to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
         @keyframes overlayIn { from { opacity: 0; } to { opacity: 1; } }
         * { box-sizing: border-box; }
+        #root { text-align: left; }
         body { margin: 0; padding: 0; background: ${C.bg}; font-family: ${FONT_STACK}; }
         button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
           outline: 2px solid ${C.brand}66; outline-offset: 2px;
