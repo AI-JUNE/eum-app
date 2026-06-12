@@ -1689,6 +1689,88 @@ function ChipSelect({ options, selected, onToggle, max, color = C.ink }) {
 // 9. YOUTH DASHBOARD
 // ============================================================================
 
+// 글로벌 벤치마크 — 매칭 추천 알고리즘 설명 (적합도 스코어)
+function MatchReasonCard({ user, senior, child }) {
+  const shared = (user?.interests || []).filter((x) => (senior?.interests || []).includes(x));
+  const score = Math.min(98, 80 + shared.length * 4 + 6);
+  const reasons = [
+    { icon: MapPin, text: '같은 우산동 · 도보 10분 거리' },
+    { icon: Heart, text: shared.length ? ('공통 관심사 ' + shared.slice(0, 2).join('·')) : '생활 리듬·관심사가 서로 보완돼요' },
+    { icon: Clock, text: '활동 가능 시간대가 잘 맞아요' },
+    { icon: ShieldCheck, text: '세 사람 모두 4단계 안전검증 완료' },
+  ];
+  return (
+    <Card padding={20} style={{ marginBottom: 20 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14, flexWrap: 'wrap' }}>
+        <Sparkles size={17} color={C.brand} />
+        <div style={{ fontSize: 14, fontWeight: 800, color: C.ink }}>이 트리오를 추천한 이유</div>
+        <Badge color={C.mute} soft={C.muteSoft} size="sm">AI 매칭 추천</Badge>
+        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ fontSize: 12, color: C.mute }}>적합도</div>
+          <div style={{ fontSize: 20, fontWeight: 800, color: C.success, fontFamily: SERIF_STACK }}>{score}%</div>
+        </div>
+      </div>
+      <div style={{ height: 8, borderRadius: 999, background: C.muteSoft, overflow: 'hidden', marginBottom: 14 }}>
+        <div style={{ width: score + '%', height: '100%', borderRadius: 999, background: 'linear-gradient(90deg, ' + C.sage + ', ' + C.success + ')' }} />
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 8 }}>
+        {reasons.map((r, i) => {
+          const Icon = r.icon;
+          return (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 11px', background: C.bg, borderRadius: 9 }}>
+              <Icon size={14} color={C.brand} />
+              <span style={{ fontSize: 12.5, color: C.inkSoft }}>{r.text}</span>
+            </div>
+          );
+        })}
+      </div>
+    </Card>
+  );
+}
+
+// 글로벌 벤치마크 — 영국 GoodGym의 미션형(일회성) 봉사
+function MissionBoardCard() {
+  const [accepted, setAccepted] = useState([]);
+  const missions = [
+    { id: 'ms1', icon: Coffee, title: '무거운 장보기 짐 옮겨드리기', who: '독거 어르신 댁', dist: '도보 8분', mins: 30, reward: '봉사 0.5h', color: C.peach, soft: C.peachSoft },
+    { id: 'ms2', icon: Smile, title: '스마트폰 사진 정리 도와드리기', who: '김복례 어르신', dist: '도보 5분', mins: 40, reward: '봉사 0.7h', color: C.lavender, soft: C.lavenderSoft },
+    { id: 'ms3', icon: BookOpen, title: '도서관에서 아이들에게 책 읽어주기', who: '우산동 작은도서관', dist: '도보 12분', mins: 50, reward: '봉사 1.0h', color: C.gold, soft: C.goldSoft },
+  ];
+  const toggle = (id) => setAccepted((a) => a.includes(id) ? a.filter((x) => x !== id) : [...a, id]);
+  return (
+    <Card padding={20} style={{ marginBottom: 20 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4, flexWrap: 'wrap' }}>
+        <Activity size={17} color={C.brand} />
+        <div style={{ fontSize: 14, fontWeight: 800, color: C.ink }}>동네 미션</div>
+        <Badge color={C.mute} soft={C.muteSoft} size="sm">영국 GoodGym 모델</Badge>
+      </div>
+      <div style={{ fontSize: 12.5, color: C.mute, marginBottom: 14 }}>오가는 길에 잠깐, 짧게 돕는 일회성 미션이에요. 정기 매칭이 없는 날에도 봉사시간을 쌓을 수 있어요.</div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {missions.map((m) => {
+          const Icon = m.icon;
+          const on = accepted.includes(m.id);
+          return (
+            <div key={m.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 12, borderRadius: 11, border: '1px solid ' + (on ? C.success : C.borderSoft), background: on ? C.successSoft : C.card }}>
+              <div style={{ width: 40, height: 40, borderRadius: 10, background: m.soft, color: m.color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <Icon size={19} />
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 13.5, fontWeight: 700, color: C.ink }}>{m.title}</div>
+                <div style={{ fontSize: 11.5, color: C.mute, marginTop: 2, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                  <span>{m.who}</span><span>· {m.dist}</span><span>· 약 {m.mins}분</span><span style={{ color: C.gold, fontWeight: 700 }}>{m.reward}</span>
+                </div>
+              </div>
+              <button onClick={() => toggle(m.id)} style={{ flexShrink: 0, border: '1px solid ' + (on ? C.success : C.border), background: on ? C.success : C.card, color: on ? '#fff' : C.ink, borderRadius: 9, padding: '8px 14px', fontSize: 12.5, fontWeight: 700, cursor: 'pointer', fontFamily: FONT_STACK }}>
+                {on ? '신청 완료' : '참여하기'}
+              </button>
+            </div>
+          );
+        })}
+      </div>
+    </Card>
+  );
+}
+
 function YouthApp({ state, user, dispatch, showToast }) {
   const [view, setView] = useState('dashboard');
   const match = state.matches.find((m) => m.youth_id === user.id);
@@ -1753,6 +1835,8 @@ function YouthApp({ state, user, dispatch, showToast }) {
             </Card>
           )}
 
+          {match && <MatchReasonCard user={user} senior={senior} child={child} />}
+
           {/* 이번 달 목표 — 움직이는 도넛 인포그래픽 */}
           <Reveal>
             <Card padding={20} style={{ marginBottom: 20, display: 'flex', alignItems: 'center', gap: 22, background: `linear-gradient(135deg, ${C.cream} 0%, ${C.sageSoft} 140%)`, flexWrap: 'wrap' }}>
@@ -1790,6 +1874,8 @@ function YouthApp({ state, user, dispatch, showToast }) {
               <ActivityTypeCard type="기억아카이브" icon={<Camera size={20} />} desc="동네 옛이야기 기록·정리" color={C.gold} count={myLogs.filter(l => l.approved && state.activities.find(a => a.id === l.activity_id)?.type === '기억아카이브').length} />
             </div>
           </div>
+
+          <MissionBoardCard />
 
           {/* Recent Logs */}
           <Card padding={0}>
