@@ -1338,6 +1338,38 @@ function ImpactBand({ state }) {
   );
 }
 
+// 발표용 — 랜딩 이용자 후기(증언) 섹션
+function TestimonialBand() {
+  const items = [
+    { role: 'youth', color: C.sage, soft: C.sageSoft, name: '김민준', sub: '청년 · 27세', quote: '할머니께 키오스크를 알려드렸는데, 다음엔 저한테 옛날 이야기를 들려주셨어요. 제가 더 배우고 가는 기분이에요.' },
+    { role: 'senior', color: C.lavender, soft: C.lavenderSoft, name: '박순자', sub: '어르신 · 73세', quote: '혼자였던 집에 아이 웃음소리가 들려요. 다시 누군가에게 쓸모 있는 사람이 된 것 같아 하루가 기다려져요.' },
+    { role: 'parent', color: C.peach, soft: C.peachSoft, name: '이서영', sub: '양육가정 · 유진 엄마', quote: '맞벌이라 늘 미안했는데, 유진이가 동네에 할머니랑 삼촌이 생겼다며 좋아해요. 마음이 놓여요.' },
+  ];
+  return (
+    <Reveal>
+      <div style={{ marginBottom: 36 }}>
+        <div style={{ textAlign: 'center', fontSize: 12, fontWeight: 700, color: C.brand, letterSpacing: '0.1em', marginBottom: 4 }}>이웃들의 이야기</div>
+        <div style={{ textAlign: 'center', fontSize: 13, color: C.mute, marginBottom: 18 }}>이음으로 이어진 세 세대의 목소리예요</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 14 }}>
+          {items.map((t, i) => (
+            <div key={i} style={{ background: C.card, border: '1px solid ' + C.border, borderRadius: 16, padding: 20, display: 'flex', flexDirection: 'column' }}>
+              <div style={{ fontSize: 30, fontWeight: 800, color: t.color, lineHeight: 1, fontFamily: SERIF_STACK }}>&ldquo;</div>
+              <div style={{ fontSize: 13.5, color: C.inkSoft, lineHeight: 1.7, marginTop: 2, marginBottom: 16, flex: 1 }}>{t.quote}</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <Avatar type={t.role} name={t.name} color={t.color} size={38} />
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 800, color: C.ink }}>{t.name}</div>
+                  <div style={{ fontSize: 11.5, color: C.mute, marginTop: 1 }}>{t.sub}</div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </Reveal>
+  );
+}
+
 function RoleSelect({ state, onSelectRole, onShowApplication }) {
   // 시드된 페르소나 fixed assignments
   const personas = [
@@ -1426,6 +1458,8 @@ function RoleSelect({ state, onSelectRole, onShowApplication }) {
             </Card>
           ))}
         </div>
+
+        <TestimonialBand />
 
         {/* 신청 페이지 진입 */}
         <Card padding={22} style={{ background: C.cream }}>
