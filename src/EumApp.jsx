@@ -1689,10 +1689,12 @@ function ChipSelect({ options, selected, onToggle, max, color = C.ink }) {
 // 9. YOUTH DASHBOARD
 // ============================================================================
 
-// 글로벌 벤치마크 — 매칭 추천 알고리즘 설명 (적합도 스코어)
+// 글로벌 벤치마크 — 매칭 추천 알고리즘 (애니메이션 적합도 분석)
 function MatchReasonCard({ user, senior, child }) {
   const shared = (user?.interests || []).filter((x) => (senior?.interests || []).includes(x));
   const score = Math.min(98, 80 + shared.length * 4 + 6);
+  const [analyzing, setAnalyzing] = useState(true);
+  useEffect(() => { const id = setTimeout(() => setAnalyzing(false), 1200); return () => clearTimeout(id); }, []);
   const reasons = [
     { icon: MapPin, text: '같은 우산동 · 도보 10분 거리' },
     { icon: Heart, text: shared.length ? ('공통 관심사 ' + shared.slice(0, 2).join('·')) : '생활 리듬·관심사가 서로 보완돼요' },
@@ -1700,29 +1702,95 @@ function MatchReasonCard({ user, senior, child }) {
     { icon: ShieldCheck, text: '세 사람 모두 4단계 안전검증 완료' },
   ];
   return (
-    <Card padding={20} style={{ marginBottom: 20 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14, flexWrap: 'wrap' }}>
-        <Sparkles size={17} color={C.brand} />
-        <div style={{ fontSize: 14, fontWeight: 800, color: C.ink }}>이 트리오를 추천한 이유</div>
-        <Badge color={C.mute} soft={C.muteSoft} size="sm">AI 매칭 추천</Badge>
-        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{ fontSize: 12, color: C.mute }}>적합도</div>
-          <div style={{ fontSize: 20, fontWeight: 800, color: C.success, fontFamily: SERIF_STACK }}>{score}%</div>
+    <Card padding={0} style={{ marginBottom: 20, overflow: 'hidden', border: '1px solid ' + C.brand + '22' }}>
+      <style>{`
+        @keyframes eumShimmer { 0% { background-position: -220px 0; } 100% { background-position: 220px 0; } }
+        @keyframes eumSparkle { 0%,100% { transform: scale(1) rotate(0deg); } 50% { transform: scale(1.22) rotate(14deg); } }
+      `}</style>
+      <div style={{ padding: '13px 20px', background: 'linear-gradient(120deg, ' + C.brand + '16, ' + C.peachSoft + ')', display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+        <span style={{ display: 'inline-flex', animation: 'eumSparkle 2.2s ease-in-out infinite' }}><Sparkles size={18} color={C.brand} /></span>
+        <div style={{ fontSize: 14, fontWeight: 800, color: C.ink }}>AI 매칭 분석</div>
+        <Badge color={C.brand} soft={C.brandSoft} size="sm">온디바이스 · API 미사용</Badge>
+        <span style={{ marginLeft: 'auto' }}>
+          {analyzing
+            ? <span style={{ fontSize: 12, fontWeight: 700, color: C.brand, background: 'linear-gradient(90deg, ' + C.brandSoft + ', #ffffff, ' + C.brandSoft + ')', backgroundSize: '220px 100%', animation: 'eumShimmer 1.1s linear infinite', padding: '4px 11px', borderRadius: 999, display: 'inline-block' }}>분석 중…</span>
+            : <Badge color={C.success} soft={C.successSoft} size="sm"><Check size={11} /> 분석 완료</Badge>}
+        </span>
+      </div>
+      <div style={{ padding: 20, display: 'flex', gap: 20, alignItems: 'center', flexWrap: 'wrap' }}>
+        <Ring value={analyzing ? 0 : score} max={100} size={106} stroke={11} color={C.brand} label={<CountUp value={analyzing ? 0 : score} suffix="%" />} sublabel="적합도" />
+        <div style={{ flex: 1, minWidth: 220 }}>
+          <div style={{ fontSize: 13.5, fontWeight: 700, color: C.ink, marginBottom: 10 }}>이 트리오를 추천한 이유</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+            {reasons.map((r, i) => {
+              const Icon = r.icon;
+              return (
+                <Reveal key={i} delay={400 + i * 140}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 11px', background: C.bg, borderRadius: 9 }}>
+                    <Icon size={14} color={C.brand} />
+                    <span style={{ fontSize: 12.5, color: C.inkSoft }}>{r.text}</span>
+                  </div>
+                </Reveal>
+              );
+            })}
+          </div>
         </div>
       </div>
-      <div style={{ height: 8, borderRadius: 999, background: C.muteSoft, overflow: 'hidden', marginBottom: 14 }}>
-        <div style={{ width: score + '%', height: '100%', borderRadius: 999, background: 'linear-gradient(90deg, ' + C.sage + ', ' + C.success + ')' }} />
+    </Card>
+  );
+}
+
+// 온디바이스 AI — 트리오 맞춤 활동 추천 (외부 API 미사용)
+function AICompanionCard({ senior, child }) {
+  const pool = useMemo(() => {
+    const ints = (senior?.interests || []);
+    const cn = child ? child.name : '아이';
+    const base = [
+      '어르신께 요즘 자주 쓰는 앱을 여쭤보고 사용법을 함께 정리해 보세요.',
+      '옛 동네 사진을 함께 보며 그때 이야기를 녹음해 기억 아카이브에 남겨보세요.',
+      cn + '와(과) 어르신이 함께 할 수 있는 보드게임 한 판 어때요?',
+      '어르신의 손글씨로 ' + cn + '에게 짧은 편지를 써보는 시간도 좋아요.',
+      '키오스크·병원 예약 앱을 실제 상황처럼 미리 연습해 보세요.',
+      '제철 음식 레시피를 어르신께 배우고 함께 장을 봐보세요.',
+    ];
+    const byInterest = {
+      '역사': '동네 역사 산책 코스를 어르신과 함께 정해보세요.',
+      '요리': '어르신의 손맛 레시피를 영상으로 기록해 보세요.',
+      '바둑': '어르신께 바둑 한 수 배워보는 건 어때요?',
+      '산책': '날씨 좋은 날, 가까운 공원 산책을 함께 해보세요.',
+      '꽃': '베란다 화분 가꾸기를 같이 해보세요.',
+      '드라마': '좋아하시는 드라마 이야기로 대화를 시작해 보세요.',
+      '독서': '같은 책을 나눠 읽고 한 문장씩 감상을 나눠보세요.',
+    };
+    const extra = ints.map((k) => byInterest[k]).filter(Boolean);
+    return [...extra, ...base];
+  }, [senior, child]);
+  const [seed, setSeed] = useState(0);
+  const picks = useMemo(() => {
+    const arr = [...pool];
+    for (let i = arr.length - 1; i > 0; i--) { const j = (i * 9301 + seed * 49297 + 7) % (i + 1); const t = arr[i]; arr[i] = arr[j]; arr[j] = t; }
+    return arr.slice(0, 3);
+  }, [pool, seed]);
+  return (
+    <Card padding={20} style={{ marginBottom: 20 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4, flexWrap: 'wrap' }}>
+        <Sparkles size={17} color={C.brand} />
+        <div style={{ fontSize: 14, fontWeight: 800, color: C.ink }}>AI 활동 도우미</div>
+        <Badge color={C.brand} soft={C.brandSoft} size="sm">온디바이스 추천</Badge>
+        <button onClick={() => setSeed((x) => x + 1)} style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 5, border: '1px solid ' + C.border, background: C.card, color: C.inkSoft, borderRadius: 9, padding: '6px 11px', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: FONT_STACK }}>
+          <Sparkles size={12} /> 다른 추천
+        </button>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 8 }}>
-        {reasons.map((r, i) => {
-          const Icon = r.icon;
-          return (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 11px', background: C.bg, borderRadius: 9 }}>
-              <Icon size={14} color={C.brand} />
-              <span style={{ fontSize: 12.5, color: C.inkSoft }}>{r.text}</span>
+      <div style={{ fontSize: 12.5, color: C.mute, marginBottom: 14 }}>트리오의 관심사를 바탕으로 오늘 함께하면 좋은 활동을 골라봤어요. (외부 API 없이 기기에서 바로 생성)</div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {picks.map((t, i) => (
+          <Reveal key={t + '-' + seed} delay={i * 120}>
+            <div style={{ display: 'flex', gap: 10, padding: 12, borderRadius: 11, background: C.brandBg, border: '1px solid ' + C.brand + '18' }}>
+              <div style={{ width: 24, height: 24, borderRadius: 7, background: C.brand, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 800, flexShrink: 0 }}>{i + 1}</div>
+              <div style={{ fontSize: 13, color: C.ink, lineHeight: 1.55 }}>{t}</div>
             </div>
-          );
-        })}
+          </Reveal>
+        ))}
       </div>
     </Card>
   );
@@ -1836,6 +1904,7 @@ function YouthApp({ state, user, dispatch, showToast }) {
           )}
 
           {match && <MatchReasonCard user={user} senior={senior} child={child} />}
+          {match && <AICompanionCard senior={senior} child={child} />}
 
           {/* 이번 달 목표 — 움직이는 도넛 인포그래픽 */}
           <Reveal>
