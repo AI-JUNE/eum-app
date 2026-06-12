@@ -1370,6 +1370,34 @@ function TestimonialBand() {
   );
 }
 
+// 발표용 — 랜딩 자주 묻는 질문(FAQ) 아코디언
+function FaqBand() {
+  const [open, setOpen] = useState(-1);
+  const faqs = [
+    { q: '누가 신청할 수 있나요?', a: '광주 광산구 우산동에 사시는 청소년부터 어르신까지, 그리고 양육가정 누구나 신청할 수 있어요. 약 5분이면 충분해요.' },
+    { q: '비용이 드나요?', a: '참여비는 전혀 없어요. 오히려 활동에 따라 광주상생카드와 봉사시간으로 보상을 받아요.' },
+    { q: '아이가 어른들과 만나는데 안전한가요?', a: '모든 참여자는 4단계 안전검증(면접·범죄경력·아동학대 전력 조회·추천인 확인)을 거치고, 대면 활동은 책임보험으로 보장돼요.' },
+    { q: '어떻게 매칭되나요?', a: '거주지·관심사·가능 시간·안전 요소를 분석해 청년·어르신·아이 3인 트리오로 연결해 드려요.' },
+  ];
+  return (
+    <div style={{ marginBottom: 36 }}>
+      <div style={{ textAlign: 'center', fontSize: 12, fontWeight: 700, color: C.brand, letterSpacing: '0.1em', marginBottom: 4 }}>자주 묻는 질문</div>
+      <div style={{ textAlign: 'center', fontSize: 13, color: C.mute, marginBottom: 16 }}>궁금한 점을 모았어요</div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, maxWidth: 680, margin: '0 auto' }}>
+        {faqs.map((f, i) => (
+          <div key={i} style={{ background: C.card, border: '1px solid ' + C.border, borderRadius: 12, overflow: 'hidden' }}>
+            <button onClick={() => setOpen(open === i ? -1 : i)} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: '15px 18px', border: 'none', background: 'transparent', cursor: 'pointer', fontFamily: FONT_STACK, textAlign: 'left' }}>
+              <span style={{ fontSize: 14, fontWeight: 700, color: C.ink }}>{f.q}</span>
+              <ChevronDown size={18} color={C.mute} style={{ transform: open === i ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+            </button>
+            {open === i && <div style={{ padding: '0 18px 16px', fontSize: 13, color: C.inkSoft, lineHeight: 1.65 }}>{f.a}</div>}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function RoleSelect({ state, onSelectRole, onShowApplication }) {
   // 시드된 페르소나 fixed assignments
   const personas = [
@@ -1460,6 +1488,7 @@ function RoleSelect({ state, onSelectRole, onShowApplication }) {
         </div>
 
         <TestimonialBand />
+        <FaqBand />
 
         {/* 신청 페이지 진입 */}
         <Card padding={22} style={{ background: C.cream }}>
@@ -2036,6 +2065,28 @@ function TrioTimelineCard({ activities, logs, state }) {
   );
 }
 
+// 청년 — 이번 주 AI 코칭 (온디바이스, 목표 기반 맞춤 제안)
+function WeekCoachCard({ monthHours }) {
+  const goal = 24;
+  const remain = Math.max(0, goal - monthHours);
+  const pct = Math.round(Math.min(1, monthHours / goal) * 100);
+  let msg, focus;
+  if (monthHours >= goal) { msg = '이번 달 목표를 이미 달성했어요. 정말 멋져요! 남은 기간은 어르신과의 깊은 대화에 집중해 보세요.'; focus = '관계 다지기'; }
+  else if (pct >= 50) { msg = '절반을 넘었어요. 이대로면 무난히 목표에 도착해요. 이번 주에 ' + Math.ceil(remain / 2) + '시간만 더 채워볼까요?'; focus = '디지털코칭'; }
+  else { msg = '아직 여유가 있어요. 이번 주 짧은 활동 한두 번이면 리듬이 잡혀요. 동네 미션부터 가볍게 시작해 봐요.'; focus = '동네 미션'; }
+  return (
+    <Card padding={20} style={{ marginBottom: 20, background: 'linear-gradient(135deg, ' + C.brandBg + ' 0%, ' + C.cream + ' 100%)', border: '1px solid ' + C.brand + '20' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8, flexWrap: 'wrap' }}>
+        <Sparkles size={17} color={C.brand} />
+        <div style={{ fontSize: 14, fontWeight: 800, color: C.ink }}>이번 주 AI 코칭</div>
+        <Badge color={C.brand} soft={C.brandSoft} size="sm">온디바이스</Badge>
+        <span style={{ marginLeft: 'auto', fontSize: 12, color: C.mute }}>추천 활동: <strong style={{ color: C.brand }}>{focus}</strong></span>
+      </div>
+      <div style={{ fontSize: 13.5, color: C.inkSoft, lineHeight: 1.6 }}>{msg}</div>
+    </Card>
+  );
+}
+
 function YouthApp({ state, user, dispatch, showToast }) {
   const [view, setView] = useState('dashboard');
   const match = state.matches.find((m) => m.youth_id === user.id);
@@ -2121,6 +2172,8 @@ function YouthApp({ state, user, dispatch, showToast }) {
               </div>
             </Card>
           </Reveal>
+
+          <WeekCoachCard monthHours={monthHours} />
 
           {/* Stats Row */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12, marginBottom: 20 }}>
@@ -2673,7 +2726,7 @@ function SeniorTalkCard() {
       <div style={{ fontSize: 22, fontWeight: 700, color: C.ink, lineHeight: 1.5, fontFamily: SERIF_STACK }}>{topics[idx]}</div>
       <div style={{ fontSize: 15, color: C.inkSoft, marginTop: 10 }}>청년·아이와 만나면 이 이야기로 시작해 보세요.</div>
       <div style={{ display: 'flex', gap: 10, marginTop: 16, flexWrap: 'wrap' }}>
-        <button onClick={() => { try { if (window.speechSynthesis) { window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(topics[idx]); u.lang = 'ko-KR'; u.rate = 0.92; window.speechSynthesis.speak(u); } } catch (e) {} }} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, border: '1px solid ' + C.lavender, background: C.card, color: C.lavender, borderRadius: 12, padding: '12px 18px', fontSize: 16, fontWeight: 700, cursor: 'pointer', fontFamily: FONT_STACK }}>
+        <button onClick={() => speakKo(topics[idx])} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, border: '1px solid ' + C.lavender, background: C.card, color: C.lavender, borderRadius: 12, padding: '12px 18px', fontSize: 16, fontWeight: 700, cursor: 'pointer', fontFamily: FONT_STACK }}>
           <Megaphone size={17} /> 읽어주기
         </button>
         <button onClick={() => setIdx((i) => (i + 1) % topics.length)} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, border: 'none', background: C.lavender, color: '#fff', borderRadius: 12, padding: '12px 18px', fontSize: 16, fontWeight: 700, cursor: 'pointer', fontFamily: FONT_STACK }}>
@@ -2682,6 +2735,28 @@ function SeniorTalkCard() {
       </div>
     </Card>
   );
+}
+
+// 자연스러운 한국어 음성 안내 — 기기 내 최적 보이스 선택 (외부 API 미사용)
+function speakKo(text, onEnd) {
+  try {
+    const synth = window.speechSynthesis;
+    if (!synth || !text) { if (onEnd) onEnd(); return; }
+    synth.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'ko-KR';
+    u.rate = 1.0;
+    u.pitch = 1.08;
+    if (onEnd) u.onend = onEnd;
+    const choose = () => {
+      const ko = synth.getVoices().filter((v) => (v.lang || '').toLowerCase().indexOf('ko') === 0);
+      const best = ko.find((v) => /google|natural|yuna|sora|nuri|heami|premium|female|여/i.test(v.name)) || ko[0];
+      if (best) u.voice = best;
+      synth.speak(u);
+    };
+    if (synth.getVoices().length) choose();
+    else { synth.onvoiceschanged = () => { synth.onvoiceschanged = null; choose(); }; }
+  } catch (e) { if (onEnd) onEnd(); }
 }
 
 // 어르신 접근성 — 음성 안내(브라우저 TTS) + 글씨 크게 (외부 API 미사용)
@@ -2695,13 +2770,9 @@ function AccessibilityCard({ readText }) {
   const speak = () => {
     try {
       if (!window.speechSynthesis) return;
-      if (speaking) { window.speechSynthesis.cancel(); setSpeaking(false); return; }
-      const u = new SpeechSynthesisUtterance(readText || '이음 화면입니다.');
-      u.lang = 'ko-KR'; u.rate = 0.92;
-      u.onend = () => setSpeaking(false);
-      window.speechSynthesis.cancel();
-      window.speechSynthesis.speak(u);
+      if (window.speechSynthesis.speaking) { window.speechSynthesis.cancel(); setSpeaking(false); return; }
       setSpeaking(true);
+      speakKo(readText || '이음 화면입니다.', () => setSpeaking(false));
     } catch (e) { setSpeaking(false); }
   };
   return (
@@ -2713,6 +2784,39 @@ function AccessibilityCard({ readText }) {
         <button onClick={toggleBig} style={{ flex: 1, minWidth: 150, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8, border: '1px solid ' + C.blue, background: big ? C.blue : C.card, color: big ? '#fff' : C.blue, borderRadius: 12, padding: '14px 16px', fontSize: 17, fontWeight: 700, cursor: 'pointer', fontFamily: FONT_STACK }}>
           <Search size={20} /> {big ? '글씨 보통으로' : '글씨 크게'}
         </button>
+      </div>
+    </Card>
+  );
+}
+
+// 코디 — 신청자 검증 파이프라인 현황 (온디바이스)
+function CoordPipeline({ state }) {
+  const a = state.applications || [];
+  const stages = [
+    { key: 'screening', label: '서류·안전검증 진행', color: C.amber },
+    { key: 'verified', label: '검증 완료·매칭 대기', color: C.blue },
+    { key: 'completed', label: '매칭 완료', color: C.success },
+  ];
+  const counts = stages.map((st) => ({ ...st, n: a.filter((x) => x.status === st.key).length }));
+  const total = a.length || 1;
+  const rejected = a.filter((x) => x.status === 'rejected').length;
+  return (
+    <Card padding={20} style={{ marginBottom: 18 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14, flexWrap: 'wrap' }}>
+        <ClipboardCheck size={18} color={C.brand} />
+        <div style={{ fontSize: 14, fontWeight: 800, color: C.ink }}>신청자 검증 파이프라인</div>
+        <span style={{ marginLeft: 'auto', fontSize: 12, color: C.mute }}>전체 {a.length}명 · 반려 {rejected}명</span>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        {counts.map((st, i) => (
+          <div key={i}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12.5, marginBottom: 5 }}>
+              <span style={{ color: C.inkSoft, fontWeight: 600 }}>{st.label}</span>
+              <span style={{ color: st.color, fontWeight: 800 }}>{st.n}명</span>
+            </div>
+            <AnimatedBar value={st.n} max={total} color={st.color} height={8} delay={i * 120} />
+          </div>
+        ))}
       </div>
     </Card>
   );
@@ -2773,6 +2877,7 @@ function SeniorApp({ state, user, dispatch, showToast }) {
                   <MapPin size={18} /> {nextActivity.location}
                 </div>
                 <div style={{ fontSize: 17, color: C.inkSoft, marginTop: 6 }}>{nextActivity.type} · {nextActivity.duration_hours}시간</div>
+                <button onClick={() => speakKo('다음 만남은 ' + fmtRelativeDate(nextActivity.scheduled_at) + ', ' + nextActivity.location + '에서 ' + youth.name + ' 청년과 함께해요.')} style={{ marginTop: 12, display: 'inline-flex', alignItems: 'center', gap: 7, border: '1px solid ' + C.lavender, background: C.card, color: C.lavender, borderRadius: 10, padding: '10px 16px', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: FONT_STACK }}><Megaphone size={16} /> 음성으로 듣기</button>
                 <div style={{ marginTop: 14, paddingTop: 14, borderTop: `1px dashed ${C.border}` }}>
                   <InsuranceBadge size="md" />
                 </div>
@@ -3572,6 +3677,7 @@ function CoordOverview({ state, setView }) {
 
       <CoordAiInsights state={state} />
       <CoordSentiment state={state} />
+      <CoordPipeline state={state} />
 
       {/* 알림 영역 */}
       {(kpis.openIncidents > 0 || kpis.pendingApps > 0 || kpis.pendingLogs > 5) && (
