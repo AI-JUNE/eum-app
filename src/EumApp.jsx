@@ -1294,6 +1294,50 @@ function LoopInfographic() {
   );
 }
 
+// 발표용 — 랜딩 임팩트 지표 (시드 데이터 기반, 애니메이션 카운트업)
+function ImpactBand({ state }) {
+  const d = useMemo(() => {
+    const p = state.participants || [];
+    const matches = (state.matches || []).filter((m) => m.status === 'active').length;
+    const hours = (state.activity_logs || []).filter((l) => l.approved).reduce((s, l) => s + (l.hours || 0), 0);
+    const surveys = state.surveys || [];
+    const sat = surveys.length ? (surveys.reduce((s, x) => s + (x.satisfaction || 0), 0) / surveys.length) : 0;
+    const cont = surveys.length ? Math.round(surveys.filter((x) => x.would_continue).length / surveys.length * 100) : 0;
+    const settled = (state.settlements || []).filter((s) => s.status === 'issued' || s.status === 'paid').reduce((s, x) => s + (x.amount_krw || x.amount || 0), 0);
+    return { people: p.length, matches, hours, sat: sat.toFixed(1), cont, settled };
+  }, [state]);
+  const tiles = [
+    { icon: Users, color: C.sage, label: '참여 이웃', node: <CountUp value={d.people} suffix="명" /> },
+    { icon: Heart, color: C.brand, label: '활성 트리오', node: <CountUp value={d.matches} suffix="쌍" /> },
+    { icon: Clock, color: C.lavender, label: '누적 활동시간', node: <CountUp value={d.hours} suffix="시간" /> },
+    { icon: Star, color: C.gold, label: '만족도', node: <span>{d.sat}<span style={{ fontSize: 14, color: C.mute }}> / 5.0</span></span> },
+    { icon: TrendingUp, color: C.success, label: '지속의향', node: <CountUp value={d.cont} suffix="%" /> },
+    { icon: Wallet, color: C.gold, label: '누적 보상', node: <span>{krw(d.settled)}</span> },
+  ];
+  return (
+    <Reveal>
+      <div style={{ marginBottom: 28 }}>
+        <div style={{ textAlign: 'center', fontSize: 12, fontWeight: 700, color: C.brand, letterSpacing: '0.1em', marginBottom: 4 }}>숫자로 보는 이음</div>
+        <div style={{ textAlign: 'center', fontSize: 13, color: C.mute, marginBottom: 16 }}>광주 광산구 우산동 1차 파일럿 기준</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12 }}>
+          {tiles.map((t, i) => {
+            const Icon = t.icon;
+            return (
+              <div key={i} style={{ background: C.card, border: '1px solid ' + C.border, borderRadius: 14, padding: '18px 16px', textAlign: 'center' }}>
+                <div style={{ width: 36, height: 36, borderRadius: 10, background: t.color + '18', color: t.color, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 10px' }}>
+                  <Icon size={18} />
+                </div>
+                <div style={{ fontSize: 24, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK, letterSpacing: '-0.02em' }}>{t.node}</div>
+                <div style={{ fontSize: 12, color: C.mute, marginTop: 4 }}>{t.label}</div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </Reveal>
+  );
+}
+
 function RoleSelect({ state, onSelectRole, onShowApplication }) {
   // 시드된 페르소나 fixed assignments
   const personas = [
@@ -1346,6 +1390,8 @@ function RoleSelect({ state, onSelectRole, onShowApplication }) {
             <Badge color={C.success} soft={C.successSoft} size="md"><UserCheck size={13} /> 4단계 안전 검증</Badge>
           </div>
         </div>
+
+        <ImpactBand state={state} />
 
         {/* 데모 로그인 안내 */}
         <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, padding: '18px 22px', marginBottom: 24, display: 'flex', alignItems: 'center', gap: 14, boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
