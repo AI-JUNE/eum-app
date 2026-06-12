@@ -433,6 +433,35 @@ function Badge({ children, color = C.mute, soft = C.muteSoft, size = 'sm' }) {
   );
 }
 
+// 글로벌 벤치마크 — 일본 '후레아이 깃푸(Fureai Kippu)' 시간은행 모델
+function TimeBankCard({ hours = 0, accent = C.brand }) {
+  return (
+    <Card padding={22} style={{ marginBottom: 20, background: 'linear-gradient(135deg, ' + C.brandBg + ' 0%, ' + C.cream + ' 100%)', border: '1px solid ' + C.brand + '22' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6, flexWrap: 'wrap' }}>
+        <Clock size={16} color={accent} />
+        <div style={{ fontSize: 13, fontWeight: 800, color: accent }}>이음 타임뱅크</div>
+        <Badge color={C.mute} soft={C.muteSoft} size="sm">일본 후레아이깃푸 모델</Badge>
+      </div>
+      <div style={{ fontSize: 30, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK }}>{hours.toFixed(1)}<span style={{ fontSize: 16, fontWeight: 600, color: C.mute }}> 시간 적립</span></div>
+      <div style={{ fontSize: 12.5, color: C.inkSoft, marginTop: 6, lineHeight: 1.55 }}>이웃을 도운 시간이 신뢰로 쌓입니다. 적립한 시간은 미래의 나 또는 가족이 돌봄을 받을 때 사용하거나, 다른 세대에게 선물할 수 있습니다.</div>
+      <div style={{ display: 'flex', gap: 8, marginTop: 14 }}>
+        <div style={{ flex: 1, textAlign: 'center', padding: '10px 0', background: C.card, borderRadius: 10, border: '1px solid ' + C.border }}>
+          <div style={{ fontSize: 11, color: C.mute }}>이월 가능</div>
+          <div style={{ fontSize: 15, fontWeight: 800, color: C.ink }}>{hours.toFixed(1)}h</div>
+        </div>
+        <div style={{ flex: 1, textAlign: 'center', padding: '10px 0', background: C.card, borderRadius: 10, border: '1px solid ' + C.border }}>
+          <div style={{ fontSize: 11, color: C.mute }}>가족 선물</div>
+          <div style={{ fontSize: 15, fontWeight: 800, color: C.ink }}>가능</div>
+        </div>
+        <div style={{ flex: 1, textAlign: 'center', padding: '10px 0', background: C.card, borderRadius: 10, border: '1px solid ' + C.border }}>
+          <div style={{ fontSize: 11, color: C.mute }}>신뢰 등급</div>
+          <div style={{ fontSize: 15, fontWeight: 800, color: C.success }}>우수</div>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
 // 멘토 피드백① — 어르신 '첫 신뢰의 허들' 대응: 지자체 공인 인증 발신 표시
 function OfficialSenderBadge({ size = 'sm', style = {} }) {
   const fs = size === 'lg' ? 13 : size === 'md' ? 12 : 11;
@@ -446,6 +475,7 @@ function OfficialSenderBadge({ size = 'sm', style = {} }) {
       border: `1px solid ${C.blue}33`, ...style,
     }}>
       <ShieldCheck size={ic} /> 광주광역시 인증 발신
+      <span style={{ fontSize: fs - 1, fontWeight: 800, background: C.amber, color: '#fff', padding: '1px 6px', borderRadius: 999, marginLeft: 3 }}>예정</span>
     </span>
   );
 }
@@ -463,6 +493,7 @@ function InsuranceBadge({ size = 'sm', style = {} }) {
       border: `1px solid ${C.success}33`, ...style,
     }}>
       <ShieldCheck size={ic} /> 활동 중 돌봄 책임보험 자동적용
+      <span style={{ fontSize: fs - 1, fontWeight: 800, background: C.amber, color: '#fff', padding: '1px 6px', borderRadius: 999, marginLeft: 3 }}>예정</span>
     </span>
   );
 }
@@ -1132,7 +1163,7 @@ function Sidebar({ role, currentView, onNavigate, onLogout, userName, dataCount 
       position: 'sticky', top: 0,
     }}>
       <div style={{ padding: '22px 20px 18px', borderBottom: `1px solid ${C.borderSoft}` }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 9, cursor: 'pointer' }} onClick={() => onNavigate('overview')} role="button" aria-label="대시보드로">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 9, cursor: 'pointer' }} onClick={() => onLogout()} role="button" aria-label="처음으로">
           <div style={{ borderRadius: 9, boxShadow: `0 2px 8px ${C.brand}40`, display: 'flex' }}>
             <EumLogo size={32} />
           </div>
@@ -1259,6 +1290,34 @@ function RoleSelect({ state, onSelectRole, onShowApplication }) {
             <Badge color={C.gold} soft={C.goldSoft} size="md">중년·서포터</Badge>
             <Badge color={C.lavender} soft={C.lavenderSoft} size="md">어르신</Badge>
             <Badge color={C.peach} soft={C.peachSoft} size="md">양육가정·아동</Badge>
+          </div>
+        </div>
+
+        {/* 3세대 선순환 + 신뢰 지표 (글로벌 사례 벤치마크) */}
+        <div style={{ marginBottom: 28 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
+            {[
+              { label: '청년', sub: '재능·디지털', color: C.sage, soft: C.sageSoft },
+              { label: '어르신', sub: '지혜·돌봄', color: C.lavender, soft: C.lavenderSoft },
+              { label: '아동', sub: '활력·미래', color: C.peach, soft: C.peachSoft },
+            ].map((n) => (
+              <React.Fragment key={n.label}>
+                <div style={{ background: n.soft, color: n.color, borderRadius: 14, padding: '11px 16px', textAlign: 'center', minWidth: 88, border: '1px solid ' + n.color + '22' }}>
+                  <div style={{ fontSize: 15, fontWeight: 800 }}>{n.label}</div>
+                  <div style={{ fontSize: 11, marginTop: 2, opacity: 0.8 }}>{n.sub}</div>
+                </div>
+                <ArrowRight size={18} color={C.mute} />
+              </React.Fragment>
+            ))}
+            <div style={{ background: C.brandSoft, color: C.brand, borderRadius: 14, padding: '11px 16px', textAlign: 'center', minWidth: 88, border: '1px solid ' + C.brand + '33' }}>
+              <div style={{ fontSize: 15, fontWeight: 800 }}>다시 청년</div>
+              <div style={{ fontSize: 11, marginTop: 2, opacity: 0.85 }}>선순환</div>
+            </div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, flexWrap: 'wrap' }}>
+            <Badge color={C.blue} soft={C.blueSoft} size="md"><ShieldCheck size={13} /> 광주광역시 통합돌봄 연계</Badge>
+            <Badge color={C.gold} soft={C.goldSoft} size="md"><Wallet size={13} /> 광주상생카드·봉사시간 보상</Badge>
+            <Badge color={C.success} soft={C.successSoft} size="md"><UserCheck size={13} /> 4단계 안전 검증</Badge>
           </div>
         </div>
 
@@ -2152,6 +2211,8 @@ function SeniorApp({ state, user, dispatch, showToast }) {
             <div style={{ fontSize: 16, color: C.inkSoft, marginTop: 10 }}>{mySettlements.length}회 정산 완료</div>
           </Card>
 
+          <TimeBankCard hours={myActivities.filter(a => a.status === 'completed').reduce((s, a) => s + (a.duration_hours || 0), 0)} accent={C.lavender} />
+
           {/* SOS 버튼 */}
           <SeniorSosCard user={user} dispatch={dispatch} showToast={showToast} match={match} />
         </>
@@ -2285,7 +2346,7 @@ function ConsumerLayout({ role, view, setView, user, dispatch, state, children }
       <div style={{ width: '100%', maxWidth: isSenior ? 840 : 700, minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'transparent', position: 'relative' }}>
         {/* 상단 앱바 */}
         <div style={{ position: 'sticky', top: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: isSenior ? '15px 22px' : '12px 18px', background: 'rgba(250,247,242,0.82)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderBottom: `1px solid ${C.borderSoft}` }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 9, cursor: 'pointer' }} onClick={() => setView(items[0]?.id || 'dashboard')} role="button" aria-label="홈으로">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 9, cursor: 'pointer' }} onClick={() => dispatch({ type: 'LOGOUT' })} role="button" aria-label="처음으로">
             <div style={{ display: 'flex', borderRadius: 8, boxShadow: `0 2px 8px ${C.brand}33` }}><EumLogo size={isSenior ? 34 : 28} /></div>
             <div>
               <div style={{ fontSize: isSenior ? 17 : 15, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK, letterSpacing: '-0.02em', lineHeight: 1.1 }}>이음</div>
@@ -2346,7 +2407,7 @@ function Layout({ role, view, setView, user, dispatch, children, state }) {
         <div style={{ position: 'sticky', top: 0, zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '11px 16px', background: 'rgba(250,247,242,0.92)', backdropFilter: 'blur(12px)', borderBottom: `1px solid ${C.borderSoft}` }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <button onClick={() => setDrawer(true)} aria-label="메뉴" style={{ display: 'flex', border: `1px solid ${C.border}`, background: C.card, borderRadius: 10, padding: 8, cursor: 'pointer', color: C.ink }}><Menu size={18} /></button>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }} onClick={() => setView('overview')}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }} onClick={() => handleLogout()}>
               <EumLogo size={26} />
               <span style={{ fontSize: 15, fontWeight: 800, fontFamily: SERIF_STACK, color: C.ink }}>이음 <span style={{ fontSize: 11, color: C.mute, fontWeight: 600 }}>관리자</span></span>
             </div>
