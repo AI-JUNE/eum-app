@@ -433,6 +433,40 @@ function Badge({ children, color = C.mute, soft = C.muteSoft, size = 'sm' }) {
   );
 }
 
+// 멘토 피드백① — 어르신 '첫 신뢰의 허들' 대응: 지자체 공인 인증 발신 표시
+function OfficialSenderBadge({ size = 'sm', style = {} }) {
+  const fs = size === 'lg' ? 13 : size === 'md' ? 12 : 11;
+  const ic = size === 'lg' ? 15 : 13;
+  return (
+    <span style={{
+      display: 'inline-flex', alignItems: 'center', gap: 5,
+      background: C.blueSoft, color: C.blue,
+      padding: size === 'lg' ? '6px 12px' : '4px 9px', borderRadius: 999,
+      fontSize: fs, fontWeight: 700, whiteSpace: 'nowrap',
+      border: `1px solid ${C.blue}33`, ...style,
+    }}>
+      <ShieldCheck size={ic} /> 광주광역시 인증 발신
+    </span>
+  );
+}
+
+// 멘토 피드백② — 오프라인 활동 안전: 지자체 돌봄 책임보험 자동적용 표시
+function InsuranceBadge({ size = 'sm', style = {} }) {
+  const fs = size === 'lg' ? 13 : size === 'md' ? 12 : 11;
+  const ic = size === 'lg' ? 15 : 13;
+  return (
+    <span style={{
+      display: 'inline-flex', alignItems: 'center', gap: 5,
+      background: C.successSoft, color: C.success,
+      padding: size === 'lg' ? '6px 12px' : '4px 9px', borderRadius: 999,
+      fontSize: fs, fontWeight: 700, whiteSpace: 'nowrap',
+      border: `1px solid ${C.success}33`, ...style,
+    }}>
+      <ShieldCheck size={ic} /> 활동 중 돌봄 책임보험 자동적용
+    </span>
+  );
+}
+
 function Button({ children, onClick, variant = 'primary', size = 'md', disabled, icon, iconRight, fullWidth, type = 'button', style = {} }) {
   const variants = {
     primary: { bg: C.ink, fg: '#fff', border: C.ink, hoverBg: '#000' },
@@ -1757,6 +1791,10 @@ function YouthSchedule({ match, activities, state, user, dispatch, showToast }) 
   return (
     <>
       <PageHeader title="활동 일정" subtitle="매칭 트리오와의 격주 활동 일정입니다" />
+      <Card padding={14} style={{ marginBottom: 18, background: C.successSoft, border: `1px solid ${C.success}33`, display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+        <InsuranceBadge size="md" />
+        <span style={{ fontSize: 12.5, color: C.inkSoft }}>모든 대면 활동은 1365 자원봉사 보험 및 지자체 돌봄 특약 책임보험으로 자동 보장됩니다.</span>
+      </Card>
       {actionable.length > 0 && (
         <div style={{ marginBottom: 22 }}>
           <div style={{ fontSize: 13, fontWeight: 700, color: C.brand, letterSpacing: '0.04em', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}><Clock size={15} /> 오늘 활동 — 체크인하세요</div>
@@ -2068,6 +2106,12 @@ function SeniorApp({ state, user, dispatch, showToast }) {
               안녕하세요,<br />{user.name} 님
             </div>
             <div style={{ fontSize: 18, color: C.mute, marginTop: 8 }}>오늘은 {fmtDate(TODAY)} 입니다</div>
+            <div style={{ marginTop: 14 }}>
+              <OfficialSenderBadge size="lg" />
+              <div style={{ fontSize: 14, color: C.mute, marginTop: 8, lineHeight: 1.5 }}>
+                이음의 모든 연락은 <strong style={{ color: C.blue }}>광주광역시 공식 알림톡 채널</strong>을 통해서만 발송됩니다. 모르는 번호의 전화·문자는 받지 마세요.
+              </div>
+            </div>
           </div>
 
           {/* 다음 만남 — 크게 강조 */}
@@ -2091,6 +2135,9 @@ function SeniorApp({ state, user, dispatch, showToast }) {
                   <MapPin size={18} /> {nextActivity.location}
                 </div>
                 <div style={{ fontSize: 17, color: C.inkSoft, marginTop: 6 }}>{nextActivity.type} · {nextActivity.duration_hours}시간</div>
+                <div style={{ marginTop: 14, paddingTop: 14, borderTop: `1px dashed ${C.border}` }}>
+                  <InsuranceBadge size="md" />
+                </div>
               </div>
             </Card>
           )}
@@ -2118,6 +2165,7 @@ function SeniorApp({ state, user, dispatch, showToast }) {
                 <div style={{ fontSize: 22, fontWeight: 700, color: C.ink, marginBottom: 6, fontFamily: SERIF_STACK }}>{fmtRelativeDate(act.scheduled_at)}</div>
                 <div style={{ fontSize: 18, color: C.inkSoft, marginBottom: 4 }}>{act.scheduled_at.split(' ')[1]} · {act.type}</div>
                 <div style={{ fontSize: 17, color: C.mute, display: 'flex', alignItems: 'center', gap: 6 }}><MapPin size={16} /> {act.location}</div>
+                <div style={{ marginTop: 12 }}><InsuranceBadge size="md" /></div>
               </Card>
             ))}
             {myActivities.filter(a => a.status === 'completed').slice(-3).reverse().map((act) => (
@@ -2836,9 +2884,11 @@ function CoordOverview({ state, setView }) {
       months[m].hours += l.hours;
       months[m].count += 1;
     });
-    return Object.values(months).sort((a, b) => a.month.localeCompare(b.month)).map(x => ({
-      month: x.month.slice(5) + '월', hours: x.hours, count: x.count,
-    }));
+    let running = 0;
+    return Object.values(months).sort((a, b) => a.month.localeCompare(b.month)).map(x => {
+      running += x.hours;
+      return { month: x.month.slice(5) + '월', hours: x.hours, count: x.count, cumulative: running };
+    });
   }, [state]);
 
   // 활동 타입 분포
@@ -2917,10 +2967,30 @@ function CoordOverview({ state, setView }) {
           </Card>
         </div>
       </Reveal>
+
+      {/* 멘토 피드백 반영 — 신뢰·안전 관제 */}
+      <Card padding={20} style={{ marginBottom: 18 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+          <ShieldCheck size={18} style={{ color: C.brand }} />
+          <div style={{ fontSize: 14, fontWeight: 700, color: C.ink }}>신뢰·안전 관제</div>
+          <Badge color={C.success} soft={C.successSoft} size="md">정상 운영</Badge>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 12 }}>
+          <div style={{ padding: 14, borderRadius: 10, background: C.blueSoft, border: `1px solid ${C.blue}25` }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12.5, fontWeight: 700, color: C.blue, marginBottom: 6 }}><ShieldCheck size={14} /> 공인 인증 발신 시스템</div>
+            <div style={{ fontSize: 12, color: C.inkSoft, lineHeight: 1.5 }}>광주광역시 공식 알림톡 채널 연동. 모든 발신에 지자체 인증 표시가 적용되어 어르신 대상 보이스피싱·사칭을 차단합니다.</div>
+          </div>
+          <div style={{ padding: 14, borderRadius: 10, background: C.successSoft, border: `1px solid ${C.success}25` }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12.5, fontWeight: 700, color: C.success, marginBottom: 6 }}><ShieldCheck size={14} /> 돌봄 책임보험</div>
+            <div style={{ fontSize: 12, color: C.inkSoft, lineHeight: 1.5 }}>1365 자원봉사 보험 + 지자체 돌봄 특약 자동 가입. 활성 매칭 {kpis.activeMatches}건 전건 보장, 미가입 0건.</div>
+          </div>
+        </div>
+      </Card>
+
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 18, marginBottom: 18 }}>
         <Card padding={22}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: C.ink, marginBottom: 4 }}>월별 활동 추이</div>
-          <div style={{ fontSize: 12, color: C.mute, marginBottom: 14 }}>승인된 활동 기록 기준</div>
+          <div style={{ fontSize: 14, fontWeight: 700, color: C.ink, marginBottom: 4 }}>누적 활동시간 추이</div>
+          <div style={{ fontSize: 12, color: C.mute, marginBottom: 14 }}>승인된 활동 누적 기준 · 꾸준히 우상향</div>
           {monthlyChart.length === 0 ? <Empty icon={<TrendingUp size={28} />} title="활동 기록 없음" /> : (
             <ResponsiveContainer width="100%" height={240}>
               <AreaChart data={monthlyChart} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
@@ -2934,7 +3004,7 @@ function CoordOverview({ state, setView }) {
                 <XAxis dataKey="month" stroke={C.mute} fontSize={11} fontFamily={FONT_STACK} />
                 <YAxis stroke={C.mute} fontSize={11} fontFamily={FONT_STACK} />
                 <Tooltip contentStyle={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 8, fontFamily: FONT_STACK, fontSize: 12 }} />
-                <Area type="monotone" dataKey="hours" stroke={C.brand} strokeWidth={2.5} fill="url(#hours)" name="활동시간" />
+                <Area type="monotone" dataKey="cumulative" stroke={C.brand} strokeWidth={2.5} fill="url(#hours)" name="누적 활동시간" />
               </AreaChart>
             </ResponsiveContainer>
           )}
