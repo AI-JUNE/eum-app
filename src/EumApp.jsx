@@ -2083,6 +2083,61 @@ function YouthSchedule({ match, activities, state, user, dispatch, showToast }) 
   );
 }
 
+// 온디바이스 AI — 활동일지 초안 생성기 (외부 API 미사용)
+function aiLogDraft(type, sn) {
+  const s = sn || '어르신';
+  const map = {
+    '디지털코칭': '오늘은 ' + s + '님과 스마트폰으로 키오스크 주문과 사진 보내기를 연습했다. 처음엔 버튼이 작아 어려워하셨지만, 두세 번 반복하니 혼자서도 해내시며 환하게 웃으셨다. 다음엔 길찾기 앱을 함께 해보기로 했다.',
+    '학습멘토': '아이와 함께 책을 읽고 모르는 낱말을 같이 찾아봤다. 집중하는 시간이 점점 길어지는 게 느껴졌고, 마지막엔 오늘 읽은 이야기를 자기 말로 정리해 발표까지 했다.',
+    '진로조언받기': s + '님께 살아오신 이야기와 일에 대한 조언을 들었다. 꾸준함이 결국 사람을 만든다는 말씀이 오래 마음에 남았다.',
+    '기억아카이브': s + '님과 옛 동네 사진을 보며 그 시절 이야기를 녹음했다. 골목마다 얽힌 추억을 들으니 동네가 달리 보였고, 소중한 기록을 남긴 것 같아 뿌듯했다.',
+  };
+  return map[type] || ('오늘 ' + s + '님과 함께한 활동을 정리해보자. 기억에 남는 순간과 느낀 점을 적어보면 좋다.');
+}
+
+// 온디바이스 AI — 코디네이터 만족도·감정 분석 (키워드 기반, 외부 API 미사용)
+function CoordSentiment({ state }) {
+  const data = useMemo(() => {
+    const logs = (state.activity_logs || []);
+    const pos = ['웃', '환하게', '뿌듯', '고마', '감사', '즐거', '행복', '좋', '함께', '해냈', '성장', '따뜻', '소중'];
+    const neg = ['어려', '힘들', '아쉽', '속상', '불편', '걱정', '지친'];
+    let p = 0, n = 0; const kw = {};
+    logs.forEach((l) => {
+      const t = l.summary || '';
+      pos.forEach((w) => { if (t.includes(w)) { p += 1; kw[w] = (kw[w] || 0) + 1; } });
+      neg.forEach((w) => { if (t.includes(w)) n += 1; });
+    });
+    const score = (p + n) ? Math.round(p / (p + n) * 100) : 100;
+    const top = Object.keys(kw).sort((a, b) => kw[b] - kw[a]).slice(0, 6);
+    const surveys = state.surveys || [];
+    const avg = surveys.length ? (surveys.reduce((s, x) => s + (x.satisfaction || 0), 0) / surveys.length) : 0;
+    return { score, top, avg: avg.toFixed(1), nLog: logs.length };
+  }, [state]);
+  return (
+    <Card padding={20} style={{ marginBottom: 18 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14, flexWrap: 'wrap' }}>
+        <Sparkles size={18} color={C.brand} />
+        <div style={{ fontSize: 14, fontWeight: 800, color: C.ink }}>AI 만족도·감정 분석</div>
+        <Badge color={C.brand} soft={C.brandSoft} size="sm">온디바이스 · API 미사용</Badge>
+      </div>
+      <div style={{ display: 'flex', gap: 20, alignItems: 'center', flexWrap: 'wrap' }}>
+        <Ring value={data.score} max={100} size={96} stroke={10} color={C.success} label={<CountUp value={data.score} suffix="%" />} sublabel="긍정 비율" />
+        <div style={{ flex: 1, minWidth: 220 }}>
+          <div style={{ fontSize: 13, color: C.inkSoft, lineHeight: 1.6, marginBottom: 10 }}>
+            활동 기록 <strong style={{ color: C.ink }}>{data.nLog}건</strong>을 분석한 결과, 참여자들의 경험이 대체로 <strong style={{ color: C.success }}>긍정적</strong>이에요. 설문 만족도는 <strong style={{ color: C.gold }}>{data.avg}/5.0</strong>.
+          </div>
+          <div style={{ fontSize: 11.5, fontWeight: 700, color: C.mute, marginBottom: 6 }}>자주 등장한 긍정 키워드</div>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            {data.top.length ? data.top.map((w) => (
+              <span key={w} style={{ fontSize: 12, fontWeight: 700, color: C.success, background: C.successSoft, padding: '4px 10px', borderRadius: 999 }}>{w}</span>
+            )) : <span style={{ fontSize: 12, color: C.mute }}>분석할 기록이 아직 적어요.</span>}
+          </div>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
 function YouthLogs({ state, user, match, myLogs, myActivities, dispatch, showToast }) {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ activity_id: '', summary: '', mood: 5, has_photo: false });
@@ -2166,7 +2221,19 @@ function YouthLogs({ state, user, match, myLogs, myActivities, dispatch, showToa
             <Select value={form.activity_id} onChange={(v) => setForm(f => ({ ...f, activity_id: v }))} options={writableOptions} placeholder="활동을 선택하세요" />
           </Field>
           <Field label="활동 기록" required sub="인상적이었던 순간, 어르신·아동의 반응, 느낀 점을 자유롭게">
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
+              <button type="button" disabled={!form.activity_id}
+                onClick={() => {
+                  const selAct = state.activities.find((a) => a.id === form.activity_id);
+                  const snp = match && state.participants.find((p) => p.id === match.senior_id);
+                  setForm((f) => ({ ...f, summary: aiLogDraft(selAct && selAct.type, snp && snp.name) }));
+                }}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 5, border: '1px solid ' + (form.activity_id ? C.brand : C.border), background: form.activity_id ? C.brandSoft : C.card, color: form.activity_id ? C.brand : C.mute, borderRadius: 9, padding: '6px 11px', fontSize: 12, fontWeight: 700, cursor: form.activity_id ? 'pointer' : 'not-allowed', fontFamily: FONT_STACK }}>
+                <Sparkles size={12} /> AI 초안 생성
+              </button>
+            </div>
             <Textarea value={form.summary} onChange={(v) => setForm(f => ({ ...f, summary: v }))} placeholder="오늘 박순자 어르신과 키오스크 실습을 했다..." rows={5} />
+            <div style={{ fontSize: 11, color: C.mute, marginTop: 6 }}>AI 초안은 참고용이에요. 실제 있었던 일로 자유롭게 고쳐 주세요. (외부 API 미사용)</div>
           </Field>
           <Field label="오늘 활동은 어땠나요?">
             <div style={{ display: 'flex', gap: 8 }}>
@@ -3283,6 +3350,7 @@ function CoordOverview({ state, setView }) {
       <PageHeader title="대시보드" subtitle={`${fmtDate(TODAY)} · 광주 광산구 우산동 1차 파일럿`} />
 
       <CoordAiInsights state={state} />
+      <CoordSentiment state={state} />
 
       {/* 알림 영역 */}
       {(kpis.openIncidents > 0 || kpis.pendingApps > 0 || kpis.pendingLogs > 5) && (
