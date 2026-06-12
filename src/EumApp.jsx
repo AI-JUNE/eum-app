@@ -221,7 +221,7 @@ const SEED_DATA = {
 // 3. STORAGE
 // ============================================================================
 
-const STORAGE_KEY = 'eum:appdata:v1';
+const STORAGE_KEY = 'eum:appdata:v2';
 
 // 시드/스키마 불일치 보정: 활동 date/time, 로그 date, 자녀 guardian_id 채우기
 function normalizeState(s) {
@@ -985,7 +985,7 @@ function CheckInOutCard({ activity, user, dispatch, showToast, color = C.sage })
   const submitFeedback = () => {
     dispatch({ type: 'ADD_LOG', payload: { id: uid('log'), activity_id: activity.id, participant_id: user.id, hours: computedHours || activity.actual_hours || activity.duration_hours || 1, summary: summary || '활동을 완료했습니다.', approved: false, has_photo: false, mood } });
     setFeedbackOpen(false);
-    showToast && showToast({ type: 'success', title: '후기 제출 완료', message: '코디 승인 후 정산에 반영됩니다.' });
+    showToast && showToast({ type: 'success', title: '후기 제출 완료', message: '코디가 승인하면 정산에 반영돼요.' });
   };
 
   const elapsed = activity.checkin_at ? Math.max(0, Date.now() - new Date(activity.checkin_at).getTime()) : 0;
@@ -2257,7 +2257,7 @@ function YouthApp({ state, user, dispatch, showToast }) {
             <div style={{ padding: '16px 20px', borderBottom: `1px solid ${C.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
                 <div style={{ fontSize: 15, fontWeight: 700, color: C.ink }}>최근 활동 기록</div>
-                <div style={{ fontSize: 12, color: C.mute, marginTop: 2 }}>코디 승인 후 정산에 반영됩니다</div>
+                <div style={{ fontSize: 12, color: C.mute, marginTop: 2 }}>코디가 승인하면 정산에 반영돼요</div>
               </div>
               <Button variant="primary" size="sm" icon={<PenLine size={14} />} onClick={() => setView('logs')}>새 기록 작성</Button>
             </div>
@@ -2473,7 +2473,7 @@ function YouthLogs({ state, user, match, myLogs, myActivities, dispatch, showToa
       mood: form.mood,
     };
     dispatch({ type: 'ADD_LOG', payload: newLog });
-    showToast({ type: 'success', message: '활동 기록이 제출되었습니다. 코디 승인 후 정산에 반영됩니다.' });
+    showToast({ type: 'success', message: '활동 기록이 제출되었습니다. 코디가 승인하면 정산에 반영돼요.' });
     setOpen(false);
     setForm({ activity_id: '', summary: '', mood: 5, has_photo: false });
   };
@@ -4831,7 +4831,7 @@ function CoordReports({ state, dispatch, showToast }) {
     if (sorted.length) { const m = state.matches.find((mm) => mm.id === sorted[0][0]); const y = m && state.participants.find((p) => p.id === m.youth_id); topName = (y && y.name) || ''; }
     setTimeout(() => {
       setAiSummary({
-        highlights: period + '월 동안 ' + stats.activeMatches + '개 트리오에서 총 ' + stats.totalHours + '시간의 활동이 이어졌어요. ' + stats.approvedLogs.length + '회 활동이 승인됐고, 만족도 평균은 ' + stats.avgScore + '점이에요.' + (topKw.length ? (' 기록에는 ' + topKw.join('·') + ' 같은 따뜻한 표현이 자주 등장했어요.') : ''),
+        highlights: period + '월 동안 ' + stats.activeMatches + '개 트리오에서 총 ' + stats.totalHours + '시간의 활동이 이어졌어요. ' + stats.approvedLogs.length + '회 활동이 승인됐어요.' + (stats.avgScore === 'N/A' ? '' : ' 만족도 평균은 ' + stats.avgScore + '점이에요.') + (topKw.length ? (' 기록에는 ' + topKw.join('·') + ' 같은 따뜻한 표현이 자주 등장했어요.') : ''),
         matches: (topName ? (topName + '님 트리오가 이달 가장 활발했어요. ') : '') + '각 트리오는 격주 만남을 안정적으로 이어가며, 청년의 디지털·학습 지원과 어르신의 돌봄이 아이에게 함께 전해지고 있어요.',
         operations: '정산 ' + krw(stats.settlementAmount) + '이 지급됐고, 안전 이슈 ' + stats.incidents.length + '건 중 ' + resolved + '건이 해결됐어요. 인증 발신·돌봄 책임보험은 도입 예정으로 준비 중이에요.',
         next_actions: '검토 대기 신청자 검증을 우선 처리하고, 활동이 평균보다 적은 트리오의 안부를 확인하세요. 다음 달 권역 오디션을 대비해 우수 사례를 정리해 두면 좋아요.',
