@@ -1270,6 +1270,16 @@ function LoopInfographic() {
       `}</style>
       <div style={{ position: 'absolute', inset: 24, borderRadius: '50%', border: '2px dashed ' + C.brand + '40', animation: 'eumSpinSlow 28s linear infinite' }} />
       <div style={{ position: 'absolute', inset: 50, borderRadius: '50%', border: '1px solid ' + C.borderSoft }} />
+      <svg viewBox="0 0 300 268" width="300" height="268" style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+        <defs>
+          <marker id="eumArrow" markerWidth="9" markerHeight="9" refX="5" refY="4.5" orient="auto">
+            <path d="M0,0 L9,4.5 L0,9 Z" fill={C.brand} opacity="0.5" />
+          </marker>
+        </defs>
+        <path d="M192.3,43.4 A100,100 0 0,1 249.6,142.7" fill="none" stroke={C.brand} strokeWidth="2" strokeOpacity="0.45" markerEnd="url(#eumArrow)" />
+        <path d="M207.4,215.9 A100,100 0 0,1 92.6,215.9" fill="none" stroke={C.brand} strokeWidth="2" strokeOpacity="0.45" markerEnd="url(#eumArrow)" />
+        <path d="M50.4,142.7 A100,100 0 0,1 107.7,43.4" fill="none" stroke={C.brand} strokeWidth="2" strokeOpacity="0.45" markerEnd="url(#eumArrow)" />
+      </svg>
       <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', textAlign: 'center', animation: 'eumPulse 3.4s ease-in-out infinite' }}>
         <div style={{ fontSize: 12, fontWeight: 700, color: C.brand, letterSpacing: '0.06em' }}>이음</div>
         <div style={{ fontSize: 19, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK, lineHeight: 1.12 }}>3세대<br />선순환</div>
@@ -1290,7 +1300,7 @@ function RoleSelect({ state, onSelectRole, onShowApplication }) {
     { role: 'youth', id: 'p001', gender: 'M', name: '김민준', subtitle: '27세 · 스타트업 개발자', desc: '어르신께 디지털을 알려드리고, 진로 조언을 받습니다.', color: C.sage, soft: C.sageSoft, gradient: 'linear-gradient(135deg, #6B8E5A 0%, #8FB47E 100%)' },
     { role: 'senior', id: 'p101', gender: 'F', name: '박순자', subtitle: '73세 · 前 교사', desc: '청년과 디지털을 익히고, 아이에게 옛이야기를 들려드려요.', color: C.lavender, soft: C.lavenderSoft, gradient: 'linear-gradient(135deg, #7F6FA0 0%, #A797C0 100%)' },
     { role: 'parent', id: 'p201', gender: 'F', name: '이서영', subtitle: '38세 · IT기업 PM (유진 8세 보호자)', desc: '아이가 어르신·청년과 만나는 안전한 공간을 신뢰해요.', color: C.peach, soft: C.peachSoft, gradient: 'linear-gradient(135deg, #D89368 0%, #E8B58F 100%)' },
-    { role: 'coordinator', id: 'cdn001', gender: 'F', name: '한가은', subtitle: '코디네이터 · 광주 광산구', desc: '신청·검증·매칭·정산을 한눈에 관리합니다.', color: C.ink, soft: '#EDEAE5', gradient: 'linear-gradient(135deg, #1A1814 0%, #3A352F 100%)' },
+    { role: 'coordinator', id: 'cdn001', gender: 'F', name: '한가은', subtitle: '코디네이터 · 광주 광산구', desc: '신청·검증·매칭·정산을 한눈에 관리해요.', color: C.ink, soft: '#EDEAE5', gradient: 'linear-gradient(135deg, #1A1814 0%, #3A352F 100%)' },
   ];
 
   return (
@@ -1866,7 +1876,7 @@ function YouthSchedule({ match, activities, state, user, dispatch, showToast }) 
     .slice(0, 3);
   return (
     <>
-      <PageHeader title="활동 일정" subtitle="매칭 트리오와의 격주 활동 일정입니다" />
+      <PageHeader title="활동 일정" subtitle="매칭 트리오와 격주로 만나는 일정이에요" />
       <Card padding={14} style={{ marginBottom: 18, background: C.successSoft, border: `1px solid ${C.success}33`, display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
         <InsuranceBadge size="md" />
         <span style={{ fontSize: 12.5, color: C.inkSoft }}>직접 만나는 활동은 1365 자원봉사 보험과 지자체 돌봄 특약으로 자동 보장돼요.</span>
@@ -1954,7 +1964,7 @@ function YouthLogs({ state, user, match, myLogs, myActivities, dispatch, showToa
 
   return (
     <>
-      <PageHeader title="활동 기록" subtitle="작성한 기록은 코디네이터 승인 후 정산에 반영됩니다"
+      <PageHeader title="활동 기록" subtitle="작성한 기록은 코디가 승인하면 정산에 반영돼요"
         right={<Button variant="brand" icon={<Plus size={16} />} onClick={() => setOpen(true)}>새 기록 작성</Button>}
       />
 
@@ -2076,7 +2086,7 @@ function ArchiveView({ state }) {
 
   return (
     <>
-      <PageHeader title="동네 기억 아카이브" subtitle="광주 우산동의 옛이야기를 어르신께 듣고 기록합니다" />
+      <PageHeader title="동네 기억 아카이브" subtitle="광주 우산동의 옛이야기를 어르신께 듣고 기록해요" />
       <Card padding={22} style={{ marginBottom: 20, background: `linear-gradient(135deg, ${C.goldSoft} 0%, ${C.cream} 100%)`, border: `1px solid ${C.gold}40` }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
           <div style={{ padding: 12, background: C.gold + '30', borderRadius: 12 }}>
@@ -2465,6 +2475,51 @@ function Layout({ role, view, setView, user, dispatch, children, state }) {
 // 9. PARENT (양육가정) APP
 // ============================================================================
 
+// 글로벌 벤치마크 — 미국 Papa의 방문 안전 체크인 모델
+function SafetyCheckinCard({ child, youth, activity }) {
+  const active = !!activity;
+  return (
+    <Card padding={20} style={{ marginBottom: 20, border: '1px solid ' + (active ? C.success : C.border), background: active ? C.successSoft : C.card }}>
+      <style>{`@keyframes eumBlink { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }`}</style>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
+        <ShieldCheck size={17} color={active ? C.success : C.mute} />
+        <div style={{ fontSize: 14, fontWeight: 800, color: C.ink }}>안심 체크인</div>
+        <Badge color={C.mute} soft={C.muteSoft} size="sm">미국 Papa 모델</Badge>
+        {active && (
+          <span style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 700, color: C.success }}>
+            <span style={{ width: 7, height: 7, borderRadius: 999, background: C.success, animation: 'eumBlink 1.4s ease-in-out infinite' }} /> 실시간 공유 중
+          </span>
+        )}
+      </div>
+      {active ? (
+        <>
+          <div style={{ fontSize: 13, color: C.inkSoft, lineHeight: 1.6, marginBottom: 14 }}>
+            <strong style={{ color: C.ink }}>{child?.name || '아이'}</strong>가 지금 <strong style={{ color: C.ink }}>{youth?.name || '청년 멘토'}</strong>와 함께 활동하고 있어요. 시작·종료 시각과 위치가 보호자에게 자동으로 공유돼요.
+          </div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <div style={{ flex: 1, textAlign: 'center', padding: '10px 0', background: C.card, borderRadius: 10, border: '1px solid ' + C.border }}>
+              <div style={{ fontSize: 11, color: C.mute }}>체크인</div>
+              <div style={{ fontSize: 14, fontWeight: 800, color: C.success }}>{activity.time || '완료'}</div>
+            </div>
+            <div style={{ flex: 1, textAlign: 'center', padding: '10px 0', background: C.card, borderRadius: 10, border: '1px solid ' + C.border }}>
+              <div style={{ fontSize: 11, color: C.mute }}>장소</div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: C.ink }}>{activity.location || '확인 중'}</div>
+            </div>
+            <div style={{ flex: 1, textAlign: 'center', padding: '10px 0', background: C.card, borderRadius: 10, border: '1px solid ' + C.border }}>
+              <div style={{ fontSize: 11, color: C.mute }}>안전 상태</div>
+              <div style={{ fontSize: 13, fontWeight: 800, color: C.success }}>이상 없음</div>
+            </div>
+          </div>
+        </>
+      ) : (
+        <div style={{ fontSize: 13, color: C.inkSoft, lineHeight: 1.6 }}>
+          오늘은 예정된 활동이 없어요. 활동이 시작되면 청년 멘토의 체크인과 함께 아이의 위치·안전 상태가 실시간으로 보호자에게 공유돼요.
+        </div>
+      )}
+    </Card>
+  );
+}
+
 function ParentApp({ state, user, dispatch, showToast }) {
   const [view, setView] = useState('dashboard');
 
@@ -2549,6 +2604,8 @@ function ParentDashboard({ user, myChildren, myMatches, todayActivities, upcomin
         </Card>
       )}
 
+      <SafetyCheckinCard child={child} youth={youth} activity={todayActivities[0]} />
+
       {/* 오늘 활동 */}
       <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 18, marginBottom: 20 }}>
         <Card padding={22}>
@@ -2559,7 +2616,7 @@ function ParentDashboard({ user, myChildren, myMatches, todayActivities, upcomin
           {todayActivities.length === 0 ? (
             <div style={{ padding: '32px 16px', textAlign: 'center', color: C.mute }}>
               <Coffee size={32} style={{ color: C.muteSoft, marginBottom: 10 }} />
-              <div style={{ fontSize: 14 }}>오늘은 예정된 활동이 없습니다.</div>
+              <div style={{ fontSize: 14 }}>오늘은 예정된 활동이 없어요.</div>
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -2987,7 +3044,7 @@ function CoordOverview({ state, setView }) {
         <Card padding={16} style={{ marginBottom: 18, background: C.amberSoft, border: `1px solid ${C.amber}50` }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <AlertTriangle size={18} style={{ color: C.amber }} />
-            <div style={{ fontSize: 13, fontWeight: 700, color: C.amber }}>처리가 필요한 항목이 있습니다</div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: C.amber }}>처리할 항목이 있어요</div>
             <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
               {kpis.openIncidents > 0 && <Button variant="ghost" size="sm" onClick={() => setView('safety')}>안전 이슈 {kpis.openIncidents}건</Button>}
               {kpis.pendingApps > 0 && <Button variant="ghost" size="sm" onClick={() => setView('applicants')}>검토 대기 {kpis.pendingApps}건</Button>}
@@ -3644,7 +3701,7 @@ function CoordActivities({ state, dispatch, showToast, user }) {
   return (
     <>
       <PageHeader title="활동 승인"
-        subtitle={`청년의 활동 기록을 승인하면 정산에 반영됩니다`}
+        subtitle={`청년의 활동 기록을 승인하면 정산에 반영돼요`}
         right={activeTab === 'pending' && selected.size > 0 && (
           <Button variant="success" icon={<CheckCircle2 size={16} />} onClick={approveSelected}>{selected.size}건 일괄 승인</Button>
         )} />
