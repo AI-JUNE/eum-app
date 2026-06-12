@@ -1398,6 +1398,23 @@ function FaqBand() {
   );
 }
 
+// 발표용 — 랜딩 함께하는 기관 띠
+function PartnerStrip() {
+  const partners = ['광주광역시', '광산구청', '광주창조경제혁신센터', '1365 자원봉사포털', '광주상생카드'];
+  return (
+    <div style={{ marginBottom: 32 }}>
+      <div style={{ textAlign: 'center', fontSize: 11.5, fontWeight: 700, color: C.mute, letterSpacing: '0.08em', marginBottom: 14 }}>함께하는 기관</div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, justifyContent: 'center' }}>
+        {partners.map((p, i) => (
+          <div key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 14px', background: C.card, border: '1px solid ' + C.border, borderRadius: 999, fontSize: 12.5, fontWeight: 700, color: C.inkSoft }}>
+            <ShieldCheck size={13} color={C.brand} /> {p}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function RoleSelect({ state, onSelectRole, onShowApplication }) {
   // 시드된 페르소나 fixed assignments
   const personas = [
@@ -1489,6 +1506,7 @@ function RoleSelect({ state, onSelectRole, onShowApplication }) {
 
         <TestimonialBand />
         <FaqBand />
+        <PartnerStrip />
 
         {/* 신청 페이지 진입 */}
         <Card padding={22} style={{ background: C.cream }}>
@@ -2087,6 +2105,39 @@ function WeekCoachCard({ monthHours }) {
   );
 }
 
+// 청년 — 활동 갤러리 (온디바이스, 사진 첨부 예정)
+function YouthGalleryCard({ activities }) {
+  const done = (activities || []).filter((a) => a.status === 'completed').slice(0, 6);
+  const grads = [
+    'linear-gradient(135deg,#E0936B,#C75D3C)', 'linear-gradient(135deg,#7F6FA0,#A797C0)',
+    'linear-gradient(135deg,#6B8E5A,#8FB47E)', 'linear-gradient(135deg,#D89368,#E8B58F)',
+    'linear-gradient(135deg,#B8884A,#D9A441)', 'linear-gradient(135deg,#4A6FA5,#7FA0C0)',
+  ];
+  if (!done.length) return null;
+  return (
+    <Card padding={20} style={{ marginBottom: 20 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14, flexWrap: 'wrap' }}>
+        <Camera size={18} color={C.brand} />
+        <div style={{ fontSize: 14, fontWeight: 800, color: C.ink }}>활동 갤러리</div>
+        <Badge color={C.mute} soft={C.muteSoft} size="sm">사진 첨부 예정</Badge>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))', gap: 10 }}>
+        {done.map((a, i) => (
+          <div key={a.id} style={{ borderRadius: 12, overflow: 'hidden', border: '1px solid ' + C.borderSoft }}>
+            <div style={{ height: 72, background: grads[i % grads.length], display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Camera size={22} color="rgba(255,255,255,0.85)" />
+            </div>
+            <div style={{ padding: '8px 10px' }}>
+              <div style={{ fontSize: 11.5, fontWeight: 700, color: C.ink }}>{a.type}</div>
+              <div style={{ fontSize: 10.5, color: C.mute, marginTop: 1 }}>{fmtDate(a.scheduled_at)}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </Card>
+  );
+}
+
 function YouthApp({ state, user, dispatch, showToast }) {
   const [view, setView] = useState('dashboard');
   const match = state.matches.find((m) => m.youth_id === user.id);
@@ -2199,6 +2250,7 @@ function YouthApp({ state, user, dispatch, showToast }) {
           <MissionBoardCard />
 
           <TrioTimelineCard activities={myActivities} logs={myLogs} state={state} />
+          <YouthGalleryCard activities={myActivities} />
 
           {/* Recent Logs */}
           <Card padding={0}>
@@ -2822,6 +2874,32 @@ function CoordPipeline({ state }) {
   );
 }
 
+// 어르신 — 가족 같은 이웃의 소식 (온디바이스)
+function SeniorMessagesCard({ youth, child }) {
+  const yn = youth ? youth.name : '민준';
+  const cn = child ? child.name : '유진';
+  const msgs = [
+    { from: yn + ' 청년', color: C.sage, text: '어르신, 지난번 들려주신 옛날 이야기 정말 좋았어요. 다음에 또 들려주세요!' },
+    { from: cn + ' 어린이', color: C.peach, text: '할머니, 같이 그림 그려서 너무 재밌었어요. 또 만나요!' },
+  ];
+  return (
+    <Card padding={20} style={{ marginBottom: 20 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+        <MessageCircle size={18} color={C.lavender} />
+        <div style={{ fontSize: 17, fontWeight: 800, color: C.ink }}>가족 같은 이웃의 소식</div>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        {msgs.map((m, i) => (
+          <div key={i} style={{ padding: '14px 16px', background: m.color + '12', borderRadius: 14, borderLeft: '4px solid ' + m.color }}>
+            <div style={{ fontSize: 13, fontWeight: 800, color: m.color, marginBottom: 5 }}>{m.from}</div>
+            <div style={{ fontSize: 16, color: C.inkSoft, lineHeight: 1.6 }}>{m.text}</div>
+          </div>
+        ))}
+      </div>
+    </Card>
+  );
+}
+
 function SeniorApp({ state, user, dispatch, showToast }) {
   const [view, setView] = useState('dashboard');
   const match = state.matches.find((m) => m.senior_id === user.id);
@@ -2896,6 +2974,7 @@ function SeniorApp({ state, user, dispatch, showToast }) {
 
           <TimeBankCard hours={myActivities.filter(a => a.status === 'completed').reduce((s, a) => s + (a.duration_hours || 0), 0)} accent={C.lavender} />
           <SeniorTalkCard />
+          <SeniorMessagesCard youth={youth} child={child} />
 
           {/* SOS 버튼 */}
           <SeniorSosCard user={user} dispatch={dispatch} showToast={showToast} match={match} />
@@ -3178,6 +3257,41 @@ function SafetyCheckinCard({ child, youth, activity }) {
   );
 }
 
+// 양육가정 — 아이 성장 기록 (온디바이스)
+function ChildGrowthCard({ child, state }) {
+  const d = useMemo(() => {
+    if (!child) return { sessions: 0, hours: 0, types: [] };
+    const matchIds = (state.matches || []).filter((m) => m.child_id === child.id).map((m) => m.id);
+    const acts = (state.activities || []).filter((a) => matchIds.indexOf(a.match_id) >= 0 && a.status === 'completed');
+    const hours = acts.reduce((s, a) => s + (a.duration_hours || 0), 0);
+    const types = Array.from(new Set(acts.map((a) => a.type)));
+    return { sessions: acts.length, hours, types };
+  }, [child, state]);
+  const milestones = [
+    { label: '첫 만남', got: d.sessions >= 1 },
+    { label: '5회 함께', got: d.sessions >= 5 },
+    { label: '두 세대와 교류', got: d.types.length >= 2 },
+    { label: '10시간 동행', got: d.hours >= 10 },
+  ];
+  return (
+    <Card padding={20} style={{ marginBottom: 20 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14, flexWrap: 'wrap' }}>
+        <Heart size={18} color={C.peach} />
+        <div style={{ fontSize: 14, fontWeight: 800, color: C.ink }}>{child ? child.name + ' 성장 기록' : '아이 성장 기록'}</div>
+        <span style={{ marginLeft: 'auto', fontSize: 12, color: C.mute }}>함께한 활동 {d.sessions}회 · {d.hours}시간</span>
+      </div>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        {milestones.map((m, i) => (
+          <div key={i} style={{ flex: 1, minWidth: 120, textAlign: 'center', padding: '12px 8px', borderRadius: 11, background: m.got ? C.peachSoft : C.bg, border: '1px solid ' + (m.got ? C.peach + '40' : C.borderSoft), opacity: m.got ? 1 : 0.55 }}>
+            <div style={{ fontSize: 20 }}>{m.got ? '⭐' : '☆'}</div>
+            <div style={{ fontSize: 12, fontWeight: 700, color: m.got ? C.ink : C.mute, marginTop: 4 }}>{m.label}</div>
+          </div>
+        ))}
+      </div>
+    </Card>
+  );
+}
+
 function ParentApp({ state, user, dispatch, showToast }) {
   const [view, setView] = useState('dashboard');
 
@@ -3263,6 +3377,7 @@ function ParentDashboard({ user, myChildren, myMatches, todayActivities, upcomin
       )}
 
       <SafetyCheckinCard child={child} youth={youth} activity={todayActivities[0]} />
+      <ChildGrowthCard child={child} state={state} />
 
       {/* 오늘 활동 */}
       <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 18, marginBottom: 20 }}>
@@ -4734,6 +4849,8 @@ function CoordReports({ state, dispatch, showToast }) {
             options={['2027-05', '2027-06', '2027-07'].map(m => ({ value: m, label: m + '월' }))}
             style={{ width: 140 }} />
           <Button variant="brand" icon={<Sparkles size={16} />} onClick={generateAiSummary} disabled={aiLoading}>{aiLoading ? '생성 중…' : 'AI 요약 생성'}</Button>
+          <Button variant="secondary" icon={<FileText size={16} />} onClick={() => { const t = aiSummary ? ['[' + period + ' 이음 월간 리포트]', '', '■ 이달의 핵심 성과', aiSummary.highlights, '', '■ 트리오별 변화', aiSummary.matches, '', '■ 안전·정산 운영', aiSummary.operations, '', '■ 다음 달 우선과제', aiSummary.next_actions].join('\n') : '먼저 AI 요약을 생성해 주세요.'; try { navigator.clipboard.writeText(t); showToast({ type: 'success', message: '리포트를 복사했어요.' }); } catch (e) {} }}>복사</Button>
+          <Button variant="secondary" icon={<Download size={16} />} onClick={() => { try { window.print(); } catch (e) {} }}>인쇄·PDF</Button>
         </>} />
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 18 }}>
