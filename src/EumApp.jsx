@@ -2324,6 +2324,93 @@ function SettlementView({ settlements, totalHours, totalEarned, user }) {
 // 10. SENIOR APP (큰 글씨, 단순 UI)
 // ============================================================================
 
+// 온디바이스 AI — 코디네이터 운영 인사이트 / 이상징후 감지 (외부 API 미사용)
+function CoordAiInsights({ state }) {
+  const data = useMemo(() => {
+    const matches = (state.matches || []).filter((m) => m.status === 'active');
+    const logs = (state.activity_logs || []);
+    const acts = (state.activities || []);
+    const matchOfAct = {};
+    acts.forEach((a) => { matchOfAct[a.id] = a.match_id; });
+    const approvedByMatch = {};
+    logs.filter((l) => l.approved).forEach((l) => { const mid = matchOfAct[l.activity_id]; if (mid) approvedByMatch[mid] = (approvedByMatch[mid] || 0) + 1; });
+    const flags = [];
+    (state.safety_incidents || []).filter((i) => i.status === 'open' || i.status === 'in_progress').forEach(() => {
+      flags.push({ sev: 'high', text: '안전 이슈가 미처리 상태예요. 가장 먼저 확인해 주세요.' });
+    });
+    const pend = logs.filter((l) => !l.approved).length;
+    if (pend >= 3) flags.push({ sev: 'mid', text: '활동 기록 ' + pend + '건이 승인 대기 중이에요. 정산 일정에 영향이 갈 수 있어요.' });
+    const counts = matches.map((m) => ({ m, c: approvedByMatch[m.id] || 0 }));
+    const avg = counts.length ? counts.reduce((s, x) => s + x.c, 0) / counts.length : 0;
+    counts.filter((x) => x.c < Math.max(1, avg * 0.5)).slice(0, 2).forEach((x) => {
+      const sn = (state.participants || []).find((p) => p.id === x.m.senior_id);
+      flags.push({ sev: 'mid', text: (sn ? sn.name + '님' : '한') + ' 트리오의 활동이 평균보다 적어요. 안부 확인을 권해요.' });
+    });
+    const surveys = state.surveys || [];
+    const cont = surveys.length ? Math.round(surveys.filter((s) => s.would_continue).length / surveys.length * 100) : 0;
+    const totalH = logs.filter((l) => l.approved).reduce((s, l) => s + (l.hours || 0), 0);
+    return { flags: flags.slice(0, 4), cont, totalH, nMatch: matches.length };
+  }, [state]);
+  const sevColor = { high: C.red, mid: C.amber };
+  const sevSoft = { high: C.redSoft, mid: C.amberSoft };
+  return (
+    <Card padding={20} style={{ marginBottom: 18, border: '1px solid ' + C.brand + '22' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12, flexWrap: 'wrap' }}>
+        <Sparkles size={18} color={C.brand} />
+        <div style={{ fontSize: 14, fontWeight: 800, color: C.ink }}>AI 운영 인사이트</div>
+        <Badge color={C.brand} soft={C.brandSoft} size="sm">온디바이스 · API 미사용</Badge>
+      </div>
+      <div style={{ fontSize: 13, color: C.inkSoft, lineHeight: 1.6, marginBottom: 14, padding: '10px 13px', background: C.bg, borderRadius: 10 }}>
+        활성 트리오 <strong style={{ color: C.ink }}>{data.nMatch}쌍</strong>, 누적 <strong style={{ color: C.ink }}>{data.totalH}시간</strong>, 지속의향 <strong style={{ color: C.success }}>{data.cont}%</strong>. 전반적으로 안정적으로 운영되고 있어요.
+      </div>
+      {data.flags.length === 0 ? (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: C.success, fontWeight: 700 }}>
+          <ShieldCheck size={15} /> 지금 주의가 필요한 트리오는 없어요.
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: C.mute, letterSpacing: '0.04em' }}>주의가 필요한 항목</div>
+          {data.flags.map((f, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '9px 12px', background: sevSoft[f.sev], borderRadius: 9 }}>
+              <span style={{ width: 8, height: 8, borderRadius: 999, background: sevColor[f.sev], flexShrink: 0 }} />
+              <span style={{ fontSize: 12.5, color: C.inkSoft }}>{f.text}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </Card>
+  );
+}
+
+// 온디바이스 AI — 어르신 '오늘의 이야깃거리' 추천 (큰 글씨, 외부 API 미사용)
+function SeniorTalkCard() {
+  const topics = [
+    '내가 가장 오래 살았던 동네는 어떤 모습이었나요?',
+    '젊을 적 가장 즐겨 드시던 음식은 무엇인가요?',
+    '학교 다닐 때 가장 친했던 친구 이야기를 들려주세요.',
+    '살면서 가장 자랑스러웠던 순간은 언제였나요?',
+    '어릴 적 가장 좋아했던 놀이는 무엇이었나요?',
+    '요즘 청년들에게 꼭 해주고 싶은 한마디가 있다면요?',
+    '가장 좋아하셨던 노래나 영화는 무엇인가요?',
+    '명절이면 우리 집은 어떤 음식을 차렸나요?',
+  ];
+  const [idx, setIdx] = useState(0);
+  return (
+    <Card padding={24} style={{ marginBottom: 20, background: 'linear-gradient(135deg, ' + C.lavenderSoft + ' 0%, ' + C.cream + ' 100%)', border: '1px solid ' + C.lavender + '33' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
+        <Sparkles size={18} color={C.lavender} />
+        <div style={{ fontSize: 17, fontWeight: 800, color: C.ink }}>오늘의 이야깃거리</div>
+        <Badge color={C.mute} soft={C.muteSoft} size="sm">AI 추천</Badge>
+      </div>
+      <div style={{ fontSize: 22, fontWeight: 700, color: C.ink, lineHeight: 1.5, fontFamily: SERIF_STACK }}>{topics[idx]}</div>
+      <div style={{ fontSize: 15, color: C.inkSoft, marginTop: 10 }}>청년·아이와 만나면 이 이야기로 시작해 보세요.</div>
+      <button onClick={() => setIdx((i) => (i + 1) % topics.length)} style={{ marginTop: 16, display: 'inline-flex', alignItems: 'center', gap: 7, border: 'none', background: C.lavender, color: '#fff', borderRadius: 12, padding: '12px 20px', fontSize: 16, fontWeight: 700, cursor: 'pointer', fontFamily: FONT_STACK }}>
+        <Sparkles size={17} /> 다른 이야깃거리
+      </button>
+    </Card>
+  );
+}
+
 function SeniorApp({ state, user, dispatch, showToast }) {
   const [view, setView] = useState('dashboard');
   const match = state.matches.find((m) => m.senior_id === user.id);
@@ -2393,6 +2480,7 @@ function SeniorApp({ state, user, dispatch, showToast }) {
           </Card>
 
           <TimeBankCard hours={myActivities.filter(a => a.status === 'completed').reduce((s, a) => s + (a.duration_hours || 0), 0)} accent={C.lavender} />
+          <SeniorTalkCard />
 
           {/* SOS 버튼 */}
           <SeniorSosCard user={user} dispatch={dispatch} showToast={showToast} match={match} />
@@ -3193,6 +3281,8 @@ function CoordOverview({ state, setView }) {
   return (
     <>
       <PageHeader title="대시보드" subtitle={`${fmtDate(TODAY)} · 광주 광산구 우산동 1차 파일럿`} />
+
+      <CoordAiInsights state={state} />
 
       {/* 알림 영역 */}
       {(kpis.openIncidents > 0 || kpis.pendingApps > 0 || kpis.pendingLogs > 5) && (
