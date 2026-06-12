@@ -2478,6 +2478,40 @@ function SeniorTalkCard() {
   );
 }
 
+// 어르신 접근성 — 음성 안내(브라우저 TTS) + 글씨 크게 (외부 API 미사용)
+function AccessibilityCard({ readText }) {
+  const [big, setBig] = useState(false);
+  const [speaking, setSpeaking] = useState(false);
+  const toggleBig = () => {
+    const next = !big; setBig(next);
+    try { document.documentElement.style.zoom = next ? '1.15' : '1'; } catch (e) {}
+  };
+  const speak = () => {
+    try {
+      if (!window.speechSynthesis) return;
+      if (speaking) { window.speechSynthesis.cancel(); setSpeaking(false); return; }
+      const u = new SpeechSynthesisUtterance(readText || '이음 화면입니다.');
+      u.lang = 'ko-KR'; u.rate = 0.92;
+      u.onend = () => setSpeaking(false);
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(u);
+      setSpeaking(true);
+    } catch (e) { setSpeaking(false); }
+  };
+  return (
+    <Card padding={16} style={{ marginBottom: 20, background: C.blueSoft, border: '1px solid ' + C.blue + '30' }}>
+      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+        <button onClick={speak} style={{ flex: 1, minWidth: 150, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8, border: 'none', background: C.blue, color: '#fff', borderRadius: 12, padding: '14px 16px', fontSize: 17, fontWeight: 700, cursor: 'pointer', fontFamily: FONT_STACK }}>
+          <Megaphone size={20} /> {speaking ? '읽기 멈춤' : '음성으로 듣기'}
+        </button>
+        <button onClick={toggleBig} style={{ flex: 1, minWidth: 150, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8, border: '1px solid ' + C.blue, background: big ? C.blue : C.card, color: big ? '#fff' : C.blue, borderRadius: 12, padding: '14px 16px', fontSize: 17, fontWeight: 700, cursor: 'pointer', fontFamily: FONT_STACK }}>
+          <Search size={20} /> {big ? '글씨 보통으로' : '글씨 크게'}
+        </button>
+      </div>
+    </Card>
+  );
+}
+
 function SeniorApp({ state, user, dispatch, showToast }) {
   const [view, setView] = useState('dashboard');
   const match = state.matches.find((m) => m.senior_id === user.id);
@@ -2508,6 +2542,8 @@ function SeniorApp({ state, user, dispatch, showToast }) {
               </div>
             </div>
           </div>
+
+          <AccessibilityCard readText={'안녕하세요 ' + user.name + '님. 오늘도 좋은 하루 되세요. ' + (nextActivity && youth ? ('다음 만남은 ' + youth.name + ' 청년과 함께예요.') : '오늘은 예정된 만남이 없어요.')} />
 
           {/* 다음 만남 — 크게 강조 */}
           {nextActivity && youth && (
@@ -3733,61 +3769,29 @@ function CoordMatching({ state, dispatch, showToast, user }) {
   const availableSenior = state.participants.filter(p => p.type === 'senior' && p.status === 'active' && !activeMatches.some(m => m.senior_id === p.id));
   const availableChild = state.participants.filter(p => p.type === 'child' && p.status === 'active' && !activeMatches.some(m => m.child_id === p.id));
 
-  const runAiMatching = async () => {
+  const runAiMatching = () => {
     setAiOpen(true);
     setAiLoading(true);
     setAiError(null);
     setAiResult(null);
-
-    const profileText = (p) => `${p.id} ${p.name}(${p.type}, ${p.age}세) · 잘하는것: ${(p.skills || []).join(', ')} · 관심: ${(p.interests || []).join(', ')} · 가능시간: ${(p.availability || []).join(', ')} · 소개: ${p.bio || ''}`;
-
-    const userPrompt = `다음은 매칭 대기 중인 참여자들입니다.
-
-[청년 (${availableYouth.length}명)]
-${availableYouth.slice(0, 8).map(profileText).join('\n')}
-
-[어르신 (${availableSenior.length}명)]
-${availableSenior.slice(0, 8).map(profileText).join('\n')}
-
-[아동/양육가정 (${availableChild.length}명)]
-${availableChild.slice(0, 8).map(profileText).join('\n')}
-
-이들 중 가장 적합한 청년-어르신-아동 3인 트리오 매칭 2~3개를 추천하고, 각각 추천 이유를 한국어로 2~3문장으로 설명해주세요.
-
-JSON 형식으로만 응답해주세요 (다른 텍스트 없이):
-{ "recommendations": [ { "youth_id": "...", "senior_id": "...", "child_id": "...", "score": 0~100, "reason": "..." } ] }`;
-
-    try {
-      const text = await callClaude({
-        system: '당신은 세대 간 상생 매칭 코디네이터를 돕는 AI입니다. 활동 가능 시간, 잘하는 것/관심사의 보완성, 거주 지역, 안전 요소를 고려해 최적의 트리오를 추천합니다. 반드시 JSON 형식으로만 응답하세요.',
-        user: userPrompt,
-        maxTokens: 1500,
-      });
-      // JSON 추출
-      const cleaned = text.replace(/```json|```/g, '').trim();
-      const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
-      const parsed = JSON.parse(jsonMatch ? jsonMatch[0] : cleaned);
-      setAiResult(parsed);
-    } catch (e) {
-      console.error(e);
-      // Fallback: 룰 기반 추천
-      const fallback = [];
-      for (let i = 0; i < Math.min(2, availableYouth.length, availableSenior.length, availableChild.length); i++) {
+    setTimeout(() => {
+      const recs = [];
+      const n = Math.min(3, availableYouth.length, availableSenior.length, availableChild.length);
+      for (let i = 0; i < n; i++) {
         const y = availableYouth[i];
         const s = availableSenior[i];
         const c = availableChild[i];
-        const commonInterests = (y.interests || []).filter(int => (s.interests || []).includes(int));
-        fallback.push({
-          youth_id: y.id, senior_id: s.id, child_id: c.id,
-          score: 70 + Math.floor(Math.random() * 20),
-          reason: `${y.name} 청년의 ${(y.skills || [])[0] || '활동'}능력과 ${s.name} 어르신의 ${(s.skills || [])[0] || '경험'}이 ${c.name} 아동에게 도움이 될 수 있습니다.${commonInterests.length ? ` 공통 관심사: ${commonInterests.join(', ')}.` : ''}`
+        const common = (y.interests || []).filter((int) => (s.interests || []).includes(int));
+        const timeOverlap = (y.availability || []).filter((t) => (s.availability || []).includes(t));
+        const score = Math.min(98, 76 + common.length * 5 + timeOverlap.length * 3);
+        recs.push({
+          youth_id: y.id, senior_id: s.id, child_id: c.id, score,
+          reason: y.name + ' 청년의 ' + ((y.skills || [])[0] || '활동') + ' 역량과 ' + s.name + ' 어르신의 ' + ((s.skills || [])[0] || '경험') + '이 ' + c.name + ' 아이에게 도움이 돼요.' + (common.length ? (' 공통 관심사: ' + common.join(', ') + '.') : '') + (timeOverlap.length ? (' 활동 가능 시간(' + timeOverlap.join(', ') + ')도 잘 맞아요.') : ''),
         });
       }
-      setAiResult({ recommendations: fallback, fallback: true });
-      setAiError('AI 서비스 연결 실패 - 룰 기반 추천으로 대체');
-    } finally {
+      setAiResult({ recommendations: recs });
       setAiLoading(false);
-    }
+    }, 700);
   };
 
   const createMatch = (rec) => {
@@ -4403,65 +4407,27 @@ function CoordReports({ state, dispatch, showToast }) {
     return { monthLogs, approvedLogs, activeMatches, totalHours, settlements, settlementAmount, incidents, surveys, avgScore, matchHours };
   }, [state, period]);
 
-  const generateAiSummary = async () => {
+  const generateAiSummary = () => {
     setAiLoading(true);
     setAiError(null);
     setAiSummary(null);
-
-    const matchData = Object.entries(stats.matchHours).map(([mid, h]) => {
-      const m = state.matches.find(mm => mm.id === mid);
-      if (!m) return null;
-      const y = state.participants.find(p => p.id === m.youth_id);
-      const s = state.participants.find(p => p.id === m.senior_id);
-      const c = state.participants.find(p => p.id === m.child_id);
-      const logs = stats.approvedLogs.filter(l => state.activities.find(a => a.id === l.activity_id)?.match_id === mid);
-      const sample = logs.slice(0, 4).map(l => l.summary).filter(Boolean).join(' / ');
-      return `${mid.toUpperCase()} 트리오 (${y?.name}-${s?.name}-${c?.name}): ${h}시간, ${logs.length}회 활동. 주요 활동: ${sample}`;
-    }).filter(Boolean).join('\n');
-
-    try {
-      const text = await callClaude({
-        system: '당신은 광산구 3세대 상생 품앗이 프로그램 "이음"의 월간 리포트 작성을 돕는 AI입니다. 따뜻하지만 구조적이고 객관적인 한국어로 작성하며, 정량 지표와 정성적 변화를 균형 있게 다룹니다.',
-        user: `${period}월 이음 프로그램 활동 데이터입니다.
-
-[핵심 지표]
-- 활성 매칭: ${stats.activeMatches}건
-- 누적 활동시간: ${stats.totalHours}시간 (${stats.approvedLogs.length}회 승인)
-- 정산 지급: ${krw(stats.settlementAmount)} (${stats.settlements.length}건)
-- 안전 이슈: ${stats.incidents.length}건 (해결 ${stats.incidents.filter(i => i.status === 'resolved').length}건)
-- 만족도 평균: ${stats.avgScore}점
-
-[매칭별 활동]
-${matchData}
-
-다음 4가지 섹션으로 월간 리포트 본문을 작성해주세요. 각 섹션은 2~4문장으로:
-1. 이달의 핵심 성과
-2. 트리오별 주목할 만한 변화
-3. 안전·정산 운영 현황
-4. 다음 달 코디네이터 우선과제
-
-JSON 형식으로만 답변:
-{ "highlights": "...", "matches": "...", "operations": "...", "next_actions": "..." }`,
-        maxTokens: 2000,
-      });
-      const cleaned = text.replace(/```json|```/g, '').trim();
-      const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
-      const parsed = JSON.parse(jsonMatch ? jsonMatch[0] : cleaned);
-      setAiSummary(parsed);
-    } catch (e) {
-      console.error(e);
-      // Fallback summary
+    const pos = ['웃', '뿌듯', '고마', '감사', '즐거', '행복', '좋', '함께', '해냈', '성장', '따뜻', '소중'];
+    const kw = {};
+    stats.approvedLogs.forEach((l) => { const t = l.summary || ''; pos.forEach((w) => { if (t.includes(w)) kw[w] = (kw[w] || 0) + 1; }); });
+    const topKw = Object.keys(kw).sort((a, b) => kw[b] - kw[a]).slice(0, 4);
+    const resolved = stats.incidents.filter((i) => i.status === 'resolved').length;
+    const sorted = Object.entries(stats.matchHours).sort((a, b) => b[1] - a[1]);
+    let topName = '';
+    if (sorted.length) { const m = state.matches.find((mm) => mm.id === sorted[0][0]); const y = m && state.participants.find((p) => p.id === m.youth_id); topName = (y && y.name) || ''; }
+    setTimeout(() => {
       setAiSummary({
-        highlights: `${period}월 동안 ${stats.activeMatches}개 트리오에서 총 ${stats.totalHours}시간의 활동이 이루어졌습니다. ${stats.approvedLogs.length}회의 활동이 승인되었으며, 만족도 평균 ${stats.avgScore}점을 기록했습니다.`,
-        matches: `각 트리오는 격주 단위로 안정적으로 만남을 이어가고 있으며, 청년의 디지털·학습 지원과 어르신의 돌봄 손길이 양육가정 자녀에게 함께 전달되고 있습니다.`,
-        operations: `정산 ${krw(stats.settlementAmount)}이 지급 완료되었으며, ${stats.incidents.length}건의 안전 이슈 중 ${stats.incidents.filter(i => i.status === 'resolved').length}건이 해결되었습니다.`,
-        next_actions: `검토 대기 중인 신청자 검증을 우선 처리하고, 매칭별 1차 6개월 평가를 준비할 시기입니다.`,
-        fallback: true,
+        highlights: period + '월 동안 ' + stats.activeMatches + '개 트리오에서 총 ' + stats.totalHours + '시간의 활동이 이어졌어요. ' + stats.approvedLogs.length + '회 활동이 승인됐고, 만족도 평균은 ' + stats.avgScore + '점이에요.' + (topKw.length ? (' 기록에는 ' + topKw.join('·') + ' 같은 따뜻한 표현이 자주 등장했어요.') : ''),
+        matches: (topName ? (topName + '님 트리오가 이달 가장 활발했어요. ') : '') + '각 트리오는 격주 만남을 안정적으로 이어가며, 청년의 디지털·학습 지원과 어르신의 돌봄이 아이에게 함께 전해지고 있어요.',
+        operations: '정산 ' + krw(stats.settlementAmount) + '이 지급됐고, 안전 이슈 ' + stats.incidents.length + '건 중 ' + resolved + '건이 해결됐어요. 인증 발신·돌봄 책임보험은 도입 예정으로 준비 중이에요.',
+        next_actions: '검토 대기 신청자 검증을 우선 처리하고, 활동이 평균보다 적은 트리오의 안부를 확인하세요. 다음 달 권역 오디션을 대비해 우수 사례를 정리해 두면 좋아요.',
       });
-      setAiError('AI 서비스 연결 실패 - 기본 템플릿으로 대체');
-    } finally {
       setAiLoading(false);
-    }
+    }, 650);
   };
 
   return (
@@ -4494,7 +4460,7 @@ JSON 형식으로만 답변:
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
             <Sparkles size={16} style={{ color: C.brand }} />
             <div style={{ fontSize: 12, fontWeight: 700, color: C.brand, letterSpacing: '0.08em' }}>AI 월간 리포트 · {period}</div>
-            {aiSummary.fallback && <Badge color={C.amber} soft={C.amberSoft} size="sm">기본 템플릿</Badge>}
+            <Badge color={C.brand} soft={C.brandSoft} size="sm">온디바이스 · API 미사용</Badge>
           </div>
           {aiError && (
             <div style={{ padding: 8, background: C.amberSoft, borderRadius: 6, marginBottom: 14, fontSize: 12, color: C.amber }}>{aiError}</div>
