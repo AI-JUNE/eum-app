@@ -2471,9 +2471,14 @@ function SeniorTalkCard() {
       </div>
       <div style={{ fontSize: 22, fontWeight: 700, color: C.ink, lineHeight: 1.5, fontFamily: SERIF_STACK }}>{topics[idx]}</div>
       <div style={{ fontSize: 15, color: C.inkSoft, marginTop: 10 }}>청년·아이와 만나면 이 이야기로 시작해 보세요.</div>
-      <button onClick={() => setIdx((i) => (i + 1) % topics.length)} style={{ marginTop: 16, display: 'inline-flex', alignItems: 'center', gap: 7, border: 'none', background: C.lavender, color: '#fff', borderRadius: 12, padding: '12px 20px', fontSize: 16, fontWeight: 700, cursor: 'pointer', fontFamily: FONT_STACK }}>
-        <Sparkles size={17} /> 다른 이야깃거리
-      </button>
+      <div style={{ display: 'flex', gap: 10, marginTop: 16, flexWrap: 'wrap' }}>
+        <button onClick={() => { try { if (window.speechSynthesis) { window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(topics[idx]); u.lang = 'ko-KR'; u.rate = 0.92; window.speechSynthesis.speak(u); } } catch (e) {} }} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, border: '1px solid ' + C.lavender, background: C.card, color: C.lavender, borderRadius: 12, padding: '12px 18px', fontSize: 16, fontWeight: 700, cursor: 'pointer', fontFamily: FONT_STACK }}>
+          <Megaphone size={17} /> 읽어주기
+        </button>
+        <button onClick={() => setIdx((i) => (i + 1) % topics.length)} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, border: 'none', background: C.lavender, color: '#fff', borderRadius: 12, padding: '12px 18px', fontSize: 16, fontWeight: 700, cursor: 'pointer', fontFamily: FONT_STACK }}>
+          <Sparkles size={17} /> 다른 이야깃거리
+        </button>
+      </div>
     </Card>
   );
 }
@@ -3293,28 +3298,6 @@ function ParentSafety({ user, myMatches, myIncidents, dispatch, showToast }) {
 // 10. CLAUDE API HELPER (AI 매칭 추천 & 월간 리포트 요약)
 // ============================================================================
 
-async function callClaude({ system, user, maxTokens = 1024 }) {
-  try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: maxTokens,
-        system,
-        messages: [{ role: 'user', content: user }],
-      }),
-    });
-    if (!res.ok) throw new Error(`API ${res.status}`);
-    const data = await res.json();
-    const text = (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('\n');
-    return text;
-  } catch (e) {
-    console.error('Claude API error:', e);
-    throw e;
-  }
-}
-
 // ============================================================================
 // 11. COORDINATOR (코디네이터 관제실) APP
 // ============================================================================
@@ -3860,7 +3843,7 @@ function CoordMatching({ state, dispatch, showToast, user }) {
               </div>
             )}
             <div style={{ fontSize: 13, color: C.inkSoft, marginBottom: 16 }}>
-              {aiResult.fallback ? '룰 기반 알고리즘으로 추천된 매칭입니다.' : `Claude AI가 참여자 프로필을 분석해 다음 ${aiResult.recommendations?.length || 0}건의 매칭을 추천했습니다.`}
+              온디바이스 매칭 엔진이 관심사·가능 시간·안전 요소를 분석해 다음 {aiResult.recommendations?.length || 0}건을 추천했어요.
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               {(aiResult.recommendations || []).map((rec, idx) => {
@@ -3875,8 +3858,12 @@ function CoordMatching({ state, dispatch, showToast, user }) {
                         <Sparkles size={14} style={{ color: C.brand }} />
                         <div style={{ fontSize: 12, fontWeight: 700, color: C.brand, letterSpacing: '0.06em' }}>추천 #{idx + 1}</div>
                       </div>
-                      <Badge color={C.brand} soft={C.brandSoft}>적합도 {rec.score || 75}</Badge>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                        <span style={{ fontSize: 11, color: C.mute, fontWeight: 700 }}>적합도</span>
+                        <span style={{ fontSize: 17, fontWeight: 800, color: C.success, fontFamily: SERIF_STACK }}><CountUp value={rec.score || 75} suffix="%" /></span>
+                      </div>
                     </div>
+                    <div style={{ marginBottom: 14 }}><AnimatedBar value={rec.score || 75} max={100} color={C.brand} height={7} delay={idx * 120} /></div>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 14 }}>
                       {[{ p: y, label: '청년' }, { p: s, label: '어르신' }, { p: c, label: '아동' }].map(({ p, label }) => (
                         <div key={p.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: 10, background: C.card, borderRadius: 8 }}>
