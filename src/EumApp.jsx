@@ -443,7 +443,7 @@ function TimeBankCard({ hours = 0, accent = C.brand }) {
         <Badge color={C.mute} soft={C.muteSoft} size="sm">일본 후레아이깃푸 모델</Badge>
       </div>
       <div style={{ fontSize: 30, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK }}>{hours.toFixed(1)}<span style={{ fontSize: 16, fontWeight: 600, color: C.mute }}> 시간 적립</span></div>
-      <div style={{ fontSize: 12.5, color: C.inkSoft, marginTop: 6, lineHeight: 1.55 }}>이웃을 도운 시간이 신뢰로 쌓입니다. 적립한 시간은 미래의 나 또는 가족이 돌봄을 받을 때 사용하거나, 다른 세대에게 선물할 수 있습니다.</div>
+      <div style={{ fontSize: 12.5, color: C.inkSoft, marginTop: 6, lineHeight: 1.55 }}>이웃을 도운 시간이 차곡차곡 신뢰로 쌓여요. 모아둔 시간은 훗날 내가, 또는 우리 가족이 돌봄이 필요할 때 쓰거나 다른 분께 선물할 수 있어요.</div>
       <div style={{ display: 'flex', gap: 8, marginTop: 14 }}>
         <div style={{ flex: 1, textAlign: 'center', padding: '10px 0', background: C.card, borderRadius: 10, border: '1px solid ' + C.border }}>
           <div style={{ fontSize: 11, color: C.mute }}>이월 가능</div>
@@ -1254,6 +1254,36 @@ function PageHeader({ title, subtitle, right }) {
 // 7. ROLE SELECT (랜딩 페이지)
 // ============================================================================
 
+// 3세대 선순환 — 회전 애니메이션 인포그래픽
+function LoopInfographic() {
+  const nodes = [
+    { label: '청년', sub: '재능·디지털', color: C.sage, soft: C.sageSoft, pos: { top: 0, left: '50%', marginLeft: -43 }, delay: '0s' },
+    { label: '어르신', sub: '지혜·돌봄', color: C.lavender, soft: C.lavenderSoft, pos: { bottom: 4, right: 2 }, delay: '1.4s' },
+    { label: '아이', sub: '활력·웃음', color: C.peach, soft: C.peachSoft, pos: { bottom: 4, left: 2 }, delay: '2.8s' },
+  ];
+  return (
+    <div style={{ position: 'relative', width: 300, height: 268, margin: '0 auto', animation: 'fadeUp 0.7s cubic-bezier(0.22,1,0.36,1)' }}>
+      <style>{`
+        @keyframes eumFloaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+        @keyframes eumPulse { 0%,100% { opacity: 1; } 50% { opacity: 0.62; } }
+        @keyframes eumSpinSlow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+      `}</style>
+      <div style={{ position: 'absolute', inset: 24, borderRadius: '50%', border: '2px dashed ' + C.brand + '40', animation: 'eumSpinSlow 28s linear infinite' }} />
+      <div style={{ position: 'absolute', inset: 50, borderRadius: '50%', border: '1px solid ' + C.borderSoft }} />
+      <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', textAlign: 'center', animation: 'eumPulse 3.4s ease-in-out infinite' }}>
+        <div style={{ fontSize: 12, fontWeight: 700, color: C.brand, letterSpacing: '0.06em' }}>이음</div>
+        <div style={{ fontSize: 19, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK, lineHeight: 1.12 }}>3세대<br />선순환</div>
+      </div>
+      {nodes.map((n) => (
+        <div key={n.label} style={{ position: 'absolute', width: 86, padding: '11px 10px', textAlign: 'center', background: n.soft, color: n.color, borderRadius: 18, border: '1px solid ' + n.color + '30', boxShadow: '0 8px 20px ' + n.color + '22', animation: 'eumFloaty 4.6s ease-in-out infinite', animationDelay: n.delay, ...n.pos }}>
+          <div style={{ fontSize: 14.5, fontWeight: 800 }}>{n.label}</div>
+          <div style={{ fontSize: 10.5, marginTop: 2, opacity: 0.82 }}>{n.sub}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function RoleSelect({ state, onSelectRole, onShowApplication }) {
   // 시드된 페르소나 fixed assignments
   const personas = [
@@ -1281,7 +1311,7 @@ function RoleSelect({ state, onSelectRole, onShowApplication }) {
             세대를 잇다, <span style={{ color: C.brand, fontStyle: 'italic' }}>이음</span>
           </h1>
           <p style={{ fontSize: 16, color: C.inkSoft, maxWidth: 560, margin: '0 auto', lineHeight: 1.6 }}>
-            청년·어르신·아동 세 세대가 서로 돕고 모두 보상받는<br />
+            세 세대가 서로 돕고, 도운 만큼 모두에게 보상이 돌아가요<br />
             <span style={{ color: C.ink, fontWeight: 600 }}>우리동네 3세대 상생 품앗이 플랫폼</span>
           </p>
           <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 24, flexWrap: 'wrap' }}>
@@ -1293,27 +1323,13 @@ function RoleSelect({ state, onSelectRole, onShowApplication }) {
           </div>
         </div>
 
-        {/* 3세대 선순환 + 신뢰 지표 (글로벌 사례 벤치마크) */}
-        <div style={{ marginBottom: 28 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
-            {[
-              { label: '청년', sub: '재능·디지털', color: C.sage, soft: C.sageSoft },
-              { label: '어르신', sub: '지혜·돌봄', color: C.lavender, soft: C.lavenderSoft },
-              { label: '아동', sub: '활력·미래', color: C.peach, soft: C.peachSoft },
-            ].map((n) => (
-              <React.Fragment key={n.label}>
-                <div style={{ background: n.soft, color: n.color, borderRadius: 14, padding: '11px 16px', textAlign: 'center', minWidth: 88, border: '1px solid ' + n.color + '22' }}>
-                  <div style={{ fontSize: 15, fontWeight: 800 }}>{n.label}</div>
-                  <div style={{ fontSize: 11, marginTop: 2, opacity: 0.8 }}>{n.sub}</div>
-                </div>
-                <ArrowRight size={18} color={C.mute} />
-              </React.Fragment>
-            ))}
-            <div style={{ background: C.brandSoft, color: C.brand, borderRadius: 14, padding: '11px 16px', textAlign: 'center', minWidth: 88, border: '1px solid ' + C.brand + '33' }}>
-              <div style={{ fontSize: 15, fontWeight: 800 }}>다시 청년</div>
-              <div style={{ fontSize: 11, marginTop: 2, opacity: 0.85 }}>선순환</div>
-            </div>
-          </div>
+        {/* 3세대 선순환 — 애니메이션 인포그래픽 */}
+        <div style={{ marginBottom: 30 }}>
+          <LoopInfographic />
+          <p style={{ textAlign: 'center', fontSize: 14.5, color: C.inkSoft, lineHeight: 1.7, maxWidth: 540, margin: '4px auto 18px' }}>
+            청년의 재능이 어르신께 닿고, 어르신의 지혜가 아이에게,<br />
+            아이의 웃음이 다시 청년에게 이어져요. 누구 하나 일방적으로 주기만 하지 않아요.
+          </p>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, flexWrap: 'wrap' }}>
             <Badge color={C.blue} soft={C.blueSoft} size="md"><ShieldCheck size={13} /> 광주광역시 통합돌봄 연계</Badge>
             <Badge color={C.gold} soft={C.goldSoft} size="md"><Wallet size={13} /> 광주상생카드·봉사시간 보상</Badge>
@@ -1328,7 +1344,7 @@ function RoleSelect({ state, onSelectRole, onShowApplication }) {
           </div>
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 14, fontWeight: 700, color: C.ink, marginBottom: 2 }}>2027 광주 광산구 우산동 파일럿 · 데모 모드</div>
-            <div style={{ fontSize: 13, color: C.mute }}>실제 운영 중인 15쌍의 데이터가 시드되어 있습니다. 역할 선택 후 모든 기능을 체험할 수 있어요.</div>
+            <div style={{ fontSize: 13, color: C.mute }}>지금 활동 중인 15쌍의 이야기를 그대로 담아뒀어요. 역할을 골라 들어가면 모든 기능을 직접 둘러볼 수 있어요.</div>
           </div>
         </div>
 
@@ -1360,7 +1376,7 @@ function RoleSelect({ state, onSelectRole, onShowApplication }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
             <div style={{ flex: 1, minWidth: 220 }}>
               <div style={{ fontSize: 16, fontWeight: 700, color: C.ink, marginBottom: 4 }}>처음 오셨나요?</div>
-              <div style={{ fontSize: 13, color: C.mute, lineHeight: 1.55 }}>광주광역시 광산구 우산동에 거주하시면 <strong style={{ color: C.inkSoft }}>청소년부터 어르신까지 누구나</strong> 신청 가능합니다. 약 5분 소요.</div>
+              <div style={{ fontSize: 13, color: C.mute, lineHeight: 1.55 }}>광주 광산구 우산동에 사시는 분이면 <strong style={{ color: C.inkSoft }}>청소년부터 어르신까지 누구나</strong> 신청할 수 있어요. 5분이면 충분해요.</div>
             </div>
             <Button variant="brand" icon={<UserPlus size={16} />} onClick={onShowApplication} size="lg">
               참여 신청하기
@@ -1853,7 +1869,7 @@ function YouthSchedule({ match, activities, state, user, dispatch, showToast }) 
       <PageHeader title="활동 일정" subtitle="매칭 트리오와의 격주 활동 일정입니다" />
       <Card padding={14} style={{ marginBottom: 18, background: C.successSoft, border: `1px solid ${C.success}33`, display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
         <InsuranceBadge size="md" />
-        <span style={{ fontSize: 12.5, color: C.inkSoft }}>모든 대면 활동은 1365 자원봉사 보험 및 지자체 돌봄 특약 책임보험으로 자동 보장됩니다.</span>
+        <span style={{ fontSize: 12.5, color: C.inkSoft }}>직접 만나는 활동은 1365 자원봉사 보험과 지자체 돌봄 특약으로 자동 보장돼요.</span>
       </Card>
       {actionable.length > 0 && (
         <div style={{ marginBottom: 22 }}>
@@ -2169,7 +2185,7 @@ function SeniorApp({ state, user, dispatch, showToast }) {
             <div style={{ marginTop: 14 }}>
               <OfficialSenderBadge size="lg" />
               <div style={{ fontSize: 14, color: C.mute, marginTop: 8, lineHeight: 1.5 }}>
-                이음의 모든 연락은 <strong style={{ color: C.blue }}>광주광역시 공식 알림톡 채널</strong>을 통해서만 발송됩니다. 모르는 번호의 전화·문자는 받지 마세요.
+                이음에서 드리는 연락은 <strong style={{ color: C.blue }}>광주광역시 공식 알림톡</strong>으로만 가요. 모르는 번호로 오는 전화나 문자는 받지 않으셔도 괜찮아요.
               </div>
             </div>
           </div>
@@ -2293,7 +2309,7 @@ function SeniorSosCard({ user, dispatch, showToast, match }) {
     <Card padding={24} style={{ border: `2px solid ${C.redSoft}`, background: C.card }}>
       <div style={{ fontSize: 15, fontWeight: 700, color: C.red, letterSpacing: '0.05em', marginBottom: 6 }}>도움이 필요하실 때</div>
       <div style={{ fontSize: 17, color: C.inkSoft, marginBottom: 16 }}>
-        활동 중 어떤 문제가 있으시면 아래 버튼을 누르세요.<br />코디네이터 한가은이 바로 연락드립니다.
+        활동하시다 불편한 일이 있으면 아래 버튼만 눌러 주세요.<br />코디네이터 한가은이 바로 연락드릴게요.
       </div>
       {confirming ? (
         <div style={{ display: 'flex', gap: 10 }}>
