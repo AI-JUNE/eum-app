@@ -1885,6 +1885,82 @@ function MissionBoardCard() {
   );
 }
 
+// 게이미피케이션 — 청년 활동 배지/업적 (온디바이스, 애니메이션)
+function AchievementsCard({ totalHours, logs, state }) {
+  const approved = (logs || []).filter((l) => l.approved);
+  const typeOf = (id) => { const a = state.activities.find((x) => x.id === id); return a && a.type; };
+  const cnt = (t) => approved.filter((l) => typeOf(l.activity_id) === t).length;
+  const types = ['디지털코칭', '학습멘토', '진로조언받기', '기억아카이브'];
+  const distinct = types.filter((t) => cnt(t) > 0).length;
+  const badges = [
+    { icon: Check, color: C.sage, label: '첫 발걸음', desc: '첫 활동 기록', got: approved.length >= 1 },
+    { icon: Activity, color: C.brand, label: '5회 달성', desc: '활동 5회', got: approved.length >= 5 },
+    { icon: Clock, color: C.lavender, label: '꾸준한 동행', desc: '활동 10시간', got: totalHours >= 10 },
+    { icon: Smile, color: C.peach, label: '디지털 선생님', desc: '디지털코칭 3회', got: cnt('디지털코칭') >= 3 },
+    { icon: Camera, color: C.gold, label: '동네 기록가', desc: '기억아카이브 2회', got: cnt('기억아카이브') >= 2 },
+    { icon: Heart, color: C.red, label: '세대 연결자', desc: '4종 활동 모두', got: distinct >= 4 },
+  ];
+  const got = badges.filter((b) => b.got).length;
+  return (
+    <Card padding={20} style={{ marginBottom: 20 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6, flexWrap: 'wrap' }}>
+        <Award size={18} color={C.brand} />
+        <div style={{ fontSize: 14, fontWeight: 800, color: C.ink }}>나의 활동 배지</div>
+        <span style={{ marginLeft: 'auto', fontSize: 13, fontWeight: 800, color: C.brand, fontFamily: SERIF_STACK }}><CountUp value={got} />/{badges.length}</span>
+      </div>
+      <div style={{ marginBottom: 16 }}><AnimatedBar value={got} max={badges.length} color={C.brand} height={8} /></div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 10 }}>
+        {badges.map((b, i) => {
+          const Icon = b.icon;
+          return (
+            <Reveal key={i} delay={i * 90}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '11px 12px', borderRadius: 11, background: b.got ? b.color + '14' : C.bg, border: '1px solid ' + (b.got ? b.color + '40' : C.borderSoft), opacity: b.got ? 1 : 0.55 }}>
+                <div style={{ width: 34, height: 34, borderRadius: 9, background: b.got ? b.color : C.muteSoft, color: b.got ? '#fff' : C.mute, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Icon size={17} />
+                </div>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontSize: 12.5, fontWeight: 800, color: b.got ? C.ink : C.mute }}>{b.label}</div>
+                  <div style={{ fontSize: 10.5, color: C.mute, marginTop: 1 }}>{b.got ? '획득 완료' : b.desc}</div>
+                </div>
+              </div>
+            </Reveal>
+          );
+        })}
+      </div>
+    </Card>
+  );
+}
+
+// 어르신 — 오늘의 기분 체크인 (온디바이스)
+function MoodCheckCard() {
+  const [mood, setMood] = useState(null);
+  const moods = [
+    { e: '😀', label: '아주 좋아요', color: C.success },
+    { e: '🙂', label: '괜찮아요', color: C.sage },
+    { e: '😐', label: '그저 그래요', color: C.gold },
+    { e: '😟', label: '힘들어요', color: C.amber },
+  ];
+  return (
+    <Card padding={20} style={{ marginBottom: 20 }}>
+      <div style={{ fontSize: 18, fontWeight: 800, color: C.ink, marginBottom: 4 }}>오늘 기분은 어떠세요?</div>
+      <div style={{ fontSize: 14, color: C.mute, marginBottom: 14 }}>버튼을 눌러 알려주세요. 코디네이터가 살펴봐요.</div>
+      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+        {moods.map((m, i) => (
+          <button key={i} onClick={() => setMood(i)} style={{ flex: 1, minWidth: 120, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '14px 8px', borderRadius: 14, border: '2px solid ' + (mood === i ? m.color : C.border), background: mood === i ? m.color + '18' : C.card, cursor: 'pointer', fontFamily: FONT_STACK }}>
+            <span style={{ fontSize: 30 }}>{m.e}</span>
+            <span style={{ fontSize: 14, fontWeight: 700, color: mood === i ? m.color : C.inkSoft }}>{m.label}</span>
+          </button>
+        ))}
+      </div>
+      {mood !== null && (
+        <div style={{ marginTop: 14, padding: '12px 14px', background: C.successSoft, borderRadius: 10, fontSize: 15, color: C.inkSoft, lineHeight: 1.5 }}>
+          {mood <= 1 ? '오늘도 좋은 하루 보내고 계시네요. 알려주셔서 고마워요!' : '알려주셔서 고마워요. 필요하시면 코디네이터 한가은이 곧 연락드릴게요.'}
+        </div>
+      )}
+    </Card>
+  );
+}
+
 function YouthApp({ state, user, dispatch, showToast }) {
   const [view, setView] = useState('dashboard');
   const match = state.matches.find((m) => m.youth_id === user.id);
@@ -1978,6 +2054,8 @@ function YouthApp({ state, user, dispatch, showToast }) {
             <StatCard label="누적 정산액" value={krw(totalEarned)} sub="광주상생카드" icon={<Wallet size={16} color={C.gold} />} color={C.gold} />
             <StatCard label="다음 활동" value={nextActivity ? fmtRelativeDate(nextActivity.scheduled_at) : '—'} sub={nextActivity ? nextActivity.type : '예정 없음'} icon={<Calendar size={16} color={C.lavender} />} />
           </div>
+
+          <AchievementsCard totalHours={totalHours} logs={myLogs} state={state} />
 
           {/* Activity Cards 4종 */}
           <div style={{ marginBottom: 20 }}>
@@ -2595,6 +2673,7 @@ function SeniorApp({ state, user, dispatch, showToast }) {
           </div>
 
           <AccessibilityCard readText={'안녕하세요 ' + user.name + '님. 오늘도 좋은 하루 되세요. ' + (nextActivity && youth ? ('다음 만남은 ' + youth.name + ' 청년과 함께예요.') : '오늘은 예정된 만남이 없어요.')} />
+          <MoodCheckCard />
 
           {/* 다음 만남 — 크게 강조 */}
           {nextActivity && youth && (
