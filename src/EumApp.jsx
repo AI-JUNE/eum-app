@@ -45,6 +45,10 @@ const C = {
   blueSoft: '#E4EBF3',
   amber: '#D9A441',
   amberSoft: '#F7EDD3',
+  success: '#5F8556',
+  successSoft: '#E8EFE3',
+  muteSoft: '#EFEBE3',
+  brandLight: '#E0936B',
 };
 
 const PERSONA = {
@@ -58,7 +62,7 @@ const PERSONA = {
 };
 
 const FONT_STACK = `-apple-system, BlinkMacSystemFont, "Pretendard Variable", Pretendard, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif`;
-const SERIF_STACK = `"Source Serif Pro", "Noto Serif KR", Georgia, serif`;
+const SERIF_STACK = `"Source Serif 4", "Source Serif Pro", "Noto Serif KR", Georgia, serif`;
 
 // ============================================================================
 // 2. SEED DATA
@@ -223,11 +227,31 @@ const SEED_DATA = {
 
 const STORAGE_KEY = 'eum:appdata:v2';
 
-// 시드/스키마 불일치 보정: 활동 date/time, 로그 date, 자녀 guardian_id 채우기
+// 검증 단계 안내 메모 (백필용)
+const VERIF_STEP_NOTES = {
+  document: '신청서·동의서 제출 확인 완료.',
+  criminal_record: '경찰청 범죄경력 회보 (성범죄·아동학대 무관).',
+  abuse_record: '아동학대 전력 조회 (아동복지법 제29조의3).',
+  interview: '대면 면접·오리엔테이션.',
+  reference: '추천인 통화 확인.',
+  guardian_consent: '보호자 동의서 5종 확인.',
+};
+// 신청자 유형별 검증 단계 구성
+function verifStepsFor(type) {
+  if (type === 'parent') return ['document', 'guardian_consent', 'interview'];
+  const base = ['document', 'criminal_record', 'abuse_record', 'interview'];
+  return base.concat(['reference']);
+}
+// 시드/스키마 불일치 보정: 활동 date/time·title, 로그 date, 자녀 guardian_id,
+// 매칭 적합도, 신청 상태, 검증 단계(application_id), 정산 필드 정합
 function normalizeState(s) {
   if (!s) return s;
+  const pById = {};
+  (s.participants || []).forEach(p => { pById[p.id] = p; });
+
   const activities = (s.activities || []).map(a => ({
     ...a,
+    title: a.title || a.type,
     date: a.date || (a.scheduled_at || '').slice(0, 10),
     time: a.time || (a.scheduled_at || '').slice(11, 16),
   }));
@@ -241,7 +265,58 @@ function normalizeState(s) {
   const participants = (s.participants || []).map(p =>
     p.type === 'child' ? { ...p, guardian_id: p.guardian_id || p.parent_id } : p
   );
-  return { ...s, activities, activity_logs, participants };
+
+  // 매칭 적합도(score) 백필 — 결정적 값 (90~97)
+  const matches = (s.matches || []).map(m => ({
+    ...m,
+    score: m.score ?? (90 + ([...String(m.id)].reduce((a, c) => a + c.charCodeAt(0), 0) % 8)),
+  }));
+  const matchedIds = new Set();
+  matches.forEach(m => {
+    if (m.status === 'active' || m.status === 'proposed') {
+      matchedIds.add(m.youth_id); matchedIds.add(m.senior_id); matchedIds.add(m.child_id);
+    }
+  });
+
+  // 신청 상태(status)·신청일(applied_at) 백필
+  const seedVerifByPid = {};
+  (s.verifications || []).forEach(v => { if (v.participant_id) seedVerifByPid[v.participant_id] = v; });
+  const applications = (s.applications || []).map(a => {
+    if (a.status) return { ...a, applied_at: a.applied_at || a.submitted_at };
+    const pv = seedVerifByPid[a.participant_id];
+    let status;
+    if (matchedIds.has(a.participant_id)) status = 'completed';
+    else if (pv && pv.status === 'passed') status = 'verified';
+    else status = 'screening';
+    return { ...a, status, applied_at: a.applied_at || a.submitted_at };
+  });
+
+  // 검증 단계(step) 레코드 백필 — application_id 기준 (중복 생성 방지)
+  const existingAppVerif = new Set((s.verifications || []).filter(v => v.application_id).map(v => v.application_id));
+  const genVerifs = [];
+  applications.forEach(a => {
+    if (existingAppVerif.has(a.id)) return;
+    const part = pById[a.participant_id];
+    const overall = a.status === 'completed' ? 'passed'
+      : (seedVerifByPid[a.participant_id] && seedVerifByPid[a.participant_id].status) || 'in_progress';
+    verifStepsFor(part && part.type).forEach((step, i) => {
+      let st;
+      if (overall === 'passed') st = 'passed';
+      else st = i === 0 ? 'passed' : i === 1 ? 'in_progress' : 'pending';
+      genVerifs.push({ id: `${a.id}-${step}`, application_id: a.id, step, status: st, note: VERIF_STEP_NOTES[step] || '' });
+    });
+  });
+  const verifications = [...(s.verifications || []), ...genVerifs];
+
+  // 정산 필드 정합 (period/amount/status) — 'paid' → 'issued'
+  const settlements = (s.settlements || []).map(st => ({
+    ...st,
+    period: st.period || st.month,
+    amount: st.amount != null ? st.amount : st.amount_krw,
+    status: st.status === 'paid' ? 'issued' : st.status,
+  }));
+
+  return { ...s, activities, activity_logs, participants, matches, applications, verifications, settlements };
 }
 
 async function loadState() {
@@ -1415,6 +1490,55 @@ function PartnerStrip() {
   );
 }
 
+// 발표용 — 해외·국내 벤치마크 비교 (이음의 차별점 포지셔닝)
+function BenchmarkBand() {
+  const models = [
+    { flag: '🇺🇸', name: 'Foster Grandparent', country: '미국 · AmeriCorps', adopt: '어르신→아동 1:1 멘토 + 활동비 보상', limit: '두 세대(어르신·아동)만 연결' },
+    { flag: '🇳🇱', name: 'Humanitas Deventer', country: '네덜란드', adopt: '청년↔어르신 교류로 무료 거주 교환', limit: '주거 자원에 한정된 1:1 교환' },
+    { flag: '🇬🇧', name: 'The Cares Family', country: '영국 런던·맨체스터', adopt: '도시 청년↔어르신 외로움 해소', limit: '아동·양육가정은 포함되지 않음' },
+    { flag: '🇰🇷', name: '케어닥 · 자란다', country: '국내 돌봄 매칭', adopt: '앱으로 간편 매칭·일지 관리', limit: '대가 지불형 일방 돌봄 중개' },
+  ];
+  return (
+    <div style={{ marginBottom: 36 }}>
+      <div style={{ textAlign: 'center', fontSize: 12, fontWeight: 700, color: C.brand, letterSpacing: '0.1em', marginBottom: 4 }}>왜 이음인가</div>
+      <div style={{ textAlign: 'center', fontSize: 20, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK, letterSpacing: '-0.02em', marginBottom: 6 }}>세계가 검증한 모델, 이음이 한 걸음 더</div>
+      <div style={{ textAlign: 'center', fontSize: 13, color: C.mute, marginBottom: 18, maxWidth: 560, marginLeft: 'auto', marginRight: 'auto', lineHeight: 1.6 }}>
+        50년 이상 검증된 해외 세대통합 모델의 장점은 그대로 가져오고, 모두가 놓친 <strong style={{ color: C.inkSoft }}>세 세대 동시·상호 교환</strong>을 더했어요.
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(232px, 1fr))', gap: 12, marginBottom: 16 }}>
+        {models.map((m, i) => (
+          <div key={i} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+              <span style={{ fontSize: 20 }}>{m.flag}</span>
+              <div>
+                <div style={{ fontSize: 13.5, fontWeight: 700, color: C.ink, lineHeight: 1.2 }}>{m.name}</div>
+                <div style={{ fontSize: 11, color: C.mute }}>{m.country}</div>
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 6, marginBottom: 7 }}>
+              <Check size={14} color={C.success} style={{ flexShrink: 0, marginTop: 2 }} />
+              <span style={{ fontSize: 12, color: C.inkSoft, lineHeight: 1.5 }}>{m.adopt}</span>
+            </div>
+            <div style={{ display: 'flex', gap: 6 }}>
+              <ArrowRight size={14} color={C.mute} style={{ flexShrink: 0, marginTop: 2 }} />
+              <span style={{ fontSize: 12, color: C.mute, lineHeight: 1.5 }}>{m.limit}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+      <div style={{ background: `linear-gradient(135deg, ${C.brand} 0%, ${C.brandDark} 100%)`, borderRadius: 14, padding: '20px 24px', display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap', boxShadow: `0 10px 28px ${C.brand}33` }}>
+        <div style={{ background: 'rgba(255,255,255,0.16)', padding: 11, borderRadius: 12, display: 'flex', backdropFilter: 'blur(8px)' }}>
+          <Sparkles size={22} color="#fff" />
+        </div>
+        <div style={{ flex: 1, minWidth: 240 }}>
+          <div style={{ fontSize: 15, fontWeight: 800, color: '#fff', marginBottom: 3, fontFamily: SERIF_STACK }}>이음 = 청년 · 어르신 · 아동 3세대 상호 품앗이</div>
+          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.9)', lineHeight: 1.55 }}>기존 모델은 두 세대의 일방 돌봄. 이음은 세 세대가 동시에 서로 주고받고, 도운 만큼 모두에게 보상이 돌아가는 선순환 구조예요.</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function RoleSelect({ state, onSelectRole, onShowApplication }) {
   // 시드된 페르소나 fixed assignments
   const personas = [
@@ -1505,6 +1629,7 @@ function RoleSelect({ state, onSelectRole, onShowApplication }) {
         </div>
 
         <TestimonialBand />
+        <BenchmarkBand />
         <FaqBand />
         <PartnerStrip />
 
@@ -2138,6 +2263,67 @@ function YouthGalleryCard({ activities }) {
   );
 }
 
+// 품앗이 타임뱅크 — 이음의 핵심 차별점(상호 가치 교환) 시각화
+function PumasiLedgerCard({ logs, state }) {
+  const tb = useMemo(() => {
+    const approved = (logs || []).filter(l => l.approved);
+    const typeOf = id => (state.activities.find(a => a.id === id) || {}).type;
+    const sum = pred => approved.filter(l => pred(typeOf(l.activity_id))).reduce((acc, l) => acc + (l.hours || 0), 0);
+    const give = sum(t => t === '디지털코칭' || t === '학습멘토');
+    const receive = sum(t => t === '진로조언받기');
+    const shared = sum(t => t === '기억아카이브');
+    const total = give + receive + shared || 1;
+    return { give, receive, shared, total };
+  }, [logs, state.activities]);
+
+  const pct = v => Math.round((v / tb.total) * 100);
+  const cols = [
+    { key: 'give', label: '내가 나눈 도움', val: tb.give, color: C.sage, soft: C.sageSoft, icon: <Heart size={16} />, sub: '어르신 디지털·아동 학습' },
+    { key: 'receive', label: '내가 받은 지혜', val: tb.receive, color: C.lavender, soft: C.lavenderSoft, icon: <GraduationCap size={16} />, sub: '어르신의 진로·인생 조언' },
+    { key: 'shared', label: '함께 만든 기록', val: tb.shared, color: C.gold, soft: C.goldSoft, icon: <Camera size={16} />, sub: '동네 기억 아카이브' },
+  ];
+
+  return (
+    <Reveal>
+      <Card padding={0} style={{ marginBottom: 20, overflow: 'hidden', border: `1px solid ${C.border}` }}>
+        <div style={{ padding: '18px 22px', background: `linear-gradient(135deg, ${C.brand} 0%, ${C.brandDark} 100%)`, color: '#fff' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ background: 'rgba(255,255,255,0.16)', padding: 8, borderRadius: 10, display: 'flex', backdropFilter: 'blur(8px)' }}><Sparkles size={18} /></div>
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', opacity: 0.85 }}>품앗이 타임뱅크</div>
+              <div style={{ fontSize: 16, fontWeight: 800, fontFamily: SERIF_STACK, letterSpacing: '-0.01em' }}>일방 봉사가 아니라, 주고받는 관계예요</div>
+            </div>
+          </div>
+        </div>
+        <div style={{ padding: 22 }}>
+          {/* 균형 바 */}
+          <div style={{ display: 'flex', height: 14, borderRadius: 999, overflow: 'hidden', background: C.bg, marginBottom: 8 }}>
+            {cols.map(c => c.val > 0 && (
+              <div key={c.key} style={{ width: `${pct(c.val)}%`, background: c.color, transition: 'width 0.6s ease' }} title={`${c.label} ${c.val}시간`} />
+            ))}
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: C.mute, marginBottom: 18 }}>
+            <span>← 나눈 시간</span><span>받은 시간 →</span>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12 }}>
+            {cols.map(c => (
+              <div key={c.key} style={{ padding: 14, borderRadius: 10, background: c.soft, border: `1px solid ${c.color}22` }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: c.color, fontWeight: 700, fontSize: 12, marginBottom: 8 }}>{c.icon}{c.label}</div>
+                <div style={{ fontSize: 24, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK, letterSpacing: '-0.02em' }}><CountUp value={c.val} suffix="시간" /></div>
+                <div style={{ fontSize: 11, color: C.mute, marginTop: 4, lineHeight: 1.4 }}>{c.sub}</div>
+              </div>
+            ))}
+          </div>
+          <div style={{ marginTop: 16, padding: '12px 14px', borderRadius: 10, background: C.cream, fontSize: 12.5, color: C.inkSoft, lineHeight: 1.6, display: 'flex', gap: 8 }}>
+            <TrendingUp size={15} color={C.brand} style={{ flexShrink: 0, marginTop: 2 }} />
+            <span>주기만 하는 봉사는 오래가지 못해요. 이음은 <strong style={{ color: C.brand }}>나눈 만큼 나도 배우고 보상받는</strong> 구조라, 세 세대가 모두 지속할 수 있어요.</span>
+          </div>
+        </div>
+      </Card>
+    </Reveal>
+  );
+}
+
 function YouthApp({ state, user, dispatch, showToast }) {
   const [view, setView] = useState('dashboard');
   const match = state.matches.find((m) => m.youth_id === user.id);
@@ -2235,6 +2421,7 @@ function YouthApp({ state, user, dispatch, showToast }) {
           </div>
 
           <AchievementsCard totalHours={totalHours} logs={myLogs} state={state} />
+          <PumasiLedgerCard logs={myLogs} state={state} />
 
           {/* Activity Cards 4종 */}
           <div style={{ marginBottom: 20 }}>
@@ -3007,7 +3194,7 @@ function SeniorApp({ state, user, dispatch, showToast }) {
       {view === 'settlement' && (
         <>
           <div style={{ fontSize: 32, fontWeight: 700, color: C.ink, marginBottom: 8, fontFamily: SERIF_STACK, letterSpacing: '-0.03em' }}>받은 상품권</div>
-          <div style={{ fontSize: 17, color: C.mute, marginBottom: 24 }}>광주상생카드은 동네 가맹점에서 사용하실 수 있습니다</div>
+          <div style={{ fontSize: 17, color: C.mute, marginBottom: 24 }}>광주상생카드는 동네 가맹점에서 사용하실 수 있습니다</div>
           <Card padding={28} style={{ marginBottom: 20, background: C.goldSoft, border: `2px solid ${C.gold}40` }}>
             <div style={{ fontSize: 16, color: C.gold, fontWeight: 700, marginBottom: 8 }}>누적 합계</div>
             <div style={{ fontSize: 48, fontWeight: 700, color: C.ink, fontFamily: SERIF_STACK, letterSpacing: '-0.03em', lineHeight: 1 }}>{krw(totalEarned)}</div>
@@ -3654,7 +3841,7 @@ function ParentSafety({ user, myMatches, myIncidents, dispatch, showToast }) {
             <div style={{ fontSize: 14, fontWeight: 700, color: C.ink }}>긴급 시</div>
           </div>
           <div style={{ fontSize: 13, color: C.inkSoft, lineHeight: 1.7 }}>
-            아이의 안전이 위협받는 즉시 위험 상황에서는 <strong style={{ color: C.red }}>112</strong> 또는 <strong style={{ color: C.red }}>119</strong>에 먼저 신고 후 코디네이터에게 알려주세요.
+            아이의 안전이 위협받는 위급 상황에서는 <strong style={{ color: C.red }}>112</strong> 또는 <strong style={{ color: C.red }}>119</strong>에 먼저 신고 후 코디네이터에게 알려주세요.
           </div>
         </Card>
       </div>
@@ -3782,8 +3969,9 @@ function CoordOverview({ state, setView }) {
   const typeChart = useMemo(() => {
     const types = {};
     state.activities.forEach(a => { types[a.type] = (types[a.type] || 0) + 1; });
-    const colors = { 돌봄: C.peach, 학습: C.sage, 동행: C.lavender, 생활: C.brand, 디지털: C.brandLight };
-    return Object.entries(types).map(([type, count]) => ({ name: type, value: count, color: colors[type] || C.mute }));
+    const colors = { 디지털코칭: C.brand, 학습멘토: C.sage, 진로조언받기: C.lavender, 기억아카이브: C.gold, 돌봄: C.peach, 생활지원: C.blue };
+    const palette = [C.brand, C.sage, C.lavender, C.gold, C.peach, C.blue, C.amber];
+    return Object.entries(types).map(([type, count], i) => ({ name: type, value: count, color: colors[type] || palette[i % palette.length] }));
   }, [state]);
 
   return (
@@ -3812,7 +4000,7 @@ function CoordOverview({ state, setView }) {
       {/* KPI 그리드 */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 14, marginBottom: 18 }}>
         <StatCard label="참여자" value={kpis.totalParticipants} sub={`청년 ${kpis.youthCount} / 어르신 ${kpis.seniorCount} / 양육 ${kpis.parentCount}`} color={C.brand} icon={<Users size={18} />} />
-        <StatCard label="활성 매칭" value={kpis.activeMatches} sub={`목표 8건 중 ${kpis.activeMatches}건 진행`} color={C.sage} icon={<Heart size={18} />} trend={kpis.activeMatches >= 3 ? `+${kpis.activeMatches - 0}` : null} />
+        <StatCard label="활성 매칭" value={kpis.activeMatches} sub={`목표 8건 중 ${kpis.activeMatches}건 진행`} color={C.sage} icon={<Heart size={18} />} trend={kpis.activeMatches >= 3 ? `+${kpis.activeMatches}` : null} />
         <StatCard label="누적 활동시간" value={`${kpis.totalHours}h`} sub={`목표 1,440시간 중 ${Math.round(kpis.totalHours / 1440 * 100)}%`} color={C.lavender} icon={<Clock size={18} />} />
         <StatCard label="지급 정산" value={krw(kpis.totalSettled)} sub={`${state.settlements.filter(s => s.status === 'issued').length}건 발급 완료`} color={C.gold} icon={<Wallet size={18} />} />
       </div>
@@ -4371,7 +4559,7 @@ function MatchCard({ match, state, onClick, accent }) {
           <div style={{ width: 8, height: 8, borderRadius: 999, background: accent }} />
           <div style={{ fontSize: 11, fontWeight: 700, color: accent, letterSpacing: '0.06em' }}>{match.id.toUpperCase()}</div>
         </div>
-        <Badge color={accent} soft={`${accent}15`}>적합도 {match.score}</Badge>
+        <Badge color={accent} soft={`${accent}15`}>적합도 {match.score}%</Badge>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, marginBottom: 14 }}>
         {[{ p: y, color: C.sage }, { p: s, color: C.lavender }, { p: c, color: C.peach }].map(({ p, color }) => p && (
@@ -4617,7 +4805,7 @@ function CoordSettlements({ state, dispatch, showToast, user }) {
             <div style={{ fontSize: 13, color: C.inkSoft }}>{calc.count}회</div>
             <div style={{ fontSize: 13, fontWeight: 700, color: C.ink, fontFamily: SERIF_STACK }}>{calc.hours}h</div>
             <div style={{ fontSize: 13, fontWeight: 800, color: C.gold, fontFamily: SERIF_STACK }}>{krw(calc.amount)}</div>
-            <div style={{ fontSize: 12, color: C.inkSoft }}>{calc.participant.type === 'youth' ? '계좌이체' : '온누리상품권'}</div>
+            <div style={{ fontSize: 12, color: C.inkSoft }}>{calc.participant.type === 'youth' ? '계좌이체' : '광주상생카드'}</div>
             <div style={{ textAlign: 'right' }}>
               {calc.existing?.status === 'issued' ? <Badge color={C.success} soft={C.successSoft} size="sm">발급</Badge> :
                 <Button variant="brand" size="sm" onClick={() => { issueOne(calc); showToast({ type: 'success', message: `${calc.participant.name}님께 발급되었습니다.` }); }}>발급</Button>}
@@ -5027,7 +5215,7 @@ function appReducer(state, action) {
       return { ...state, settlements: [...state.settlements, action.payload] };
     }
     case 'RESET_DATA': {
-      return { ...SEED_DATA, currentUserId: null, currentRole: null };
+      return normalizeState({ ...SEED_DATA, currentUserId: null, currentRole: null });
     }
     default:
       return state;
