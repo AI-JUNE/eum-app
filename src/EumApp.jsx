@@ -1620,6 +1620,72 @@ function BenchmarkBand() {
   );
 }
 
+// 발표용 — 랜딩 기술 차별성·해자(moat) 섹션
+function MoatBand() {
+  const items = [
+    { icon: Sparkles, color: C.brand, soft: C.brandSoft, tag: '특허 출원 준비 중', title: '3세대 트리오 매칭 엔진', desc: '거주 근접·생활 일정·관심 시너지·안전 적합·상호 보완 다섯 요소를 가중 점수화해 한 번에 세 세대를 묶습니다. 한 명을 다른 한 명에게 붙이는 1:1 중개와는 구조가 달라요.' },
+    { icon: ShieldCheck, color: C.blue, soft: C.blueSoft, tag: '아동 동반 필수 절차', title: '4단계 안전검증 · 책임보험 내장', desc: '면접·범죄경력·아동학대 전력·추천인 확인을 거치고, 모든 대면 활동은 책임보험으로 보장합니다. 미성년 보호자 5종 전자동의까지 시스템에 들어가 있어요.' },
+    { icon: Wallet, color: C.gold, soft: C.goldSoft, tag: '지자체·1365 연계', title: '활동을 보상으로 잇는 정산', desc: '활동 기록이 봉사시간과 광주상생카드 보상으로 자동 환산·발급됩니다. 통합돌봄·자원봉사 행정과 맞물리는 정산 흐름이 이미 돌아갑니다.' },
+  ];
+  return (
+    <div style={{ marginBottom: 36 }}>
+      <div style={{ textAlign: 'center', fontSize: 12, fontWeight: 700, color: C.brand, letterSpacing: '0.1em', marginBottom: 4 }}>이음만의 것</div>
+      <div style={{ textAlign: 'center', fontSize: 20, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK, letterSpacing: '-0.02em', marginBottom: 6 }}>따라 하기 어려운 세 가지</div>
+      <div style={{ textAlign: 'center', fontSize: 13, color: C.mute, marginBottom: 18, maxWidth: 540, marginLeft: 'auto', marginRight: 'auto', lineHeight: 1.6 }}>아이디어가 아니라, 이미 작동하는 매칭·안전·정산 기술이 이음의 진입장벽이에요</div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(232px, 1fr))', gap: 12 }}>
+        {items.map((m, i) => {
+          const Icon = m.icon;
+          return (
+            <div key={i} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, padding: 18 }}>
+              <div style={{ display: 'inline-flex', padding: 10, borderRadius: 11, background: m.soft, marginBottom: 12 }}><Icon size={20} color={m.color} /></div>
+              <div style={{ fontSize: 10.5, fontWeight: 700, color: m.color, letterSpacing: '0.04em', marginBottom: 5 }}>{m.tag}</div>
+              <div style={{ fontSize: 15, fontWeight: 800, color: C.ink, marginBottom: 7, lineHeight: 1.3 }}>{m.title}</div>
+              <div style={{ fontSize: 12.5, color: C.inkSoft, lineHeight: 1.6 }}>{m.desc}</div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// 발표용 — 랜딩 수익 구조(지속가능 모델) 섹션 · B2G + 구독 + 수수료
+function RevenueModelBand() {
+  const streams = [
+    { icon: Award, color: C.sage, soft: C.sageSoft, badge: '공공 기반', title: '지자체 위탁 · 바우처', desc: '통합돌봄 위탁운영비와 사회서비스 바우처 정산이 매출의 토대. 공공 예산으로 초기 운영을 안정적으로 받칩니다.' },
+    { icon: Heart, color: C.peach, soft: C.peachSoft, badge: '가족 구독', title: '안심 케어 구독', desc: '보호자 대상 월 구독 — 실시간 안전 알림, 활동 리포트, 우선 매칭. 공공 밖 민간 수요로 확장합니다.' },
+    { icon: Wallet, color: C.gold, soft: C.goldSoft, badge: '거래 수수료', title: '매칭 · 정산 수수료', desc: '상생카드 정산과 제휴 서비스 연계에서 발생하는 수수료. 트리오가 늘수록 함께 커지는 매출이에요.' },
+  ];
+  return (
+    <div style={{ marginBottom: 36 }}>
+      <div style={{ textAlign: 'center', fontSize: 12, fontWeight: 700, color: C.brand, letterSpacing: '0.1em', marginBottom: 4 }}>어떻게 지속되나</div>
+      <div style={{ textAlign: 'center', fontSize: 20, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK, letterSpacing: '-0.02em', marginBottom: 6 }}>공공으로 시작해, 자립으로</div>
+      <div style={{ textAlign: 'center', fontSize: 13, color: C.mute, marginBottom: 18, maxWidth: 540, marginLeft: 'auto', marginRight: 'auto', lineHeight: 1.6 }}>한 곳에 기대지 않는 세 갈래 수익으로, 보조금이 끝나도 돌아가는 구조를 설계했어요</div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(232px, 1fr))', gap: 12, marginBottom: 16 }}>
+        {streams.map((s, i) => {
+          const Icon = s.icon;
+          return (
+            <div key={i} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, padding: 18 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 10 }}>
+                <div style={{ display: 'inline-flex', padding: 9, borderRadius: 10, background: s.soft }}><Icon size={18} color={s.color} /></div>
+                <span style={{ fontSize: 11, fontWeight: 700, color: s.color, background: s.soft, padding: '3px 9px', borderRadius: 999 }}>{s.badge}</span>
+              </div>
+              <div style={{ fontSize: 14.5, fontWeight: 800, color: C.ink, marginBottom: 6, lineHeight: 1.3 }}>{s.title}</div>
+              <div style={{ fontSize: 12.5, color: C.inkSoft, lineHeight: 1.6 }}>{s.desc}</div>
+            </div>
+          );
+        })}
+      </div>
+      <div style={{ background: C.cream, border: `1px solid ${C.border}`, borderRadius: 14, padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+        <TrendingUp size={20} color={C.sage} />
+        <div style={{ flex: 1, minWidth: 240, fontSize: 13, color: C.inkSoft, lineHeight: 1.55 }}>
+          <strong style={{ color: C.ink }}>트리오 한 쌍이 늘 때마다 이익이 쌓이는 구조.</strong> 공공 위탁이 기반을 깔고, 구독·수수료가 마진을 더해 규모가 커질수록 자립도가 올라갑니다.
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // 히어로 일러스트 — 세 인물이 각자 움직이는 SVG (영상 없이 per-character 모션)
 function HeroScene() {
   return (
@@ -1825,6 +1891,8 @@ function RoleSelect({ state, onSelectRole, onShowApplication }) {
 
         <Reveal><TestimonialBand /></Reveal>
         <Reveal delay={60}><BenchmarkBand /></Reveal>
+        <Reveal delay={60}><MoatBand /></Reveal>
+        <Reveal delay={60}><RevenueModelBand /></Reveal>
         <Reveal delay={60}><FaqBand /></Reveal>
         <PartnerStrip />
 
@@ -4271,6 +4339,66 @@ function CoordinatorApp({ state, user, dispatch, showToast }) {
   );
 }
 
+// --- 11.0 운영·수익 모델 (가정 기반 시뮬레이션) ---
+function CoordRevenueModel({ state }) {
+  const m = useMemo(() => {
+    const trios = state.matches.filter(x => x.status === 'active').length;
+    const parents = state.participants.filter(p => p.type === 'parent' && p.status === 'active').length;
+    const settled = state.settlements.filter(isSettled).reduce((s, x) => s + settleAmount(x), 0);
+    // 가정 단가 (월 기준) — 발표용 시뮬레이션, 실제 보상 정산과 별개
+    const B2G_PER_TRIO = 250000;   // 지자체 통합돌봄 위탁운영비 / 트리오·월
+    const SUB_PER_PARENT = 19900;  // 가족 안심 구독료 / 보호자·월
+    const FEE_RATE = 0.10;         // 정산·제휴 수수료율
+    const COST_PER_TRIO = 180000;  // 트리오당 월 운영비(코디·보험·인프라)
+    const rB2G = trios * B2G_PER_TRIO;
+    const rSub = parents * SUB_PER_PARENT;
+    const rFee = Math.round(settled * FEE_RATE);
+    const revenue = rB2G + rSub + rFee;
+    const cost = trios * COST_PER_TRIO;
+    const margin = revenue - cost;
+    const marginPct = revenue > 0 ? Math.round(margin / revenue * 100) : 0;
+    const contribPerTrio = B2G_PER_TRIO - COST_PER_TRIO;
+    return { trios, parents, settled, rB2G, rSub, rFee, revenue, cost, margin, marginPct, contribPerTrio };
+  }, [state]);
+
+  const streams = [
+    { label: '지자체 위탁·바우처', amt: m.rB2G, color: C.sage, note: `활성 트리오 ${m.trios}쌍 × 월 25만` },
+    { label: '가족 안심 구독', amt: m.rSub, color: C.peach, note: `보호자 ${m.parents}명 × 월 1.99만` },
+    { label: '매칭·정산 수수료', amt: m.rFee, color: C.gold, note: '정산액의 10%' },
+  ];
+  const maxAmt = Math.max(m.rB2G, m.rSub, m.rFee, 1);
+
+  return (
+    <Card padding={20} style={{ marginBottom: 18 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
+        <Wallet size={18} style={{ color: C.gold }} />
+        <div style={{ fontSize: 14, fontWeight: 700, color: C.ink }}>지속가능 운영·수익 모델</div>
+        <Badge color={C.mute} soft={C.muteSoft} size="sm">가정 기반 시뮬레이션</Badge>
+      </div>
+      <div style={{ fontSize: 12, color: C.mute, marginBottom: 16 }}>현재 파일럿 규모에 가정 단가를 적용한 월 추정 · 실제 보상 정산과는 별개예요</div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12, marginBottom: 16 }}>
+        <StatCard label="월 매출(추정)" value={krw(m.revenue)} sub="B2G+구독+수수료" color={C.sage} icon={<TrendingUp size={18} />} />
+        <StatCard label="월 운영비(추정)" value={krw(m.cost)} sub={`트리오당 18만 × ${m.trios}`} color={C.inkSoft} icon={<Activity size={18} />} />
+        <StatCard label="월 영업이익(추정)" value={krw(m.margin)} sub={`영업이익률 ${m.marginPct}%`} trend={m.margin > 0 ? 'up' : null} color={C.brand} icon={<Wallet size={18} />} />
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 14 }}>
+        {streams.map((s, i) => (
+          <div key={i}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 5 }}>
+              <span style={{ color: C.inkSoft, fontWeight: 600 }}>{s.label} <span style={{ color: C.muteLight, fontWeight: 500 }}>· {s.note}</span></span>
+              <span style={{ fontWeight: 700, color: s.color }}>{krw(s.amt)}</span>
+            </div>
+            <AnimatedBar value={s.amt} max={maxAmt} color={s.color} height={7} delay={i * 90} />
+          </div>
+        ))}
+      </div>
+      <div style={{ background: C.sageSoft, border: `1px solid ${C.sage}25`, borderRadius: 10, padding: '12px 14px', fontSize: 12.5, color: C.inkSoft, lineHeight: 1.55 }}>
+        <strong style={{ color: C.sage }}>트리오당 기여이익 +{krw(m.contribPerTrio)}.</strong> 공공 위탁(25만)이 운영비(18만)를 이미 넘어, 트리오가 늘수록 흑자 폭이 커지고 구독·수수료가 마진을 더합니다.
+      </div>
+    </Card>
+  );
+}
+
 // --- 11.1 Overview (KPI dashboard) ---
 
 function CoordOverview({ state, setView }) {
@@ -4339,7 +4467,7 @@ function CoordOverview({ state, setView }) {
           <h1 style={{ fontSize: 28, fontWeight: 700, color: C.ink, letterSpacing: '-0.04em', margin: 0, fontFamily: FONT_STACK, lineHeight: 1.05 }}>한가은 코디님, {greeting}</h1>
           <div style={{ fontSize: 13, color: C.mute, marginTop: 6 }}>{fmtDate(TODAY)} · 광주 광산구 우산동 1차 파일럿</div>
         </div>
-        <Button variant="primary" icon={<Plus size={16} />} onClick={() => setView('settlement')}>{Number(TODAY.slice(5, 7))}월 정산 발급</Button>
+        <Button variant="primary" icon={<Plus size={16} />} onClick={() => setView('settlements')}>{Number(TODAY.slice(5, 7))}월 정산 발급</Button>
       </div>
 
       {/* 처리 대기 큐 (케어닥 벤치마크) */}
@@ -4456,6 +4584,8 @@ function CoordOverview({ state, setView }) {
           </div>
         </div>
       </Card>
+
+      <CoordRevenueModel state={state} />
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 18, marginBottom: 18 }}>
         <Card padding={22}>
