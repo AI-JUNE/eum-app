@@ -1529,19 +1529,24 @@ function TestimonialBand() {
 // 발표용 — 랜딩 자주 묻는 질문(FAQ) 아코디언
 function FaqBand() {
   const [open, setOpen] = useState(-1);
+  const isMobile = useIsMobile(720);
   const faqs = [
     { q: '누가 신청할 수 있나요?', a: '광주 광산구 우산동에 사시는 청소년부터 어르신까지, 그리고 양육가정 누구나 신청할 수 있어요. 약 5분이면 충분해요.' },
-    { q: '비용이 드나요?', a: '참여비는 전혀 없어요. 오히려 활동에 따라 광주상생카드와 봉사시간으로 보상을 받아요.' },
+    { q: '참여하는 데 비용이 드나요?', a: '참여비는 전혀 없어요. 오히려 활동에 따라 광주상생카드와 봉사시간으로 보상을 받습니다. 보호자 안심 케어 구독은 선택이에요.' },
     { q: '아이가 어른들과 만나는데 안전한가요?', a: '모든 참여자는 4단계 안전검증(면접·범죄경력·아동학대 전력 조회·추천인 확인)을 거치고, 대면 활동은 책임보험으로 보장돼요.' },
-    { q: '어떻게 매칭되나요?', a: '거주지·관심사·가능 시간·안전 요소를 분석해 청년·어르신·아이 3인 트리오로 연결해 드려요.' },
+    { q: '어떻게 매칭되나요?', a: '거주지·생활 일정·관심사·안전 요소를 분석해 청년·어르신·아이 3인 트리오로 연결해 드려요. 코디네이터가 최종 확인합니다.' },
+    { q: '보상은 어떻게 받나요?', a: '활동 기록이 승인되면 봉사시간과 광주상생카드 포인트로 자동 환산돼요. 1365 자원봉사 실적과도 연계됩니다.' },
+    { q: '매칭까지 얼마나 걸리나요?', a: '신청과 안전검증을 마치면 보통 1~2주 안에 트리오를 제안해 드려요. 가능 시간과 동네가 가까울수록 더 빨라요.' },
+    { q: '활동 중 문제가 생기면 어떻게 하나요?', a: '앱의 SOS 버튼이나 실시간 안전 공유로 코디네이터가 즉시 개입해요. 모든 활동은 책임보험으로 보장됩니다.' },
+    { q: '안심 케어 구독은 꼭 해야 하나요?', a: '아니에요. 기본 참여와 매칭·활동 일지는 무료예요. 구독은 실시간 안전 알림·주간 리포트·우선 매칭이 필요한 보호자를 위한 선택이에요.' },
   ];
   return (
     <div style={{ marginBottom: 36 }}>
       <div style={{ textAlign: 'center', fontSize: 12, fontWeight: 700, color: C.brand, letterSpacing: '0.1em', marginBottom: 4 }}>자주 묻는 질문</div>
       <div style={{ textAlign: 'center', fontSize: 13, color: C.mute, marginBottom: 16 }}>궁금한 점을 모았어요</div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, maxWidth: 680, margin: '0 auto' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', alignItems: 'start', gap: 10, maxWidth: 1000, margin: '0 auto' }}>
         {faqs.map((f, i) => (
-          <div key={i} style={{ background: C.card, border: '1px solid ' + C.border, borderRadius: 12, overflow: 'hidden' }}>
+          <div key={i} style={{ background: C.card, border: '1px solid ' + C.border, borderRadius: 12, overflow: 'hidden', alignSelf: 'start' }}>
             <button onClick={() => setOpen(open === i ? -1 : i)} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: '15px 18px', border: 'none', background: 'transparent', cursor: 'pointer', fontFamily: FONT_STACK, textAlign: 'left' }}>
               <span style={{ fontSize: 14, fontWeight: 700, color: C.ink }}>{f.q}</span>
               <ChevronDown size={18} color={C.mute} style={{ transform: open === i ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
@@ -1682,6 +1687,45 @@ function RevenueModelBand() {
           <strong style={{ color: C.ink }}>트리오 한 쌍이 늘 때마다 이익이 쌓이는 구조.</strong> 공공 위탁이 기반을 깔고, 구독·수수료가 마진을 더해 규모가 커질수록 자립도가 올라갑니다.
         </div>
       </div>
+    </div>
+  );
+}
+
+// 발표용 — 랜딩 보호자 안심 케어 구독 요금제 (3단: 무료/베이직/프리미엄)
+function PricingBand({ onShowApplication }) {
+  const plans = [
+    { key: 'free', name: '무료', price: 0, tagline: '동네 품앗이 기본', color: C.mute, soft: C.muteSoft, features: ['트리오 매칭·활동 일지', '봉사시간·상생카드 보상', '4단계 안전검증·책임보험'], cta: '무료로 시작', highlight: false },
+    { key: 'basic', name: '안심 베이직', price: 19900, tagline: '맞벌이 보호자에게', color: C.brand, soft: C.brandSoft, features: ['무료의 모든 기능', '실시간 체크인·위치 안전 알림', '주간 활동 리포트', '활동 사진 아카이브'], cta: '구독하기', highlight: true },
+    { key: 'premium', name: '안심 프리미엄', price: 39900, tagline: '가장 깊은 안심', color: C.lavender, soft: C.lavenderSoft, features: ['베이직의 모든 기능', '우선 매칭 — 대기 없이 먼저', '전담 코디네이터 핫라인', '월간 성장 리포트·상담'], cta: '구독하기', highlight: false },
+  ];
+  return (
+    <div style={{ marginBottom: 36 }}>
+      <div style={{ textAlign: 'center', fontSize: 12, fontWeight: 700, color: C.brand, letterSpacing: '0.1em', marginBottom: 4 }}>보호자 안심 케어</div>
+      <div style={{ textAlign: 'center', fontSize: 20, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK, letterSpacing: '-0.02em', marginBottom: 6 }}>참여는 무료, 더 깊은 안심은 선택</div>
+      <div style={{ textAlign: 'center', fontSize: 13, color: C.mute, marginBottom: 24, maxWidth: 540, marginLeft: 'auto', marginRight: 'auto', lineHeight: 1.6 }}>아이를 맡기는 보호자를 위한 구독이에요. 기본 활동은 누구나 무료로 이용할 수 있어요</div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(248px, 1fr))', gap: 14, maxWidth: 900, margin: '0 auto', alignItems: 'stretch' }}>
+        {plans.map((p) => (
+          <div key={p.key} style={{ position: 'relative', background: C.card, border: `${p.highlight ? 2 : 1}px solid ${p.highlight ? p.color : C.border}`, borderRadius: 16, padding: 22, boxShadow: p.highlight ? `0 16px 36px ${p.color}22` : '0 1px 3px rgba(0,0,0,0.03)', display: 'flex', flexDirection: 'column' }}>
+            {p.highlight && <div style={{ position: 'absolute', top: -11, left: '50%', transform: 'translateX(-50%)', background: p.color, color: '#fff', fontSize: 11, fontWeight: 700, padding: '4px 12px', borderRadius: 999, whiteSpace: 'nowrap' }}>가장 인기</div>}
+            <div style={{ fontSize: 12, fontWeight: 700, color: p.color, marginBottom: 4 }}>{p.tagline}</div>
+            <div style={{ fontSize: 19, fontWeight: 800, color: C.ink, marginBottom: 10 }}>{p.name}</div>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 3, marginBottom: 16 }}>
+              <span style={{ fontSize: 30, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK, letterSpacing: '-0.03em' }}>{p.price === 0 ? '무료' : krw(p.price)}</span>
+              {p.price > 0 && <span style={{ fontSize: 13, color: C.mute }}>/ 월</span>}
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 9, marginBottom: 18, flex: 1 }}>
+              {p.features.map((f, i) => (
+                <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+                  <Check size={15} color={p.color} style={{ flexShrink: 0, marginTop: 2 }} />
+                  <span style={{ fontSize: 12.5, color: C.inkSoft, lineHeight: 1.45 }}>{f}</span>
+                </div>
+              ))}
+            </div>
+            <Button variant={p.highlight ? 'primary' : 'secondary'} fullWidth onClick={onShowApplication}>{p.cta}</Button>
+          </div>
+        ))}
+      </div>
+      <div style={{ textAlign: 'center', fontSize: 11.5, color: C.muteLight, marginTop: 14 }}>구독료는 우산동 파일럿 가정 기준 예시예요 · 언제든 해지할 수 있어요</div>
     </div>
   );
 }
@@ -1893,6 +1937,7 @@ function RoleSelect({ state, onSelectRole, onShowApplication }) {
         <Reveal delay={60}><BenchmarkBand /></Reveal>
         <Reveal delay={60}><MoatBand /></Reveal>
         <Reveal delay={60}><RevenueModelBand /></Reveal>
+        <Reveal delay={60}><PricingBand onShowApplication={onShowApplication} /></Reveal>
         <Reveal delay={60}><FaqBand /></Reveal>
         <PartnerStrip />
 
@@ -3625,6 +3670,7 @@ const PARTICIPANT_NAV = {
   parent: [
     { id: 'dashboard', label: '홈', icon: Home }, { id: 'today', label: '오늘', icon: Activity },
     { id: 'match', label: '매칭', icon: Users }, { id: 'safety', label: '안전', icon: ShieldCheck },
+    { id: 'subscribe', label: '안심구독', icon: Heart },
   ],
 };
 
@@ -3872,6 +3918,66 @@ function ChildGrowthCard({ child, state }) {
   );
 }
 
+// 양육가정 — 안심 케어 구독 관리 화면 (실서비스 구독 surface)
+function ParentSubscription({ showToast }) {
+  const [plan, setPlan] = useState('basic'); // 데모: 베이직 구독 중
+  const plans = [
+    { key: 'free', name: '무료', price: 0, color: C.mute, soft: C.muteSoft, features: ['트리오 매칭·활동 일지', '봉사시간·상생카드 보상', '4단계 안전검증·책임보험'] },
+    { key: 'basic', name: '안심 베이직', price: 19900, color: C.brand, soft: C.brandSoft, features: ['실시간 체크인·위치 안전 알림', '주간 활동 리포트', '활동 사진 아카이브'] },
+    { key: 'premium', name: '안심 프리미엄', price: 39900, color: C.lavender, soft: C.lavenderSoft, features: ['우선 매칭 — 대기 없이 먼저', '전담 코디네이터 핫라인', '월간 성장 리포트·상담'] },
+  ];
+  const order = { free: 0, basic: 1, premium: 2 };
+  const current = plans.find((p) => p.key === plan) || plans[0];
+  const change = (key) => {
+    if (key === plan) return;
+    const up = order[key] > order[plan];
+    const name = (plans.find((p) => p.key === key) || {}).name;
+    setPlan(key);
+    showToast({ type: 'success', message: `${name} 플랜으로 ${up ? '업그레이드' : '변경'}되었어요.`, duration: 3500 });
+  };
+  return (
+    <>
+      <PageHeader eyebrow="ANSIM CARE" title="안심 케어 구독" subtitle="아이를 맡기는 마음이 더 놓이도록, 필요한 만큼만 선택하세요" />
+      <Card padding={20} style={{ marginBottom: 18, background: current.soft, border: `1px solid ${current.color}30` }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+          <div style={{ display: 'inline-flex', padding: 11, borderRadius: 12, background: '#fff' }}><Heart size={22} color={current.color} /></div>
+          <div style={{ flex: 1, minWidth: 180 }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: current.color, letterSpacing: '0.04em' }}>현재 이용 중</div>
+            <div style={{ fontSize: 20, fontWeight: 800, color: C.ink }}>{current.name}{current.price > 0 ? <span style={{ fontSize: 14, color: C.mute, fontWeight: 600 }}> · {krw(current.price)}/월</span> : null}</div>
+          </div>
+          {plan !== 'free' && <Badge color={C.success} soft={C.successSoft} size="md"><Check size={11} /> 구독 중</Badge>}
+        </div>
+      </Card>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: 14, alignItems: 'stretch' }}>
+        {plans.map((p) => {
+          const isCurrent = p.key === plan;
+          return (
+            <Card key={p.key} padding={20} style={{ border: `${isCurrent ? 2 : 1}px solid ${isCurrent ? p.color : C.border}`, display: 'flex', flexDirection: 'column' }}>
+              <div style={{ fontSize: 17, fontWeight: 800, color: C.ink, marginBottom: 6 }}>{p.name}</div>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 3, marginBottom: 14 }}>
+                <span style={{ fontSize: 26, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK, letterSpacing: '-0.03em' }}>{p.price === 0 ? '무료' : krw(p.price)}</span>
+                {p.price > 0 && <span style={{ fontSize: 12, color: C.mute }}>/ 월</span>}
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16, flex: 1 }}>
+                {p.features.map((f, i) => (
+                  <div key={i} style={{ display: 'flex', gap: 7, alignItems: 'flex-start' }}>
+                    <Check size={14} color={p.color} style={{ flexShrink: 0, marginTop: 2 }} />
+                    <span style={{ fontSize: 12, color: C.inkSoft, lineHeight: 1.45 }}>{f}</span>
+                  </div>
+                ))}
+              </div>
+              <Button variant={isCurrent ? 'secondary' : (p.key === 'basic' ? 'primary' : 'secondary')} fullWidth disabled={isCurrent} onClick={() => change(p.key)}>
+                {isCurrent ? '이용 중' : (order[p.key] > order[plan] ? '업그레이드' : '이 플랜으로 변경')}
+              </Button>
+            </Card>
+          );
+        })}
+      </div>
+      <div style={{ marginTop: 16, fontSize: 11.5, color: C.muteLight, textAlign: 'center' }}>데모 모드 — 결제 없이 플랜 변경을 체험할 수 있어요 · 구독료는 파일럿 예시 기준</div>
+    </>
+  );
+}
+
 function ParentApp({ state, user, dispatch, showToast }) {
   const [view, setView] = useState('dashboard');
 
@@ -3912,6 +4018,7 @@ function ParentApp({ state, user, dispatch, showToast }) {
         <ParentSafety user={user} myMatches={myMatches} myIncidents={myIncidents}
           state={state} myChildren={myChildren} dispatch={dispatch} showToast={showToast} />
       )}
+      {view === 'subscribe' && <ParentSubscription showToast={showToast} />}
     </Layout>
   );
 }
