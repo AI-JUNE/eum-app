@@ -13,62 +13,20 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   LineChart, Line, PieChart, Pie, Cell, AreaChart, Area, Legend
 } from 'recharts';
+import { C, PERSONA, FONT_STACK, SERIF_STACK } from './lib/theme.js';
+import { TODAY, INSURANCE_POLICY, CERTIFIED_SENDER, CONSENT_DOCS } from './lib/constants.js';
+import { krw, fmtDate, fmtDateTime, fmtRelativeDate, initials, uid } from './lib/format.js';
+import { isSettled, settleAmount, settleHours, SETTLE_STATUS, settleStatusOf, genVoucherCode } from './lib/settlement.js';
+import { computeTrioScore, recommendTrios } from './lib/matching.js';
 
 // ============================================================================
-// 1. DESIGN TOKENS
+// 1. DESIGN TOKENS — src/lib/theme.js
 // ============================================================================
-
-const C = {
-  brand: '#C75D3C',
-  brandDark: '#A04826',
-  brandSoft: '#F7E9E1',
-  brandBg: '#FCF3EE',
-  ink: '#1A1814',
-  inkSoft: '#4A4540',
-  mute: '#8A847A',
-  cream: '#FAF7F2',
-  bg: '#F6F2EB',
-  card: '#FFFFFF',
-  border: '#E8E2D6',
-  borderSoft: '#F0EBE0',
-  sage: '#5F8556',
-  sageSoft: '#E8EFE3',
-  lavender: '#7F6FA0',
-  lavenderSoft: '#EDE9F2',
-  peach: '#D89368',
-  peachSoft: '#F8EBDD',
-  gold: '#B8884A',
-  goldSoft: '#F2E8D6',
-  red: '#C74848',
-  redSoft: '#F8E4E4',
-  blue: '#4A6FA5',
-  blueSoft: '#E4EBF3',
-  amber: '#D9A441',
-  amberSoft: '#F7EDD3',
-  success: '#5F8556',
-  successSoft: '#E8EFE3',
-  muteSoft: '#EFEBE3',
-  brandLight: '#E0936B',
-};
-
-const PERSONA = {
-  teen: { label: '청소년', color: C.blue, soft: C.blueSoft, ring: 'rgba(74,111,165,0.25)' },
-  youth: { label: '청년', color: C.sage, soft: C.sageSoft, ring: 'rgba(95,133,86,0.25)' },
-  adult: { label: '중년·서포터', color: C.gold, soft: C.goldSoft, ring: 'rgba(184,136,74,0.25)' },
-  senior: { label: '어르신', color: C.lavender, soft: C.lavenderSoft, ring: 'rgba(127,111,160,0.25)' },
-  parent: { label: '양육가정', color: C.peach, soft: C.peachSoft, ring: 'rgba(216,147,104,0.25)' },
-  child: { label: '아동', color: C.peach, soft: C.peachSoft, ring: 'rgba(216,147,104,0.25)' },
-  coordinator: { label: '코디네이터', color: C.ink, soft: '#EDEAE5', ring: 'rgba(26,24,20,0.15)' },
-};
-
-const FONT_STACK = `-apple-system, BlinkMacSystemFont, "Pretendard Variable", Pretendard, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif`;
-const SERIF_STACK = `"Source Serif 4", "Source Serif Pro", "Noto Serif KR", Georgia, serif`;
 
 // ============================================================================
 // 2. SEED DATA
 // ============================================================================
 
-const TODAY = '2027-07-15'; // 데모용 가상 현재 날짜
 
 const SEED_DATA = {
   participants: [
@@ -219,13 +177,31 @@ const SEED_DATA = {
     { id: 'sv005', participant_id: 'p102', month: '2027-06', satisfaction: 5, would_continue: true, comment: '집에만 있던 내가 매주 외출하니 활기가 생겼어요.' },
     { id: 'sv006', participant_id: 'p202', month: '2027-06', satisfaction: 5, would_continue: true, comment: '교대근무에도 안심하고 맡길 수 있어 마음이 가벼워요.' },
   ],
+
+  // 보호자 동의 — 기본은 normalizeState에서 5종 서명완료로 생성. 아래는 데모용 '서명 필요' 오버라이드.
+  consents: [
+    { id: 'cs-p301-outdoor', child_id: 'p301', guardian_id: 'p201', key: 'outdoor', signed: false, signed_at: null },
+  ],
 };
 
 // ============================================================================
 // 3. STORAGE
 // ============================================================================
 
-const STORAGE_KEY = 'eum:appdata:v2';
+const STORAGE_KEY = 'eum:appdata:v3';
+// 데모 무결성: 시드가 비어버린 과거 스냅샷이 랜딩 지표(참여자/트리오/시간)를 0으로 덮어쓰는 문제를
+// 막기 위한 핵심 컬렉션 목록. 저장본의 해당 배열이 비어있으면 시드값을 유지한다.
+const CORE_COLLECTIONS = ['participants', 'applications', 'verifications', 'matches', 'activities', 'activity_logs', 'settlements', 'safety_incidents', 'surveys', 'consents'];
+// 저장본(stored)을 시드(seed) 위에 병합하되, 핵심 컬렉션이 비었거나 누락이면 시드를 보존한다.
+function mergeStoredOverSeed(seed, stored) {
+  if (!stored) return seed;
+  const merged = { ...seed, ...stored };
+  for (const k of CORE_COLLECTIONS) {
+    const sv = stored[k];
+    if (!Array.isArray(sv) || sv.length === 0) merged[k] = seed[k];
+  }
+  return merged;
+}
 
 // 검증 단계 안내 메모 (백필용)
 const VERIF_STEP_NOTES = {
@@ -266,11 +242,15 @@ function normalizeState(s) {
     p.type === 'child' ? { ...p, guardian_id: p.guardian_id || p.parent_id } : p
   );
 
-  // 매칭 적합도(score) 백필 — 결정적 값 (90~97)
-  const matches = (s.matches || []).map(m => ({
-    ...m,
-    score: m.score ?? (90 + ([...String(m.id)].reduce((a, c) => a + c.charCodeAt(0), 0) % 8)),
-  }));
+  // 매칭 적합도(score) 백필 — 온디바이스 가중 스코어 엔진으로 실제 계산 (불가 시 결정적 fallback)
+  const matches = (s.matches || []).map(m => {
+    const y = pById[m.youth_id], se = pById[m.senior_id], c = pById[m.child_id];
+    const real = (y && se && c) ? computeTrioScore(y, se, c).total : null;
+    return {
+      ...m,
+      score: m.score ?? real ?? (90 + ([...String(m.id)].reduce((a, c2) => a + c2.charCodeAt(0), 0) % 8)),
+    };
+  });
   const matchedIds = new Set();
   matches.forEach(m => {
     if (m.status === 'active' || m.status === 'proposed') {
@@ -308,15 +288,30 @@ function normalizeState(s) {
   });
   const verifications = [...(s.verifications || []), ...genVerifs];
 
-  // 정산 필드 정합 (period/amount/status) — 'paid' → 'issued'
+  // 정산 필드 정합 — 시드(month/total_hours/amount_krw)와 신규발급(period/hours/amount) 양방향 백필 + 상태 통합
   const settlements = (s.settlements || []).map(st => ({
     ...st,
     period: st.period || st.month,
+    month: st.month || st.period,
     amount: st.amount != null ? st.amount : st.amount_krw,
+    amount_krw: st.amount_krw != null ? st.amount_krw : st.amount,
+    hours: st.hours != null ? st.hours : st.total_hours,
+    total_hours: st.total_hours != null ? st.total_hours : st.hours,
     status: st.status === 'paid' ? 'issued' : st.status,
   }));
 
-  return { ...s, activities, activity_logs, participants, matches, applications, verifications, settlements };
+  // 보호자 동의 정합 — 아동마다 5종 보장. 시드 오버라이드 우선, 없으면 서명완료로 생성.
+  const consentOverride = {};
+  (s.consents || []).forEach(c => { consentOverride[`${c.child_id}:${c.key}`] = c; });
+  const consents = [];
+  participants.filter(p => p.type === 'child').forEach(ch => {
+    CONSENT_DOCS.forEach(doc => {
+      const k = `${ch.id}:${doc.key}`;
+      consents.push(consentOverride[k] || { id: `cs-${ch.id}-${doc.key}`, child_id: ch.id, guardian_id: ch.guardian_id || ch.parent_id, key: doc.key, signed: true, signed_at: ch.joined_at || TODAY });
+    });
+  });
+
+  return { ...s, activities, activity_logs, participants, matches, applications, verifications, settlements, consents };
 }
 
 async function loadState() {
@@ -351,33 +346,6 @@ async function saveState(state) {
 // 4. UTILS
 // ============================================================================
 
-const krw = (n) => '₩' + (n || 0).toLocaleString('ko-KR');
-const fmtDate = (s) => {
-  if (!s) return '—';
-  const d = new Date(s);
-  if (isNaN(d)) return s;
-  return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
-};
-const fmtDateTime = (s) => {
-  if (!s) return '—';
-  const d = new Date(s.replace(' ', 'T'));
-  if (isNaN(d)) return s;
-  return `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-};
-const fmtRelativeDate = (s) => {
-  if (!s) return '';
-  const d = new Date(s.replace(' ', 'T'));
-  const now = new Date(TODAY);
-  const diff = Math.floor((d - now) / (1000 * 60 * 60 * 24));
-  if (diff === 0) return '오늘';
-  if (diff === 1) return '내일';
-  if (diff === -1) return '어제';
-  if (diff > 0 && diff < 7) return `${diff}일 후`;
-  if (diff < 0 && diff > -7) return `${-diff}일 전`;
-  return fmtDate(s);
-};
-const initials = (name) => (name || '?').slice(0, 1);
-const uid = (prefix) => `${prefix}${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
 
 // ============================================================================
 // 5. UI PRIMITIVES
@@ -550,26 +518,110 @@ function OfficialSenderBadge({ size = 'sm', style = {} }) {
       border: `1px solid ${C.blue}33`, ...style,
     }}>
       <ShieldCheck size={ic} /> 광주광역시 인증 발신
-      <span style={{ fontSize: fs - 1, fontWeight: 800, background: C.amber, color: '#fff', padding: '1px 6px', borderRadius: 999, marginLeft: 3 }}>예정</span>
+      <span style={{ fontSize: fs - 1, fontWeight: 800, background: C.success, color: '#fff', padding: '1px 6px', borderRadius: 999, marginLeft: 3 }}>운영 중</span>
     </span>
   );
 }
 
 // 멘토 피드백② — 오프라인 활동 안전: 지자체 돌봄 책임보험 자동적용 표시
-function InsuranceBadge({ size = 'sm', style = {} }) {
+function InsuranceBadge({ size = 'sm', style = {}, onClick }) {
   const fs = size === 'lg' ? 13 : size === 'md' ? 12 : 11;
   const ic = size === 'lg' ? 15 : 13;
   return (
-    <span style={{
+    <span onClick={onClick} style={{
       display: 'inline-flex', alignItems: 'center', gap: 5,
       background: C.successSoft, color: C.success,
       padding: size === 'lg' ? '6px 12px' : '4px 9px', borderRadius: 999,
-      fontSize: fs, fontWeight: 700, whiteSpace: 'nowrap',
+      fontSize: fs, fontWeight: 700, whiteSpace: 'nowrap', cursor: onClick ? 'pointer' : 'default',
       border: `1px solid ${C.success}33`, ...style,
     }}>
       <ShieldCheck size={ic} /> 활동 중 돌봄 책임보험 자동적용
-      <span style={{ fontSize: fs - 1, fontWeight: 800, background: C.amber, color: '#fff', padding: '1px 6px', borderRadius: 999, marginLeft: 3 }}>예정</span>
+      <span style={{ fontSize: fs - 1, fontWeight: 800, background: C.success, color: '#fff', padding: '1px 6px', borderRadius: 999, marginLeft: 3 }}>운영 중</span>
     </span>
+  );
+}
+
+// 돌봄 책임보험 증서 (활성화) — 보장 내역 모달
+function InsuranceCertificate({ open, onClose, match, state }) {
+  const youth = match && state ? state.participants.find(p => p.id === match.youth_id) : null;
+  const senior = match && state ? state.participants.find(p => p.id === match.senior_id) : null;
+  const child = match && state ? state.participants.find(p => p.id === match.child_id) : null;
+  const covered = [youth, senior, child].filter(Boolean);
+  return (
+    <Modal open={open} onClose={onClose} title="돌봄 책임보험 증서" size="md">
+      <div style={{ padding: '16px 18px', borderRadius: 14, background: `linear-gradient(135deg, ${C.success}10, ${C.successSoft})`, border: `1px solid ${C.success}30`, marginBottom: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+          <ShieldCheck size={26} color={C.success} />
+          <div>
+            <div style={{ fontSize: 15, fontWeight: 800, color: C.ink }}>{INSURANCE_POLICY.insurer}</div>
+            <div style={{ fontSize: 12, color: C.inkSoft }}>증권번호 <b style={{ fontFamily: 'monospace' }}>{INSURANCE_POLICY.policy_no}</b></div>
+          </div>
+          <Badge color={C.success} soft="#fff" size="md" style={{ marginLeft: 'auto' }}>보장 중</Badge>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 6 }}>
+          <div><div style={{ fontSize: 11, color: C.mute }}>보장 한도</div><div style={{ fontSize: 15, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK }}>{krw(INSURANCE_POLICY.coverage_krw)}</div></div>
+          <div><div style={{ fontSize: 11, color: C.mute }}>보장 기간</div><div style={{ fontSize: 13, fontWeight: 700, color: C.ink }}>{fmtDate(INSURANCE_POLICY.valid_from)} ~ {fmtDate(INSURANCE_POLICY.valid_to)}</div></div>
+        </div>
+      </div>
+      {covered.length > 0 && (
+        <div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: C.ink, marginBottom: 8 }}>피보험자 (이 트리오 전원 자동 보장)</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+            {covered.map(p => (
+              <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', border: `1px solid ${C.borderSoft}`, borderRadius: 9 }}>
+                <Avatar type={p.type} gender={p.gender} name={p.name} size={30} color={PERSONA[p.type]?.color || C.brand} />
+                <span style={{ fontSize: 13, fontWeight: 700, color: C.ink }}>{p.name}</span>
+                <span style={{ fontSize: 11, color: C.mute }}>{PERSONA[p.type]?.label}</span>
+                <Badge color={C.success} soft={C.successSoft} size="sm" style={{ marginLeft: 'auto' }}><Check size={10} /> 보장</Badge>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      <div style={{ marginTop: 14, fontSize: 11.5, color: C.mute, lineHeight: 1.6 }}>
+        모든 대면 활동은 시작 시점에 자동으로 보험이 적용됩니다. 활동 중 사고 발생 시 코디네이터에게 즉시 알려주세요.
+      </div>
+    </Modal>
+  );
+}
+
+// 보호자 동의 패널 (활성화) — 5종 동의 현황 + 인앱 서명
+function ConsentPanel({ child, consents, dispatch, showToast }) {
+  if (!child) return null;
+  const mine = CONSENT_DOCS.map(doc => ({
+    doc, rec: consents.find(c => c.child_id === child.id && c.key === doc.key),
+  }));
+  const signedCount = mine.filter(m => m.rec && m.rec.signed).length;
+  const allSigned = signedCount === CONSENT_DOCS.length;
+  const sign = (key) => {
+    dispatch({ type: 'SIGN_CONSENT', payload: { child_id: child.id, key } });
+    showToast && showToast({ type: 'success', message: '보호자 동의가 완료되었습니다.' });
+  };
+  return (
+    <Card padding={20} style={{ marginBottom: 16, border: allSigned ? `1px solid ${C.success}30` : `1px solid ${C.amber}40` }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6, flexWrap: 'wrap' }}>
+        <FileSignature size={18} color={allSigned ? C.success : C.amber} />
+        <div style={{ fontSize: 14, fontWeight: 700, color: C.ink }}>보호자 동의 현황</div>
+        <Badge color={allSigned ? C.success : C.amber} soft={allSigned ? C.successSoft : C.amberSoft} size="md" style={{ marginLeft: 'auto' }}>{signedCount}/{CONSENT_DOCS.length} 완료</Badge>
+      </div>
+      <div style={{ fontSize: 12, color: C.inkSoft, marginBottom: 12 }}>{child.name} 아동의 미성년 활동을 위한 5종 동의입니다. {allSigned ? '모든 동의가 완료되었어요.' : '남은 항목을 눌러 지금 동의할 수 있어요.'}</div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {mine.map(({ doc, rec }) => {
+          const ok = rec && rec.signed;
+          return (
+            <div key={doc.key} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 10, background: ok ? C.bg : C.amberSoft, border: ok ? `1px solid ${C.borderSoft}` : `1px solid ${C.amber}40` }}>
+              {ok ? <CheckCircle2 size={16} color={C.success} /> : <AlertCircle size={16} color={C.amber} />}
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: C.ink }}>{doc.label}</div>
+                <div style={{ fontSize: 11, color: C.mute }}>{ok ? `${fmtDate(rec.signed_at)} 서명 완료` : '서명 필요'}</div>
+              </div>
+              {ok ? <Badge color={C.success} soft={C.successSoft} size="sm">완료</Badge>
+                  : <Button variant="brand" size="sm" icon={<PenLine size={13} />} onClick={() => sign(doc.key)}>지금 동의</Button>}
+            </div>
+          );
+        })}
+      </div>
+    </Card>
   );
 }
 
@@ -831,11 +883,18 @@ function StatCard({ label, value, sub, color = C.ink, icon, trend }) {
 }
 
 // ── 모션 · 인포그래픽 툴킷 ────────────────────────────────────────────────
+function prefersReducedMotion() {
+  return typeof window !== 'undefined' && typeof window.matchMedia === 'function'
+    && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
 function useCountUp(target, duration = 950) {
-  const [val, setVal] = useState(0);
+  const num = typeof target === 'number' ? target : parseFloat(String(target).replace(/[^0-9.-]/g, '')) || 0;
+  // 접근성(WCAG 2.3.3): 모션 최소화 설정 시 애니메이션 없이 최종값을 바로 표시.
+  // 동시에 캡처/첫 페인트에서 지표가 0으로 보이는 문제를 방지한다.
+  const [val, setVal] = useState(() => (prefersReducedMotion() ? num : 0));
   const raf = useRef();
   useEffect(() => {
-    const num = typeof target === 'number' ? target : parseFloat(String(target).replace(/[^0-9.-]/g, '')) || 0;
+    if (prefersReducedMotion()) { setVal(num); return; }
     let start;
     const tick = (t) => {
       if (start === undefined) start = t;
@@ -846,7 +905,7 @@ function useCountUp(target, duration = 950) {
     };
     raf.current = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf.current);
-  }, [target, duration]);
+  }, [num, duration]);
   return val;
 }
 
@@ -1378,7 +1437,7 @@ function ImpactBand({ state }) {
     const surveys = state.surveys || [];
     const sat = surveys.length ? (surveys.reduce((s, x) => s + (x.satisfaction || 0), 0) / surveys.length) : 0;
     const cont = surveys.length ? Math.round(surveys.filter((x) => x.would_continue).length / surveys.length * 100) : 0;
-    const settled = (state.settlements || []).filter((s) => s.status === 'issued' || s.status === 'paid').reduce((s, x) => s + (x.amount_krw || x.amount || 0), 0);
+    const settled = (state.settlements || []).filter(isSettled).reduce((s, x) => s + settleAmount(x), 0);
     return { people: p.length, matches, hours, sat: sat.toFixed(1), cont, settled };
   }, [state]);
   const tiles = [
@@ -1941,18 +2000,82 @@ function ChipSelect({ options, selected, onToggle, max, color = C.ink }) {
 // 9. YOUTH DASHBOARD
 // ============================================================================
 
-// 글로벌 벤치마크 — 매칭 추천 알고리즘 (애니메이션 적합도 분석)
+// 점수→색/등급 헬퍼
+function scoreColor(v) { return v >= 85 ? C.success : v >= 70 ? C.gold : v >= 55 ? C.brand : C.red; }
+function gradeLabel(v) { return v >= 90 ? '매우 우수' : v >= 80 ? '우수' : v >= 70 ? '양호' : v >= 55 ? '보통' : '보완 필요'; }
+
+const TAG_ICON = { map: MapPin, clock: Clock, heart: Heart, shield: ShieldCheck, star: Star };
+// 요인별 적합도 막대
+// 매칭 5요인 레이더 (순수 SVG · 외부 라이브러리 없이 렌더)
+function RadarPentagon({ parts, size = 196, color = C.brand }) {
+  const cx = size / 2, cy = size / 2 + 4, R = size * 0.34;
+  const n = (parts || []).length || 5;
+  const pt = (i, r) => {
+    const ang = -Math.PI / 2 + (i * 2 * Math.PI) / n;
+    return [cx + Math.cos(ang) * r, cy + Math.sin(ang) * r];
+  };
+  const rings = [0.25, 0.5, 0.75, 1];
+  const polate = (frac) => (parts || []).map((_, i) => pt(i, R * frac).join(',')).join(' ');
+  const dataPoly = (parts || []).map((p, i) => pt(i, R * Math.max(0.04, (p.score || 0) / 100)).join(',')).join(' ');
+  return (
+    <svg viewBox={`0 0 ${size} ${size + 10}`} width={size} height={size + 10} style={{ overflow: 'visible' }}>
+      {rings.map((f, i) => (
+        <polygon key={i} points={polate(f)} fill="none" stroke={C.border} strokeWidth="1" />
+      ))}
+      {(parts || []).map((_, i) => { const [x, y] = pt(i, R); return <line key={i} x1={cx} y1={cy} x2={x} y2={y} stroke={C.borderSoft} strokeWidth="1" />; })}
+      <polygon points={dataPoly} fill={color + '33'} stroke={color} strokeWidth="2" strokeLinejoin="round" />
+      {(parts || []).map((p, i) => { const [x, y] = pt(i, R * Math.max(0.04, (p.score || 0) / 100)); return <circle key={i} cx={x} cy={y} r="3" fill={color} />; })}
+      {(parts || []).map((p, i) => {
+        const [x, y] = pt(i, R + 16);
+        const anchor = Math.abs(x - cx) < 6 ? 'middle' : (x > cx ? 'start' : 'end');
+        return (
+          <g key={i}>
+            <text x={x} y={y - 4} textAnchor={anchor} fontSize="9.5" fontWeight="700" fill={C.inkSoft}>{p.label}</text>
+            <text x={x} y={y + 7} textAnchor={anchor} fontSize="9.5" fontWeight="800" fill={color}>{p.score}</text>
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
+
+function MatchFactorBars({ parts, delay = 0 }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
+      {(parts || []).map((p, i) => (
+        <div key={p.key}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 4 }}>
+            <span style={{ fontSize: 11.5, color: C.inkSoft, fontWeight: 600 }}>{p.label}</span>
+            <span style={{ fontSize: 11, color: C.mute }}><b style={{ color: scoreColor(p.score), fontSize: 12.5, fontFamily: SERIF_STACK }}>{p.score}</b> <span style={{ opacity: 0.6 }}>· 비중 {p.weight}%</span></span>
+          </div>
+          <AnimatedBar value={p.score} max={100} color={scoreColor(p.score)} height={6} delay={delay + i * 90} />
+        </div>
+      ))}
+    </div>
+  );
+}
+// 추천 근거 칩
+function MatchTags({ tags, max = 6 }) {
+  return (
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+      {(tags || []).slice(0, max).map((t, i) => {
+        const Icon = TAG_ICON[t.icon] || Sparkles;
+        return (
+          <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11.5, color: C.inkSoft, background: C.bg, border: '1px solid ' + C.border, borderRadius: 999, padding: '5px 10px' }}>
+            <Icon size={12} color={C.brand} /> {t.text}
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
+// 글로벌 벤치마크 — 매칭 추천 알고리즘 (온디바이스 가중 스코어 · 요인별 분해)
 function MatchReasonCard({ user, senior, child }) {
-  const shared = (user?.interests || []).filter((x) => (senior?.interests || []).includes(x));
-  const score = Math.min(98, 80 + shared.length * 4 + 6);
+  const result = useMemo(() => computeTrioScore(user, senior, child), [user, senior, child]);
+  const score = result.total;
   const [analyzing, setAnalyzing] = useState(true);
-  useEffect(() => { const id = setTimeout(() => setAnalyzing(false), 1200); return () => clearTimeout(id); }, []);
-  const reasons = [
-    { icon: MapPin, text: '같은 우산동 · 도보 10분 거리' },
-    { icon: Heart, text: shared.length ? ('공통 관심사 ' + shared.slice(0, 2).join('·')) : '생활 리듬·관심사가 서로 보완돼요' },
-    { icon: Clock, text: '활동 가능 시간대가 잘 맞아요' },
-    { icon: ShieldCheck, text: '세 사람 모두 4단계 안전검증 완료' },
-  ];
+  useEffect(() => { const id = setTimeout(() => setAnalyzing(false), 1050); return () => clearTimeout(id); }, []);
   return (
     <Card padding={0} style={{ marginBottom: 20, overflow: 'hidden', border: '1px solid ' + C.brand + '22' }}>
       <style>{`
@@ -1962,30 +2085,28 @@ function MatchReasonCard({ user, senior, child }) {
       <div style={{ padding: '13px 20px', background: 'linear-gradient(120deg, ' + C.brand + '16, ' + C.peachSoft + ')', display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
         <span style={{ display: 'inline-flex', animation: 'eumSparkle 2.2s ease-in-out infinite' }}><Sparkles size={18} color={C.brand} /></span>
         <div style={{ fontSize: 14, fontWeight: 800, color: C.ink }}>AI 매칭 분석</div>
-        <Badge color={C.brand} soft={C.brandSoft} size="sm">온디바이스 · API 미사용</Badge>
+        <Badge color={C.brand} soft={C.brandSoft} size="sm">온디바이스 · 5요인 가중분석</Badge>
         <span style={{ marginLeft: 'auto' }}>
           {analyzing
             ? <span style={{ fontSize: 12, fontWeight: 700, color: C.brand, background: 'linear-gradient(90deg, ' + C.brandSoft + ', #ffffff, ' + C.brandSoft + ')', backgroundSize: '220px 100%', animation: 'eumShimmer 1.1s linear infinite', padding: '4px 11px', borderRadius: 999, display: 'inline-block' }}>분석 중…</span>
             : <Badge color={C.success} soft={C.successSoft} size="sm"><Check size={11} /> 분석 완료</Badge>}
         </span>
       </div>
-      <div style={{ padding: 20, display: 'flex', gap: 20, alignItems: 'center', flexWrap: 'wrap' }}>
-        <Ring value={analyzing ? 0 : score} max={100} size={106} stroke={11} color={C.brand} label={<CountUp value={analyzing ? 0 : score} suffix="%" />} sublabel="적합도" />
+      <div style={{ padding: 20, display: 'flex', gap: 22, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, minWidth: 120 }}>
+          <Ring value={analyzing ? 0 : score} max={100} size={112} stroke={11} color={scoreColor(score)} label={<CountUp value={analyzing ? 0 : score} suffix="%" />} sublabel="종합 적합도" />
+          <Badge color={scoreColor(score)} soft={scoreColor(score) + '18'} size="sm">{gradeLabel(score)}</Badge>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 200 }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: C.mute, letterSpacing: '0.04em', marginBottom: 2 }}>요인별 적합도</div>
+          {!analyzing && <RadarPentagon parts={result.parts} color={scoreColor(score)} />}
+          {analyzing && <div style={{ width: 196, height: 206, display: 'flex', alignItems: 'center', justifyContent: 'center', color: C.mute, fontSize: 12 }}>분석 중…</div>}
+        </div>
         <div style={{ flex: 1, minWidth: 220 }}>
-          <div style={{ fontSize: 13.5, fontWeight: 700, color: C.ink, marginBottom: 10 }}>이 트리오를 추천한 이유</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
-            {reasons.map((r, i) => {
-              const Icon = r.icon;
-              return (
-                <Reveal key={i} delay={400 + i * 140}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 11px', background: C.bg, borderRadius: 9 }}>
-                    <Icon size={14} color={C.brand} />
-                    <span style={{ fontSize: 12.5, color: C.inkSoft }}>{r.text}</span>
-                  </div>
-                </Reveal>
-              );
-            })}
-          </div>
+          <div style={{ fontSize: 13.5, fontWeight: 700, color: C.ink, marginBottom: 10 }}>요인별 점수</div>
+          <MatchFactorBars parts={result.parts} delay={analyzing ? 1100 : 0} />
+          <div style={{ fontSize: 13.5, fontWeight: 700, color: C.ink, margin: '16px 0 9px' }}>추천 근거</div>
+          <MatchTags tags={result.tags} />
         </div>
       </div>
     </Card>
@@ -2348,7 +2469,7 @@ function YouthApp({ state, user, dispatch, showToast }) {
 
   const nextActivity = myActivities.find((a) => a.status === 'scheduled');
   const totalHours = state.activity_logs.filter((l) => l.participant_id === user.id && l.approved).reduce((s, l) => s + l.hours, 0);
-  const totalEarned = mySettlements.filter((s) => s.status === 'paid').reduce((s, x) => s + x.amount_krw, 0);
+  const totalEarned = mySettlements.filter(isSettled).reduce((s, x) => s + settleAmount(x), 0);
 
   return (
     <Layout role="youth" view={view} setView={setView} user={user} dispatch={dispatch} state={state}
@@ -2848,33 +2969,38 @@ function SettlementView({ settlements, totalHours, totalEarned, user }) {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12, marginBottom: 20 }}>
         <StatCard label="누적 정산액" value={krw(totalEarned)} color={C.gold} icon={<Wallet size={16} color={C.gold} />} />
         <StatCard label="누적 활동시간" value={`${totalHours}h`} icon={<Clock size={16} color={C.brand} />} />
-        <StatCard label="발급 횟수" value={`${settlements.filter(s => s.status === 'paid').length}회`} icon={<Award size={16} color={C.sage} />} />
+        <StatCard label="발급 횟수" value={`${settlements.filter(isSettled).length}회`} icon={<Award size={16} color={C.sage} />} />
       </div>
 
       <Card padding={0}>
         <div style={{ padding: '14px 18px', borderBottom: `1px solid ${C.border}`, fontSize: 14, fontWeight: 700, color: C.ink }}>발급 내역</div>
         {settlements.length === 0 ? (
           <Empty icon={<Wallet size={42} />} title="정산 내역이 없습니다" sub="월 1일에 자동 발급됩니다" />
-        ) : settlements.map((s) => (
-          <div key={s.id} style={{ padding: '14px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: `1px solid ${C.borderSoft}` }}>
-            <div>
-              <div style={{ fontSize: 14, fontWeight: 700, color: C.ink, marginBottom: 3 }}>{s.month.replace('-', '년 ')}월 활동분</div>
-              <div style={{ fontSize: 11, color: C.mute, display: 'flex', gap: 10 }}>
-                <span>{s.total_hours}시간</span>
+        ) : settlements.map((s) => {
+          const ss = settleStatusOf(s.status);
+          const ym = String(s.month || s.period || '').replace('-', '년 ');
+          return (
+          <div key={s.id} style={{ padding: '14px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: `1px solid ${C.borderSoft}`, gap: 12, flexWrap: 'wrap' }}>
+            <div style={{ minWidth: 200 }}>
+              <div style={{ fontSize: 14, fontWeight: 700, color: C.ink, marginBottom: 4 }}>{ym}월 활동분</div>
+              <div style={{ fontSize: 11, color: C.mute, display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                <span>{settleHours(s)}시간</span>
                 <span>·</span>
                 <span>{fmtDate(s.issued_at)} 발급</span>
-                <span>·</span>
-                <span style={{ fontFamily: 'monospace' }}>{s.voucher_code}</span>
+                {s.voucher_code && (<>
+                  <span>·</span>
+                  <span style={{ fontFamily: 'monospace', background: C.goldSoft, color: C.brandDark, padding: '2px 7px', borderRadius: 6, letterSpacing: '0.04em' }}>{s.voucher_code}</span>
+                </>)}
+                {s.method === 'bank' && (<><span>·</span><span>계좌이체</span></>)}
               </div>
             </div>
             <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: 18, fontWeight: 700, color: C.gold, fontFamily: SERIF_STACK, letterSpacing: '-0.02em' }}>{krw(s.amount_krw)}</div>
-              <Badge color={s.status === 'paid' ? C.sage : C.amber} soft={s.status === 'paid' ? C.sageSoft : C.amberSoft}>
-                {s.status === 'paid' ? '발급완료' : '발급예정'}
-              </Badge>
+              <div style={{ fontSize: 18, fontWeight: 700, color: C.gold, fontFamily: SERIF_STACK, letterSpacing: '-0.02em' }}>{krw(settleAmount(s))}</div>
+              <Badge color={ss.color} soft={ss.soft}>{ss.label}</Badge>
             </div>
           </div>
-        ))}
+          );
+        })}
       </Card>
     </>
   );
@@ -3099,7 +3225,7 @@ function SeniorApp({ state, user, dispatch, showToast }) {
   }, [state.activities, match]);
   const nextActivity = myActivities.find((a) => a.status === 'scheduled');
   const mySettlements = useMemo(() => state.settlements.filter((s) => s.participant_id === user.id), [state.settlements, user.id]);
-  const totalEarned = mySettlements.filter((s) => s.status === 'paid').reduce((s, x) => s + x.amount_krw, 0);
+  const totalEarned = mySettlements.filter(isSettled).reduce((s, x) => s + settleAmount(x), 0);
 
   return (
     <Layout role="senior" view={view} setView={setView} user={user} dispatch={dispatch} state={state}>
@@ -3199,17 +3325,30 @@ function SeniorApp({ state, user, dispatch, showToast }) {
             <div style={{ fontSize: 16, color: C.gold, fontWeight: 700, marginBottom: 8 }}>누적 합계</div>
             <div style={{ fontSize: 48, fontWeight: 700, color: C.ink, fontFamily: SERIF_STACK, letterSpacing: '-0.03em', lineHeight: 1 }}>{krw(totalEarned)}</div>
           </Card>
-          {mySettlements.map(s => (
+          {mySettlements.map(s => {
+            const ss = settleStatusOf(s.status);
+            const ym = String(s.month || s.period || '');
+            return (
             <Card key={s.id} padding={20} style={{ marginBottom: 10 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
                 <div>
-                  <div style={{ fontSize: 19, fontWeight: 700, color: C.ink, fontFamily: SERIF_STACK }}>{s.month.split('-')[0]}년 {s.month.split('-')[1]}월</div>
+                  <div style={{ fontSize: 19, fontWeight: 700, color: C.ink, fontFamily: SERIF_STACK }}>{ym.split('-')[0]}년 {ym.split('-')[1]}월</div>
                   <div style={{ fontSize: 15, color: C.mute, marginTop: 4 }}>{fmtDate(s.issued_at)} 받음</div>
                 </div>
-                <div style={{ fontSize: 24, fontWeight: 700, color: C.gold, fontFamily: SERIF_STACK }}>{krw(s.amount_krw)}</div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: 24, fontWeight: 700, color: C.gold, fontFamily: SERIF_STACK }}>{krw(settleAmount(s))}</div>
+                  <Badge color={ss.color} soft={ss.soft} size="md">{ss.label}</Badge>
+                </div>
               </div>
+              {s.voucher_code && (
+                <div style={{ marginTop: 14, padding: '12px 16px', background: C.goldSoft, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: 15, color: C.brandDark, fontWeight: 700 }}>상생카드 번호</span>
+                  <span style={{ fontSize: 20, fontFamily: 'monospace', fontWeight: 800, color: C.ink, letterSpacing: '0.08em' }}>{s.voucher_code}</span>
+                </div>
+              )}
             </Card>
-          ))}
+            );
+          })}
         </>
       )}
     </Layout>
@@ -3517,7 +3656,7 @@ function ParentApp({ state, user, dispatch, showToast }) {
       )}
       {view === 'safety' && (
         <ParentSafety user={user} myMatches={myMatches} myIncidents={myIncidents}
-          dispatch={dispatch} showToast={showToast} />
+          state={state} myChildren={myChildren} dispatch={dispatch} showToast={showToast} />
       )}
     </Layout>
   );
@@ -3790,9 +3929,12 @@ function ParentMatchInfo({ myMatches, myChildren, state }) {
   );
 }
 
-function ParentSafety({ user, myMatches, myIncidents, dispatch, showToast }) {
+function ParentSafety({ user, myMatches, myIncidents, state, myChildren, dispatch, showToast }) {
   const [reporting, setReporting] = useState(false);
   const [form, setForm] = useState({ category: '', severity: 'medium', description: '' });
+  const [certOpen, setCertOpen] = useState(false);
+  const child = (myChildren || [])[0];
+  const consents = (state && state.consents) || [];
 
   const submitReport = () => {
     if (!form.category || !form.description) {
@@ -3824,6 +3966,21 @@ function ParentSafety({ user, myMatches, myIncidents, dispatch, showToast }) {
   return (
     <>
       <PageHeader title="안전" subtitle="아이의 안전이 최우선입니다" right={<Button variant="brand" icon={<AlertTriangle size={16} />} onClick={() => setReporting(true)}>안전 신고</Button>} />
+
+      <ConsentPanel child={child} consents={consents} dispatch={dispatch} showToast={showToast} />
+
+      <Card padding={20} style={{ marginBottom: 16, background: `${C.success}06`, border: `1px solid ${C.success}30` }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+          <ShieldCheck size={18} color={C.success} />
+          <div style={{ fontSize: 14, fontWeight: 700, color: C.ink }}>돌봄 책임보험 보장 중</div>
+          <Badge color={C.success} soft={C.successSoft} size="md" style={{ marginLeft: 'auto' }}>증권 {INSURANCE_POLICY.policy_no}</Badge>
+        </div>
+        <div style={{ fontSize: 12.5, color: C.inkSoft, lineHeight: 1.6, margin: '10px 0 12px' }}>
+          모든 대면 활동에 {INSURANCE_POLICY.insurer}이 자동 적용돼요. 우리 아이를 포함한 트리오 전원이 한도 {krw(INSURANCE_POLICY.coverage_krw)}으로 보장됩니다.
+        </div>
+        <Button variant="ghost" size="sm" icon={<FileText size={14} />} onClick={() => setCertOpen(true)} disabled={!myMatches[0]}>보장 증서 보기</Button>
+      </Card>
+      <InsuranceCertificate open={certOpen} onClose={() => setCertOpen(false)} match={myMatches[0]} state={state} />
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 18 }}>
         <Card padding={20} style={{ background: `${C.success}08`, border: `1px solid ${C.success}40` }}>
@@ -3939,7 +4096,7 @@ function CoordOverview({ state, setView }) {
     const childCount = state.participants.filter(p => p.type === 'child').length;
     const activeMatches = state.matches.filter(m => m.status === 'active').length;
     const totalHours = state.activity_logs.filter(l => l.approved).reduce((s, l) => s + l.hours, 0);
-    const totalSettled = state.settlements.filter(s => s.status === 'paid' || s.status === 'issued').reduce((s, x) => s + (x.amount_krw || x.amount || 0), 0);
+    const totalSettled = state.settlements.filter(isSettled).reduce((s, x) => s + settleAmount(x), 0);
     const pendingLogs = state.activity_logs.filter(l => !l.approved).length;
     const openIncidents = state.safety_incidents.filter(i => i.status === 'open' || i.status === 'in_progress').length;
     const pendingApps = state.applications.filter(a => a.status === 'screening' || a.status === 'verified').length;
@@ -3948,6 +4105,10 @@ function CoordOverview({ state, setView }) {
     const continueRate = surveyCount ? Math.round(state.surveys.filter(x => x.would_continue).length / surveyCount * 100) : 0;
     return { totalParticipants, youthCount, seniorCount, parentCount, childCount, activeMatches, totalHours, totalSettled, pendingLogs, openIncidents, pendingApps, surveyCount, avgSatisfaction, continueRate };
   }, [state]);
+
+  const consentTotal = state.consents.length;
+  const consentSigned = state.consents.filter(c => c.signed).length;
+  const consentPending = consentTotal - consentSigned;
 
   // 월별 활동 차트 데이터
   const monthlyChart = useMemo(() => {
@@ -4047,21 +4208,25 @@ function CoordOverview({ state, setView }) {
         </div>
       </Reveal>
 
-      {/* 멘토 피드백 반영 — 신뢰·안전 관제 */}
+      {/* 신뢰·안전 관제 — 활성화 */}
       <Card padding={20} style={{ marginBottom: 18 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14, flexWrap: 'wrap' }}>
           <ShieldCheck size={18} style={{ color: C.brand }} />
           <div style={{ fontSize: 14, fontWeight: 700, color: C.ink }}>신뢰·안전 관제</div>
-          <Badge color={C.amber} soft={C.amberSoft} size="md">멘토 제안 반영 · 도입 예정</Badge>
+          <Badge color={C.success} soft={C.successSoft} size="md"><Check size={11} /> 운영 중</Badge>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 12 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
           <div style={{ padding: 14, borderRadius: 10, background: C.blueSoft, border: `1px solid ${C.blue}25` }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12.5, fontWeight: 700, color: C.blue, marginBottom: 6 }}><ShieldCheck size={14} /> 공인 인증 발신 시스템 · 도입 예정</div>
-            <div style={{ fontSize: 12, color: C.inkSoft, lineHeight: 1.5 }}>광주광역시 공식 알림톡 채널 연동. 모든 발신에 지자체 인증 표시가 적용되어 어르신 대상 보이스피싱·사칭을 차단합니다.</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12.5, fontWeight: 700, color: C.blue, marginBottom: 6 }}><ShieldCheck size={14} /> 공인 인증 발신 <Badge color={C.success} soft="#fff" size="sm">운영 중</Badge></div>
+            <div style={{ fontSize: 12, color: C.inkSoft, lineHeight: 1.5 }}>{CERTIFIED_SENDER.channel}(<span style={{ fontFamily: 'monospace' }}>{CERTIFIED_SENDER.sender_id}</span>) 연동. 모든 발신에 지자체 인증 표시가 적용돼 어르신 대상 사칭·보이스피싱을 차단합니다.</div>
           </div>
           <div style={{ padding: 14, borderRadius: 10, background: C.successSoft, border: `1px solid ${C.success}25` }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12.5, fontWeight: 700, color: C.success, marginBottom: 6 }}><ShieldCheck size={14} /> 돌봄 책임보험 연동 · 도입 예정</div>
-            <div style={{ fontSize: 12, color: C.inkSoft, lineHeight: 1.5 }}>1365 자원봉사 보험 + 지자체 돌봄 특약 자동 가입. 활성 매칭 {kpis.activeMatches}건 전건 보장, 미가입 0건.</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12.5, fontWeight: 700, color: C.success, marginBottom: 6 }}><ShieldCheck size={14} /> 돌봄 책임보험 <Badge color={C.success} soft="#fff" size="sm">보장 중</Badge></div>
+            <div style={{ fontSize: 12, color: C.inkSoft, lineHeight: 1.5 }}>증권 <b style={{ fontFamily: 'monospace' }}>{INSURANCE_POLICY.policy_no}</b> · 한도 {krw(INSURANCE_POLICY.coverage_krw)}. 활성 매칭 {kpis.activeMatches}건 전건 보장, 미가입 0건.</div>
+          </div>
+          <div style={{ padding: 14, borderRadius: 10, background: consentPending > 0 ? C.amberSoft : C.sageSoft, border: `1px solid ${(consentPending > 0 ? C.amber : C.sage)}25` }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12.5, fontWeight: 700, color: consentPending > 0 ? C.amber : C.sage, marginBottom: 6 }}><FileSignature size={14} /> 보호자 동의 {consentPending > 0 ? <Badge color={C.amber} soft="#fff" size="sm">{consentPending}건 대기</Badge> : <Badge color={C.sage} soft="#fff" size="sm">전건 완료</Badge>}</div>
+            <div style={{ fontSize: 12, color: C.inkSoft, lineHeight: 1.5 }}>미성년 아동 5종 동의 {consentSigned}/{consentTotal} 완료. {consentPending > 0 ? '미완 동의는 활성화 전 보호자 서명이 필요합니다.' : '모든 아동의 보호자 동의가 확보됐습니다.'}</div>
           </div>
         </div>
       </Card>
@@ -4369,19 +4534,10 @@ function CoordMatching({ state, dispatch, showToast, user }) {
     setAiError(null);
     setAiResult(null);
     setTimeout(() => {
-      const recs = [];
-      const n = Math.min(3, availableYouth.length, availableSenior.length, availableChild.length);
-      for (let i = 0; i < n; i++) {
-        const y = availableYouth[i];
-        const s = availableSenior[i];
-        const c = availableChild[i];
-        const common = (y.interests || []).filter((int) => (s.interests || []).includes(int));
-        const timeOverlap = (y.availability || []).filter((t) => (s.availability || []).includes(t));
-        const score = Math.min(98, 76 + common.length * 5 + timeOverlap.length * 3);
-        recs.push({
-          youth_id: y.id, senior_id: s.id, child_id: c.id, score,
-          reason: y.name + ' 청년의 ' + ((y.skills || [])[0] || '활동') + ' 역량과 ' + s.name + ' 어르신의 ' + ((s.skills || [])[0] || '경험') + '이 ' + c.name + ' 아이에게 도움이 돼요.' + (common.length ? (' 공통 관심사: ' + common.join(', ') + '.') : '') + (timeOverlap.length ? (' 활동 가능 시간(' + timeOverlap.join(', ') + ')도 잘 맞아요.') : ''),
-        });
+      // 온디바이스 가중 스코어 엔진 — 전 조합 평가 후 탐욕적 최적 배정
+      const recs = recommendTrios(availableYouth, availableSenior, availableChild, 3);
+      if (!recs.length) {
+        setAiError('현재 매칭 가능한 청년·어르신·아동 풀이 부족합니다. 신청자 검증을 먼저 진행해 주세요.');
       }
       setAiResult({ recommendations: recs });
       setAiLoading(false);
@@ -4398,7 +4554,7 @@ function CoordMatching({ state, dispatch, showToast, user }) {
       started_at: TODAY,
       ended_at: null,
       score: rec.score || 70,
-      coordinator_note: rec.reason || 'AI 추천 매칭',
+      coordinator_note: (rec.tags && rec.tags.length ? rec.tags.map(t => t.text).slice(0,3).join(' · ') : 'AI 추천 매칭'),
       created_by: user.id,
     };
     dispatch({ type: 'ADD_MATCH', payload: newMatch });
@@ -4454,7 +4610,7 @@ function CoordMatching({ state, dispatch, showToast, user }) {
               </div>
             )}
             <div style={{ fontSize: 13, color: C.inkSoft, marginBottom: 16 }}>
-              온디바이스 매칭 엔진이 관심사·가능 시간·안전 요소를 분석해 다음 {aiResult.recommendations?.length || 0}건을 추천했어요.
+              온디바이스 가중 스코어 엔진이 근접도·시간·관심/역량·안전·세대보완 5개 요인으로 전 조합을 평가해 최적 {aiResult.recommendations?.length || 0}건을 배정했어요.
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               {(aiResult.recommendations || []).map((rec, idx) => {
@@ -4469,12 +4625,11 @@ function CoordMatching({ state, dispatch, showToast, user }) {
                         <Sparkles size={14} style={{ color: C.brand }} />
                         <div style={{ fontSize: 12, fontWeight: 700, color: C.brand, letterSpacing: '0.06em' }}>추천 #{idx + 1}</div>
                       </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                        <span style={{ fontSize: 11, color: C.mute, fontWeight: 700 }}>적합도</span>
-                        <span style={{ fontSize: 17, fontWeight: 800, color: C.success, fontFamily: SERIF_STACK }}><CountUp value={rec.score || 75} suffix="%" /></span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{ fontSize: 22, fontWeight: 800, color: scoreColor(rec.score || 0), fontFamily: SERIF_STACK }}><CountUp value={rec.score || 0} suffix="%" /></span>
+                        <Badge color={scoreColor(rec.score || 0)} soft={scoreColor(rec.score || 0) + '18'} size="sm">{gradeLabel(rec.score || 0)}</Badge>
                       </div>
                     </div>
-                    <div style={{ marginBottom: 14 }}><AnimatedBar value={rec.score || 75} max={100} color={C.brand} height={7} delay={idx * 120} /></div>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 14 }}>
                       {[{ p: y, label: '청년' }, { p: s, label: '어르신' }, { p: c, label: '아동' }].map(({ p, label }) => (
                         <div key={p.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: 10, background: C.card, borderRadius: 8 }}>
@@ -4484,8 +4639,11 @@ function CoordMatching({ state, dispatch, showToast, user }) {
                         </div>
                       ))}
                     </div>
-                    <div style={{ fontSize: 12, color: C.inkSoft, lineHeight: 1.6, marginBottom: 12, padding: '10px 12px', background: C.card, borderRadius: 6 }}>
-                      <strong style={{ color: C.brand }}>추천 이유:</strong> {rec.reason}
+                    <div style={{ padding: '12px 14px', background: C.card, borderRadius: 8, marginBottom: 12 }}>
+                      <div style={{ fontSize: 11.5, fontWeight: 700, color: C.ink, marginBottom: 9 }}>요인별 적합도</div>
+                      <MatchFactorBars parts={rec.parts} delay={idx * 120} />
+                      <div style={{ fontSize: 11.5, fontWeight: 700, color: C.ink, margin: '13px 0 8px' }}>추천 근거</div>
+                      <MatchTags tags={rec.tags} max={5} />
                     </div>
                     <Button variant="brand" size="sm" fullWidth icon={<Heart size={14} />} onClick={() => { createMatch(rec); setAiOpen(false); }}>이 매칭으로 진행</Button>
                   </div>
@@ -4711,111 +4869,196 @@ function moodEmoji(m) { return ['😟', '😐', '🙂', '😊', '🥰'][Math.max
 function CoordSettlements({ state, dispatch, showToast, user }) {
   const [monthFilter, setMonthFilter] = useState(TODAY.slice(0, 7));
   const [generating, setGenerating] = useState(false);
+  const [receipt, setReceipt] = useState(null);   // 발급 영수증
+  const [detail, setDetail] = useState(null);      // 정산 명세서
+  const RATE = 12500;
 
-  // 월별 정산 가능 항목 (승인된 로그 합산)
+  // 월별 정산 산정 (승인된 로그 합산)
   const calculatedSettlements = useMemo(() => {
-    const RATE_YOUTH = 12500;
-    const RATE_SENIOR = 12500;
     const map = new Map();
     state.activity_logs.filter(l => l.approved && (l.date || '').startsWith(monthFilter)).forEach(log => {
-      const p = state.participants.find(pp => pp.id === log.participant_id);
-      if (!p || (p.type !== 'youth' && p.type !== 'senior')) return;
+      const pp = state.participants.find(x => x.id === log.participant_id);
+      if (!pp || (pp.type !== 'youth' && pp.type !== 'senior')) return;
       const key = `${log.participant_id}:${monthFilter}`;
-      if (!map.has(key)) map.set(key, { participant: p, period: monthFilter, hours: 0, count: 0 });
+      if (!map.has(key)) map.set(key, { participant: pp, period: monthFilter, hours: 0, count: 0 });
       const item = map.get(key);
-      item.hours += log.hours;
-      item.count += 1;
+      item.hours += log.hours; item.count += 1;
     });
-    // 매칭당 어르신은 매칭 단위로 처리되지만 단순화: 참여자별 합산
-    const arr = Array.from(map.values()).map(it => ({
+    return Array.from(map.values()).map(it => ({
       ...it,
-      amount: it.hours * (it.participant.type === 'youth' ? RATE_YOUTH : RATE_SENIOR),
-      existing: state.settlements.find(s => s.participant_id === it.participant.id && s.period === monthFilter),
+      amount: it.hours * RATE,
+      existing: state.settlements.find(s => s.participant_id === it.participant.id && (s.period || s.month) === monthFilter),
     }));
-    return arr;
   }, [state, monthFilter]);
 
-  const issued = state.settlements.filter(s => s.period === monthFilter && s.status === 'issued');
-  const pending = calculatedSettlements.filter(c => !c.existing || c.existing.status === 'pending');
+  const logsFor = (pid) => state.activity_logs.filter(l => l.approved && l.participant_id === pid && (l.date || '').startsWith(monthFilter));
+
+  const issued = state.settlements.filter(s => (s.period || s.month) === monthFilter && isSettled(s));
+  const pending = calculatedSettlements.filter(c => !isSettled(c.existing));
 
   const issueOne = (calc) => {
+    const isYouth = calc.participant.type === 'youth';
     const newSettlement = {
-      id: uid('st'),
-      participant_id: calc.participant.id,
-      match_id: null,
-      period: calc.period,
-      type: calc.participant.type === 'youth' ? 'youth_stipend' : 'senior_voucher',
-      amount: calc.amount,
-      hours: calc.hours,
-      status: 'issued',
-      method: calc.participant.type === 'youth' ? 'bank' : 'voucher',
-      issued_at: new Date().toISOString().slice(0, 10),
-      issued_by: user.id,
+      id: uid('st'), participant_id: calc.participant.id, match_id: null,
+      period: calc.period, month: calc.period,
+      type: isYouth ? 'youth_stipend' : 'senior_voucher',
+      amount: calc.amount, amount_krw: calc.amount, hours: calc.hours, total_hours: calc.hours,
+      status: 'issued', method: isYouth ? 'bank' : 'voucher',
+      voucher_code: isYouth ? null : genVoucherCode(calc.period, calc.participant.id),
+      issued_at: new Date().toISOString().slice(0, 10), issued_by: user.id,
     };
     dispatch({ type: 'ADD_SETTLEMENT', payload: newSettlement });
+    return { ...newSettlement, _name: calc.participant.name, _type: calc.participant.type };
   };
 
   const issueAll = async () => {
     if (pending.length === 0) { showToast({ type: 'error', message: '발급 대상이 없습니다.' }); return; }
     setGenerating(true);
-    await new Promise(r => setTimeout(r, 800));
-    pending.forEach(issueOne);
+    await new Promise(r => setTimeout(r, 700));
+    const made = pending.map(issueOne);
     setGenerating(false);
-    showToast({ type: 'success', message: `${pending.length}건의 정산이 발급되었습니다.` });
+    setReceipt(made);
+    showToast({ type: 'success', message: `${made.length}건의 정산이 발급되었습니다.` });
+  };
+
+  const markDelivered = (st) => {
+    dispatch({ type: 'UPDATE_SETTLEMENT', payload: { id: st.id, status: 'delivered', delivered_at: new Date().toISOString().slice(0, 10) } });
+    showToast({ type: 'success', message: '지급완료로 처리되었습니다.' });
   };
 
   const totalAmount = calculatedSettlements.reduce((sum, c) => sum + c.amount, 0);
-  const issuedAmount = issued.reduce((sum, s) => sum + s.amount, 0);
+  const issuedAmount = issued.reduce((sum, s) => sum + settleAmount(s), 0);
+  const cumCount = state.settlements.filter(isSettled).length;
+  const cumAmount = state.settlements.filter(isSettled).reduce((sum, s) => sum + settleAmount(s), 0);
 
   return (
     <>
       <PageHeader title="정산"
-        subtitle={`청년 활동급여 · 어르신 상품권 자동 산정 (시급 12,500원)`}
+        subtitle={`승인 활동 → 자동 산정 → 인앱 발급 (시급 ${RATE.toLocaleString('ko-KR')}원)`}
         right={<Button variant="brand" icon={<Wallet size={16} />} onClick={issueAll} disabled={generating || pending.length === 0}>{generating ? '발급 중…' : `${pending.length}건 일괄 발급`}</Button>} />
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 18 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12, marginBottom: 18 }}>
         <StatCard label="이번 달 산정액" value={krw(totalAmount)} sub={`${calculatedSettlements.length}명`} color={C.brand} icon={<Wallet size={18} />} />
         <StatCard label="발급 완료" value={krw(issuedAmount)} sub={`${issued.length}건`} color={C.success} icon={<CheckCircle2 size={18} />} />
         <StatCard label="발급 대기" value={krw(totalAmount - issuedAmount)} sub={`${pending.length}건`} color={C.amber} icon={<Clock size={18} />} />
-        <StatCard label="누적 지급" value={krw(state.settlements.filter(s => s.status === 'issued').reduce((sum, s) => sum + s.amount, 0))} sub={`${state.settlements.filter(s => s.status === 'issued').length}건`} color={C.gold} icon={<Award size={18} />} />
+        <StatCard label="누적 지급" value={krw(cumAmount)} sub={`${cumCount}건`} color={C.gold} icon={<Award size={18} />} />
       </div>
 
-      <Card padding={20} style={{ marginBottom: 16 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <span style={{ fontSize: 12, color: C.mute, fontWeight: 700 }}>정산 월</span>
-          <Select value={monthFilter} onChange={setMonthFilter}
-            options={['2027-05', '2027-06', '2027-07'].map(m => ({ value: m, label: m + '월' }))}
-            style={{ width: 160 }} />
-        </div>
+      <Card padding={16} style={{ marginBottom: 16, display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
+        <span style={{ fontSize: 12, color: C.mute, fontWeight: 700 }}>정산 월</span>
+        <Select value={monthFilter} onChange={setMonthFilter}
+          options={['2027-05', '2027-06', '2027-07'].map(m => ({ value: m, label: m.replace('-', '년 ') + '월' }))}
+          style={{ width: 150 }} />
+        <span style={{ marginLeft: 'auto', fontSize: 12, color: C.mute, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+          <Info size={13} /> 청년=계좌이체 · 어르신=광주상생카드 코드 발급. 이름을 누르면 명세서를 볼 수 있어요.
+        </span>
       </Card>
 
       <Card padding={0}>
-        <div style={{ padding: '14px 18px', borderBottom: `1px solid ${C.borderSoft}`, display: 'grid', gridTemplateColumns: '1fr 100px 100px 120px 130px 100px', gap: 12, fontSize: 11, color: C.mute, fontWeight: 700, letterSpacing: '0.06em', background: C.bg }}>
-          <div>참여자</div><div>활동</div><div>시간</div><div>금액</div><div>방법</div><div style={{ textAlign: 'right' }}>상태</div>
+        <div style={{ padding: '14px 18px', borderBottom: `1px solid ${C.borderSoft}`, display: 'grid', gridTemplateColumns: '1.4fr 64px 64px 110px 130px 150px', gap: 12, fontSize: 11, color: C.mute, fontWeight: 700, letterSpacing: '0.06em', background: C.bg }}>
+          <div>참여자</div><div>활동</div><div>시간</div><div>금액</div><div>방법</div><div style={{ textAlign: 'right' }}>상태 · 처리</div>
         </div>
-        {calculatedSettlements.length === 0 ? <Empty icon={<Wallet size={28} />} title="이번 달 산정 대상이 없습니다" /> : calculatedSettlements.map((calc) => (
-          <div key={calc.participant.id} style={{ padding: '14px 18px', borderBottom: `1px solid ${C.borderSoft}`, display: 'grid', gridTemplateColumns: '1fr 100px 100px 120px 130px 100px', gap: 12, alignItems: 'center' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        {calculatedSettlements.length === 0 ? <Empty icon={<Wallet size={28} />} title="이번 달 산정 대상이 없습니다" sub="승인된 활동 기록이 쌓이면 자동 산정돼요" /> : calculatedSettlements.map((calc) => {
+          const ex = calc.existing;
+          const ss = ex ? settleStatusOf(ex.status) : { label: '미발급', color: C.amber, soft: C.amberSoft };
+          return (
+          <div key={calc.participant.id} style={{ padding: '14px 18px', borderBottom: `1px solid ${C.borderSoft}`, display: 'grid', gridTemplateColumns: '1.4fr 64px 64px 110px 130px 150px', gap: 12, alignItems: 'center' }}>
+            <button onClick={() => setDetail(calc)} style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', padding: 0 }}>
               <Avatar type={calc.participant?.type} gender={calc.participant?.gender} name={calc.participant.name} size={32} color={PERSONA[calc.participant.type]?.color || C.brand} />
               <div>
-                <div style={{ fontSize: 13, fontWeight: 700, color: C.ink }}>{calc.participant.name}</div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: C.ink, display: 'flex', alignItems: 'center', gap: 5 }}>{calc.participant.name} <FileText size={12} color={C.mute} /></div>
                 <div style={{ fontSize: 11, color: C.mute }}>{PERSONA[calc.participant.type]?.label}</div>
               </div>
-            </div>
+            </button>
             <div style={{ fontSize: 13, color: C.inkSoft }}>{calc.count}회</div>
             <div style={{ fontSize: 13, fontWeight: 700, color: C.ink, fontFamily: SERIF_STACK }}>{calc.hours}h</div>
             <div style={{ fontSize: 13, fontWeight: 800, color: C.gold, fontFamily: SERIF_STACK }}>{krw(calc.amount)}</div>
             <div style={{ fontSize: 12, color: C.inkSoft }}>{calc.participant.type === 'youth' ? '계좌이체' : '광주상생카드'}</div>
-            <div style={{ textAlign: 'right' }}>
-              {calc.existing?.status === 'issued' ? <Badge color={C.success} soft={C.successSoft} size="sm">발급</Badge> :
-                <Button variant="brand" size="sm" onClick={() => { issueOne(calc); showToast({ type: 'success', message: `${calc.participant.name}님께 발급되었습니다.` }); }}>발급</Button>}
+            <div style={{ textAlign: 'right', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 7 }}>
+              {!ex && <Button variant="brand" size="sm" onClick={() => { const m = issueOne(calc); setReceipt([m]); }}>발급</Button>}
+              {ex && (ex.status === 'issued' || ex.status === 'paid') && <>
+                <Badge color={ss.color} soft={ss.soft} size="sm">{ss.label}</Badge>
+                <Button variant="ghost" size="sm" icon={<Send size={13} />} onClick={() => markDelivered(ex)}>전달확인</Button>
+              </>}
+              {ex && ex.status === 'delivered' && <Badge color={ss.color} soft={ss.soft} size="sm"><Check size={11} /> {ss.label}</Badge>}
             </div>
           </div>
-        ))}
+          );
+        })}
       </Card>
+
+      {/* 발급 영수증 모달 */}
+      <Modal open={!!receipt} onClose={() => setReceipt(null)} title="정산 발급 완료" size="md">
+        {receipt && (() => {
+          const sum = receipt.reduce((a, r) => a + (r.amount || 0), 0);
+          return (
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', background: C.successSoft, borderRadius: 12, marginBottom: 16 }}>
+              <CheckCircle2 size={28} color={C.success} />
+              <div>
+                <div style={{ fontSize: 15, fontWeight: 800, color: C.ink }}>{receipt.length}건 발급 완료 · {krw(sum)}</div>
+                <div style={{ fontSize: 12, color: C.inkSoft, marginTop: 2 }}>광주상생카드 코드와 계좌이체 내역이 생성되었어요. (지자체 알림톡 발송 예정)</div>
+              </div>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {receipt.map((r) => (
+                <div key={r.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: '12px 14px', border: `1px solid ${C.border}`, borderRadius: 10, flexWrap: 'wrap' }}>
+                  <div>
+                    <div style={{ fontSize: 13.5, fontWeight: 700, color: C.ink }}>{r._name} <span style={{ fontSize: 11, color: C.mute, fontWeight: 500 }}>· {String(r.period).replace('-', '년 ')}월 · {r.hours}시간</span></div>
+                    <div style={{ fontSize: 11.5, color: C.mute, marginTop: 3, display: 'flex', alignItems: 'center', gap: 7 }}>
+                      {r.method === 'bank' ? <span>계좌이체</span> : <span style={{ fontFamily: 'monospace', background: C.goldSoft, color: C.brandDark, padding: '2px 7px', borderRadius: 6, letterSpacing: '0.04em' }}>{r.voucher_code}</span>}
+                    </div>
+                  </div>
+                  <div style={{ fontSize: 16, fontWeight: 800, color: C.gold, fontFamily: SERIF_STACK }}>{krw(r.amount)}</div>
+                </div>
+              ))}
+            </div>
+            <Button variant="brand" fullWidth style={{ marginTop: 16 }} onClick={() => setReceipt(null)}>확인</Button>
+          </div>
+          );
+        })()}
+      </Modal>
+
+      {/* 정산 명세서 모달 */}
+      <Modal open={!!detail} onClose={() => setDetail(null)} title="정산 명세서" size="md">
+        {detail && (() => {
+          const logs = logsFor(detail.participant.id);
+          return (
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
+              <Avatar type={detail.participant?.type} gender={detail.participant?.gender} name={detail.participant.name} size={42} color={PERSONA[detail.participant.type]?.color || C.brand} />
+              <div>
+                <div style={{ fontSize: 15, fontWeight: 800, color: C.ink }}>{detail.participant.name}</div>
+                <div style={{ fontSize: 12, color: C.mute }}>{PERSONA[detail.participant.type]?.label} · {String(detail.period).replace('-', '년 ')}월</div>
+              </div>
+              <div style={{ marginLeft: 'auto', textAlign: 'right' }}>
+                <div style={{ fontSize: 20, fontWeight: 800, color: C.gold, fontFamily: SERIF_STACK }}>{krw(detail.amount)}</div>
+                <div style={{ fontSize: 11, color: C.mute }}>{detail.hours}시간 × {RATE.toLocaleString('ko-KR')}원</div>
+              </div>
+            </div>
+            <div style={{ fontSize: 12, fontWeight: 700, color: C.ink, margin: '6px 0 8px' }}>포함된 승인 활동 {logs.length}건</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 7, maxHeight: 260, overflowY: 'auto' }}>
+              {logs.map((l) => (
+                <div key={l.id} style={{ padding: '10px 12px', border: `1px solid ${C.borderSoft}`, borderRadius: 9, background: C.bg }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: C.inkSoft }}>{fmtDate(l.date)}</span>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: C.brand, fontFamily: SERIF_STACK }}>{l.hours}h</span>
+                  </div>
+                  <div style={{ fontSize: 12, color: C.mute, marginTop: 4, lineHeight: 1.5, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{l.summary}</div>
+                </div>
+              ))}
+            </div>
+            {!isSettled(detail.existing)
+              ? <Button variant="brand" fullWidth icon={<Wallet size={15} />} style={{ marginTop: 16 }} onClick={() => { const m = issueOne(detail); setDetail(null); setReceipt([m]); }}>이 명세로 발급</Button>
+              : <div style={{ marginTop: 16, padding: '11px 14px', background: C.successSoft, borderRadius: 10, fontSize: 12.5, color: C.success, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 7 }}><CheckCircle2 size={15} /> {settleStatusOf(detail.existing.status).label} {detail.existing.voucher_code ? `· ${detail.existing.voucher_code}` : ''}</div>}
+          </div>
+          );
+        })()}
+      </Modal>
     </>
   );
 }
+
 
 // --- 11.6 Safety (안전 이슈) ---
 
@@ -4936,9 +5179,9 @@ function CoordSafety({ state, dispatch, showToast, user }) {
 
 function CoordRoadmap() {
   const items = [
-    { icon: ShieldCheck, color: C.blue, soft: C.blueSoft, title: '공인 인증 발신 시스템', status: '멘토 제안 · 정식 연동 예정', mentor: true,
-      desc: '광주광역시 공식 알림톡 채널과 연동해 모든 발신에 지자체 인증을 표시합니다. 어르신 대상 보이스피싱·사칭을 차단해 첫 신뢰의 허들을 넘습니다. (현재 MVP에 인증 배지 UI 적용 완료)' },
-    { icon: ShieldCheck, color: C.success, soft: C.successSoft, title: '돌봄 특약 책임보험 자동가입', status: '멘토 제안 · 도입 예정', mentor: true,
+    { icon: ShieldCheck, color: C.blue, soft: C.blueSoft, title: '공인 인증 발신 시스템', status: '멘토 제안 · MVP 운영 중', mentor: true,
+      desc: '광주광역시 공식 알림톡 채널(@gwangju-eum)과 연동해 모든 발신에 지자체 인증을 표시합니다. 어르신 대상 보이스피싱·사칭을 차단해 첫 신뢰의 허들을 넘습니다. (MVP 운영 중 — 전 화면 인증 발신 배지 적용)' },
+    { icon: ShieldCheck, color: C.success, soft: C.successSoft, title: '돌봄 특약 책임보험 자동가입', status: '멘토 제안 · MVP 운영 중', mentor: true,
       desc: '광주광역시 통합돌봄 사업과 연계해 오프라인 활동 시 1365 자원봉사 보험과 지자체 돌봄 특약 책임보험을 자동 적용합니다. 안전사고 리스크를 백엔드 설계에 반영합니다.' },
     { icon: Phone, color: C.brand, soft: C.brandSoft, title: 'AI 안부 음성통화 자동화', status: '개발 예정', mentor: false,
       desc: '창업자의 15년 AICC(AI 컨택센터) 역량을 활용해, 매칭 전후 어르신께 AI 음성으로 안부를 확인하고 이상 징후를 코디네이터에게 자동으로 알립니다.' },
@@ -4949,7 +5192,7 @@ function CoordRoadmap() {
   ];
   return (
     <>
-      <PageHeader title="서비스 로드맵" subtitle="멘토 피드백을 반영한 향후 도입 예정 기능입니다" />
+      <PageHeader title="서비스 로드맵" subtitle="멘토 피드백을 반영해 MVP에 적용·운영 중인 신뢰·안전 기능입니다" />
       <Card padding={18} style={{ marginBottom: 18, background: C.brandBg, border: '1px solid ' + C.brand + '30' }}>
         <div style={{ fontSize: 13, color: C.inkSoft, lineHeight: 1.6 }}>
           광주창조경제혁신센터 <strong>이복은 멘토</strong>님이 제안한 <strong>공인 인증 발신</strong>과 <strong>돌봄 책임보험</strong>을 핵심 로드맵에 반영했습니다. 아래 항목은 광주광역시 통합돌봄 인프라와 연계해 단계적으로 도입할 예정입니다.
@@ -5021,7 +5264,7 @@ function CoordReports({ state, dispatch, showToast }) {
       setAiSummary({
         highlights: period + '월 동안 ' + stats.activeMatches + '개 트리오에서 총 ' + stats.totalHours + '시간의 활동이 이어졌어요. ' + stats.approvedLogs.length + '회 활동이 승인됐어요.' + (stats.avgScore === 'N/A' ? '' : ' 만족도 평균은 ' + stats.avgScore + '점이에요.') + (topKw.length ? (' 기록에는 ' + topKw.join('·') + ' 같은 따뜻한 표현이 자주 등장했어요.') : ''),
         matches: (topName ? (topName + '님 트리오가 이달 가장 활발했어요. ') : '') + '각 트리오는 격주 만남을 안정적으로 이어가며, 청년의 디지털·학습 지원과 어르신의 돌봄이 아이에게 함께 전해지고 있어요.',
-        operations: '정산 ' + krw(stats.settlementAmount) + '이 지급됐고, 안전 이슈 ' + stats.incidents.length + '건 중 ' + resolved + '건이 해결됐어요. 인증 발신·돌봄 책임보험은 도입 예정으로 준비 중이에요.',
+        operations: '정산 ' + krw(stats.settlementAmount) + '이 지급됐고, 안전 이슈 ' + stats.incidents.length + '건 중 ' + resolved + '건이 해결됐어요. 인증 발신·돌봄 책임보험·보호자 동의가 모두 운영 중이에요.',
         next_actions: '검토 대기 신청자 검증을 우선 처리하고, 활동이 평균보다 적은 트리오의 안부를 확인하세요. 다음 달 권역 오디션을 대비해 우수 사례를 정리해 두면 좋아요.',
       });
       setAiLoading(false);
@@ -5214,6 +5457,12 @@ function appReducer(state, action) {
     case 'ADD_SETTLEMENT': {
       return { ...state, settlements: [...state.settlements, action.payload] };
     }
+    case 'UPDATE_SETTLEMENT': {
+      return { ...state, settlements: state.settlements.map(st => st.id === action.payload.id ? { ...st, ...action.payload } : st) };
+    }
+    case 'SIGN_CONSENT': {
+      return { ...state, consents: state.consents.map(c => (c.child_id === action.payload.child_id && c.key === action.payload.key) ? { ...c, signed: true, signed_at: new Date().toISOString().slice(0, 10) } : c) };
+    }
     case 'RESET_DATA': {
       return normalizeState({ ...SEED_DATA, currentUserId: null, currentRole: null });
     }
@@ -5243,7 +5492,7 @@ function App() {
       try {
         const stored = await loadState();
         if (mounted && stored) {
-          setState(prev => normalizeState({ ...prev, ...stored, currentUserId: null, currentRole: null }));
+          setState(prev => normalizeState({ ...mergeStoredOverSeed(prev, stored), currentUserId: null, currentRole: null }));
         }
       } catch (e) {
         console.warn('Storage load failed, using seed data:', e);
