@@ -1634,8 +1634,8 @@ function MoatBand() {
   ];
   return (
     <div style={{ marginBottom: 36 }}>
-      <div style={{ textAlign: 'center', fontSize: 12, fontWeight: 700, color: C.brand, letterSpacing: '0.1em', marginBottom: 4 }}>이음의 진짜 경쟁력</div>
-      <div style={{ textAlign: 'center', fontSize: 20, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK, letterSpacing: '-0.02em', marginBottom: 6 }}>쉽게 흉내 낼 수 없는 세 가지</div>
+      <div style={{ textAlign: 'center', fontSize: 12, fontWeight: 700, color: C.brand, letterSpacing: '0.1em', marginBottom: 4 }}>이음의 차별성</div>
+      <div style={{ textAlign: 'center', fontSize: 20, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK, letterSpacing: '-0.02em', marginBottom: 6 }}>오직 이음에만 있는 세 가지</div>
       <div style={{ textAlign: 'center', fontSize: 13, color: C.mute, marginBottom: 18, maxWidth: 540, marginLeft: 'auto', marginRight: 'auto', lineHeight: 1.6 }}>아이디어는 누구나 떠올려요. 이음에는 이미 돌아가는 매칭·안전·정산 시스템이 있습니다</div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(232px, 1fr))', gap: 12 }}>
         {items.map((m, i) => {
