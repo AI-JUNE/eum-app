@@ -485,7 +485,7 @@ function TimeBankCard({ hours = 0, accent = C.brand }) {
         <div style={{ fontSize: 13, fontWeight: 800, color: accent }}>이음 타임뱅크</div>
         <Badge color={C.mute} soft={C.muteSoft} size="sm">일본 후레아이깃푸 모델</Badge>
       </div>
-      <div style={{ fontSize: 30, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK }}>{hours.toFixed(1)}<span style={{ fontSize: 16, fontWeight: 600, color: C.mute }}> 시간 적립</span></div>
+      <div style={{ fontSize: 'clamp(23px, 6.5vw, 30px)', fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK, whiteSpace: 'nowrap' }}>{hours.toFixed(1)}<span style={{ fontSize: 14, fontWeight: 600, color: C.mute }}> 시간 적립</span></div>
       <div style={{ fontSize: 12.5, color: C.inkSoft, marginTop: 6, lineHeight: 1.55 }}>이웃을 도운 시간이 차곡차곡 신뢰로 쌓여요. 모아둔 시간은 훗날 내가, 또는 우리 가족이 돌봄이 필요할 때 쓰거나 다른 분께 선물할 수 있어요.</div>
       <div style={{ display: 'flex', gap: 8, marginTop: 14 }}>
         <div style={{ flex: 1, textAlign: 'center', padding: '10px 0', background: C.card, borderRadius: 10, border: '1px solid ' + C.border }}>
@@ -870,7 +870,7 @@ function StatCard({ label, value, sub, color = C.ink, icon, trend }) {
         <div style={{ fontSize: 11, color: C.muteLight, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>{label}</div>
         {icon && <div style={{ color: C.muteLight, display: 'flex' }}>{icon}</div>}
       </div>
-      <div style={{ fontSize: 32, fontWeight: 700, color: C.ink, letterSpacing: '-0.045em', lineHeight: 1, fontFamily: FONT_STACK }}>
+      <div style={{ fontSize: 'clamp(20px, 6.2vw, 32px)', fontWeight: 700, color: C.ink, letterSpacing: '-0.045em', lineHeight: 1.04, fontFamily: FONT_STACK, whiteSpace: 'nowrap' }}>
         {typeof value === 'number' ? <CountUp value={value} /> : value}
       </div>
       <div style={{ width: 22, height: 2, background: color, marginTop: 13, borderRadius: 1 }} />
@@ -1482,9 +1482,9 @@ function ImpactBand({ state }) {
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12 }}>
           {tiles.map((t, i) => (
-            <div key={i} style={{ background: C.card, border: '1px solid ' + C.border, borderRadius: 12, padding: '18px 18px' }}>
+            <div key={i} style={{ background: C.card, border: '1px solid ' + C.border, borderRadius: 12, padding: '18px 16px', minWidth: 0, overflow: 'hidden' }}>
               <div style={{ fontSize: 11, color: C.muteLight, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 11 }}>{t.label}</div>
-              <div style={{ fontSize: 28, fontWeight: 700, color: C.ink, fontFamily: FONT_STACK, letterSpacing: '-0.04em', lineHeight: 1 }}>{t.node}</div>
+              <div style={{ fontSize: 'clamp(19px, 5.6vw, 28px)', fontWeight: 700, color: C.ink, fontFamily: FONT_STACK, letterSpacing: '-0.04em', lineHeight: 1.04, whiteSpace: 'nowrap' }}>{t.node}</div>
               <div style={{ width: 20, height: 2, background: t.color, marginTop: 12, borderRadius: 1 }} />
             </div>
           ))}
@@ -1634,9 +1634,9 @@ function MoatBand() {
   ];
   return (
     <div style={{ marginBottom: 36 }}>
-      <div style={{ textAlign: 'center', fontSize: 12, fontWeight: 700, color: C.brand, letterSpacing: '0.1em', marginBottom: 4 }}>이음만의 것</div>
-      <div style={{ textAlign: 'center', fontSize: 20, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK, letterSpacing: '-0.02em', marginBottom: 6 }}>따라 하기 어려운 세 가지</div>
-      <div style={{ textAlign: 'center', fontSize: 13, color: C.mute, marginBottom: 18, maxWidth: 540, marginLeft: 'auto', marginRight: 'auto', lineHeight: 1.6 }}>아이디어가 아니라, 이미 작동하는 매칭·안전·정산 기술이 이음의 진입장벽이에요</div>
+      <div style={{ textAlign: 'center', fontSize: 12, fontWeight: 700, color: C.brand, letterSpacing: '0.1em', marginBottom: 4 }}>이음의 진짜 경쟁력</div>
+      <div style={{ textAlign: 'center', fontSize: 20, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK, letterSpacing: '-0.02em', marginBottom: 6 }}>쉽게 흉내 낼 수 없는 세 가지</div>
+      <div style={{ textAlign: 'center', fontSize: 13, color: C.mute, marginBottom: 18, maxWidth: 540, marginLeft: 'auto', marginRight: 'auto', lineHeight: 1.6 }}>아이디어는 누구나 떠올려요. 이음에는 이미 돌아가는 매칭·안전·정산 시스템이 있습니다</div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(232px, 1fr))', gap: 12 }}>
         {items.map((m, i) => {
           const Icon = m.icon;
@@ -1710,7 +1710,7 @@ function PricingBand({ onShowApplication }) {
             <div style={{ fontSize: 12, fontWeight: 700, color: p.color, marginBottom: 4 }}>{p.tagline}</div>
             <div style={{ fontSize: 19, fontWeight: 800, color: C.ink, marginBottom: 10 }}>{p.name}</div>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 3, marginBottom: 16 }}>
-              <span style={{ fontSize: 30, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK, letterSpacing: '-0.03em' }}>{p.price === 0 ? '무료' : krw(p.price)}</span>
+              <span style={{ fontSize: 'clamp(23px, 7vw, 30px)', fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK, letterSpacing: '-0.03em', whiteSpace: 'nowrap' }}>{p.price === 0 ? '무료' : krw(p.price)}</span>
               {p.price > 0 && <span style={{ fontSize: 13, color: C.mute }}>/ 월</span>}
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 9, marginBottom: 18, flex: 1 }}>
@@ -1845,7 +1845,7 @@ function RoleSelect({ state, onSelectRole, onShowApplication }) {
           </div>
         </div>
       </div>
-      <div style={{ maxWidth: 1320, width: '100%', padding: '56px 40px 72px' }}>
+      <div style={{ maxWidth: 1320, width: '100%', padding: isMobile ? '36px 16px 56px' : '56px 40px 72px' }}>
         {/* 히어로 — 2단 좌측정렬 (좌: 카피·CTA / 우: 3세대 선순환 비주얼) */}
         <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.05fr 0.95fr', gap: isMobile ? 28 : 52, alignItems: 'center', margin: '8px 0 52px' }}>
           <div style={{ textAlign: isMobile ? 'center' : 'left' }}>
@@ -3528,7 +3528,7 @@ function SeniorApp({ state, user, dispatch, showToast }) {
           {/* 이번 달 받은 상품권 */}
           <Card padding={24} style={{ marginBottom: 20, background: C.goldSoft, border: `2px solid ${C.gold}40` }}>
             <div style={{ fontSize: 15, fontWeight: 700, color: C.gold, letterSpacing: '0.05em', marginBottom: 8 }}>지금까지 받은 상품권</div>
-            <div style={{ fontSize: 42, fontWeight: 700, color: C.ink, letterSpacing: '-0.03em', fontFamily: SERIF_STACK, lineHeight: 1 }}>
+            <div style={{ fontSize: 'clamp(28px, 9vw, 42px)', fontWeight: 700, color: C.ink, letterSpacing: '-0.03em', fontFamily: SERIF_STACK, lineHeight: 1.02 }}>
               {krw(totalEarned)}
             </div>
             <div style={{ fontSize: 16, color: C.inkSoft, marginTop: 10 }}>{mySettlements.length}회 정산 완료</div>
@@ -3572,7 +3572,7 @@ function SeniorApp({ state, user, dispatch, showToast }) {
           <div style={{ fontSize: 17, color: C.mute, marginBottom: 24 }}>광주상생카드는 동네 가맹점에서 사용하실 수 있습니다</div>
           <Card padding={28} style={{ marginBottom: 20, background: C.goldSoft, border: `2px solid ${C.gold}40` }}>
             <div style={{ fontSize: 16, color: C.gold, fontWeight: 700, marginBottom: 8 }}>누적 합계</div>
-            <div style={{ fontSize: 48, fontWeight: 700, color: C.ink, fontFamily: SERIF_STACK, letterSpacing: '-0.03em', lineHeight: 1 }}>{krw(totalEarned)}</div>
+            <div style={{ fontSize: 'clamp(30px, 11vw, 48px)', fontWeight: 700, color: C.ink, fontFamily: SERIF_STACK, letterSpacing: '-0.03em', lineHeight: 1.02, whiteSpace: 'nowrap' }}>{krw(totalEarned)}</div>
           </Card>
           {mySettlements.map(s => {
             const ss = settleStatusOf(s.status);
@@ -3955,7 +3955,7 @@ function ParentSubscription({ showToast }) {
             <Card key={p.key} padding={20} style={{ border: `${isCurrent ? 2 : 1}px solid ${isCurrent ? p.color : C.border}`, display: 'flex', flexDirection: 'column' }}>
               <div style={{ fontSize: 17, fontWeight: 800, color: C.ink, marginBottom: 6 }}>{p.name}</div>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: 3, marginBottom: 14 }}>
-                <span style={{ fontSize: 26, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK, letterSpacing: '-0.03em' }}>{p.price === 0 ? '무료' : krw(p.price)}</span>
+                <span style={{ fontSize: 'clamp(21px, 6.5vw, 26px)', fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK, letterSpacing: '-0.03em', whiteSpace: 'nowrap' }}>{p.price === 0 ? '무료' : krw(p.price)}</span>
                 {p.price > 0 && <span style={{ fontSize: 12, color: C.mute }}>/ 월</span>}
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16, flex: 1 }}>
