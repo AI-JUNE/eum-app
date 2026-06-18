@@ -4,13 +4,15 @@ export const C = {
   brandDark: '#A04826',
   brandSoft: '#F7E9E1',
   brandBg: '#FCF3EE',
-  ink: '#1A1814',
-  inkSoft: '#4A4540',
-  mute: '#8A847A',
+  ink: '#16140F',
+  inkSoft: '#514E47',
+  mute: '#8E8A7F',
+  muteLight: '#A7A398',
   cream: '#FAF7F2',
-  bg: '#F6F2EB',
+  bg: '#F4F2EC',
   card: '#FFFFFF',
-  border: '#E8E2D6',
+  cardWarm: '#FBFAF6',
+  border: '#E7E3D8',
   borderSoft: '#F0EBE0',
   sage: '#5F8556',
   sageSoft: '#E8EFE3',
@@ -42,5 +44,6 @@ export const PERSONA = {
   coordinator: { label: '코디네이터', color: C.ink, soft: '#EDEAE5', ring: 'rgba(26,24,20,0.15)' },
 };
 
-export const FONT_STACK = `-apple-system, BlinkMacSystemFont, "Pretendard Variable", Pretendard, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif`;
-export const SERIF_STACK = `"Source Serif 4", "Source Serif Pro", "Noto Serif KR", Georgia, serif`;
+export const FONT_STACK = `"Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif`;
+// 폰트 단일화 — Pretendard 하나로 통일 (상용 서비스 일관성). 디스플레이도 Pretendard.
+export const SERIF_STACK = `"Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif`;

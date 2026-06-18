@@ -654,10 +654,12 @@ function Button({ children, onClick, variant = 'primary', size = 'md', disabled,
         background: hover && !disabled ? v.hoverBg : v.bg,
         color: v.fg, border: `1px solid ${v.border}`,
         padding: s.pad, fontSize: s.fs, fontWeight: 600,
-        borderRadius: 8, cursor: disabled ? 'not-allowed' : 'pointer',
-        opacity: disabled ? 0.5 : 1, transition: 'all 0.12s ease',
+        borderRadius: 10, cursor: disabled ? 'not-allowed' : 'pointer',
+        opacity: disabled ? 0.5 : 1, transition: 'all 0.16s cubic-bezier(0.22,1,0.36,1)',
         height: s.h, width: fullWidth ? '100%' : 'auto',
         fontFamily: FONT_STACK, letterSpacing: '-0.01em',
+        boxShadow: 'none',
+        transform: hover && !disabled && (variant === 'primary' || variant === 'brand') ? 'translateY(-1px)' : 'none',
         ...style
       }}
     >
@@ -677,13 +679,12 @@ function Card({ children, padding = 20, style = {}, onClick, hoverable }) {
       onMouseLeave={() => hoverable && setHover(false)}
       style={{
         background: C.card,
-        border: `1px solid ${C.border}`,
-        borderRadius: 14,
+        border: `1px solid ${hover ? C.muteLight : C.border}`,
+        borderRadius: 12,
         padding,
         cursor: onClick ? 'pointer' : 'default',
-        transition: 'all 0.15s ease',
-        boxShadow: hover ? '0 4px 16px rgba(26,24,20,0.06)' : 'none',
-        transform: hover ? 'translateY(-1px)' : 'none',
+        transition: 'box-shadow 0.22s ease, border-color 0.22s ease',
+        boxShadow: hover ? '0 12px 32px rgba(20,19,15,0.10)' : 'none',
         ...style
       }}
     >
@@ -865,15 +866,16 @@ function Toast({ toast, onClose }) {
 function StatCard({ label, value, sub, color = C.ink, icon, trend }) {
   return (
     <Card padding={18}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
-        <div style={{ fontSize: 12, color: C.mute, fontWeight: 600, letterSpacing: '0.02em' }}>{label}</div>
-        {icon && <div style={{ background: C.bg, padding: 6, borderRadius: 8, display: 'flex' }}>{icon}</div>}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+        <div style={{ fontSize: 11, color: C.muteLight, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>{label}</div>
+        {icon && <div style={{ color: C.muteLight, display: 'flex' }}>{icon}</div>}
       </div>
-      <div style={{ fontSize: 26, fontWeight: 700, color, letterSpacing: '-0.03em', lineHeight: 1.1, fontFamily: SERIF_STACK }}>
+      <div style={{ fontSize: 32, fontWeight: 700, color: C.ink, letterSpacing: '-0.045em', lineHeight: 1, fontFamily: FONT_STACK }}>
         {typeof value === 'number' ? <CountUp value={value} /> : value}
       </div>
+      <div style={{ width: 22, height: 2, background: color, marginTop: 13, borderRadius: 1 }} />
       {sub && (
-        <div style={{ fontSize: 12, color: trend === 'up' ? C.sage : trend === 'down' ? C.red : C.mute, marginTop: 6, display: 'flex', alignItems: 'center', gap: 3 }}>
+        <div style={{ fontSize: 12, color: trend === 'up' ? C.sage : trend === 'down' ? C.red : C.mute, marginTop: 10, display: 'flex', alignItems: 'center', gap: 3 }}>
           {trend === 'up' && <TrendingUp size={12} />}
           {sub}
         </div>
@@ -931,7 +933,7 @@ function Ring({ value, max = 100, size = 96, stroke = 9, color = C.brand, track 
           style={{ transition: `stroke-dashoffset ${duration}ms cubic-bezier(0.22,1,0.36,1)` }} />
       </svg>
       <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-        {label != null && <div style={{ fontSize: Math.round(size * 0.27), fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK, letterSpacing: '-0.02em', lineHeight: 1 }}>{label}</div>}
+        {label != null && <div style={{ fontSize: Math.round(size * 0.28), fontWeight: 700, color: C.ink, fontFamily: FONT_STACK, letterSpacing: '-0.04em', lineHeight: 1 }}>{label}</div>}
         {sublabel && <div style={{ fontSize: Math.max(10, Math.round(size * 0.12)), color: C.mute, marginTop: 3, fontWeight: 600 }}>{sublabel}</div>}
       </div>
     </div>
@@ -951,11 +953,23 @@ function AnimatedBar({ value, max = 100, color = C.brand, height = 8, track = C.
 }
 
 // 진입 애니메이션 래퍼 (마운트 시 fade + slide)
-function Reveal({ children, delay = 0, y = 10, style = {} }) {
+function Reveal({ children, delay = 0, y = 14, style = {} }) {
+  const ref = useRef(null);
   const [shown, setShown] = useState(false);
-  useEffect(() => { const id = setTimeout(() => setShown(true), delay); return () => clearTimeout(id); }, [delay]);
+  useEffect(() => {
+    if (prefersReducedMotion()) { setShown(true); return; }
+    const el = ref.current;
+    if (!el || typeof IntersectionObserver === 'undefined') { setShown(true); return; }
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) { const id = setTimeout(() => setShown(true), delay); io.unobserve(e.target); }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [delay]);
   return (
-    <div style={{ opacity: shown ? 1 : 0, transform: shown ? 'none' : `translateY(${y}px)`, transition: 'opacity 0.5s ease, transform 0.55s cubic-bezier(0.22,1,0.36,1)', ...style }}>
+    <div ref={ref} style={{ opacity: shown ? 1 : 0, transform: shown ? 'none' : `translateY(${y}px)`, transition: 'opacity 0.6s ease, transform 0.7s cubic-bezier(0.22,1,0.36,1)', ...style }}>
       {children}
     </div>
   );
@@ -1372,12 +1386,23 @@ function Sidebar({ role, currentView, onNavigate, onLogout, userName, dataCount 
   );
 }
 
-function PageHeader({ title, subtitle, right }) {
+// Gowon 스타일 아이브로 라벨 — 짧은 선 + 대문자 자간
+function Eyebrow({ children, color = C.ink }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 24, gap: 16, flexWrap: 'wrap' }}>
+    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, marginBottom: 11 }}>
+      <span style={{ width: 26, height: 2, background: color, display: 'inline-block' }} />
+      <span style={{ fontSize: 11, fontWeight: 700, color: C.inkSoft, letterSpacing: '0.18em', textTransform: 'uppercase' }}>{children}</span>
+    </div>
+  );
+}
+
+function PageHeader({ title, subtitle, right, eyebrow }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 26, gap: 16, flexWrap: 'wrap' }}>
       <div>
-        <h1 style={{ fontSize: 28, fontWeight: 700, color: C.ink, letterSpacing: '-0.035em', margin: 0, fontFamily: SERIF_STACK, lineHeight: 1.15 }}>{title}</h1>
-        {subtitle && <div style={{ fontSize: 14, color: C.mute, marginTop: 5 }}>{subtitle}</div>}
+        {eyebrow && <Eyebrow>{eyebrow}</Eyebrow>}
+        <h1 style={{ fontSize: 32, fontWeight: 700, color: C.ink, letterSpacing: '-0.045em', margin: 0, fontFamily: FONT_STACK, lineHeight: 1.08 }}>{title}</h1>
+        {subtitle && <div style={{ fontSize: 14, color: C.mute, marginTop: 6 }}>{subtitle}</div>}
       </div>
       {right}
     </div>
@@ -1450,22 +1475,19 @@ function ImpactBand({ state }) {
   ];
   return (
     <Reveal>
-      <div style={{ marginBottom: 28 }}>
-        <div style={{ textAlign: 'center', fontSize: 12, fontWeight: 700, color: C.brand, letterSpacing: '0.1em', marginBottom: 4 }}>숫자로 보는 이음</div>
-        <div style={{ textAlign: 'center', fontSize: 13, color: C.mute, marginBottom: 16 }}>광주 광산구 우산동 1차 파일럿 기준</div>
+      <div style={{ marginBottom: 32 }}>
+        <div style={{ textAlign: 'center', marginBottom: 18 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: C.inkSoft, letterSpacing: '0.04em', marginBottom: 6 }}>숫자로 보는 이음</div>
+          <div style={{ fontSize: 13, color: C.mute }}>데모 시연용 샘플 데이터입니다</div>
+        </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12 }}>
-          {tiles.map((t, i) => {
-            const Icon = t.icon;
-            return (
-              <div key={i} style={{ background: C.card, border: '1px solid ' + C.border, borderRadius: 14, padding: '18px 16px', textAlign: 'center' }}>
-                <div style={{ width: 36, height: 36, borderRadius: 10, background: t.color + '18', color: t.color, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 10px' }}>
-                  <Icon size={18} />
-                </div>
-                <div style={{ fontSize: 24, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK, letterSpacing: '-0.02em' }}>{t.node}</div>
-                <div style={{ fontSize: 12, color: C.mute, marginTop: 4 }}>{t.label}</div>
-              </div>
-            );
-          })}
+          {tiles.map((t, i) => (
+            <div key={i} style={{ background: C.card, border: '1px solid ' + C.border, borderRadius: 12, padding: '18px 18px' }}>
+              <div style={{ fontSize: 11, color: C.muteLight, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 11 }}>{t.label}</div>
+              <div style={{ fontSize: 28, fontWeight: 700, color: C.ink, fontFamily: FONT_STACK, letterSpacing: '-0.04em', lineHeight: 1 }}>{t.node}</div>
+              <div style={{ width: 20, height: 2, background: t.color, marginTop: 12, borderRadius: 1 }} />
+            </div>
+          ))}
         </div>
       </div>
     </Reveal>
@@ -1562,7 +1584,7 @@ function BenchmarkBand() {
       <div style={{ textAlign: 'center', fontSize: 12, fontWeight: 700, color: C.brand, letterSpacing: '0.1em', marginBottom: 4 }}>왜 이음인가</div>
       <div style={{ textAlign: 'center', fontSize: 20, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK, letterSpacing: '-0.02em', marginBottom: 6 }}>세계가 검증한 모델, 이음이 한 걸음 더</div>
       <div style={{ textAlign: 'center', fontSize: 13, color: C.mute, marginBottom: 18, maxWidth: 560, marginLeft: 'auto', marginRight: 'auto', lineHeight: 1.6 }}>
-        50년 이상 검증된 해외 세대통합 모델의 장점은 그대로 가져오고, 모두가 놓친 <strong style={{ color: C.inkSoft }}>세 세대 동시·상호 교환</strong>을 더했어요.
+        해외에서 50년 넘게 검증된 세대통합 모델에,<br />모두가 놓쳤던 <strong style={{ color: C.inkSoft }}>세 세대가 동시에 주고받는 구조</strong>를 더했어요
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(232px, 1fr))', gap: 12, marginBottom: 16 }}>
         {models.map((m, i) => (
@@ -1598,6 +1620,89 @@ function BenchmarkBand() {
   );
 }
 
+// 히어로 일러스트 — 세 인물이 각자 움직이는 SVG (영상 없이 per-character 모션)
+function HeroScene() {
+  return (
+    <svg viewBox="0 0 460 440" width="100%" style={{ display: 'block' }} role="img" aria-label="청년·어르신·아동 세 세대가 함께 있는 모습">
+      <rect x="0" y="0" width="460" height="440" fill="#FBF8F2" />
+      {/* 배경 — 동네 */}
+      <circle cx="402" cy="250" r="44" fill="#CBD9BC" />
+      <circle cx="372" cy="280" r="30" fill="#D7E2CB" />
+      <rect x="356" y="300" width="78" height="70" fill="#EADFce" opacity="0.7" />
+      <path d="M352,300 L395,272 L438,300 Z" fill="#B9A7C2" opacity="0.7" />
+      <circle cx="60" cy="250" r="34" fill="#D7E2CB" />
+      <rect x="42" y="316" width="40" height="56" rx="6" fill="#EFE6D8" />
+      <ellipse cx="62" cy="318" rx="22" ry="14" fill="#CBD9BC" />
+      <line x1="20" y1="398" x2="440" y2="398" stroke="#E3D9C8" strokeWidth="2.5" />
+
+      {/* 청년 */}
+      <g className="eum-fig-a">
+        <ellipse cx="150" cy="400" rx="13" ry="6" fill="#2B2722" />
+        <ellipse cx="174" cy="400" rx="13" ry="6" fill="#2B2722" />
+        <rect x="146" y="306" width="15" height="92" rx="7" fill="#2B2722" />
+        <rect x="166" y="306" width="15" height="92" rx="7" fill="#2B2722" />
+        <rect x="110" y="300" width="22" height="26" rx="4" fill="#D9C2A6" />
+        <path d="M121,300 q0,-10 10,-10" fill="none" stroke="#B89A78" strokeWidth="3" />
+        <rect x="113" y="224" width="15" height="78" rx="7" fill="#9FBE8E" />
+        <path d="M120,216 C120,202 134,194 163,194 C192,194 206,202 206,216 L210,312 C180,326 146,326 116,312 Z" fill="#9FBE8E" />
+        <path d="M150,196 L163,218 L176,196 Z" fill="#E8835E" />
+        <path className="eum-wave" d="M198,224 q34,-4 52,16" fill="none" stroke="#9FBE8E" strokeWidth="15" strokeLinecap="round" />
+        <rect x="156" y="172" width="14" height="26" fill="#F1C9A5" />
+        <circle cx="163" cy="156" r="27" fill="#F1C9A5" />
+        <path d="M137,156 C135,127 159,117 183,126 C190,129 191,141 188,151 C176,138 151,138 139,159 Z" fill="#2B2722" />
+        <circle cx="156" cy="157" r="2.6" fill="#2B2722" />
+        <circle cx="172" cy="157" r="2.6" fill="#2B2722" />
+        <path d="M156,167 q7,6 14,0" fill="none" stroke="#2B2722" strokeWidth="2.2" strokeLinecap="round" />
+        <circle cx="150" cy="164" r="4" fill="#F4B3A0" opacity="0.55" />
+      </g>
+
+      {/* 어르신 */}
+      <g className="eum-fig-b">
+        <ellipse cx="236" cy="400" rx="13" ry="6" fill="#3A352F" />
+        <ellipse cx="262" cy="400" rx="13" ry="6" fill="#3A352F" />
+        <rect x="232" y="312" width="16" height="86" rx="8" fill="#C67E4F" />
+        <rect x="252" y="312" width="16" height="86" rx="8" fill="#C67E4F" />
+        <path d="M208,238 C208,222 222,214 250,214 C278,214 292,222 292,238 L296,320 C266,332 234,332 204,320 Z" fill="#B6A9CE" />
+        <rect x="200" y="244" width="14" height="70" rx="7" fill="#B6A9CE" />
+        <rect x="286" y="244" width="14" height="70" rx="7" fill="#B6A9CE" />
+        <path d="M236,216 q14,12 28,0 l-6,16 q-8,5 -16,0 Z" fill="#E8835E" />
+        <rect x="243" y="196" width="14" height="22" fill="#EBC09B" />
+        <circle cx="250" cy="180" r="26" fill="#EBC09B" />
+        <path d="M224,180 C222,150 248,142 272,151 C281,155 282,170 277,180 C276,166 270,160 262,158 C268,168 266,176 262,180 C260,166 240,158 226,178 Z" fill="#CFCAD3" />
+        <circle cx="243" cy="181" r="2.5" fill="#3A352F" />
+        <circle cx="258" cy="181" r="2.5" fill="#3A352F" />
+        <path d="M243,190 q7,5 14,0" fill="none" stroke="#3A352F" strokeWidth="2.2" strokeLinecap="round" />
+        <circle cx="237" cy="187" r="4" fill="#E79A87" opacity="0.5" />
+        <circle cx="265" cy="187" r="4" fill="#E79A87" opacity="0.5" />
+      </g>
+
+      {/* 아이 */}
+      <g className="eum-fig-c">
+        <ellipse cx="318" cy="398" rx="10" ry="5" fill="#5B4F6E" />
+        <ellipse cx="338" cy="398" rx="10" ry="5" fill="#5B4F6E" />
+        <rect x="315" y="344" width="12" height="54" rx="6" fill="#8C7FB0" />
+        <rect x="331" y="344" width="12" height="54" rx="6" fill="#8C7FB0" />
+        <path d="M302,300 C302,290 310,284 329,284 C348,284 356,290 356,300 L358,348 C338,356 320,356 300,348 Z" fill="#9FBE8E" />
+        <rect x="304" y="308" width="52" height="7" fill="#EFE6D8" opacity="0.85" />
+        <rect x="304" y="324" width="52" height="7" fill="#EFE6D8" opacity="0.85" />
+        <rect x="296" y="300" width="12" height="44" rx="6" fill="#9FBE8E" />
+        <rect x="350" y="300" width="12" height="44" rx="6" fill="#9FBE8E" />
+        <rect x="349" y="332" width="20" height="22" rx="6" fill="#C68A5E" />
+        <circle cx="354" cy="330" r="6" fill="#C68A5E" />
+        <circle cx="364" cy="330" r="6" fill="#C68A5E" />
+        <rect x="320" y="272" width="12" height="16" fill="#F1C9A5" />
+        <circle cx="329" cy="258" r="22" fill="#F1C9A5" />
+        <path d="M309,256 C308,236 328,228 348,236 C353,239 353,250 350,257 C340,246 320,246 311,259 Z" fill="#2B2722" />
+        <circle cx="323" cy="259" r="2.6" fill="#2B2722" />
+        <circle cx="337" cy="259" r="2.6" fill="#2B2722" />
+        <path d="M322,267 q7,7 15,0" fill="none" stroke="#2B2722" strokeWidth="2.2" strokeLinecap="round" />
+        <circle cx="318" cy="265" r="4" fill="#F4B3A0" opacity="0.6" />
+        <circle cx="342" cy="265" r="4" fill="#F4B3A0" opacity="0.6" />
+      </g>
+    </svg>
+  );
+}
+
 function RoleSelect({ state, onSelectRole, onShowApplication }) {
   // 시드된 페르소나 fixed assignments
   const personas = [
@@ -1607,54 +1712,85 @@ function RoleSelect({ state, onSelectRole, onShowApplication }) {
     { role: 'coordinator', id: 'cdn001', gender: 'F', name: '한가은', subtitle: '코디네이터 · 광주 광산구', desc: '신청·검증·매칭·정산을 한눈에 관리해요.', color: C.ink, soft: '#EDEAE5', gradient: 'linear-gradient(135deg, #1A1814 0%, #3A352F 100%)' },
   ];
 
+  const isMobile = useIsMobile(820);
+
   return (
     <div style={{
       minHeight: '100vh', background: C.bg, fontFamily: FONT_STACK,
-      padding: '60px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center',
-      backgroundImage: `radial-gradient(circle at 20% 0%, ${C.brandSoft} 0%, transparent 40%), radial-gradient(circle at 80% 30%, ${C.peachSoft} 0%, transparent 50%)`,
+      display: 'flex', flexDirection: 'column', alignItems: 'center',
     }}>
-      <div style={{ maxWidth: 1080, width: '100%' }}>
-        {/* 헤더 */}
-        <div style={{ marginBottom: 56, textAlign: 'center' }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-            <div style={{ width: 54, height: 54, borderRadius: 14, boxShadow: `0 8px 24px ${C.brand}40`, display: 'flex' }}>
-              <EumLogo size={54} />
+      {/* 상단 내비게이션 (고원·Papa 벤치마크) */}
+      <div style={{ width: '100%', position: 'sticky', top: 0, zIndex: 50, background: 'rgba(244,242,236,0.82)', backdropFilter: 'blur(10px)', borderBottom: `1px solid ${C.border}` }}>
+        <div style={{ maxWidth: 1320, margin: '0 auto', padding: isMobile ? '12px 16px' : '14px 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+          <div onClick={() => window.location.reload()} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }} role="button" aria-label="홈으로 새로고침">
+            <div style={{ width: 30, height: 30, display: 'flex' }}><EumLogo size={30} /></div>
+            <div style={{ lineHeight: 1.05 }}>
+              <div style={{ fontWeight: 700, color: C.ink, fontSize: 18, letterSpacing: '-0.02em', lineHeight: 1 }}>이음</div>
+              <div style={{ fontSize: 10, color: C.mute, fontWeight: 600, marginTop: 2, whiteSpace: 'nowrap', letterSpacing: '0.01em' }}>3세대 상생 품앗이</div>
             </div>
           </div>
-          <h1 style={{ fontSize: 44, fontWeight: 700, color: C.ink, letterSpacing: '-0.04em', margin: '0 0 10px', fontFamily: SERIF_STACK, lineHeight: 1.1 }}>
-            세대를 잇다, <span style={{ color: C.brand, fontStyle: 'italic' }}>이음</span>
-          </h1>
-          <p style={{ fontSize: 16, color: C.inkSoft, maxWidth: 560, margin: '0 auto', lineHeight: 1.6 }}>
-            세 세대가 서로 돕고, 도운 만큼 모두에게 보상이 돌아가요<br />
-            <span style={{ color: C.ink, fontWeight: 600 }}>우리동네 3세대 상생 품앗이 플랫폼</span>
-          </p>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 24, flexWrap: 'wrap' }}>
-            <Badge color={C.blue} soft={C.blueSoft} size="md">청소년</Badge>
-            <Badge color={C.sage} soft={C.sageSoft} size="md">청년</Badge>
-            <Badge color={C.gold} soft={C.goldSoft} size="md">중년·서포터</Badge>
-            <Badge color={C.lavender} soft={C.lavenderSoft} size="md">어르신</Badge>
-            <Badge color={C.peach} soft={C.peachSoft} size="md">양육가정·아동</Badge>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
+            <span onClick={() => { const el = document.getElementById('eum-demo'); if (el) el.scrollIntoView({ behavior: 'smooth' }); }} style={{ fontSize: 13.5, color: C.inkSoft, fontWeight: 500, cursor: 'pointer' }}>둘러보기</span>
+            <Button variant="primary" size="sm" onClick={onShowApplication}>참여 신청하기</Button>
+          </div>
+        </div>
+      </div>
+      <div style={{ maxWidth: 1320, width: '100%', padding: '56px 40px 72px' }}>
+        {/* 히어로 — 2단 좌측정렬 (좌: 카피·CTA / 우: 3세대 선순환 비주얼) */}
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.05fr 0.95fr', gap: isMobile ? 28 : 52, alignItems: 'center', margin: '8px 0 52px' }}>
+          <div style={{ textAlign: isMobile ? 'center' : 'left' }}>
+            <div style={{ fontSize: 11.5, fontWeight: 700, color: C.inkSoft, letterSpacing: '0.04em', marginBottom: 16 }}>3세대 상생 품앗이</div>
+            <h1 style={{ fontSize: isMobile ? 44 : 58, fontWeight: 700, color: C.ink, letterSpacing: '-0.05em', margin: '0 0 18px', fontFamily: FONT_STACK, lineHeight: 1.03 }}>
+              세대를 잇다,<br /><span style={{ color: C.brand }}>이음</span>
+            </h1>
+            <p style={{ fontSize: 17, color: C.inkSoft, maxWidth: 470, margin: isMobile ? '0 auto 26px' : '0 0 26px', lineHeight: 1.6 }}>
+              혼자인 어르신, 방과후 혼자인 아이, 낯선 동네의 청년.<br />서로의 빈자리를 채우는 우리 동네 3세대 품앗이
+            </p>
+            <div style={{ display: 'flex', gap: 10, justifyContent: isMobile ? 'center' : 'flex-start', flexWrap: 'wrap', marginBottom: 22 }}>
+              <Button variant="primary" size="lg" onClick={onShowApplication} iconRight={<ArrowRight size={16} />}>5분 만에 참여 신청</Button>
+              <Button variant="secondary" size="lg" onClick={() => { const el = document.getElementById('eum-demo'); if (el) el.scrollIntoView({ behavior: 'smooth' }); }}>데모 둘러보기</Button>
+            </div>
+            <div style={{ display: 'flex', gap: 8, justifyContent: isMobile ? 'center' : 'flex-start', flexWrap: 'wrap' }}>
+              <Badge color={C.blue} soft={C.blueSoft} size="md"><ShieldCheck size={13} /> 통합돌봄 연계</Badge>
+              <Badge color={C.gold} soft={C.goldSoft} size="md"><Wallet size={13} /> 상생카드 보상</Badge>
+              <Badge color={C.success} soft={C.successSoft} size="md"><UserCheck size={13} /> 4단계 안전검증</Badge>
+            </div>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <div style={{ width: '100%', maxWidth: 480, borderRadius: 24, overflow: 'hidden', boxShadow: '0 24px 60px rgba(22,20,15,0.12)', border: `1px solid ${C.border}`, animation: 'fadeUp 0.8s cubic-bezier(0.22,1,0.36,1), eumHeroFloat 7s ease-in-out 0.8s infinite' }}>
+              <img className="eum-hero-img" src="https://d8j0ntlcm91z4.cloudfront.net/user_3ENsWC9Fimdubfa90AmLsdoIGVe/hf_20260618_054046_590cd991-7eef-42e9-82c3-d7dd782d050d.png" alt="청년·어르신·아동 세 세대가 함께하는 모습" style={{ width: '100%', display: 'block' }} loading="eager" />
+            </div>
           </div>
         </div>
 
-        {/* 3세대 선순환 — 애니메이션 인포그래픽 */}
-        <div style={{ marginBottom: 30 }}>
-          <LoopInfographic />
-          <p style={{ textAlign: 'center', fontSize: 14.5, color: C.inkSoft, lineHeight: 1.7, maxWidth: 540, margin: '4px auto 18px' }}>
-            청년의 재능이 어르신께 닿고, 어르신의 지혜가 아이에게,<br />
-            아이의 웃음이 다시 청년에게 이어져요. 누구 하나 일방적으로 주기만 하지 않아요.
-          </p>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, flexWrap: 'wrap' }}>
-            <Badge color={C.blue} soft={C.blueSoft} size="md"><ShieldCheck size={13} /> 광주광역시 통합돌봄 연계</Badge>
-            <Badge color={C.gold} soft={C.goldSoft} size="md"><Wallet size={13} /> 광주상생카드·봉사시간 보상</Badge>
-            <Badge color={C.success} soft={C.successSoft} size="md"><UserCheck size={13} /> 4단계 안전 검증</Badge>
+        {/* 3세대 선순환 — 개념(애니메이션) 섹션 */}
+        <Reveal>
+          <div style={{ margin: '8px 0 56px', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.05fr 0.95fr', gap: isMobile ? 28 : 52, alignItems: 'center' }}>
+            <div style={{ display: 'flex', justifyContent: 'center' }}><LoopInfographic /></div>
+            <div style={{ textAlign: isMobile ? 'center' : 'left' }}>
+              <div style={{ fontSize: 11.5, fontWeight: 700, color: C.inkSoft, letterSpacing: '0.04em', marginBottom: 12 }}>3세대 선순환</div>
+              <h2 style={{ fontSize: 27, fontWeight: 700, color: C.ink, letterSpacing: '-0.04em', margin: '0 0 16px', fontFamily: FONT_STACK, lineHeight: 1.25 }}>세대가 함께 돌보는 동네</h2>
+              <p style={{ fontSize: 15.5, color: C.inkSoft, lineHeight: 1.7, maxWidth: 440, margin: isMobile ? '0 auto 20px' : '0 0 20px' }}>한쪽만 주는 게 아니라, 서로 주고받는 동네예요</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, maxWidth: 520, margin: isMobile ? '0 auto' : 0 }}>
+                {[
+                  { c: C.sage, who: '청년', what: '스마트폰·키오스크 사용법을 알려드리고, 아이의 공부를 도와요' },
+                  { c: C.lavender, who: '어르신', what: '살아온 지혜와 옛이야기로 아이 곁을 든든히 지켜요' },
+                  { c: C.peach, who: '아이', what: '웃음과 활력으로 어른들의 하루를 환하게 채워요' },
+                ].map((r) => (
+                  <div key={r.who} style={{ display: 'flex', alignItems: 'flex-start', gap: 14, padding: '13px 16px', borderRadius: 12, background: C.card, border: `1px solid ${C.border}` }}>
+                    <span style={{ fontSize: 14.5, fontWeight: 700, color: r.c, minWidth: 48, flexShrink: 0 }}>{r.who}</span>
+                    <span style={{ fontSize: 13.5, color: C.inkSoft, lineHeight: 1.55 }}>{r.what}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
-        </div>
+        </Reveal>
 
         <ImpactBand state={state} />
 
         {/* 데모 로그인 안내 */}
-        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, padding: '18px 22px', marginBottom: 24, display: 'flex', alignItems: 'center', gap: 14, boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
+        <div id="eum-demo" style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, padding: '18px 22px', marginBottom: 24, display: 'flex', alignItems: 'center', gap: 14, boxShadow: '0 1px 3px rgba(0,0,0,0.03)', scrollMarginTop: 80 }}>
           <div style={{ background: C.amberSoft, padding: 9, borderRadius: 10, display: 'flex' }}>
             <Sparkles size={20} color={C.amber} />
           </div>
@@ -1665,7 +1801,7 @@ function RoleSelect({ state, onSelectRole, onShowApplication }) {
         </div>
 
         {/* 페르소나 카드 */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 14, marginBottom: 36 }}>
+        <Reveal style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 14, marginBottom: 36 }}>
           {personas.map((p) => (
             <Card key={p.role} padding={0} hoverable onClick={() => onSelectRole(p.role, p.id)} style={{ overflow: 'hidden', cursor: 'pointer' }}>
               <div style={{ background: p.gradient, height: 70, position: 'relative', display: 'flex', alignItems: 'flex-end', padding: 14 }}>
@@ -1685,11 +1821,11 @@ function RoleSelect({ state, onSelectRole, onShowApplication }) {
               </div>
             </Card>
           ))}
-        </div>
+        </Reveal>
 
-        <TestimonialBand />
-        <BenchmarkBand />
-        <FaqBand />
+        <Reveal><TestimonialBand /></Reveal>
+        <Reveal delay={60}><BenchmarkBand /></Reveal>
+        <Reveal delay={60}><FaqBand /></Reveal>
         <PartnerStrip />
 
         {/* 신청 페이지 진입 */}
@@ -1706,7 +1842,7 @@ function RoleSelect({ state, onSelectRole, onShowApplication }) {
         </Card>
 
         <div style={{ textAlign: 'center', marginTop: 36, color: C.mute, fontSize: 12 }}>
-          이음 MVP · 광산구청 주민참여예산 시범사업 · 2027 우산동 파일럿
+          © 2027 이음 · 세대를 잇다
         </div>
       </div>
     </div>
@@ -3430,6 +3566,56 @@ function ConsumerLayout({ role, view, setView, user, dispatch, state, children }
   const isSenior = role === 'senior';
   const items = PARTICIPANT_NAV[role] || [];
   const handleLogout = () => dispatch({ type: 'LOGOUT' });
+  const isMobile = useIsMobile(900);
+
+  // ── 데스크톱: 좌측 사이드바 웹 레이아웃 (모바일은 아래 셸) ──
+  if (!isMobile) {
+    return (
+      <div style={{ minHeight: '100vh', background: C.bg, fontFamily: FONT_STACK, color: C.ink, display: 'flex' }}>
+        <aside style={{ width: 248, flexShrink: 0, borderRight: `1px solid ${C.border}`, background: C.card, position: 'sticky', top: 0, height: '100vh', display: 'flex', flexDirection: 'column', padding: '22px 16px' }}>
+          <div onClick={handleLogout} role="button" aria-label="처음으로" style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', padding: '0 6px', marginBottom: 26 }}>
+            <EumLogo size={32} />
+            <div>
+              <div style={{ fontSize: 16, fontWeight: 700, color: C.ink, fontFamily: SERIF_STACK, letterSpacing: '-0.02em', lineHeight: 1.05 }}>이음</div>
+              <div style={{ fontSize: 11, color: persona.color, fontWeight: 700, marginTop: 1 }}>{persona.label}</div>
+            </div>
+          </div>
+          <nav style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+            {items.map((it) => {
+              const active = view === it.id; const Icon = it.icon;
+              return (
+                <button key={it.id} onClick={() => setView(it.id)} style={{ display: 'flex', alignItems: 'center', gap: 11, padding: isSenior ? '13px 12px' : '11px 12px', border: 'none', borderRadius: 10, cursor: 'pointer', background: active ? persona.soft : 'transparent', color: active ? persona.color : C.inkSoft, fontFamily: FONT_STACK, fontSize: isSenior ? 16 : 14, fontWeight: active ? 700 : 500, textAlign: 'left', transition: 'all 0.14s' }}>
+                  <Icon size={isSenior ? 22 : 19} strokeWidth={active ? 2.4 : 1.9} /> {it.label}
+                </button>
+              );
+            })}
+          </nav>
+          <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 10, background: C.bg }}>
+              <Avatar type={role} gender={user?.gender} name={user?.name} size={32} color={persona.color} />
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: C.ink, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user?.name}님</div>
+                <div style={{ fontSize: 11, color: C.mute }}>{persona.label}</div>
+              </div>
+            </div>
+            <button onClick={handleLogout} aria-label="로그아웃" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, border: `1px solid ${C.border}`, background: C.card, color: C.inkSoft, borderRadius: 10, padding: '9px 12px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: FONT_STACK }}>
+              <LogOut size={15} /> 나가기
+            </button>
+          </div>
+        </aside>
+        <main style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+          <div style={{ position: 'sticky', top: 0, zIndex: 40, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 10, padding: '12px 28px', background: 'rgba(244,242,236,0.82)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderBottom: `1px solid ${C.borderSoft}` }}>
+            <NotificationBell state={state} role={role} user={user} onNavigate={setView} />
+          </div>
+          <div key={view} style={{ flex: 1, padding: '28px 32px 56px', animation: 'fadeUp 0.42s cubic-bezier(0.22,1,0.36,1)' }}>
+            <div style={{ maxWidth: 1200, margin: '0 auto', width: '100%' }}>{children}</div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  // ── 모바일: 상단 앱바 + 하단 탭 셸 ──
   return (
     <div style={{ minHeight: '100vh', background: `linear-gradient(180deg, ${persona.soft} 0%, ${C.bg} 240px)`, fontFamily: FONT_STACK, color: C.ink, display: 'flex', justifyContent: 'center' }}>
       <div style={{ width: '100%', maxWidth: isSenior ? 840 : 700, minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'transparent', position: 'relative' }}>
@@ -4110,6 +4296,15 @@ function CoordOverview({ state, setView }) {
   const consentSigned = state.consents.filter(c => c.signed).length;
   const consentPending = consentTotal - consentSigned;
 
+  // 시안 반영 — 트렌드 증감 · 퍼널 · 처리 대기 큐
+  const ym = TODAY.slice(0, 7);
+  const newThisMonth = state.participants.filter(p => (p.joined_at || '').startsWith(ym)).length;
+  const hoursThisMonth = state.activity_logs.filter(l => l.approved && (l.date || '').startsWith(ym)).reduce((s, l) => s + l.hours, 0);
+  const appsTotal = state.applications.length;
+  const verifiedCount = state.applications.filter(a => a.status === 'verified' || a.status === 'completed').length;
+  const queueTotal = kpis.pendingApps + kpis.pendingLogs + kpis.openIncidents + consentPending;
+  const greeting = (() => { const h = new Date().getHours(); return h < 12 ? '좋은 아침이에요' : h < 18 ? '좋은 오후예요' : '좋은 저녁이에요'; })();
+
   // 월별 활동 차트 데이터
   const monthlyChart = useMemo(() => {
     const months = {};
@@ -4137,34 +4332,65 @@ function CoordOverview({ state, setView }) {
 
   return (
     <>
-      <PageHeader title="대시보드" subtitle={`${fmtDate(TODAY)} · 광주 광산구 우산동 1차 파일럿`} />
+      {/* 개편 헤더 — 인사 + CTA */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 16, flexWrap: 'wrap', marginBottom: 20 }}>
+        <div>
+          <Eyebrow>OPERATIONS</Eyebrow>
+          <h1 style={{ fontSize: 28, fontWeight: 700, color: C.ink, letterSpacing: '-0.04em', margin: 0, fontFamily: FONT_STACK, lineHeight: 1.05 }}>한가은 코디님, {greeting}</h1>
+          <div style={{ fontSize: 13, color: C.mute, marginTop: 6 }}>{fmtDate(TODAY)} · 광주 광산구 우산동 1차 파일럿</div>
+        </div>
+        <Button variant="primary" icon={<Plus size={16} />} onClick={() => setView('settlement')}>{Number(TODAY.slice(5, 7))}월 정산 발급</Button>
+      </div>
+
+      {/* 처리 대기 큐 (케어닥 벤치마크) */}
+      <Card padding={16} style={{ marginBottom: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+          <span style={{ fontSize: 13.5, fontWeight: 700, color: C.ink }}>처리 대기</span>
+          <span style={{ fontSize: 11.5, color: C.mute }}>오늘 확인이 필요한 {queueTotal}건</span>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {[
+            { tag: '검증', tagC: C.blue, tagBg: C.blueSoft, label: '신청자 서류·안전검증 대기', n: kpis.pendingApps, view: 'applicants', emph: false },
+            { tag: '정산영향', tagC: C.brand, tagBg: C.brandSoft, label: '활동기록 승인 대기 · 정산 일정 영향', n: kpis.pendingLogs, view: 'activities', emph: kpis.pendingLogs > 0 },
+            { tag: '안전', tagC: C.success, tagBg: C.successSoft, label: kpis.openIncidents > 0 ? '미해결 안전 이슈 처리 필요' : '보호자 동의 서명 대기', n: kpis.openIncidents > 0 ? kpis.openIncidents : consentPending, view: 'safety', emph: kpis.openIncidents > 0 },
+          ].map((r, i) => (
+            <div key={i} onClick={() => setView(r.view)} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', borderRadius: 10, cursor: 'pointer', border: `1px solid ${r.emph ? r.tagC + '55' : C.borderSoft}`, background: r.emph ? r.tagBg : C.card, transition: 'all 0.14s ease' }}>
+              <span style={{ fontSize: 11, fontWeight: 700, color: r.tagC, background: r.tagBg, padding: '4px 9px', borderRadius: 6, whiteSpace: 'nowrap' }}>{r.tag}</span>
+              <span style={{ fontSize: 13.5, fontWeight: 600, color: C.ink }}>{r.label}</span>
+              <span style={{ marginLeft: 'auto', fontSize: 20, fontWeight: 700, color: r.emph ? r.tagC : C.ink, fontFamily: FONT_STACK }}>{r.n}</span>
+              <ChevronRight size={16} color={C.muteLight} />
+            </div>
+          ))}
+        </div>
+      </Card>
+
+      {/* KPI — 트렌드 증감 */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12, marginBottom: 12 }}>
+        <StatCard label="참여자" value={kpis.totalParticipants} sub={newThisMonth > 0 ? `+${newThisMonth}명 이번 달` : `청년 ${kpis.youthCount}/어르신 ${kpis.seniorCount}/양육 ${kpis.parentCount}`} trend={newThisMonth > 0 ? 'up' : null} color={C.brand} icon={<Users size={18} />} />
+        <StatCard label="활성 트리오" value={`${kpis.activeMatches} / 8`} sub={`목표 ${Math.round(kpis.activeMatches / 8 * 100)}% 달성`} color={C.sage} icon={<Heart size={18} />} />
+        <StatCard label="누적 활동시간" value={`${kpis.totalHours}h`} sub={hoursThisMonth > 0 ? `+${hoursThisMonth}h 이번 달` : `목표 1,440h 중 ${Math.round(kpis.totalHours / 1440 * 100)}%`} trend={hoursThisMonth > 0 ? 'up' : null} color={C.lavender} icon={<Clock size={18} />} />
+        <StatCard label="지급 정산" value={krw(kpis.totalSettled)} sub={`${state.settlements.filter(isSettled).length}건 발급`} color={C.gold} icon={<Wallet size={18} />} />
+      </div>
+
+      {/* 매칭 퍼널 */}
+      <Card padding={18} style={{ marginBottom: 18 }}>
+        <div style={{ fontSize: 13, fontWeight: 700, color: C.ink, marginBottom: 14 }}>매칭 퍼널</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {[
+            { label: '신청', n: appsTotal, pct: 100, c: C.ink },
+            { label: '검증 완료', n: verifiedCount, pct: appsTotal ? Math.round(verifiedCount / appsTotal * 100) : 0, c: C.inkSoft },
+            { label: '매칭 완료', n: kpis.activeMatches, pct: appsTotal ? Math.round(kpis.activeMatches / appsTotal * 100) : 0, c: C.brand },
+          ].map((f, i) => (
+            <div key={i}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 5 }}><span style={{ color: C.inkSoft }}>{f.label}</span><span style={{ fontWeight: 700, color: f.c }}>{f.n}</span></div>
+              <AnimatedBar value={f.pct} max={100} color={f.c} height={6} delay={i * 100} />
+            </div>
+          ))}
+        </div>
+      </Card>
 
       <CoordAiInsights state={state} />
       <CoordSentiment state={state} />
-      <CoordPipeline state={state} />
-
-      {/* 알림 영역 */}
-      {(kpis.openIncidents > 0 || kpis.pendingApps > 0 || kpis.pendingLogs > 5) && (
-        <Card padding={16} style={{ marginBottom: 18, background: C.amberSoft, border: `1px solid ${C.amber}50` }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <AlertTriangle size={18} style={{ color: C.amber }} />
-            <div style={{ fontSize: 13, fontWeight: 700, color: C.amber }}>처리할 항목이 있어요</div>
-            <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
-              {kpis.openIncidents > 0 && <Button variant="ghost" size="sm" onClick={() => setView('safety')}>안전 이슈 {kpis.openIncidents}건</Button>}
-              {kpis.pendingApps > 0 && <Button variant="ghost" size="sm" onClick={() => setView('applicants')}>검토 대기 {kpis.pendingApps}건</Button>}
-              {kpis.pendingLogs > 0 && <Button variant="ghost" size="sm" onClick={() => setView('activities')}>승인 대기 {kpis.pendingLogs}건</Button>}
-            </div>
-          </div>
-        </Card>
-      )}
-
-      {/* KPI 그리드 */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 14, marginBottom: 18 }}>
-        <StatCard label="참여자" value={kpis.totalParticipants} sub={`청년 ${kpis.youthCount} / 어르신 ${kpis.seniorCount} / 양육 ${kpis.parentCount}`} color={C.brand} icon={<Users size={18} />} />
-        <StatCard label="활성 매칭" value={kpis.activeMatches} sub={`목표 8건 중 ${kpis.activeMatches}건 진행`} color={C.sage} icon={<Heart size={18} />} trend={kpis.activeMatches >= 3 ? `+${kpis.activeMatches}` : null} />
-        <StatCard label="누적 활동시간" value={`${kpis.totalHours}h`} sub={`목표 1,440시간 중 ${Math.round(kpis.totalHours / 1440 * 100)}%`} color={C.lavender} icon={<Clock size={18} />} />
-        <StatCard label="지급 정산" value={krw(kpis.totalSettled)} sub={`${state.settlements.filter(s => s.status === 'issued').length}건 발급 완료`} color={C.gold} icon={<Wallet size={18} />} />
-      </div>
 
       {/* 움직이는 인포그래픽 밴드 */}
       <Reveal>
@@ -5475,6 +5701,44 @@ function appReducer(state, action) {
 // 13. MAIN APP (인증 · 라우팅 · 영속화 · Toast)
 // ============================================================================
 
+// 참여 신청 알림 메일 — 운영자(gowonceo@gmail.com) 수신
+const RECIPIENT_EMAIL = 'gowonceo@gmail.com';
+// web3forms.com 에서 gowonceo@gmail.com 으로 무료 발급받은 access key를 넣으면 서버 없이 자동 발송됩니다.
+// 비워두면 메일 클라이언트(mailto)로 작성 화면이 열립니다.
+const WEB3FORMS_KEY = '';
+async function sendApplicationEmail(data) {
+  const label = (PERSONA[data.type] && PERSONA[data.type].label) || data.type;
+  const body = [
+    '[이음] 새 참여 신청이 접수되었습니다.',
+    '',
+    `· 유형: ${label}`,
+    `· 이름: ${data.name || '-'}`,
+    `· 나이: ${data.age || '-'}`,
+    `· 연락처: ${data.phone || '-'}`,
+    `· 주소: ${data.address || '-'}`,
+    `· 비상연락처: ${data.emergency_contact || '-'}`,
+    `· 직업: ${data.occupation || '-'}`,
+    `· 소개: ${data.bio || '-'}`,
+    `· 신청일시: ${new Date().toLocaleString('ko-KR')}`,
+  ].join('\n');
+  const subject = `[이음] 새 참여 신청 — ${data.name || ''} (${label})`;
+  if (WEB3FORMS_KEY) {
+    try {
+      await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({ access_key: WEB3FORMS_KEY, subject, from_name: '이음 참여신청', replyto: RECIPIENT_EMAIL, message: body }),
+      });
+      return 'sent';
+    } catch (e) { /* fall back to mailto */ }
+  }
+  try {
+    const url = `mailto:${RECIPIENT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.open(url, '_blank') || (window.location.href = url);
+  } catch (e) {}
+  return 'mailto';
+}
+
 function App() {
   const [state, setState] = useState(() => {
     return normalizeState({ ...SEED_DATA, currentUserId: null, currentRole: null });
@@ -5589,8 +5853,9 @@ function App() {
     }));
 
     dispatch({ type: 'ADD_APPLICATION', payload: { participant: newParticipant, application, verifications } });
+    sendApplicationEmail(data);
     setShowApplication(false);
-    showToast({ type: 'success', message: '신청이 접수되었습니다. 코디네이터가 검토 후 연락드립니다.', duration: 5000 });
+    showToast({ type: 'success', message: '신청이 접수되었어요. 신청 내용이 코디네이터에게 전달됩니다.', duration: 5000 });
   };
 
   if (loading) {
@@ -5616,6 +5881,19 @@ function App() {
     <div style={{ textAlign: 'left' }}>
       <style>{`
         @keyframes spin { from { transform: rotate(0); } to { transform: rotate(360deg); } }
+        .eum-hero-img { transition: transform 0.6s cubic-bezier(0.22,1,0.36,1); }
+        .eum-hero-img:hover { transform: scale(1.04); }
+        @keyframes eumHeroFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+        @keyframes eumBobA { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+        @keyframes eumBobB { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-3.5px); } }
+        @keyframes eumBobC { 0%,100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-10px) rotate(-3deg); } }
+        @keyframes eumWave { 0%,100% { transform: rotate(0deg); } 50% { transform: rotate(-8deg); } }
+        .eum-fig-a { animation: eumBobA 4.2s ease-in-out infinite; }
+        .eum-fig-b { animation: eumBobB 5.6s ease-in-out infinite; }
+        .eum-fig-c { animation: eumBobC 2.6s ease-in-out infinite; transform-origin: 332px 392px; }
+        .eum-wave { animation: eumWave 3.4s ease-in-out infinite; transform-origin: 250px 224px; }
+        @keyframes eumFloaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
+        @keyframes eumPulse { 0%,100% { opacity: 0.55; } 50% { opacity: 0.85; } }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
