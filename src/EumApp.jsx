@@ -58,7 +58,7 @@ const PERSONA = {
 };
 
 const FONT_STACK = `-apple-system, BlinkMacSystemFont, "Pretendard Variable", Pretendard, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif`;
-const SERIF_STACK = `"Source Serif Pro", "Noto Serif KR", Georgia, serif`;
+const SERIF_STACK = FONT_STACK; // 가독성: 세리프 → Pretendard 산세리프 통일
 
 // ============================================================================
 // 2. SEED DATA
@@ -428,7 +428,7 @@ function Badge({ children, color = C.mute, soft = C.muteSoft, size = 'sm' }) {
       display: 'inline-flex', alignItems: 'center', gap: 4,
       background: soft, color, padding: pad, borderRadius: 6,
       fontSize: fs, fontWeight: 600, letterSpacing: '-0.01em',
-      whiteSpace: 'nowrap',
+      whiteSpace: 'nowrap', flexShrink: 0, maxWidth: '100%',
     }}>{children}</span>
   );
 }
