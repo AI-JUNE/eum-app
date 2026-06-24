@@ -1097,6 +1097,8 @@ function Sidebar({ role, currentView, onNavigate, onLogout, userName, dataCount 
       { id: 'settlements', label: '정산', icon: <Wallet size={18} /> },
       { id: 'safety', label: '안전 이슈', icon: <ShieldAlert size={18} />, count: dataCount?.openIncidents, danger: dataCount?.openIncidents > 0 },
       { id: 'reports', label: '리포트', icon: <FileText size={18} /> },
+      { id: 'b2g', label: '공공 성과·납품', icon: <TrendingUp size={18} /> },
+      { id: 'b2b', label: '기업·기관 복지', icon: <Award size={18} /> },
       { id: 'ai-advisor', label: '복지 어드바이저', icon: <Sparkles size={18} /> },
       { id: 'ai-match', label: 'AI 자동·선택 매칭', icon: <Users size={18} /> },
       { id: 'ai-copilot', label: 'AI 코파일럿', icon: <ClipboardCheck size={18} /> },
@@ -1105,6 +1107,7 @@ function Sidebar({ role, currentView, onNavigate, onLogout, userName, dataCount 
     ],
     youth: [
       { id: 'dashboard', label: '홈', icon: <Home size={18} /> },
+      { id: 'discover', label: '활동 찾기', icon: <Search size={18} /> },
       { id: 'schedule', label: '활동 일정', icon: <Calendar size={18} /> },
       { id: 'logs', label: '활동 기록', icon: <PenLine size={18} /> },
       { id: 'mentor', label: '진로 멘토', icon: <GraduationCap size={18} /> },
@@ -1640,6 +1643,8 @@ function YouthApp({ state, user, dispatch, showToast }) {
       {view === 'dashboard' && (
         <>
           <PageHeader title={`안녕하세요, ${user.name}님`} subtitle={`이번 주 활동을 함께 살펴보세요`} />
+          <VolunteerHub user={user} totalHours={totalHours} setView={setView} showToast={showToast} />
+          <TrustRow />
 
           {/* Hero — 매칭 트리오 */}
           {match && (
@@ -1747,6 +1752,7 @@ function YouthApp({ state, user, dispatch, showToast }) {
         </>
       )}
 
+      {view === 'discover' && <YouthDiscover user={user} totalHours={totalHours} showToast={showToast} setView={setView} />}
       {view === 'schedule' && <YouthSchedule match={match} activities={myActivities} state={state} user={user} dispatch={dispatch} showToast={showToast} />}
       {view === 'logs' && <YouthLogs state={state} user={user} match={match} myLogs={myLogs} myActivities={myActivities} dispatch={dispatch} showToast={showToast} />}
       {view === 'mentor' && <YouthMentor senior={senior} myLogs={myLogs} state={state} />}
@@ -2265,7 +2271,7 @@ function SeniorSosCard({ user, dispatch, showToast, match }) {
 const PARTICIPANT_NAV = {
   youth: [
     { id: 'dashboard', label: '홈', icon: Home }, { id: 'schedule', label: '일정', icon: Calendar },
-    { id: 'logs', label: '기록', icon: PenLine }, { id: 'mentor', label: '멘토', icon: GraduationCap },
+    { id: 'discover', label: '찾기', icon: Search }, { id: 'logs', label: '기록', icon: PenLine }, { id: 'mentor', label: '멘토', icon: GraduationCap },
     { id: 'archive', label: '기억', icon: BookOpen }, { id: 'settlement', label: '정산', icon: Wallet },
   ],
   senior: [
@@ -2587,6 +2593,8 @@ function ParentDashboard({ user, myChildren, myMatches, todayActivities, upcomin
           </div>
         )}
       </Card>
+      <TrustRow />
+      <ConsumerPricing />
     </>
   );
 }
@@ -2855,6 +2863,8 @@ function CoordinatorApp({ state, user, dispatch, showToast }) {
       {view === 'settlements' && <CoordSettlements state={state} dispatch={dispatch} showToast={showToast} user={user} />}
       {view === 'safety' && <CoordSafety state={state} dispatch={dispatch} showToast={showToast} user={user} />}
       {view === 'reports' && <CoordReports state={state} dispatch={dispatch} showToast={showToast} />}
+      {view === 'b2g' && <CoordB2G state={state} showToast={showToast} />}
+      {view === 'b2b' && <CoordB2B state={state} showToast={showToast} />}
       {view === 'ai-advisor' && <CoordAdvisor state={state} showToast={showToast} />}
       {view === 'ai-match' && <CoordAIMatch state={state} showToast={showToast} />}
       {view === 'ai-copilot' && <CoordCopilot state={state} showToast={showToast} />}
@@ -2997,7 +3007,7 @@ function CoordAdvisor({ state, showToast }){
                   </div>
                 ))}
               </div>
-              <div style={{ display:'flex', gap:8, marginTop:12 }}><Button variant="brand" size="sm" onClick={()=>showToast && showToast('신청 동행 목록에 추가했습니다','success')}>신청 동행 등록</Button></div>
+              <div style={{ display:'flex', gap:8, marginTop:12 }}><Button variant="brand" size="sm" onClick={async()=>{ await EUM_API.notify.alimtalk(); showToast && showToast('신청 동행 등록 + 알림톡 발송(API)','success'); }}>신청 동행 등록</Button></div>
               <div style={{ fontSize:10.5, color:C.mute, marginTop:9, lineHeight:1.5 }}>※ 규칙기반 추정이며 실제 수급 자격은 신청·심사로 확정됩니다. 코디가 최종 확인 후 신청을 동행합니다.</div>
             </AIWrap>
           )}
@@ -3148,6 +3158,968 @@ function CoordChaperone({ state, showToast }){
   );
 }
 
+// ============================================================================
+// 전면개편 모듈 (2026-06 · B2G·B2B 강화 + 복지 어드바이저 전역 노출 + UX)
+//  케어닥/행복이음 벤치마킹 — 큰 카드·플로팅·신뢰배지·쉬운 UX
+// ============================================================================
+
+// 코디 대시보드 상단 — AI·공공 도구 빠른 접근(발견성 개선)
+function QuickAccessStrip({ setView }) {
+  const items = [
+    { id: 'b2g', t: '공공 성과·납품', d: '도입효과·ROI·연계', c: C.blue, ic: <TrendingUp size={18} /> },
+    { id: 'b2b', t: '기업·기관 복지', d: 'ESG·임직원 돌봄', c: C.sage, ic: <Award size={18} /> },
+    { id: 'ai-advisor', t: '복지 어드바이저', d: '사각지대 발굴', c: C.lavender, ic: <Sparkles size={18} /> },
+    { id: 'ai-match', t: 'AI 매칭', d: '자동+선택형', c: C.peach, ic: <Users size={18} /> },
+  ];
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(150px,1fr))', gap: 10, marginBottom: 22 }}>
+      {items.map(it => (
+        <button key={it.id} onClick={() => setView(it.id)} style={{ textAlign: 'left', cursor: 'pointer', fontFamily: FONT_STACK, background: C.card, border: `1px solid ${C.border}`, borderLeft: `4px solid ${it.c}`, borderRadius: 13, padding: '13px 15px', transition: 'all .15s' }}
+          onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 6px 18px rgba(26,24,20,.07)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+          onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none'; }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 7, color: it.c, fontWeight: 800, fontSize: 13.5 }}>{it.ic}{it.t}</div>
+          <div style={{ fontSize: 11, color: C.mute, marginTop: 4 }}>{it.d}</div>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// 공통: 큰 KPI 카드
+function BigStat({ label, value, sub, color }) {
+  return (
+    <Card padding={18} style={{ borderTop: `3px solid ${color}` }}>
+      <div style={{ fontSize: 11.5, color: C.mute, fontWeight: 700 }}>{label}</div>
+      <div style={{ fontSize: 24, fontWeight: 800, color: C.ink, marginTop: 5, letterSpacing: '-0.02em' }}>{value}</div>
+      {sub && <div style={{ fontSize: 11, color: C.inkSoft, marginTop: 4, lineHeight: 1.45 }}>{sub}</div>}
+    </Card>
+  );
+}
+
+// ───────── B2G: 공공 성과·납품 ─────────
+function CoordB2G({ state, showToast }) {
+  const ps = state.participants || [];
+  const seniors = ps.filter(p => p.type === 'senior');
+  const gapList = seniors.slice(0, 5);
+  const link = [
+    ['행복이음(차세대 사회보장정보시스템)', '대상자·개인별지원계획 연계', '연동 준비'],
+    ['통합돌봄(2026.3 시행)', '일상생활돌봄·가족지원 실행도구', '연동 준비'],
+    ['복지로·보조금24', 'AI 복지 어드바이저 추천 근거', '연계'],
+    ['사회서비스 전자바우처', '제공기관 등록·이용 정산', '준비'],
+    ['광주상생카드·경찰청', '상품권 자동발급·범죄경력 조회', '연동'],
+  ];
+  return (
+    <div>
+      <PageHeader title="공공 성과·납품 (B2G)" subtitle="지자체가 도입 즉시 보는 효과·ROI와, 기존 복지 시스템 연계 현황입니다. 통합돌봄을 ‘바로 굴릴’ 실행 도구로 납품합니다." right={<Badge color={C.blue} soft={C.blueSoft}>지자체 · 통합돌봄</Badge>} />
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(160px,1fr))', gap: 12 }}>
+        <BigStat label="전산 도입비 (자체구축 대비)" value="70%↓" sub="구축 0 · 사용료형 SaaS" color={C.blue} />
+        <BigStat label="통합돌봄 1인 행정비" value="40%↓" sub="매칭·정산·보고 자동화" color={C.sage} />
+        <BigStat label="복지 사각지대 발굴" value={`${seniors.length}건`} sub="어드바이저가 자동 탐지" color={C.brand} />
+        <BigStat label="SROI 사회적 투자수익" value="1 : 2.3" sub="고립·돌봄공백 절감 추정" color={C.gold} />
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 1fr', gap: 14, marginTop: 16 }} className="b2ggrid">
+        <Card>
+          <div style={{ fontSize: 14, fontWeight: 800, marginBottom: 4 }}>기존 복지 플랫폼 연계 현황</div>
+          <div style={{ fontSize: 11.5, color: C.mute, marginBottom: 12 }}>새 시스템 강요 없이, 지자체가 쓰는 시스템 위에 얹힙니다.</div>
+          {link.map((l, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 0', borderBottom: i < link.length - 1 ? `1px solid ${C.borderSoft}` : 'none' }}>
+              <ShieldCheck size={15} style={{ color: C.blue, flex: '0 0 auto' }} />
+              <div style={{ flex: 1 }}><div style={{ fontSize: 12.5, fontWeight: 700, color: C.ink }}>{l[0]}</div><div style={{ fontSize: 11, color: C.mute }}>{l[1]}</div></div>
+              <Badge color={C.sage} soft={C.sageSoft} size="sm">{l[2]}</Badge>
+            </div>
+          ))}
+        </Card>
+        <Card>
+          <div style={{ fontSize: 14, fontWeight: 800, marginBottom: 4 }}>사각지대 발굴 리스트</div>
+          <div style={{ fontSize: 11.5, color: C.mute, marginBottom: 12 }}>받을 수 있는데 못 받는 어르신을 먼저 찾습니다.</div>
+          {gapList.map((p, i) => (
+            <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 0', borderBottom: i < gapList.length - 1 ? `1px solid ${C.borderSoft}` : 'none' }}>
+              <div style={{ width: 30, height: 30, borderRadius: 9, background: C.lavenderSoft, color: C.lavender, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 12 }}>{p.name[0]}</div>
+              <div style={{ flex: 1 }}><div style={{ fontSize: 12.5, fontWeight: 700 }}>{p.name} · {p.age}세</div><div style={{ fontSize: 11, color: C.mute }}>노인맞춤돌봄·기초연금 추정</div></div>
+              <Badge color={C.brand} soft={C.brandSoft} size="sm">발굴</Badge>
+            </div>
+          ))}
+          <Button variant="brand" size="sm" fullWidth style={{ marginTop: 12 }} onClick={() => showToast && showToast('지자체 제출용 운영보고서를 생성했습니다', 'success')}>지자체 운영보고서 자동 생성</Button>
+        </Card>
+      </div>
+
+      <Card style={{ marginTop: 14, background: C.blueSoft, border: `1px solid ${C.blue}33` }}>
+        <div style={{ fontSize: 13, fontWeight: 800, color: C.blue, marginBottom: 6 }}>도입 효과 한 줄</div>
+        <div style={{ fontSize: 12.5, color: C.inkSoft, lineHeight: 1.6 }}>인력 채용·전산 구축보다 <b>저렴한 사용료</b>로, 이미 잡힌 돌봄 예산으로 <b>바로 시작</b>합니다. ‘세대를 잇는 마을 돌봄’이 주민에게 보여줄 <b>성과</b>가 됩니다. 진입은 ① 사회서비스 바우처 → ② 플랫폼 사용료 → ③ 민간위탁 순.</div>
+      </Card>
+    </div>
+  );
+}
+
+// ───────── B2B: 기업·기관 복지 ─────────
+function CoordB2B({ state, showToast }) {
+  const ps = state.participants || [];
+  const trios = (state.matches || []).filter(m => m.status === 'active').length;
+  const esg = [
+    ['세대통합 활동', `${(state.activity_logs || []).filter(l => l.approved).length}회`, C.sage],
+    ['참여 세대', '청년·어르신·아동', C.lavender],
+    ['지역상품권 환원', '활동비 100% 지역경제', C.gold],
+    ['임직원 가족 돌봄', '돌봄 공백 해소', C.peach],
+  ];
+  return (
+    <div>
+      <PageHeader title="기업·기관 복지 (B2B)" subtitle="임직원 가족 돌봄을 턴키로 운영하고, ‘진짜 ESG 스토리’를 성과로 리포트합니다. 복지관·어린이집 등 기관 운영에도 그대로 적용됩니다." right={<Badge color={C.sage} soft={C.sageSoft}>기업 · 복지재단</Badge>} />
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(160px,1fr))', gap: 12 }}>
+        <BigStat label="핵심인력 이직 방지 ROI" value="5×+" sub="1인 대체비용 대비 복지비" color={C.sage} />
+        <BigStat label="운영 부담" value="0" sub="모집·매칭·운영 이음이 대행" color={C.blue} />
+        <BigStat label="활성 트리오" value={`${trios}조`} sub="임직원 가족 연결" color={C.peach} />
+        <BigStat label="ESG 사회가치" value="정량 리포트" sub="활동·세대·환원 지표" color={C.gold} />
+      </div>
+      <Card style={{ marginTop: 16 }}>
+        <div style={{ fontSize: 14, fontWeight: 800, marginBottom: 12 }}>ESG 성과 리포트 (요약)</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: 10 }}>
+          {esg.map((e, i) => (
+            <div key={i} style={{ border: `1px solid ${C.border}`, borderRadius: 11, padding: '13px 14px', borderLeft: `4px solid ${e[2]}` }}>
+              <div style={{ fontSize: 11, color: C.mute, fontWeight: 700 }}>{e[0]}</div>
+              <div style={{ fontSize: 15, fontWeight: 800, color: C.ink, marginTop: 3 }}>{e[1]}</div>
+            </div>
+          ))}
+        </div>
+        <Button variant="success" size="sm" style={{ marginTop: 14 }} onClick={() => showToast && showToast('기업 ESG 성과 리포트(PDF 초안)를 생성했습니다', 'success')}>ESG 리포트 생성</Button>
+      </Card>
+      <Card style={{ marginTop: 14, background: C.sageSoft, border: `1px solid ${C.sage}33` }}>
+        <div style={{ fontSize: 12.5, color: C.inkSoft, lineHeight: 1.6 }}><b>B2B 패키지</b> — 회사는 신청만, 모집·매칭·운영·정산은 이음이 턴키로. 직원이 가족 걱정을 덜어 <b>이직이 줄고</b> 만족도가 오릅니다. 복지관·어린이집은 ‘기존 사업 강화’로 도입.</div>
+      </Card>
+    </div>
+  );
+}
+
+// ───────── 전역 플로팅 복지 어드바이저 (우측하단) ─────────
+function WelfareFab({ role }) {
+  const [open, setOpen] = useState(false);
+  const [pf, setPf] = useState({ age: 73, alone: true, income: '저소득', digitalWeak: true, careNeed: false, familyCareYouth: false, gets: [] });
+  const [run, setRun] = useState(false);
+  const res = run ? aiWelfare(pf) : [];
+  const big = role === 'senior';
+  const bottom = role === 'coordinator' ? 24 : 86;
+  const cks = [['alone', '혼자 살아요'], ['digitalWeak', '스마트폰이 어려워요'], ['careNeed', '아프거나 외로워요'], ['familyCareYouth', '가족을 돌봐요(청년)']];
+  return (
+    <>
+      <button onClick={() => setOpen(true)} aria-label="복지 어드바이저" style={{ position: 'fixed', right: 22, bottom, zIndex: 9000, display: 'flex', alignItems: 'center', gap: 8, background: C.lavender, color: '#fff', border: 'none', borderRadius: 999, padding: big ? '16px 22px' : '13px 18px', fontFamily: FONT_STACK, fontWeight: 800, fontSize: big ? 16 : 14, cursor: 'pointer', boxShadow: '0 8px 24px rgba(127,111,160,.45)' }}>
+        <Sparkles size={big ? 22 : 18} /> 복지 찾기
+      </button>
+      {open && (
+        <div onClick={() => setOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 9400, background: 'rgba(26,24,20,.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: C.card, borderRadius: 18, width: '100%', maxWidth: 460, maxHeight: '86vh', overflowY: 'auto', padding: 22, fontFamily: FONT_STACK }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 17, fontWeight: 800, color: C.lavender }}><Sparkles size={20} /> 복지 어드바이저</div>
+              <button onClick={() => setOpen(false)} style={{ border: 'none', background: 'none', cursor: 'pointer', color: C.mute }}><X size={20} /></button>
+            </div>
+            <div style={{ fontSize: 12.5, color: C.inkSoft, lineHeight: 1.55, marginBottom: 14 }}>몇 가지만 고르면 <b>받을 수 있는 복지</b>를 찾아드려요. 가입 없이 바로요.</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+              <span style={{ fontSize: 13, fontWeight: 700, color: C.inkSoft }}>나이</span>
+              <input type="number" value={pf.age} onChange={e => { setPf({ ...pf, age: +e.target.value }); setRun(false); }} style={{ width: 90, padding: '9px 11px', borderRadius: 9, border: `1px solid ${C.border}`, fontFamily: FONT_STACK, fontSize: 15 }} />
+              <span style={{ fontSize: 13, color: C.mute }}>세</span>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 9, marginBottom: 14 }}>
+              {cks.map(([k, t]) => (
+                <label key={k} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 14.5, cursor: 'pointer', color: C.inkSoft, padding: '6px 0' }}>
+                  <input type="checkbox" checked={pf[k]} onChange={e => { setPf({ ...pf, [k]: e.target.checked, income: k === 'alone' && e.target.checked ? '저소득' : pf.income }); setRun(false); }} style={{ width: 18, height: 18 }} />{t}
+                </label>
+              ))}
+            </div>
+            <Button variant="brand" fullWidth onClick={() => setRun(true)} style={{ background: C.lavender, border: 'none' }}>복지 찾기</Button>
+            {run && (
+              <div style={{ marginTop: 14 }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: C.lavender, marginBottom: 9 }}>받을 수 있는 복지 {res.length}건</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
+                  {res.map((x, i) => (
+                    <div key={i} style={{ border: `1px solid ${C.border}`, borderRadius: 11, padding: '12px 14px' }}>
+                      <div style={{ fontSize: 14, fontWeight: 800 }}>{x.name}</div>
+                      <div style={{ fontSize: 12, color: C.inkSoft, marginTop: 4, lineHeight: 1.5 }}>{x.why}</div>
+                      <div style={{ fontSize: 11.5, color: C.inkSoft, marginTop: 6 }}><b style={{ color: C.gold }}>혜택</b> {x.benefit} · <b style={{ color: C.blue }}>신청</b> {x.where}</div>
+                    </div>
+                  ))}
+                </div>
+                <div style={{ fontSize: 10.5, color: C.mute, marginTop: 10, lineHeight: 1.5 }}>※ 추정 결과예요. 실제 신청·심사로 확정되며, 코디네이터가 신청을 도와드려요.</div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+// ───────── 소비자 B2C 구독 (약화 · 맨 아래) ─────────
+function ConsumerPricing() {
+  const tiers = [
+    { name: '무료', price: '무료', sub: '동네 품앗이 기본', feats: ['트리오 매칭·활동 일지', '봉사시간·상생카드 보상'], hot: false, c: C.mute },
+    { name: '안심 베이직', price: '₩19,900', sub: '맞벌이 보호자에게', feats: ['실시간 체크인·위치 알림', '주간 활동 리포트'], hot: true, c: C.brand },
+    { name: '안심 프리미엄', price: '₩39,900', sub: '가장 깊은 안심', feats: ['우선 매칭', '월간 성장 리포트·상담'], hot: false, c: C.lavender },
+  ];
+  return (
+    <Card padding={18} style={{ marginTop: 18, background: C.cream, border: `1px dashed ${C.border}` }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
+        <div style={{ fontSize: 13, fontWeight: 800, color: C.inkSoft }}>참여는 무료, 더 깊은 안심은 선택</div>
+        <Badge color={C.mute} soft={C.borderSoft} size="sm">선택 · 베타 예정</Badge>
+      </div>
+      <div style={{ fontSize: 11, color: C.mute, marginBottom: 12 }}>기본 활동은 누구나 무료입니다. 공공·기업 지원 시 구독도 무료로 제공돼요.</div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(150px,1fr))', gap: 9, opacity: 0.92 }}>
+        {tiers.map(t => (
+          <div key={t.name} style={{ border: `1px solid ${t.hot ? C.brand + '66' : C.border}`, borderRadius: 11, padding: '12px 13px', background: C.card }}>
+            <div style={{ fontSize: 10.5, color: C.mute, fontWeight: 700 }}>{t.sub}</div>
+            <div style={{ fontSize: 13.5, fontWeight: 800, color: t.c, marginTop: 2 }}>{t.name}</div>
+            <div style={{ fontSize: 17, fontWeight: 800, color: C.ink, margin: '4px 0 8px' }}>{t.price}<span style={{ fontSize: 11, color: C.mute, fontWeight: 600 }}>{t.price !== '무료' ? ' /월' : ''}</span></div>
+            {t.feats.map((f, i) => <div key={i} style={{ fontSize: 11, color: C.inkSoft, marginBottom: 4 }}>· {f}</div>)}
+          </div>
+        ))}
+      </div>
+      <div style={{ fontSize: 10, color: C.mute, marginTop: 10 }}>구독료는 우산동 파일럿 가정 기준 예시이며, 시장조사상 개인 구독은 장기 옵션입니다(B2G·B2B 우선).</div>
+    </Card>
+  );
+}
+
+// ============================================================================
+// 1365·케어닥 관점 모듈 (2026-06) — 아웃사이드인: 탐색 + 봉사실적 인증
+//  1365 자원봉사포털: 봉사실적 인증·나이스(학생부) 연계·마일리지·모집공고 탐색
+//  케어닥: 카테고리 탐색·신뢰배지·쉬운 신청
+// ============================================================================
+
+// 청년 홈 — 1365 봉사실적 인증 허브
+function VolunteerHub({ user, totalHours, setView, showToast }) {
+  const hrs = totalHours || 0;
+  const miles = Math.round(hrs * 100); // 봉사 마일리지(가정)
+  return (
+    <Card padding={0} style={{ marginBottom: 18, overflow: 'hidden', border: `1px solid ${C.border}` }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 18px', background: '#FF6B35', color: '#fff' }}>
+        <Award size={18} />
+        <div style={{ fontSize: 13.5, fontWeight: 800 }}>1365 자원봉사 실적 연계</div>
+        <span style={{ marginLeft: 'auto', fontSize: 10.5, fontWeight: 700, background: 'rgba(255,255,255,.22)', padding: '3px 9px', borderRadius: 999 }}>공식 인정</span>
+      </div>
+      <div style={{ padding: 18 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(120px,1fr))', gap: 10, marginBottom: 14 }}>
+          <div><div style={{ fontSize: 11, color: C.mute, fontWeight: 700 }}>인정 봉사시간</div><div style={{ fontSize: 22, fontWeight: 800, color: C.ink }}>{hrs}<span style={{ fontSize: 12, color: C.mute }}>시간</span></div></div>
+          <div><div style={{ fontSize: 11, color: C.mute, fontWeight: 700 }}>봉사 마일리지</div><div style={{ fontSize: 22, fontWeight: 800, color: '#FF6B35' }}>{miles.toLocaleString('ko-KR')}<span style={{ fontSize: 12, color: C.mute }}>P</span></div></div>
+          <div><div style={{ fontSize: 11, color: C.mute, fontWeight: 700 }}>나이스(학생부) 연계</div><div style={{ fontSize: 14, fontWeight: 800, color: C.sage, marginTop: 4 }}><CheckCircle2 size={14} style={{ verticalAlign: 'middle' }} /> 연계 가능</div></div>
+        </div>
+        <div style={{ fontSize: 11.5, color: C.inkSoft, lineHeight: 1.55, marginBottom: 12 }}>이음 활동은 <b>1365 자원봉사 실적</b>으로 인정됩니다. 실적확인서를 발급해 대학·취업·학교생활기록부(나이스)에 활용하세요.</div>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <Button variant="brand" size="sm" icon={<Download size={14} />} onClick={async()=>{ const r=await EUM_API.v1365.issueCertificate(user.id); showToast ? showToast('실적확인서 발급 완료 · '+r.certNo,'success') : setView('settlement'); }}>실적확인서 발급</Button>
+          <Button variant="secondary" size="sm" icon={<Search size={14} />} onClick={() => setView('discover')}>활동 찾기</Button>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+// 청년 — 활동 찾기(탐색·모집공고) : 케어닥식 카드 + 1365식 모집/실적
+const DISCOVER_CATS = ['전체', '디지털코칭', '학습멘토', '정서돌봄', '동네기억'];
+const DISCOVER_LIST = [
+  { t: '어르신 디지털 코칭', cat: '디지털코칭', org: '우산동 행복카페', when: '토 10:00', place: '우산동', reward: 30000, hrs: 3, cap: '2/3', hot: true },
+  { t: '아동 학습 멘토', cat: '학습멘토', org: '우산도서관', when: '평일 16:00', place: '우산동', reward: 30000, hrs: 3, cap: '1/2', hot: true },
+  { t: '세대 기억 아카이브', cat: '동네기억', org: '우산동 경로당', when: '토 14:00', place: '우산동', reward: 20000, hrs: 2, cap: '3/4', hot: false },
+  { t: '정서 돌봄 말벗', cat: '정서돌봄', org: '우산동 복지관', when: '일 11:00', place: '우산동', reward: 20000, hrs: 2, cap: '0/2', hot: false },
+  { t: '키오스크 동행 교육', cat: '디지털코칭', org: '광산구청 민원실', when: '수 14:00', place: '광산구', reward: 25000, hrs: 2, cap: '1/3', hot: false },
+];
+function YouthDiscover({ user, totalHours, showToast, setView }) {
+  const [q, setQ] = useState('');
+  const [cat, setCat] = useState('전체');
+  const list = DISCOVER_LIST.filter(x => (cat === '전체' || x.cat === cat) && (q === '' || x.t.includes(q) || x.org.includes(q)));
+  return (
+    <div>
+      <PageHeader title="활동 찾기" subtitle="우리 동네 세대 돌봄 활동을 직접 찾아 신청하세요. 참여하면 보상과 함께 1365 봉사시간이 쌓입니다." right={<Badge color={'#FF6B35'} soft={'#FFE9DF'}>1365 봉사실적 인정</Badge>} />
+
+      {/* 임팩트 통계 */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(130px,1fr))', gap: 10, marginBottom: 16 }}>
+        {[['내 누적 봉사시간', `${totalHours || 0}시간`, C.brand], ['이번 달 모집', `${DISCOVER_LIST.length}건`, C.sage], ['우리동네 활동가', '128명', C.lavender], ['상품권 환원', '지역경제 100%', C.gold]].map(([l, v, c]) => (
+          <Card key={l} padding={14} style={{ borderTop: `3px solid ${c}` }}><div style={{ fontSize: 11, color: C.mute, fontWeight: 700 }}>{l}</div><div style={{ fontSize: 17, fontWeight: 800, marginTop: 3 }}>{v}</div></Card>
+        ))}
+      </div>
+
+      {/* 검색 + 카테고리 칩 */}
+      <div style={{ position: 'relative', marginBottom: 12 }}>
+        <Search size={16} style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: C.mute }} />
+        <input value={q} onChange={e => setQ(e.target.value)} placeholder="활동·기관 검색" style={{ width: '100%', padding: '11px 13px 11px 38px', borderRadius: 11, border: `1px solid ${C.border}`, fontFamily: FONT_STACK, fontSize: 14 }} />
+      </div>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
+        {DISCOVER_CATS.map(c => (
+          <button key={c} onClick={() => setCat(c)} style={{ cursor: 'pointer', fontFamily: FONT_STACK, fontSize: 12.5, fontWeight: 700, padding: '7px 14px', borderRadius: 999, border: `1px solid ${cat === c ? C.brand : C.border}`, background: cat === c ? C.brand : C.card, color: cat === c ? '#fff' : C.inkSoft }}>{c}</button>
+        ))}
+      </div>
+
+      {/* 모집공고 카드 */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(280px,1fr))', gap: 13 }}>
+        {list.map((x, i) => (
+          <Card key={i} hoverable>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+              <Badge color={C.sage} soft={C.sageSoft} size="sm">{x.cat}</Badge>
+              {x.hot && <Badge color={C.brand} soft={C.brandSoft} size="sm">인기</Badge>}
+            </div>
+            <div style={{ fontSize: 15, fontWeight: 800, marginBottom: 8 }}>{x.t}</div>
+            <div style={{ fontSize: 12, color: C.inkSoft, display: 'flex', flexDirection: 'column', gap: 5, marginBottom: 11 }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><MapPin size={13} style={{ color: C.mute }} />{x.org} · {x.place}</span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Clock size={13} style={{ color: C.mute }} />{x.when} · 모집 {x.cap}</span>
+            </div>
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 12 }}>
+              <span style={{ fontSize: 11.5, fontWeight: 700, color: C.gold, background: C.goldSoft, padding: '4px 9px', borderRadius: 7 }}>상품권 {x.reward.toLocaleString('ko-KR')}원</span>
+              <span style={{ fontSize: 11.5, fontWeight: 700, color: '#FF6B35', background: '#FFE9DF', padding: '4px 9px', borderRadius: 7 }}>봉사 {x.hrs}시간 인정</span>
+            </div>
+            <Button variant="brand" size="sm" fullWidth onClick={() => showToast && showToast(`'${x.t}' 참여를 신청했습니다 · 코디 확인 후 확정`, 'success')}>참여 신청</Button>
+          </Card>
+        ))}
+      </div>
+      {list.length === 0 && <Card style={{ textAlign: 'center', color: C.mute, padding: 30 }}>조건에 맞는 활동이 없어요. 다른 검색어/카테고리를 시도해 보세요.</Card>}
+
+      <Card style={{ marginTop: 16, background: '#FFF4EE', border: '1px solid #FFD9C7' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}><Award size={16} style={{ color: '#FF6B35' }} /><div style={{ fontSize: 13, fontWeight: 800, color: '#D9531E' }}>참여하면 1365 봉사실적으로 인정</div></div>
+        <div style={{ fontSize: 12, color: C.inkSoft, lineHeight: 1.6 }}>이음 활동시간은 <b>1365 자원봉사포털 실적</b>과 연계되어 실적확인서·나이스(학생부) 연계·봉사 마일리지로 쌓입니다. 단기 알바와 달리 <b>경력·스펙·보상</b>을 동시에.</div>
+      </Card>
+    </div>
+  );
+}
+
+// ============================================================================
+// 리치 메인화면(랜딩) 복원 — git f07a3ca 이식 (2026-06)
+//  히어로·임팩트 카운터·3세대 후기·차별성·수익모델·FAQ·구독요금·벤치마킹
+//  RL* 접두사로 네임스페이스(기존 컴포넌트 무충돌). 위치=광주 광산구 우산동
+// ============================================================================
+function RLuseCountUp(target, duration = 950) {
+  const num = typeof target === 'number' ? target : parseFloat(String(target).replace(/[^0-9.-]/g, '')) || 0;
+  // 접근성(WCAG 2.3.3): 모션 최소화 설정 시 애니메이션 없이 최종값을 바로 표시.
+  // 동시에 캡처/첫 페인트에서 지표가 0으로 보이는 문제를 방지한다.
+  const [val, setVal] = useState(() => (prefersReducedMotion() ? num : 0));
+  const raf = useRef();
+  useEffect(() => {
+    if (prefersReducedMotion()) { setVal(num); return; }
+    let start;
+    const tick = (t) => {
+      if (start === undefined) start = t;
+      const p = Math.min((t - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - p, 3);
+      setVal(num * eased);
+      if (p < 1) raf.current = requestAnimationFrame(tick);
+    };
+    raf.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf.current);
+  }, [num, duration]);
+  return val;
+}
+
+function RLCountUp({ value, decimals = 0, prefix = '', suffix = '', duration = 950 }) {
+  const v = RLuseCountUp(value, duration);
+  const n = (decimals > 0 ? v : Math.round(v)).toLocaleString('ko-KR', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+  return <>{prefix}{n}{suffix}</>;
+}
+
+function RLRing({ value, max = 100, size = 96, stroke = 9, color = C.brand, track = C.borderSoft, label, sublabel, duration = 1100 }) {
+  const pct = max > 0 ? Math.max(0, Math.min(1, value / max)) : 0;
+  const r = (size - stroke) / 2;
+  const circ = 2 * Math.PI * r;
+  const [draw, setDraw] = useState(0);
+  useEffect(() => { const id = requestAnimationFrame(() => setDraw(pct)); return () => cancelAnimationFrame(id); }, [pct]);
+  return (
+    <div style={{ position: 'relative', width: size, height: size, flexShrink: 0 }}>
+      <svg width={size} height={size} style={{ transform: 'rotate(-90deg)', display: 'block' }}>
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={track} strokeWidth={stroke} />
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={color} strokeWidth={stroke} strokeLinecap="round"
+          strokeDasharray={circ} strokeDashoffset={circ * (1 - draw)}
+          style={{ transition: `stroke-dashoffset ${duration}ms cubic-bezier(0.22,1,0.36,1)` }} />
+      </svg>
+      <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+        {label != null && <div style={{ fontSize: Math.round(size * 0.28), fontWeight: 700, color: C.ink, fontFamily: FONT_STACK, letterSpacing: '-0.04em', lineHeight: 1 }}>{label}</div>}
+        {sublabel && <div style={{ fontSize: Math.max(10, Math.round(size * 0.12)), color: C.mute, marginTop: 3, fontWeight: 600 }}>{sublabel}</div>}
+      </div>
+    </div>
+  );
+}
+
+function RLEyebrow({ children, color = C.ink }) {
+  return (
+    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, marginBottom: 11 }}>
+      <span style={{ width: 26, height: 2, background: color, display: 'inline-block' }} />
+      <span style={{ fontSize: 11, fontWeight: 700, color: C.inkSoft, letterSpacing: '0.18em', textTransform: 'uppercase' }}>{children}</span>
+    </div>
+  );
+}
+
+function RLHeroScene() {
+  return (
+    <svg viewBox="0 0 460 440" width="100%" style={{ display: 'block' }} role="img" aria-label="청년·어르신·아동 세 세대가 함께 있는 모습">
+      <rect x="0" y="0" width="460" height="440" fill="#FBF8F2" />
+      {/* 배경 — 동네 */}
+      <circle cx="402" cy="250" r="44" fill="#CBD9BC" />
+      <circle cx="372" cy="280" r="30" fill="#D7E2CB" />
+      <rect x="356" y="300" width="78" height="70" fill="#EADFce" opacity="0.7" />
+      <path d="M352,300 L395,272 L438,300 Z" fill="#B9A7C2" opacity="0.7" />
+      <circle cx="60" cy="250" r="34" fill="#D7E2CB" />
+      <rect x="42" y="316" width="40" height="56" rx="6" fill="#EFE6D8" />
+      <ellipse cx="62" cy="318" rx="22" ry="14" fill="#CBD9BC" />
+      <line x1="20" y1="398" x2="440" y2="398" stroke="#E3D9C8" strokeWidth="2.5" />
+
+      {/* 청년 */}
+      <g className="eum-fig-a">
+        <ellipse cx="150" cy="400" rx="13" ry="6" fill="#2B2722" />
+        <ellipse cx="174" cy="400" rx="13" ry="6" fill="#2B2722" />
+        <rect x="146" y="306" width="15" height="92" rx="7" fill="#2B2722" />
+        <rect x="166" y="306" width="15" height="92" rx="7" fill="#2B2722" />
+        <rect x="110" y="300" width="22" height="26" rx="4" fill="#D9C2A6" />
+        <path d="M121,300 q0,-10 10,-10" fill="none" stroke="#B89A78" strokeWidth="3" />
+        <rect x="113" y="224" width="15" height="78" rx="7" fill="#9FBE8E" />
+        <path d="M120,216 C120,202 134,194 163,194 C192,194 206,202 206,216 L210,312 C180,326 146,326 116,312 Z" fill="#9FBE8E" />
+        <path d="M150,196 L163,218 L176,196 Z" fill="#E8835E" />
+        <path className="eum-wave" d="M198,224 q34,-4 52,16" fill="none" stroke="#9FBE8E" strokeWidth="15" strokeLinecap="round" />
+        <rect x="156" y="172" width="14" height="26" fill="#F1C9A5" />
+        <circle cx="163" cy="156" r="27" fill="#F1C9A5" />
+        <path d="M137,156 C135,127 159,117 183,126 C190,129 191,141 188,151 C176,138 151,138 139,159 Z" fill="#2B2722" />
+        <circle cx="156" cy="157" r="2.6" fill="#2B2722" />
+        <circle cx="172" cy="157" r="2.6" fill="#2B2722" />
+        <path d="M156,167 q7,6 14,0" fill="none" stroke="#2B2722" strokeWidth="2.2" strokeLinecap="round" />
+        <circle cx="150" cy="164" r="4" fill="#F4B3A0" opacity="0.55" />
+      </g>
+
+      {/* 어르신 */}
+      <g className="eum-fig-b">
+        <ellipse cx="236" cy="400" rx="13" ry="6" fill="#3A352F" />
+        <ellipse cx="262" cy="400" rx="13" ry="6" fill="#3A352F" />
+        <rect x="232" y="312" width="16" height="86" rx="8" fill="#C67E4F" />
+        <rect x="252" y="312" width="16" height="86" rx="8" fill="#C67E4F" />
+        <path d="M208,238 C208,222 222,214 250,214 C278,214 292,222 292,238 L296,320 C266,332 234,332 204,320 Z" fill="#B6A9CE" />
+        <rect x="200" y="244" width="14" height="70" rx="7" fill="#B6A9CE" />
+        <rect x="286" y="244" width="14" height="70" rx="7" fill="#B6A9CE" />
+        <path d="M236,216 q14,12 28,0 l-6,16 q-8,5 -16,0 Z" fill="#E8835E" />
+        <rect x="243" y="196" width="14" height="22" fill="#EBC09B" />
+        <circle cx="250" cy="180" r="26" fill="#EBC09B" />
+        <path d="M224,180 C222,150 248,142 272,151 C281,155 282,170 277,180 C276,166 270,160 262,158 C268,168 266,176 262,180 C260,166 240,158 226,178 Z" fill="#CFCAD3" />
+        <circle cx="243" cy="181" r="2.5" fill="#3A352F" />
+        <circle cx="258" cy="181" r="2.5" fill="#3A352F" />
+        <path d="M243,190 q7,5 14,0" fill="none" stroke="#3A352F" strokeWidth="2.2" strokeLinecap="round" />
+        <circle cx="237" cy="187" r="4" fill="#E79A87" opacity="0.5" />
+        <circle cx="265" cy="187" r="4" fill="#E79A87" opacity="0.5" />
+      </g>
+
+      {/* 아이 */}
+      <g className="eum-fig-c">
+        <ellipse cx="318" cy="398" rx="10" ry="5" fill="#5B4F6E" />
+        <ellipse cx="338" cy="398" rx="10" ry="5" fill="#5B4F6E" />
+        <rect x="315" y="344" width="12" height="54" rx="6" fill="#8C7FB0" />
+        <rect x="331" y="344" width="12" height="54" rx="6" fill="#8C7FB0" />
+        <path d="M302,300 C302,290 310,284 329,284 C348,284 356,290 356,300 L358,348 C338,356 320,356 300,348 Z" fill="#9FBE8E" />
+        <rect x="304" y="308" width="52" height="7" fill="#EFE6D8" opacity="0.85" />
+        <rect x="304" y="324" width="52" height="7" fill="#EFE6D8" opacity="0.85" />
+        <rect x="296" y="300" width="12" height="44" rx="6" fill="#9FBE8E" />
+        <rect x="350" y="300" width="12" height="44" rx="6" fill="#9FBE8E" />
+        <rect x="349" y="332" width="20" height="22" rx="6" fill="#C68A5E" />
+        <circle cx="354" cy="330" r="6" fill="#C68A5E" />
+        <circle cx="364" cy="330" r="6" fill="#C68A5E" />
+        <rect x="320" y="272" width="12" height="16" fill="#F1C9A5" />
+        <circle cx="329" cy="258" r="22" fill="#F1C9A5" />
+        <path d="M309,256 C308,236 328,228 348,236 C353,239 353,250 350,257 C340,246 320,246 311,259 Z" fill="#2B2722" />
+        <circle cx="323" cy="259" r="2.6" fill="#2B2722" />
+        <circle cx="337" cy="259" r="2.6" fill="#2B2722" />
+        <path d="M322,267 q7,7 15,0" fill="none" stroke="#2B2722" strokeWidth="2.2" strokeLinecap="round" />
+        <circle cx="318" cy="265" r="4" fill="#F4B3A0" opacity="0.6" />
+        <circle cx="342" cy="265" r="4" fill="#F4B3A0" opacity="0.6" />
+      </g>
+    </svg>
+  );
+}
+
+function RLImpactBand({ state }) {
+  const d = useMemo(() => {
+    const p = state.participants || [];
+    const matches = (state.matches || []).filter((m) => m.status === 'active').length;
+    const hours = (state.activity_logs || []).filter((l) => l.approved).reduce((s, l) => s + (l.hours || 0), 0);
+    const surveys = state.surveys || [];
+    const sat = surveys.length ? (surveys.reduce((s, x) => s + (x.satisfaction || 0), 0) / surveys.length) : 0;
+    const cont = surveys.length ? Math.round(surveys.filter((x) => x.would_continue).length / surveys.length * 100) : 0;
+    const settled = (state.settlements || []).filter(isSettled).reduce((s, x) => s + settleAmount(x), 0);
+    return { people: p.length, matches, hours, sat: sat.toFixed(1), cont, settled };
+  }, [state]);
+  const tiles = [
+    { icon: Users, color: C.sage, label: '참여 이웃', node: <RLCountUp value={d.people} suffix="명" /> },
+    { icon: Heart, color: C.brand, label: '활성 트리오', node: <RLCountUp value={d.matches} suffix="쌍" /> },
+    { icon: Clock, color: C.lavender, label: '누적 활동시간', node: <RLCountUp value={d.hours} suffix="시간" /> },
+    { icon: Star, color: C.gold, label: '만족도', node: <span>{d.sat}<span style={{ fontSize: 14, color: C.mute }}> / 5.0</span></span> },
+    { icon: TrendingUp, color: C.success, label: '지속의향', node: <RLCountUp value={d.cont} suffix="%" /> },
+    { icon: Wallet, color: C.gold, label: '누적 보상', node: <span>{krw(d.settled)}</span> },
+  ];
+  return (
+    <Reveal>
+      <div style={{ marginBottom: 32 }}>
+        <div style={{ textAlign: 'center', marginBottom: 18 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: C.inkSoft, letterSpacing: '0.04em', marginBottom: 6 }}>숫자로 보는 이음</div>
+          <div style={{ fontSize: 13, color: C.mute }}>데모 시연용 샘플 데이터입니다</div>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12 }}>
+          {tiles.map((t, i) => (
+            <div key={i} style={{ background: C.card, border: '1px solid ' + C.border, borderRadius: 12, padding: '18px 18px' }}>
+              <div style={{ fontSize: 11, color: C.muteLight, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 11 }}>{t.label}</div>
+              <div style={{ fontSize: 28, fontWeight: 700, color: C.ink, fontFamily: FONT_STACK, letterSpacing: '-0.04em', lineHeight: 1 }}>{t.node}</div>
+              <div style={{ width: 20, height: 2, background: t.color, marginTop: 12, borderRadius: 1 }} />
+            </div>
+          ))}
+        </div>
+      </div>
+    </Reveal>
+  );
+}
+
+function RLTestimonialBand() {
+  const items = [
+    { role: 'youth', color: C.sage, soft: C.sageSoft, name: '김민준', sub: '청년 · 27세', quote: '할머니께 키오스크를 알려드렸는데, 다음엔 저한테 옛날 이야기를 들려주셨어요. 제가 더 배우고 가는 기분이에요.' },
+    { role: 'senior', color: C.lavender, soft: C.lavenderSoft, name: '박순자', sub: '어르신 · 73세', quote: '혼자였던 집에 아이 웃음소리가 들려요. 다시 누군가에게 쓸모 있는 사람이 된 것 같아 하루가 기다려져요.' },
+    { role: 'parent', color: C.peach, soft: C.peachSoft, name: '이서영', sub: '양육가정 · 유진 엄마', quote: '맞벌이라 늘 미안했는데, 유진이가 동네에 할머니랑 삼촌이 생겼다며 좋아해요. 마음이 놓여요.' },
+  ];
+  return (
+    <Reveal>
+      <div style={{ marginBottom: 36 }}>
+        <div style={{ textAlign: 'center', fontSize: 12, fontWeight: 700, color: C.brand, letterSpacing: '0.1em', marginBottom: 4 }}>이웃들의 이야기</div>
+        <div style={{ textAlign: 'center', fontSize: 13, color: C.mute, marginBottom: 18 }}>이음으로 이어진 세 세대의 목소리예요</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 14 }}>
+          {items.map((t, i) => (
+            <div key={i} style={{ background: C.card, border: '1px solid ' + C.border, borderRadius: 16, padding: 20, display: 'flex', flexDirection: 'column' }}>
+              <div style={{ fontSize: 30, fontWeight: 800, color: t.color, lineHeight: 1, fontFamily: SERIF_STACK }}>&ldquo;</div>
+              <div style={{ fontSize: 13.5, color: C.inkSoft, lineHeight: 1.7, marginTop: 2, marginBottom: 16, flex: 1 }}>{t.quote}</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <Avatar type={t.role} name={t.name} color={t.color} size={38} />
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 800, color: C.ink }}>{t.name}</div>
+                  <div style={{ fontSize: 11.5, color: C.mute, marginTop: 1 }}>{t.sub}</div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </Reveal>
+  );
+}
+
+function RLFaqBand() {
+  const [open, setOpen] = useState(-1);
+  const isMobile = useIsMobile(720);
+  const faqs = [
+    { q: '누가 신청할 수 있나요?', a: '광주 광산구 우산동에 사시는 청소년부터 어르신까지, 그리고 양육가정 누구나 신청할 수 있어요. 약 5분이면 충분해요.' },
+    { q: '참여하는 데 비용이 드나요?', a: '참여비는 전혀 없어요. 오히려 활동에 따라 광주상생카드와 봉사시간으로 보상을 받습니다. 보호자 안심 케어 구독은 선택이에요.' },
+    { q: '아이가 어른들과 만나는데 안전한가요?', a: '모든 참여자는 4단계 안전검증(면접·범죄경력·아동학대 전력 조회·추천인 확인)을 거치고, 대면 활동은 책임보험으로 보장돼요.' },
+    { q: '어떻게 매칭되나요?', a: '거주지·생활 일정·관심사·안전 요소를 분석해 청년·어르신·아이 3인 트리오로 연결해 드려요. 코디네이터가 최종 확인합니다.' },
+    { q: '보상은 어떻게 받나요?', a: '활동 기록이 승인되면 봉사시간과 광주상생카드 포인트로 자동 환산돼요. 1365 자원봉사 실적과도 연계됩니다.' },
+    { q: '매칭까지 얼마나 걸리나요?', a: '신청과 안전검증을 마치면 보통 1~2주 안에 트리오를 제안해 드려요. 가능 시간과 동네가 가까울수록 더 빨라요.' },
+    { q: '활동 중 문제가 생기면 어떻게 하나요?', a: '앱의 SOS 버튼이나 실시간 안전 공유로 코디네이터가 즉시 개입해요. 모든 활동은 책임보험으로 보장됩니다.' },
+    { q: '안심 케어 구독은 꼭 해야 하나요?', a: '아니에요. 기본 참여와 매칭·활동 일지는 무료예요. 구독은 실시간 안전 알림·주간 리포트·우선 매칭이 필요한 보호자를 위한 선택이에요.' },
+  ];
+  return (
+    <div style={{ marginBottom: 36 }}>
+      <div style={{ textAlign: 'center', fontSize: 12, fontWeight: 700, color: C.brand, letterSpacing: '0.1em', marginBottom: 4 }}>자주 묻는 질문</div>
+      <div style={{ textAlign: 'center', fontSize: 13, color: C.mute, marginBottom: 16 }}>궁금한 점을 모았어요</div>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', alignItems: 'start', gap: 10, maxWidth: 1000, margin: '0 auto' }}>
+        {faqs.map((f, i) => (
+          <div key={i} style={{ background: C.card, border: '1px solid ' + C.border, borderRadius: 12, overflow: 'hidden', alignSelf: 'start' }}>
+            <button onClick={() => setOpen(open === i ? -1 : i)} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: '15px 18px', border: 'none', background: 'transparent', cursor: 'pointer', fontFamily: FONT_STACK, textAlign: 'left' }}>
+              <span style={{ fontSize: 14, fontWeight: 700, color: C.ink }}>{f.q}</span>
+              <ChevronDown size={18} color={C.mute} style={{ transform: open === i ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+            </button>
+            {open === i && <div style={{ padding: '0 18px 16px', fontSize: 13, color: C.inkSoft, lineHeight: 1.65 }}>{f.a}</div>}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function RLMoatBand() {
+  const items = [
+    { icon: Sparkles, color: C.brand, soft: C.brandSoft, tag: '특허 출원 준비 중', title: '3세대 트리오 매칭 엔진', desc: '거주 근접·생활 일정·관심 시너지·안전 적합·상호 보완 다섯 요소를 가중 점수화해 한 번에 세 세대를 묶습니다. 한 명을 다른 한 명에게 붙이는 1:1 중개와는 구조가 달라요.' },
+    { icon: ShieldCheck, color: C.blue, soft: C.blueSoft, tag: '아동 동반 필수 절차', title: '4단계 안전검증 · 책임보험 내장', desc: '면접·범죄경력·아동학대 전력·추천인 확인을 거치고, 모든 대면 활동은 책임보험으로 보장합니다. 미성년 보호자 5종 전자동의까지 시스템에 들어가 있어요.' },
+    { icon: Wallet, color: C.gold, soft: C.goldSoft, tag: '지자체·1365 연계', title: '활동을 보상으로 잇는 정산', desc: '활동 기록이 봉사시간과 광주상생카드 보상으로 자동 환산·발급됩니다. 통합돌봄·자원봉사 행정과 맞물리는 정산 흐름이 이미 돌아갑니다.' },
+  ];
+  return (
+    <div style={{ marginBottom: 36 }}>
+      <div style={{ textAlign: 'center', fontSize: 12, fontWeight: 700, color: C.brand, letterSpacing: '0.1em', marginBottom: 4 }}>이음만의 것</div>
+      <div style={{ textAlign: 'center', fontSize: 20, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK, letterSpacing: '-0.02em', marginBottom: 6 }}>따라 하기 어려운 세 가지</div>
+      <div style={{ textAlign: 'center', fontSize: 13, color: C.mute, marginBottom: 18, maxWidth: 540, marginLeft: 'auto', marginRight: 'auto', lineHeight: 1.6 }}>아이디어가 아니라, 이미 작동하는 매칭·안전·정산 기술이 이음의 진입장벽이에요</div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(232px, 1fr))', gap: 12 }}>
+        {items.map((m, i) => {
+          const Icon = m.icon;
+          return (
+            <div key={i} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, padding: 18 }}>
+              <div style={{ display: 'inline-flex', padding: 10, borderRadius: 11, background: m.soft, marginBottom: 12 }}><Icon size={20} color={m.color} /></div>
+              <div style={{ fontSize: 10.5, fontWeight: 700, color: m.color, letterSpacing: '0.04em', marginBottom: 5 }}>{m.tag}</div>
+              <div style={{ fontSize: 15, fontWeight: 800, color: C.ink, marginBottom: 7, lineHeight: 1.3 }}>{m.title}</div>
+              <div style={{ fontSize: 12.5, color: C.inkSoft, lineHeight: 1.6 }}>{m.desc}</div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function RLRevenueModelBand() {
+  const streams = [
+    { icon: Award, color: C.sage, soft: C.sageSoft, badge: '공공 기반', title: '지자체 위탁 · 바우처', desc: '통합돌봄 위탁운영비와 사회서비스 바우처 정산이 매출의 토대. 공공 예산으로 초기 운영을 안정적으로 받칩니다.' },
+    { icon: Heart, color: C.peach, soft: C.peachSoft, badge: '가족 구독', title: '안심 케어 구독', desc: '보호자 대상 월 구독 — 실시간 안전 알림, 활동 리포트, 우선 매칭. 공공 밖 민간 수요로 확장합니다.' },
+    { icon: Wallet, color: C.gold, soft: C.goldSoft, badge: '거래 수수료', title: '매칭 · 정산 수수료', desc: '상생카드 정산과 제휴 서비스 연계에서 발생하는 수수료. 트리오가 늘수록 함께 커지는 매출이에요.' },
+  ];
+  return (
+    <div style={{ marginBottom: 36 }}>
+      <div style={{ textAlign: 'center', fontSize: 12, fontWeight: 700, color: C.brand, letterSpacing: '0.1em', marginBottom: 4 }}>어떻게 지속되나</div>
+      <div style={{ textAlign: 'center', fontSize: 20, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK, letterSpacing: '-0.02em', marginBottom: 6 }}>공공으로 시작해, 자립으로</div>
+      <div style={{ textAlign: 'center', fontSize: 13, color: C.mute, marginBottom: 18, maxWidth: 540, marginLeft: 'auto', marginRight: 'auto', lineHeight: 1.6 }}>한 곳에 기대지 않는 세 갈래 수익으로, 보조금이 끝나도 돌아가는 구조를 설계했어요</div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(232px, 1fr))', gap: 12, marginBottom: 16 }}>
+        {streams.map((s, i) => {
+          const Icon = s.icon;
+          return (
+            <div key={i} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, padding: 18 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 10 }}>
+                <div style={{ display: 'inline-flex', padding: 9, borderRadius: 10, background: s.soft }}><Icon size={18} color={s.color} /></div>
+                <span style={{ fontSize: 11, fontWeight: 700, color: s.color, background: s.soft, padding: '3px 9px', borderRadius: 999 }}>{s.badge}</span>
+              </div>
+              <div style={{ fontSize: 14.5, fontWeight: 800, color: C.ink, marginBottom: 6, lineHeight: 1.3 }}>{s.title}</div>
+              <div style={{ fontSize: 12.5, color: C.inkSoft, lineHeight: 1.6 }}>{s.desc}</div>
+            </div>
+          );
+        })}
+      </div>
+      <div style={{ background: C.cream, border: `1px solid ${C.border}`, borderRadius: 14, padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+        <TrendingUp size={20} color={C.sage} />
+        <div style={{ flex: 1, minWidth: 240, fontSize: 13, color: C.inkSoft, lineHeight: 1.55 }}>
+          <strong style={{ color: C.ink }}>트리오 한 쌍이 늘 때마다 이익이 쌓이는 구조.</strong> 공공 위탁이 기반을 깔고, 구독·수수료가 마진을 더해 규모가 커질수록 자립도가 올라갑니다.
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RLBenchmarkBand() {
+  const models = [
+    { flag: '🇺🇸', name: 'Foster Grandparent', country: '미국 · AmeriCorps', adopt: '어르신→아동 1:1 멘토 + 활동비 보상', limit: '두 세대(어르신·아동)만 연결' },
+    { flag: '🇳🇱', name: 'Humanitas Deventer', country: '네덜란드', adopt: '청년↔어르신 교류로 무료 거주 교환', limit: '주거 자원에 한정된 1:1 교환' },
+    { flag: '🇬🇧', name: 'The Cares Family', country: '영국 런던·맨체스터', adopt: '도시 청년↔어르신 외로움 해소', limit: '아동·양육가정은 포함되지 않음' },
+    { flag: '🇰🇷', name: '케어닥 · 자란다', country: '국내 돌봄 매칭', adopt: '앱으로 간편 매칭·일지 관리', limit: '대가 지불형 일방 돌봄 중개' },
+  ];
+  return (
+    <div style={{ marginBottom: 36 }}>
+      <div style={{ textAlign: 'center', fontSize: 12, fontWeight: 700, color: C.brand, letterSpacing: '0.1em', marginBottom: 4 }}>왜 이음인가</div>
+      <div style={{ textAlign: 'center', fontSize: 20, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK, letterSpacing: '-0.02em', marginBottom: 6 }}>세계가 검증한 모델, 이음이 한 걸음 더</div>
+      <div style={{ textAlign: 'center', fontSize: 13, color: C.mute, marginBottom: 18, maxWidth: 560, marginLeft: 'auto', marginRight: 'auto', lineHeight: 1.6 }}>
+        해외에서 50년 넘게 검증된 세대통합 모델에,<br />모두가 놓쳤던 <strong style={{ color: C.inkSoft }}>세 세대가 동시에 주고받는 구조</strong>를 더했어요
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(232px, 1fr))', gap: 12, marginBottom: 16 }}>
+        {models.map((m, i) => (
+          <div key={i} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+              <span style={{ fontSize: 20 }}>{m.flag}</span>
+              <div>
+                <div style={{ fontSize: 13.5, fontWeight: 700, color: C.ink, lineHeight: 1.2 }}>{m.name}</div>
+                <div style={{ fontSize: 11, color: C.mute }}>{m.country}</div>
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 6, marginBottom: 7 }}>
+              <Check size={14} color={C.success} style={{ flexShrink: 0, marginTop: 2 }} />
+              <span style={{ fontSize: 12, color: C.inkSoft, lineHeight: 1.5 }}>{m.adopt}</span>
+            </div>
+            <div style={{ display: 'flex', gap: 6 }}>
+              <ArrowRight size={14} color={C.mute} style={{ flexShrink: 0, marginTop: 2 }} />
+              <span style={{ fontSize: 12, color: C.mute, lineHeight: 1.5 }}>{m.limit}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+      <div style={{ background: `linear-gradient(135deg, ${C.brand} 0%, ${C.brandDark} 100%)`, borderRadius: 14, padding: '20px 24px', display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap', boxShadow: `0 10px 28px ${C.brand}33` }}>
+        <div style={{ background: 'rgba(255,255,255,0.16)', padding: 11, borderRadius: 12, display: 'flex', backdropFilter: 'blur(8px)' }}>
+          <Sparkles size={22} color="#fff" />
+        </div>
+        <div style={{ flex: 1, minWidth: 240 }}>
+          <div style={{ fontSize: 15, fontWeight: 800, color: '#fff', marginBottom: 3, fontFamily: SERIF_STACK }}>이음 = 청년 · 어르신 · 아동 3세대 상호 품앗이</div>
+          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.9)', lineHeight: 1.55 }}>기존 모델은 두 세대의 일방 돌봄. 이음은 세 세대가 동시에 서로 주고받고, 도운 만큼 모두에게 보상이 돌아가는 선순환 구조예요.</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RLLoopInfographic() {
+  const nodes = [
+    { label: '청년', sub: '재능·디지털', color: C.sage, soft: C.sageSoft, pos: { top: 0, left: '50%', marginLeft: -43 }, delay: '0s' },
+    { label: '어르신', sub: '지혜·돌봄', color: C.lavender, soft: C.lavenderSoft, pos: { bottom: 4, right: 2 }, delay: '1.4s' },
+    { label: '아이', sub: '활력·웃음', color: C.peach, soft: C.peachSoft, pos: { bottom: 4, left: 2 }, delay: '2.8s' },
+  ];
+  return (
+    <div style={{ position: 'relative', width: 300, height: 268, margin: '0 auto', animation: 'fadeUp 0.7s cubic-bezier(0.22,1,0.36,1)' }}>
+      <style>{`
+        @keyframes eumFloaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+        @keyframes eumPulse { 0%,100% { opacity: 1; } 50% { opacity: 0.62; } }
+        @keyframes eumSpinSlow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+      `}</style>
+      <div style={{ position: 'absolute', inset: 24, borderRadius: '50%', border: '2px dashed ' + C.brand + '40', animation: 'eumSpinSlow 28s linear infinite' }} />
+      <div style={{ position: 'absolute', inset: 50, borderRadius: '50%', border: '1px solid ' + C.borderSoft }} />
+      <svg viewBox="0 0 300 268" width="300" height="268" style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+        <defs>
+          <marker id="eumArrow" markerWidth="9" markerHeight="9" refX="5" refY="4.5" orient="auto">
+            <path d="M0,0 L9,4.5 L0,9 Z" fill={C.brand} opacity="0.5" />
+          </marker>
+        </defs>
+        <path d="M192.3,43.4 A100,100 0 0,1 249.6,142.7" fill="none" stroke={C.brand} strokeWidth="2" strokeOpacity="0.45" markerEnd="url(#eumArrow)" />
+        <path d="M207.4,215.9 A100,100 0 0,1 92.6,215.9" fill="none" stroke={C.brand} strokeWidth="2" strokeOpacity="0.45" markerEnd="url(#eumArrow)" />
+        <path d="M50.4,142.7 A100,100 0 0,1 107.7,43.4" fill="none" stroke={C.brand} strokeWidth="2" strokeOpacity="0.45" markerEnd="url(#eumArrow)" />
+      </svg>
+      <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', textAlign: 'center', animation: 'eumPulse 3.4s ease-in-out infinite' }}>
+        <div style={{ fontSize: 12, fontWeight: 700, color: C.brand, letterSpacing: '0.06em' }}>이음</div>
+        <div style={{ fontSize: 19, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK, lineHeight: 1.12 }}>3세대<br />선순환</div>
+      </div>
+      {nodes.map((n) => (
+        <div key={n.label} style={{ position: 'absolute', width: 86, padding: '11px 10px', textAlign: 'center', background: n.soft, color: n.color, borderRadius: 18, border: '1px solid ' + n.color + '30', boxShadow: '0 8px 20px ' + n.color + '22', animation: 'eumFloaty 4.6s ease-in-out infinite', animationDelay: n.delay, ...n.pos }}>
+          <div style={{ fontSize: 14.5, fontWeight: 800 }}>{n.label}</div>
+          <div style={{ fontSize: 10.5, marginTop: 2, opacity: 0.82 }}>{n.sub}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function RLPartnerStrip() {
+  const partners = ['광주광역시', '광산구청', '광주창조경제혁신센터', '1365 자원봉사포털', '광주상생카드'];
+  return (
+    <div style={{ marginBottom: 32 }}>
+      <div style={{ textAlign: 'center', fontSize: 11.5, fontWeight: 700, color: C.mute, letterSpacing: '0.08em', marginBottom: 14 }}>함께하는 기관</div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, justifyContent: 'center' }}>
+        {partners.map((p, i) => (
+          <div key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 14px', background: C.card, border: '1px solid ' + C.border, borderRadius: 999, fontSize: 12.5, fontWeight: 700, color: C.inkSoft }}>
+            <ShieldCheck size={13} color={C.brand} /> {p}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function RLPricingBand({ onShowApplication }) {
+  const plans = [
+    { key: 'free', name: '무료', price: 0, tagline: '동네 품앗이 기본', color: C.mute, soft: C.muteSoft, features: ['트리오 매칭·활동 일지', '봉사시간·상생카드 보상', '4단계 안전검증·책임보험'], cta: '무료로 시작', highlight: false },
+    { key: 'basic', name: '안심 베이직', price: 19900, tagline: '맞벌이 보호자에게', color: C.brand, soft: C.brandSoft, features: ['무료의 모든 기능', '실시간 체크인·위치 안전 알림', '주간 활동 리포트', '활동 사진 아카이브'], cta: '구독하기', highlight: true },
+    { key: 'premium', name: '안심 프리미엄', price: 39900, tagline: '가장 깊은 안심', color: C.lavender, soft: C.lavenderSoft, features: ['베이직의 모든 기능', '우선 매칭 — 대기 없이 먼저', '전담 코디네이터 핫라인', '월간 성장 리포트·상담'], cta: '구독하기', highlight: false },
+  ];
+  return (
+    <div style={{ marginBottom: 36 }}>
+      <div style={{ textAlign: 'center', fontSize: 12, fontWeight: 700, color: C.brand, letterSpacing: '0.1em', marginBottom: 4 }}>보호자 안심 케어</div>
+      <div style={{ textAlign: 'center', fontSize: 20, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK, letterSpacing: '-0.02em', marginBottom: 6 }}>참여는 무료, 더 깊은 안심은 선택</div>
+      <div style={{ textAlign: 'center', fontSize: 13, color: C.mute, marginBottom: 24, maxWidth: 540, marginLeft: 'auto', marginRight: 'auto', lineHeight: 1.6 }}>아이를 맡기는 보호자를 위한 구독이에요. 기본 활동은 누구나 무료로 이용할 수 있어요</div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(248px, 1fr))', gap: 14, maxWidth: 900, margin: '0 auto', alignItems: 'stretch' }}>
+        {plans.map((p) => (
+          <div key={p.key} style={{ position: 'relative', background: C.card, border: `${p.highlight ? 2 : 1}px solid ${p.highlight ? p.color : C.border}`, borderRadius: 16, padding: 22, boxShadow: p.highlight ? `0 16px 36px ${p.color}22` : '0 1px 3px rgba(0,0,0,0.03)', display: 'flex', flexDirection: 'column' }}>
+            {p.highlight && <div style={{ position: 'absolute', top: -11, left: '50%', transform: 'translateX(-50%)', background: p.color, color: '#fff', fontSize: 11, fontWeight: 700, padding: '4px 12px', borderRadius: 999, whiteSpace: 'nowrap' }}>가장 인기</div>}
+            <div style={{ fontSize: 12, fontWeight: 700, color: p.color, marginBottom: 4 }}>{p.tagline}</div>
+            <div style={{ fontSize: 19, fontWeight: 800, color: C.ink, marginBottom: 10 }}>{p.name}</div>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 3, marginBottom: 16 }}>
+              <span style={{ fontSize: 30, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK, letterSpacing: '-0.03em' }}>{p.price === 0 ? '무료' : krw(p.price)}</span>
+              {p.price > 0 && <span style={{ fontSize: 13, color: C.mute }}>/ 월</span>}
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 9, marginBottom: 18, flex: 1 }}>
+              {p.features.map((f, i) => (
+                <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+                  <Check size={15} color={p.color} style={{ flexShrink: 0, marginTop: 2 }} />
+                  <span style={{ fontSize: 12.5, color: C.inkSoft, lineHeight: 1.45 }}>{f}</span>
+                </div>
+              ))}
+            </div>
+            <Button variant={p.highlight ? 'primary' : 'secondary'} fullWidth onClick={onShowApplication}>{p.cta}</Button>
+          </div>
+        ))}
+      </div>
+      <div style={{ textAlign: 'center', fontSize: 11.5, color: C.muteLight, marginTop: 14 }}>구독료는 우산동 파일럿 가정 기준 예시예요 · 언제든 해지할 수 있어요</div>
+    </div>
+  );
+}
+
+function RLLanding({ state, onSelectRole, onShowApplication }) {
+  // 시드된 페르소나 fixed assignments
+  const personas = [
+    { role: 'youth', id: 'p001', gender: 'M', name: '김민준', subtitle: '27세 · 스타트업 개발자', desc: '어르신껜 디지털을 알려드리고, 저는 인생 조언을 얻어요.', color: C.sage, soft: C.sageSoft, gradient: 'linear-gradient(135deg, #6B8E5A 0%, #8FB47E 100%)' },
+    { role: 'senior', id: 'p101', gender: 'F', name: '박순자', subtitle: '73세 · 前 교사', desc: '청년에게 디지털을 배우고, 아이에겐 옛이야기를 들려줘요.', color: C.lavender, soft: C.lavenderSoft, gradient: 'linear-gradient(135deg, #7F6FA0 0%, #A797C0 100%)' },
+    { role: 'parent', id: 'p201', gender: 'F', name: '이서영', subtitle: '38세 · IT기업 PM (유진 8세 보호자)', desc: '아이가 이웃 어른들과 안전하게 어울리는 시간이 참 든든해요.', color: C.peach, soft: C.peachSoft, gradient: 'linear-gradient(135deg, #D89368 0%, #E8B58F 100%)' },
+    { role: 'coordinator', id: 'cdn001', gender: 'F', name: '한가은', subtitle: '코디네이터 · 광주 광산구', desc: '신청·검증·매칭·정산을 한눈에 관리해요.', color: C.ink, soft: '#EDEAE5', gradient: 'linear-gradient(135deg, #1A1814 0%, #3A352F 100%)' },
+  ];
+
+  const isMobile = useIsMobile(820);
+
+  return (
+    <div style={{
+      minHeight: '100vh', background: C.bg, fontFamily: FONT_STACK,
+      display: 'flex', flexDirection: 'column', alignItems: 'center',
+    }}>
+      {/* 상단 내비게이션 (고원·Papa 벤치마크) */}
+      <div style={{ width: '100%', position: 'sticky', top: 0, zIndex: 50, background: 'rgba(244,242,236,0.82)', backdropFilter: 'blur(10px)', borderBottom: `1px solid ${C.border}` }}>
+        <div style={{ maxWidth: 1320, margin: '0 auto', padding: isMobile ? '12px 16px' : '14px 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+          <div onClick={() => window.location.reload()} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }} role="button" aria-label="홈으로 새로고침">
+            <div style={{ width: 30, height: 30, display: 'flex' }}><EumLogo size={30} /></div>
+            <div style={{ lineHeight: 1.05 }}>
+              <div style={{ fontWeight: 700, color: C.ink, fontSize: 18, letterSpacing: '-0.02em', lineHeight: 1 }}>이음</div>
+              <div style={{ fontSize: 10, color: C.mute, fontWeight: 600, marginTop: 2, whiteSpace: 'nowrap', letterSpacing: '0.01em' }}>3세대 상생 품앗이</div>
+            </div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
+            <span onClick={() => { const el = document.getElementById('eum-demo'); if (el) el.scrollIntoView({ behavior: 'smooth' }); }} style={{ fontSize: 13.5, color: C.inkSoft, fontWeight: 500, cursor: 'pointer' }}>둘러보기</span>
+            <Button variant="primary" size="sm" onClick={onShowApplication}>참여 신청하기</Button>
+          </div>
+        </div>
+      </div>
+      <div style={{ maxWidth: 1320, width: '100%', padding: '56px 40px 72px' }}>
+        {/* 히어로 — 2단 좌측정렬 (좌: 카피·CTA / 우: 3세대 선순환 비주얼) */}
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.05fr 0.95fr', gap: isMobile ? 28 : 52, alignItems: 'center', margin: '8px 0 52px' }}>
+          <div style={{ textAlign: isMobile ? 'center' : 'left' }}>
+            <div style={{ fontSize: 11.5, fontWeight: 700, color: C.inkSoft, letterSpacing: '0.04em', marginBottom: 16 }}>3세대 상생 품앗이</div>
+            <h1 style={{ fontSize: isMobile ? 44 : 58, fontWeight: 700, color: C.ink, letterSpacing: '-0.05em', margin: '0 0 18px', fontFamily: FONT_STACK, lineHeight: 1.03 }}>
+              세대를 잇다,<br /><span style={{ color: C.brand }}>이음</span>
+            </h1>
+            <p style={{ fontSize: 17, color: C.inkSoft, maxWidth: 470, margin: isMobile ? '0 auto 26px' : '0 0 26px', lineHeight: 1.6 }}>
+              혼자인 어르신, 방과후 혼자인 아이, 낯선 동네의 청년.<br />서로의 빈자리를 채우는 우리 동네 3세대 품앗이
+            </p>
+            <div style={{ display: 'flex', gap: 10, justifyContent: isMobile ? 'center' : 'flex-start', flexWrap: 'wrap', marginBottom: 22 }}>
+              <Button variant="primary" size="lg" onClick={onShowApplication} iconRight={<ArrowRight size={16} />}>5분 만에 참여 신청</Button>
+              <Button variant="secondary" size="lg" onClick={() => { const el = document.getElementById('eum-demo'); if (el) el.scrollIntoView({ behavior: 'smooth' }); }}>데모 둘러보기</Button>
+            </div>
+            <div style={{ display: 'flex', gap: 8, justifyContent: isMobile ? 'center' : 'flex-start', flexWrap: 'wrap' }}>
+              <Badge color={C.blue} soft={C.blueSoft} size="md"><ShieldCheck size={13} /> 통합돌봄 연계</Badge>
+              <Badge color={C.gold} soft={C.goldSoft} size="md"><Wallet size={13} /> 상생카드 보상</Badge>
+              <Badge color={C.success} soft={C.successSoft} size="md"><UserCheck size={13} /> 4단계 안전검증</Badge>
+            </div>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <div style={{ width: '100%', maxWidth: 480, borderRadius: 24, overflow: 'hidden', boxShadow: '0 24px 60px rgba(22,20,15,0.12)', border: `1px solid ${C.border}`, animation: 'fadeUp 0.8s cubic-bezier(0.22,1,0.36,1), eumHeroFloat 7s ease-in-out 0.8s infinite' }}>
+              <img className="eum-hero-img" src="https://d8j0ntlcm91z4.cloudfront.net/user_3ENsWC9Fimdubfa90AmLsdoIGVe/hf_20260618_054046_590cd991-7eef-42e9-82c3-d7dd782d050d.png" alt="청년·어르신·아동 세 세대가 함께하는 모습" style={{ width: '100%', display: 'block' }} loading="eager" />
+            </div>
+          </div>
+        </div>
+
+        {/* 3세대 선순환 — 개념(애니메이션) 섹션 */}
+        <Reveal>
+          <div style={{ margin: '8px 0 56px', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.05fr 0.95fr', gap: isMobile ? 28 : 52, alignItems: 'center' }}>
+            <div style={{ display: 'flex', justifyContent: 'center' }}><RLLoopInfographic /></div>
+            <div style={{ textAlign: isMobile ? 'center' : 'left' }}>
+              <div style={{ fontSize: 11.5, fontWeight: 700, color: C.inkSoft, letterSpacing: '0.04em', marginBottom: 12 }}>3세대 선순환</div>
+              <h2 style={{ fontSize: 27, fontWeight: 700, color: C.ink, letterSpacing: '-0.04em', margin: '0 0 16px', fontFamily: FONT_STACK, lineHeight: 1.25 }}>세대가 함께 돌보는 동네</h2>
+              <p style={{ fontSize: 15.5, color: C.inkSoft, lineHeight: 1.7, maxWidth: 440, margin: isMobile ? '0 auto 20px' : '0 0 20px' }}>한쪽만 주는 게 아니라, 서로 주고받는 동네예요</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, maxWidth: 520, margin: isMobile ? '0 auto' : 0 }}>
+                {[
+                  { c: C.sage, who: '청년', what: '스마트폰·키오스크 사용법을 알려드리고, 아이의 공부를 도와요' },
+                  { c: C.lavender, who: '어르신', what: '살아온 지혜와 옛이야기로 아이 곁을 든든히 지켜요' },
+                  { c: C.peach, who: '아이', what: '웃음과 활력으로 어른들의 하루를 환하게 채워요' },
+                ].map((r) => (
+                  <div key={r.who} style={{ display: 'flex', alignItems: 'flex-start', gap: 14, padding: '13px 16px', borderRadius: 12, background: C.card, border: `1px solid ${C.border}` }}>
+                    <span style={{ fontSize: 14.5, fontWeight: 700, color: r.c, minWidth: 48, flexShrink: 0 }}>{r.who}</span>
+                    <span style={{ fontSize: 13.5, color: C.inkSoft, lineHeight: 1.55 }}>{r.what}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </Reveal>
+
+        <RLImpactBand state={state} />
+
+        {/* 데모 로그인 안내 */}
+        <div id="eum-demo" style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, padding: '18px 22px', marginBottom: 24, display: 'flex', alignItems: 'center', gap: 14, boxShadow: '0 1px 3px rgba(0,0,0,0.03)', scrollMarginTop: 80 }}>
+          <div style={{ background: C.amberSoft, padding: 9, borderRadius: 10, display: 'flex' }}>
+            <Sparkles size={20} color={C.amber} />
+          </div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: C.ink, marginBottom: 2 }}>2027 광주 광산구 우산동 파일럿 · 데모 모드</div>
+            <div style={{ fontSize: 13, color: C.mute }}>지금 활동 중인 15쌍의 이야기를 그대로 담아뒀어요. 역할을 골라 들어가면 모든 기능을 직접 둘러볼 수 있어요.</div>
+          </div>
+        </div>
+
+        {/* 페르소나 카드 */}
+        <Reveal style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 14, marginBottom: 36 }}>
+          {personas.map((p) => (
+            <Card key={p.role} padding={0} hoverable onClick={() => onSelectRole(p.role, p.id)} style={{ overflow: 'hidden', cursor: 'pointer' }}>
+              <div style={{ background: p.gradient, height: 70, position: 'relative', display: 'flex', alignItems: 'flex-end', padding: 14 }}>
+                <Avatar type={p.role} gender={p.gender} name={p.name} color="#fff" size={56} ring={false} />
+                <div style={{ position: 'absolute', top: 12, right: 12, fontSize: 10, fontWeight: 700, color: '#fff', letterSpacing: '0.08em', opacity: 0.85, background: 'rgba(255,255,255,0.15)', padding: '4px 8px', borderRadius: 6, backdropFilter: 'blur(8px)' }}>
+                  {PERSONA[p.role].label.toUpperCase()}
+                </div>
+              </div>
+              <div style={{ padding: 18 }}>
+                <div style={{ fontSize: 18, fontWeight: 700, color: C.ink, letterSpacing: '-0.02em', fontFamily: SERIF_STACK }}>{p.name}</div>
+                <div style={{ fontSize: 12, color: C.mute, marginBottom: 10, marginTop: 2 }}>{p.subtitle}</div>
+                <div style={{ fontSize: 13, color: C.inkSoft, lineHeight: 1.55, minHeight: 60 }}>{p.desc}</div>
+                <div style={{ marginTop: 14, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <span style={{ fontSize: 12, color: p.color, fontWeight: 700 }}>입장하기</span>
+                  <ArrowRight size={16} color={p.color} />
+                </div>
+              </div>
+            </Card>
+          ))}
+        </Reveal>
+
+        <Reveal><RLTestimonialBand /></Reveal>
+        <Reveal delay={60}><RLBenchmarkBand /></Reveal>
+        <Reveal delay={60}><RLMoatBand /></Reveal>
+        <Reveal delay={60}><RLRevenueModelBand /></Reveal>
+        <Reveal delay={60}><RLPricingBand onShowApplication={onShowApplication} /></Reveal>
+        <Reveal delay={60}><RLFaqBand /></Reveal>
+        <RLPartnerStrip />
+
+        {/* 신청 페이지 진입 */}
+        <Card padding={22} style={{ background: C.cream }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+            <div style={{ flex: 1, minWidth: 220 }}>
+              <div style={{ fontSize: 16, fontWeight: 700, color: C.ink, marginBottom: 4 }}>처음 오셨나요?</div>
+              <div style={{ fontSize: 13, color: C.mute, lineHeight: 1.55 }}>광주 광산구 우산동에 사시는 분이면 <strong style={{ color: C.inkSoft }}>청소년부터 어르신까지 누구나</strong> 신청할 수 있어요. 5분이면 충분해요.</div>
+            </div>
+            <Button variant="brand" icon={<UserPlus size={16} />} onClick={onShowApplication} size="lg">
+              참여 신청하기
+            </Button>
+          </div>
+        </Card>
+
+        <div style={{ textAlign: 'center', marginTop: 36, color: C.mute, fontSize: 12 }}>
+          © 2027 이음 · 세대를 잇다
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
+// 상용화 배치 (2026-06) — API 실연동 구조(인라인·목업) + 신뢰배지 + 접근성
+//  실제 연동 스택은 src/api/* (zip 제공). 단일파일 배포를 위해 핵심만 인라인.
+// ============================================================================
+const EUM_API = {
+  useMock: true, // .env VITE_USE_MOCK=false 시 실연동(서버 BFF 경유)
+  v1365:   { issueCertificate: async (id) => ({ certNo: '1365-' + String(Date.now()).slice(-8), url: 'https://www.1365.go.kr' }),
+             accrue: async (id, h) => ({ ok: true, added: h }) },
+  welfare: { recommend: async (pf) => (typeof aiWelfare === 'function' ? aiWelfare(pf) : []) },
+  notify:  { alimtalk: async () => ({ ok: true, messageId: 'AT-' + Date.now() }) },
+  happyeum:{ getTarget: async () => ({ found: true }) },
+  sangsang:{ issueVoucher: async (id, amount) => ({ code: 'GSC-' + amount }) },
+};
+
+// 케어닥식 신뢰배지
+function TrustRow() {
+  const items = [
+    { ic: <ShieldCheck size={15} />, t: '4단계 안전검증' },
+    { ic: <UserCheck size={15} />, t: '범죄경력·아동학대 조회' },
+    { ic: <Heart size={15} />, t: '돌봄 책임보험' },
+    { ic: <Award size={15} />, t: '지자체 공인 인증발신' },
+  ];
+  return (
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, margin: '4px 0 18px' }}>
+      {items.map((x, i) => (
+        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11.5, fontWeight: 700, color: C.sage, background: C.sageSoft, border: `1px solid ${C.sage}33`, padding: '6px 11px', borderRadius: 999 }}>{x.ic}{x.t}</div>
+      ))}
+    </div>
+  );
+}
+
+// 어르신 접근성 — 큰 글씨 토글(전역 zoom)
+function AccessibilityFab() {
+  const [big, setBig] = useState(false);
+  const toggle = () => { const n = !big; setBig(n); try { document.documentElement.style.zoom = n ? '1.18' : '1'; } catch (e) {} };
+  return (
+    <button onClick={toggle} aria-label="큰 글씨 전환" title="큰 글씨 전환" style={{ position: 'fixed', left: 22, bottom: 24, zIndex: 9000, display: 'flex', alignItems: 'center', gap: 7, background: big ? C.ink : C.card, color: big ? '#fff' : C.ink, border: `1.5px solid ${C.ink}`, borderRadius: 999, padding: '11px 16px', fontFamily: FONT_STACK, fontWeight: 800, fontSize: 14, cursor: 'pointer', boxShadow: '0 6px 18px rgba(26,24,20,.2)' }}>
+      <span style={{ fontSize: 17 }}>가</span>{big ? '기본 글씨' : '큰 글씨'}
+    </button>
+  );
+}
+
 function CoordOverview({ state, setView }) {
   const kpis = useMemo(() => {
     const totalParticipants = state.participants.length;
@@ -3194,6 +4166,7 @@ function CoordOverview({ state, setView }) {
   return (
     <>
       <PageHeader title="대시보드" subtitle={`${fmtDate(TODAY)} · 광주 광산구 우산동 1차 파일럿`} />
+      <QuickAccessStrip setView={setView} />
 
       {/* 알림 영역 */}
       {(kpis.openIncidents > 0 || kpis.pendingApps > 0 || kpis.pendingLogs > 5) && (
@@ -4665,7 +5638,7 @@ function App() {
 
       {!role || !user ? (
         <>
-          <RoleSelect state={state} onSelectRole={handleSelectRole} onShowApplication={() => setShowApplication(true)} />
+          <RLLanding state={state} onSelectRole={handleSelectRole} onShowApplication={() => setShowApplication(true)} />
           {showApplication && <ApplicationForm onClose={() => setShowApplication(false)} onSubmit={handleSubmitApplication} />}
         </>
       ) : (
@@ -4676,6 +5649,9 @@ function App() {
           {role === 'coordinator' && <CoordinatorApp state={state} user={user} dispatch={dispatch} showToast={showToast} />}
         </>
       )}
+
+      {role && user && <WelfareFab role={role} />}
+      <AccessibilityFab />
 
       {/* Toast 컨테이너 */}
       <div style={{ position: 'fixed', top: 20, right: 20, zIndex: 9999, display: 'flex', flexDirection: 'column', gap: 10, pointerEvents: 'none' }}>
