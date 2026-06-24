@@ -3480,6 +3480,16 @@ function YouthDiscover({ user, totalHours, showToast, setView }) {
 //  히어로·임팩트 카운터·3세대 후기·차별성·수익모델·FAQ·구독요금·벤치마킹
 //  RL* 접두사로 네임스페이스(기존 컴포넌트 무충돌). 위치=광주 광산구 우산동
 // ============================================================================
+// --- 리치 랜딩 의존 헬퍼 복원(f07a3ca/settlement.js) ---
+function prefersReducedMotion() {
+  return typeof window !== 'undefined' && typeof window.matchMedia === 'function'
+    && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+const RL_SETTLE_DONE = new Set(['issued', 'paid', 'delivered']);
+function isSettled(s) { return !!s && RL_SETTLE_DONE.has(s.status); }
+function settleAmount(s) { return (s && (s.amount != null ? s.amount : s.amount_krw)) || 0; }
+function settleHours(s) { return (s && (s.hours != null ? s.hours : s.total_hours)) || 0; }
+
 function RLuseCountUp(target, duration = 950) {
   const num = typeof target === 'number' ? target : parseFloat(String(target).replace(/[^0-9.-]/g, '')) || 0;
   // 접근성(WCAG 2.3.3): 모션 최소화 설정 시 애니메이션 없이 최종값을 바로 표시.
