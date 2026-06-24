@@ -1644,6 +1644,7 @@ function YouthApp({ state, user, dispatch, showToast }) {
         <>
           <PageHeader title={`안녕하세요, ${user.name}님`} subtitle={`이번 주 활동을 함께 살펴보세요`} />
           <VolunteerHub user={user} totalHours={totalHours} setView={setView} showToast={showToast} />
+          <HomeHub setView={setView} />
           <TrustRow />
 
           {/* Hero — 매칭 트리오 */}
@@ -2125,6 +2126,8 @@ function SeniorApp({ state, user, dispatch, showToast }) {
             </div>
           </div>
 
+          <HomeHub setView={setView} items={[{ id: 'schedule', label: '다음 만남', icon: Calendar, c: C.lavender }, { id: 'settlement', label: '받은 상품권', icon: Wallet, c: C.gold }]} />
+
           {/* 다음 만남 — 크게 강조 */}
           {nextActivity && youth && (
             <Card padding={28} style={{ marginBottom: 20, background: `linear-gradient(135deg, ${C.lavenderSoft} 0%, ${C.cream} 100%)`, border: `2px solid ${C.lavender}40` }}>
@@ -2456,6 +2459,7 @@ function ParentDashboard({ user, myChildren, myMatches, todayActivities, upcomin
   return (
     <>
       <PageHeader title={`안녕하세요, ${user.name}님`} subtitle="아이의 오늘 활동과 트리오 소식을 확인하세요" />
+      <HomeHub setView={setView} items={[{ id: 'today', label: '오늘 활동', icon: Activity, c: C.peach }, { id: 'match', label: '매칭 정보', icon: Users, c: C.lavender }, { id: 'safety', label: '안전', icon: ShieldCheck, c: C.sage }]} />
 
       {/* 트리오 카드 */}
       {match && (
@@ -3901,43 +3905,7 @@ function RLPartnerStrip() {
   );
 }
 
-function RLPricingBand({ onShowApplication }) {
-  const plans = [
-    { key: 'free', name: '무료', price: 0, tagline: '동네 품앗이 기본', color: C.mute, soft: C.muteSoft, features: ['트리오 매칭·활동 일지', '봉사시간·상생카드 보상', '4단계 안전검증·책임보험'], cta: '무료로 시작', highlight: false },
-    { key: 'basic', name: '안심 베이직', price: 19900, tagline: '맞벌이 보호자에게', color: C.brand, soft: C.brandSoft, features: ['무료의 모든 기능', '실시간 체크인·위치 안전 알림', '주간 활동 리포트', '활동 사진 아카이브'], cta: '구독하기', highlight: true },
-    { key: 'premium', name: '안심 프리미엄', price: 39900, tagline: '가장 깊은 안심', color: C.lavender, soft: C.lavenderSoft, features: ['베이직의 모든 기능', '우선 매칭 — 대기 없이 먼저', '전담 코디네이터 핫라인', '월간 성장 리포트·상담'], cta: '구독하기', highlight: false },
-  ];
-  return (
-    <div style={{ marginBottom: 36 }}>
-      <div style={{ textAlign: 'center', fontSize: 12, fontWeight: 700, color: C.brand, letterSpacing: '0.1em', marginBottom: 4 }}>보호자 안심 케어</div>
-      <div style={{ textAlign: 'center', fontSize: 20, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK, letterSpacing: '-0.02em', marginBottom: 6 }}>참여는 무료, 더 깊은 안심은 선택</div>
-      <div style={{ textAlign: 'center', fontSize: 13, color: C.mute, marginBottom: 24, maxWidth: 540, marginLeft: 'auto', marginRight: 'auto', lineHeight: 1.6 }}>아이를 맡기는 보호자를 위한 구독이에요. 기본 활동은 누구나 무료로 이용할 수 있어요</div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(248px, 1fr))', gap: 14, maxWidth: 900, margin: '0 auto', alignItems: 'stretch' }}>
-        {plans.map((p) => (
-          <div key={p.key} style={{ position: 'relative', background: C.card, border: `${p.highlight ? 2 : 1}px solid ${p.highlight ? p.color : C.border}`, borderRadius: 16, padding: 22, boxShadow: p.highlight ? `0 16px 36px ${p.color}22` : '0 1px 3px rgba(0,0,0,0.03)', display: 'flex', flexDirection: 'column' }}>
-            {p.highlight && <div style={{ position: 'absolute', top: -11, left: '50%', transform: 'translateX(-50%)', background: p.color, color: '#fff', fontSize: 11, fontWeight: 700, padding: '4px 12px', borderRadius: 999, whiteSpace: 'nowrap' }}>가장 인기</div>}
-            <div style={{ fontSize: 12, fontWeight: 700, color: p.color, marginBottom: 4 }}>{p.tagline}</div>
-            <div style={{ fontSize: 19, fontWeight: 800, color: C.ink, marginBottom: 10 }}>{p.name}</div>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 3, marginBottom: 16 }}>
-              <span style={{ fontSize: 30, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK, letterSpacing: '-0.03em' }}>{p.price === 0 ? '무료' : krw(p.price)}</span>
-              {p.price > 0 && <span style={{ fontSize: 13, color: C.mute }}>/ 월</span>}
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 9, marginBottom: 18, flex: 1 }}>
-              {p.features.map((f, i) => (
-                <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
-                  <Check size={15} color={p.color} style={{ flexShrink: 0, marginTop: 2 }} />
-                  <span style={{ fontSize: 12.5, color: C.inkSoft, lineHeight: 1.45 }}>{f}</span>
-                </div>
-              ))}
-            </div>
-            <Button variant={p.highlight ? 'primary' : 'secondary'} fullWidth onClick={onShowApplication}>{p.cta}</Button>
-          </div>
-        ))}
-      </div>
-      <div style={{ textAlign: 'center', fontSize: 11.5, color: C.muteLight, marginTop: 14 }}>구독료는 우산동 파일럿 가정 기준 예시예요 · 언제든 해지할 수 있어요</div>
-    </div>
-  );
-}
+function RLPricingBand() { return null; } // B2C 구독 섹션 제외(요청)
 
 function RLLanding({ state, onSelectRole, onShowApplication }) {
   // 시드된 페르소나 fixed assignments
@@ -4127,6 +4095,37 @@ function AccessibilityFab() {
     <button onClick={toggle} aria-label="큰 글씨 전환" title="큰 글씨 전환" style={{ position: 'fixed', left: 22, bottom: 24, zIndex: 9000, display: 'flex', alignItems: 'center', gap: 7, background: big ? C.ink : C.card, color: big ? '#fff' : C.ink, border: `1.5px solid ${C.ink}`, borderRadius: 999, padding: '11px 16px', fontFamily: FONT_STACK, fontWeight: 800, fontSize: 14, cursor: 'pointer', boxShadow: '0 6px 18px rgba(26,24,20,.2)' }}>
       <span style={{ fontSize: 17 }}>가</span>{big ? '기본 글씨' : '큰 글씨'}
     </button>
+  );
+}
+
+// 케어닥식 홈 허브 — 큰 아이콘 빠른탐색 (A: UX 통일)
+function HomeHub({ setView, items }) {
+  const def = [
+    { id: 'discover', label: '활동 찾기', icon: Search, c: C.brand },
+    { id: 'schedule', label: '활동 일정', icon: Calendar, c: C.blue },
+    { id: 'mentor', label: '진로 멘토', icon: GraduationCap, c: C.sage },
+    { id: 'logs', label: '활동 기록', icon: PenLine, c: C.lavender },
+    { id: 'archive', label: '동네 기억', icon: BookOpen, c: C.gold },
+    { id: 'settlement', label: '정산·실적', icon: Wallet, c: C.peach },
+  ];
+  const list = items || def;
+  return (
+    <div style={{ marginBottom: 18 }}>
+      <div style={{ fontSize: 13, fontWeight: 800, color: C.ink, marginBottom: 10 }}>무엇을 도와드릴까요?</div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(96px,1fr))', gap: 10 }}>
+        {list.map((it) => {
+          const Ic = it.icon;
+          return (
+            <button key={it.id} onClick={() => setView(it.id)} style={{ cursor: 'pointer', fontFamily: FONT_STACK, background: C.card, border: `1px solid ${C.border}`, borderRadius: 16, padding: '16px 8px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 9, transition: 'all .15s' }}
+              onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 6px 18px rgba(26,24,20,.08)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none'; }}>
+              <span style={{ width: 46, height: 46, borderRadius: 14, background: it.c + '1A', color: it.c, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Ic size={24} /></span>
+              <span style={{ fontSize: 12.5, fontWeight: 700, color: C.ink }}>{it.label}</span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
   );
 }
 
