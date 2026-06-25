@@ -478,9 +478,9 @@ function Button({ children, onClick, variant = 'primary', size = 'md', disabled,
   };
   const v = variants[variant];
   const sizes = {
-    sm: { pad: '6px 12px', fs: 13, h: 32 },
-    md: { pad: '9px 16px', fs: 14, h: 38 },
-    lg: { pad: '12px 22px', fs: 15, h: 46 },
+    sm: { pad: '7px 13px', fs: 13, h: 34 },
+    md: { pad: '10px 18px', fs: 14, h: 40 },
+    lg: { pad: '13px 24px', fs: 15.5, h: 48 },
   };
   const s = sizes[size];
   const [hover, setHover] = useState(false);
@@ -495,8 +495,9 @@ function Button({ children, onClick, variant = 'primary', size = 'md', disabled,
         display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6,
         background: hover && !disabled ? v.hoverBg : v.bg,
         color: v.fg, border: `1px solid ${v.border}`,
-        padding: s.pad, fontSize: s.fs, fontWeight: 600,
-        borderRadius: 8, cursor: disabled ? 'not-allowed' : 'pointer',
+        padding: s.pad, fontSize: s.fs, fontWeight: 700,
+        borderRadius: 10, cursor: disabled ? 'not-allowed' : 'pointer',
+        boxShadow: !disabled && ['primary', 'brand', 'danger', 'success'].includes(variant) ? `0 2px 8px ${v.bg}33` : 'none',
         opacity: disabled ? 0.5 : 1, transition: 'all 0.12s ease',
         height: s.h, width: fullWidth ? '100%' : 'auto',
         fontFamily: FONT_STACK, letterSpacing: '-0.01em',
