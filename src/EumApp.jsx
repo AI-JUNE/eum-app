@@ -521,7 +521,7 @@ function Card({ children, padding = 20, style = {}, onClick, hoverable }) {
       style={{
         background: C.card,
         border: `1px solid ${C.border}`,
-        borderRadius: 14,
+        borderRadius: 16,
         padding,
         cursor: onClick ? 'pointer' : 'default',
         transition: 'all 0.15s ease',
@@ -1052,10 +1052,10 @@ function Tabs({ tabs, active, onChange, style = {} }) {
 
 function Empty({ icon, title, sub, action }) {
   return (
-    <div style={{ textAlign: 'center', padding: '60px 20px', color: C.mute }}>
-      <div style={{ marginBottom: 14, display: 'flex', justifyContent: 'center', color: C.border }}>{icon}</div>
-      <div style={{ fontSize: 16, fontWeight: 600, color: C.ink, marginBottom: 6 }}>{title}</div>
-      {sub && <div style={{ fontSize: 13, marginBottom: 16 }}>{sub}</div>}
+    <div style={{ textAlign: 'center', padding: '56px 20px', color: C.mute }}>
+      {icon && <div style={{ width: 64, height: 64, borderRadius: 18, background: C.bg, color: C.mute, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>{icon}</div>}
+      <div style={{ fontSize: 16, fontWeight: 700, color: C.ink, marginBottom: 6 }}>{title}</div>
+      {sub && <div style={{ fontSize: 13.5, marginBottom: 18, lineHeight: 1.6, maxWidth: 360, marginLeft: 'auto', marginRight: 'auto' }}>{sub}</div>}
       {action}
     </div>
   );
