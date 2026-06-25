@@ -2864,7 +2864,7 @@ function CoordinatorApp({ state, user, dispatch, showToast }) {
 
   return (
     <Layout role="coordinator" view={view} setView={setView} user={user} dispatch={dispatch} state={state}>
-      {view === 'overview' && <CoordOverview state={state} setView={setView} />}
+      {view === 'overview' && <CoordOverview state={state} setView={setView} dispatch={dispatch} />}
       {view === 'applicants' && <CoordApplicants state={state} dispatch={dispatch} showToast={showToast} user={user} />}
       {view === 'matching' && <CoordMatching state={state} dispatch={dispatch} showToast={showToast} user={user} />}
       {view === 'activities' && <CoordActivities state={state} dispatch={dispatch} showToast={showToast} user={user} />}
@@ -4133,7 +4133,7 @@ function HomeHub({ setView, items }) {
   );
 }
 
-function CoordOverview({ state, setView }) {
+function CoordOverview({ state, setView, dispatch }) {
   const kpis = useMemo(() => {
     const totalParticipants = state.participants.length;
     const youthCount = state.participants.filter(p => p.type === 'youth' && p.status === 'active').length;
@@ -4178,7 +4178,7 @@ function CoordOverview({ state, setView }) {
 
   return (
     <>
-      <PageHeader title="대시보드" subtitle={`${fmtDate(TODAY)} · 광주 광산구 우산동 1차 파일럿`} />
+      <PageHeader title="대시보드" subtitle={`${fmtDate(TODAY)} · 광주 광산구 우산동 1차 파일럿`} right={<Button variant="ghost" size="sm" icon={<Trash2 size={14} />} onClick={() => { if (typeof window !== 'undefined' && window.confirm('데모 데이터를 처음 상태로 초기화할까요? (현재 화면 변경분이 사라집니다)')) dispatch && dispatch({ type: 'RESET_DATA' }); }}>데모 초기화</Button>} />
       <QuickAccessStrip setView={setView} />
 
       {/* 알림 영역 */}
