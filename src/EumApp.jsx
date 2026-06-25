@@ -4172,8 +4172,8 @@ function CoordOverview({ state, setView }) {
   const typeChart = useMemo(() => {
     const types = {};
     state.activities.forEach(a => { types[a.type] = (types[a.type] || 0) + 1; });
-    const colors = { 돌봄: C.peach, 학습: C.sage, 동행: C.lavender, 생활: C.brand, 디지털: C.brandLight };
-    return Object.entries(types).map(([type, count]) => ({ name: type, value: count, color: colors[type] || C.mute }));
+    const palette = [C.brand, C.sage, C.lavender, C.gold, C.peach, C.blue, C.amber];
+    return Object.entries(types).map(([type, count], i) => ({ name: type, value: count, color: palette[i % palette.length] }));
   }, [state]);
 
   return (
