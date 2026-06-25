@@ -3099,7 +3099,7 @@ function CoordCopilot({ state, showToast }){
       const m = a.match_id || 'm'; byMatch[m] = (byMatch[m]||0) + h;
     });
     const settle = Math.round(hrs*AI_RATE); const cnt = (logs.length?logs.length:acts.filter(a=>a.status==='completed').length);
-    const text = '[광산구 우산동 세대통합 돌봄 · 운영보고 초안]\\n활동 '+cnt+'회 · 총 '+hrs+'시간 · 참여 조 '+Object.keys(byMatch).length+'개.\\n주요 활동: 어르신 디지털 코칭(사진·영상통화·키오스크), 아동 학습·정서 지도, 진로 멘토링, 동네 기억 아카이브.\\n특이사항: 일부 어르신 건강·경제 부담 호소 → 복지 어드바이저 연계 권고.\\n정산 예정: '+settle.toLocaleString('ko-KR')+'원 (지역상생카드, '+hrs+'h × '+AI_RATE.toLocaleString('ko-KR')+'원/h).';
+    const text = '[광산구 우산동 세대통합 돌봄 · 운영보고 초안]\n활동 '+cnt+'회 · 총 '+hrs+'시간 · 참여 조 '+Object.keys(byMatch).length+'개.\n주요 활동: 어르신 디지털 코칭(사진·영상통화·키오스크), 아동 학습·정서 지도, 진로 멘토링, 동네 기억 아카이브.\n특이사항: 일부 어르신 건강·경제 부담 호소 → 복지 어드바이저 연계 권고.\n정산 예정: '+settle.toLocaleString('ko-KR')+'원 (지역상생카드, '+hrs+'h × '+AI_RATE.toLocaleString('ko-KR')+'원/h).';
     return { hrs, cnt, trios:Object.keys(byMatch).length, settle, text };
   };
   const go = ()=>{ setBusy(true); setOut(null); setTimeout(()=>{ setOut(compute()); setBusy(false); }, 700); };
