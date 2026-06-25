@@ -1216,10 +1216,13 @@ function Sidebar({ role, currentView, onNavigate, onLogout, userName, dataCount 
 
 function PageHeader({ title, subtitle, right }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 24, gap: 16, flexWrap: 'wrap' }}>
+    <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 22, gap: 16, flexWrap: 'wrap', paddingBottom: 14, borderBottom: `1px solid ${C.borderSoft}` }}>
       <div>
-        <h1 style={{ fontSize: 28, fontWeight: 700, color: C.ink, letterSpacing: '-0.035em', margin: 0, fontFamily: SERIF_STACK, lineHeight: 1.15 }}>{title}</h1>
-        {subtitle && <div style={{ fontSize: 14, color: C.mute, marginTop: 5 }}>{subtitle}</div>}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <span style={{ width: 4, height: 22, borderRadius: 3, background: C.brand, flexShrink: 0 }} />
+          <h1 style={{ fontSize: 26, fontWeight: 800, color: C.ink, letterSpacing: '-0.03em', margin: 0, lineHeight: 1.2 }}>{title}</h1>
+        </div>
+        {subtitle && <div style={{ fontSize: 13.5, color: C.mute, marginTop: 6, marginLeft: 14, lineHeight: 1.55 }}>{subtitle}</div>}
       </div>
       {right}
     </div>
