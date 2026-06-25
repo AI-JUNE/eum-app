@@ -4751,6 +4751,36 @@ JSON 형식으로만 응답해주세요 (다른 텍스트 없이):
         </div>
       )}
 
+      {(availableYouth.length + availableSenior.length + availableChild.length) > 0 && (
+        <div style={{ marginTop: 26 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: C.amber, letterSpacing: '0.08em' }}>매칭 대기 · 미배정 {availableYouth.length + availableSenior.length + availableChild.length}명</div>
+            <Button variant="ghost" size="sm" icon={<Sparkles size={14} />} onClick={runAiMatching}>AI로 트리오 만들기</Button>
+          </div>
+          <Card padding={16}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
+              {[['청년 멘토', availableYouth, C.sage], ['어르신 멘토', availableSenior, C.lavender], ['아동', availableChild, C.peach]].map(([label, arr, col]) => (
+                <div key={label}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: col, marginBottom: 8, letterSpacing: '0.04em' }}>{label} · {arr.length}</div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {arr.length === 0 ? <div style={{ fontSize: 12, color: C.mute, padding: '8px 4px' }}>대기 없음</div> :
+                      arr.map(p => (
+                        <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '8px 10px', background: C.bg, borderRadius: 9 }}>
+                          <Avatar type={p.type} gender={p.gender} name={p.name} size={30} color={col} />
+                          <div style={{ minWidth: 0, flex: 1 }}>
+                            <div style={{ fontSize: 12.5, fontWeight: 700, color: C.ink }}>{p.name}</div>
+                            <div style={{ fontSize: 11, color: C.mute, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.age}세 · {(p.skills && p.skills[0]) || (p.interests && p.interests[0]) || '활동 희망'}</div>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+        </div>
+      )}
+
       <Modal open={aiOpen} onClose={() => setAiOpen(false)} title="AI 매칭 추천" size="lg">
         {aiLoading && (
           <div style={{ padding: '40px 20px', textAlign: 'center' }}>
