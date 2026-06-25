@@ -693,10 +693,10 @@ function Toast({ toast, onClose }) {
   return (
     <div style={{
       position: 'fixed', bottom: 24, right: 24, zIndex: 2000,
-      background: c.bg, color: '#fff', padding: '12px 16px',
-      borderRadius: 10, display: 'flex', alignItems: 'center', gap: 10,
-      boxShadow: '0 8px 24px rgba(0,0,0,0.3)', maxWidth: 360,
-      fontSize: 14, fontWeight: 500, animation: 'slideInRight 0.2s ease',
+      background: c.bg, color: '#fff', padding: '13px 18px',
+      borderRadius: 12, display: 'flex', alignItems: 'center', gap: 10,
+      boxShadow: '0 10px 30px rgba(0,0,0,0.32)', maxWidth: 380,
+      fontSize: 14, fontWeight: 600, animation: 'slideInRight 0.2s ease',
       fontFamily: FONT_STACK,
     }}>
       {c.icon}
