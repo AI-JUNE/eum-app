@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { HAS_SUPABASE } from './api/supabase.js';
+import { list as dbList } from './api/eumData.js';
 import {
   Users, UserCheck, Calendar, Award, AlertTriangle, Heart, ShieldCheck,
   Sparkles, ChevronRight, ChevronLeft, ChevronDown, Check, X, Plus, Search,
@@ -327,6 +329,15 @@ function normalizeState(s) {
 }
 
 async function loadState() {
+  // Supabase 연결 시: 실 DB에서 전체 테이블을 읽어 상태 구성 (키 없으면 자동 폴백)
+  if (HAS_SUPABASE) {
+    try {
+      const tables = ['participants', 'applications', 'verifications', 'matches', 'activities', 'activity_logs', 'settlements', 'safety_incidents', 'surveys'];
+      const out = {}; let hasAny = false;
+      for (const t of tables) { const rows = await dbList(t); out[t] = rows || []; if (rows && rows.length) hasAny = true; }
+      if (hasAny) return out;
+    } catch (e) { console.warn('Supabase load failed, falling back to local/seed', e); }
+  }
   try {
     const raw = (typeof localStorage !== 'undefined') ? localStorage.getItem(STORAGE_KEY) : null;
     if (!raw) return null;
@@ -3290,7 +3301,14 @@ function BigStat({ label, value, sub, color }) {
 function CoordB2G({ state, showToast }) {
   const ps = state.participants || [];
   const seniors = ps.filter(p => p.type === 'senior');
-  const gapList = seniors.slice(0, 5);
+  // 어르신별 실제 미신청(사각지대) 복지를 어드바이저 규칙으로 산출
+  const seniorGaps = seniors.map(p => {
+    const recs = aiWelfare({ age: +p.age || 0, alone: true, income: '기초연금', digitalWeak: true, careNeed: false, familyCareYouth: false, gets: [] });
+    const gaps = recs.filter(r => r.gap);
+    return { p, gaps, names: gaps.slice(0, 2).map(g => g.name) };
+  });
+  const totalGaps = seniorGaps.reduce((sum, x) => sum + x.gaps.length, 0);
+  const gapList = seniorGaps.slice(0, 5);
   const link = [
     ['행복이음(차세대 사회보장정보시스템)', '대상자·개인별지원계획 연계', '연동 준비'],
     ['통합돌봄(2026.3 시행)', '일상생활돌봄·가족지원 실행도구', '연동 준비'],
@@ -3304,7 +3322,7 @@ function CoordB2G({ state, showToast }) {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(160px,1fr))', gap: 12 }}>
         <BigStat label="전산 도입비 (자체구축 대비)" value="70%↓" sub="구축 0 · 사용료형 SaaS" color={C.blue} />
         <BigStat label="통합돌봄 1인 행정비" value="40%↓" sub="매칭·정산·보고 자동화" color={C.sage} />
-        <BigStat label="복지 사각지대 발굴" value={`${seniors.length}건`} sub="어드바이저가 자동 탐지" color={C.brand} />
+        <BigStat label="복지 사각지대 발굴" value={`${totalGaps}건`} sub={`어드바이저 자동 탐지 · 어르신 ${seniors.length}명`} color={C.brand} />
         <BigStat label="SROI 사회적 투자수익" value="1 : 2.3" sub="고립·돌봄공백 절감 추정" color={C.gold} />
       </div>
 
@@ -3323,10 +3341,10 @@ function CoordB2G({ state, showToast }) {
         <Card>
           <div style={{ fontSize: 14, fontWeight: 800, marginBottom: 4 }}>사각지대 발굴 리스트</div>
           <div style={{ fontSize: 11.5, color: C.mute, marginBottom: 12 }}>받을 수 있는데 못 받는 어르신을 먼저 찾습니다.</div>
-          {gapList.map((p, i) => (
-            <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 0', borderBottom: i < gapList.length - 1 ? `1px solid ${C.borderSoft}` : 'none' }}>
-              <div style={{ width: 30, height: 30, borderRadius: 9, background: C.lavenderSoft, color: C.lavender, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 12 }}>{p.name[0]}</div>
-              <div style={{ flex: 1 }}><div style={{ fontSize: 12.5, fontWeight: 700 }}>{p.name} · {p.age}세</div><div style={{ fontSize: 11, color: C.mute }}>노인맞춤돌봄·기초연금 추정</div></div>
+          {gapList.map((g, i) => (
+            <div key={g.p.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 0', borderBottom: i < gapList.length - 1 ? `1px solid ${C.borderSoft}` : 'none' }}>
+              <div style={{ width: 30, height: 30, borderRadius: 9, background: C.lavenderSoft, color: C.lavender, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 12 }}>{g.p.name[0]}</div>
+              <div style={{ flex: 1, minWidth: 0 }}><div style={{ fontSize: 12.5, fontWeight: 700 }}>{g.p.name} · {g.p.age}세</div><div style={{ fontSize: 11, color: C.mute, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>미신청 {g.gaps.length}건 · {g.names.join(' · ')}</div></div>
               <Badge color={C.brand} soft={C.brandSoft} size="sm">발굴</Badge>
             </div>
           ))}
@@ -5321,7 +5339,7 @@ function CoordRoadmap() {
 }
 
 function CoordReports({ state, dispatch, showToast }) {
-  const [period, setPeriod] = useState(TODAY.slice(0, 7));
+  const [period, setPeriod] = useState('2027-06'); // 데이터가 풍부한 직전 달 기본 표시
   const [aiSummary, setAiSummary] = useState(null);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState(null);
@@ -5331,7 +5349,7 @@ function CoordReports({ state, dispatch, showToast }) {
     const approvedLogs = monthLogs.filter(l => l.approved);
     const activeMatches = state.matches.filter(m => m.status === 'active').length;
     const totalHours = approvedLogs.reduce((s, l) => s + l.hours, 0);
-    const settlements = state.settlements.filter(s => s.period === period && s.status === 'issued');
+    const settlements = state.settlements.filter(s => s.period === period && (s.status === 'issued' || s.status === 'paid'));
     const settlementAmount = settlements.reduce((s, x) => s + x.amount, 0);
     const incidents = state.safety_incidents.filter(i => i.reported_at?.startsWith(period));
     const surveys = state.surveys?.filter(sv => sv.month === period) || [];
