@@ -706,16 +706,16 @@ function Toast({ toast, onClose }) {
 
 function StatCard({ label, value, sub, color = C.ink, icon, trend }) {
   return (
-    <Card padding={18}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
-        <div style={{ fontSize: 12, color: C.mute, fontWeight: 600, letterSpacing: '0.02em' }}>{label}</div>
-        {icon && <div style={{ background: C.bg, padding: 6, borderRadius: 8, display: 'flex' }}>{icon}</div>}
+    <Card padding={18} style={{ borderTop: `3px solid ${color}` }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+        <div style={{ fontSize: 12, color: C.mute, fontWeight: 700, letterSpacing: '0.01em' }}>{label}</div>
+        {icon && <div style={{ background: color + '14', color, padding: 7, borderRadius: 10, display: 'flex' }}>{icon}</div>}
       </div>
-      <div style={{ fontSize: 26, fontWeight: 700, color, letterSpacing: '-0.03em', lineHeight: 1.1, fontFamily: SERIF_STACK }}>
+      <div style={{ fontSize: 28, fontWeight: 800, color, letterSpacing: '-0.03em', lineHeight: 1.05 }}>
         {typeof value === 'number' ? <CountUp value={value} /> : value}
       </div>
       {sub && (
-        <div style={{ fontSize: 12, color: trend === 'up' ? C.sage : trend === 'down' ? C.red : C.mute, marginTop: 6, display: 'flex', alignItems: 'center', gap: 3 }}>
+        <div style={{ fontSize: 12, color: trend === 'up' ? C.sage : trend === 'down' ? C.red : C.mute, marginTop: 7, display: 'flex', alignItems: 'center', gap: 4, fontWeight: 600 }}>
           {trend === 'up' && <TrendingUp size={12} />}
           {sub}
         </div>
