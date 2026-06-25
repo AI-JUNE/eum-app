@@ -72,7 +72,7 @@ const SEED_DATA = {
     { id: 'p001', name: '김민준', gender: 'M', type: 'youth', age: 27, phone: '010-1234-5678', address: '광주광역시 광산구 우산동', emergency_contact: '010-9876-5432 (부친)', occupation: '스타트업 개발자', skills: ['디지털코칭', '학습멘토', '코딩교육'], interests: ['IT', '진로상담', '여행'], availability: ['평일저녁', '토요일'], status: 'active', avatar_color: C.sage, joined_at: '2027-03-15', bio: '마곡 스타트업 2년차 개발자. 어르신께 IT를, 아이들에게 코딩을 가르쳐드리고 싶어요.' },
     { id: 'p002', name: '이지원', gender: 'F', type: 'youth', age: 25, phone: '010-2345-6789', address: '광주광역시 광산구 우산동', emergency_contact: '010-1111-2222 (모친)', occupation: '대학원생', skills: ['학습멘토', '글쓰기', '독서지도'], interests: ['교육', '문학', '심리'], availability: ['평일저녁', '주말'], status: 'active', avatar_color: C.sage, joined_at: '2027-03-18', bio: '교육학 석사과정. 아이들과 책 읽고 글쓰기를 함께하고 싶어요.' },
     { id: 'p003', name: '박서준', gender: 'M', type: 'youth', age: 29, phone: '010-3456-7890', address: '광주광역시 광산구 첨단동', emergency_contact: '010-3333-4444 (형)', occupation: '디자이너', skills: ['디지털코칭', '예술교육', '사진'], interests: ['디자인', '사진', '카페'], availability: ['토요일', '일요일'], status: 'active', avatar_color: C.sage, joined_at: '2027-03-20', bio: 'UX 디자이너. 어르신께 스마트폰 사진을, 아이들에게 그림을 가르쳐요.' },
-    { id: 'p004', name: '최예린', gender: 'F', type: 'youth', age: 26, phone: '010-4567-8901', address: '광주광역시 광산구 우산동', emergency_contact: '010-5555-6666 (모친)', occupation: '간호사', skills: ['건강관리', '응급처치', '돌봄'], interests: ['건강', '운동', '요리'], availability: ['평일저녁'], status: 'pending_match', avatar_color: C.sage, joined_at: '2027-04-01', bio: '대학병원 간호사. 어르신 건강 케어와 아이 안전에 강점이 있어요.' },
+    { id: 'p004', name: '최예린', gender: 'F', type: 'youth', age: 26, phone: '010-4567-8901', address: '광주광역시 광산구 우산동', emergency_contact: '010-5555-6666 (모친)', occupation: '간호사', skills: ['건강관리', '응급처치', '돌봄'], interests: ['건강', '운동', '요리'], availability: ['평일저녁'], status: 'active', avatar_color: C.sage, joined_at: '2027-04-01', bio: '대학병원 간호사. 어르신 건강 케어와 아이 안전에 강점이 있어요.' },
     { id: 'p005', name: '정태윤', gender: 'M', type: 'youth', age: 28, phone: '010-5678-9012', address: '광산구 등촌동', emergency_contact: '010-7777-8888 (모친)', occupation: '회계사', skills: ['학습멘토', '수학교육'], interests: ['경제', '독서', '러닝'], availability: ['평일저녁', '토요일'], status: 'verifying', avatar_color: C.sage, joined_at: '2027-05-12', bio: '회계사. 아이들에게 수학과 경제 개념을 쉽게 알려주고 싶어요.' },
 
     // 어르신 5명
@@ -80,7 +80,7 @@ const SEED_DATA = {
     { id: 'p102', name: '김복례', gender: 'F', type: 'senior', age: 78, phone: '010-2222-2222', address: '광주광역시 광산구 우산동 (30년 거주)', emergency_contact: '010-4444-5555 (아들)', occupation: '前 봉제공장 운영', skills: ['바느질', '뜨개질', '요리'], interests: ['요리', '드라마', '산책'], availability: ['평일오후'], status: 'active', avatar_color: C.lavender, joined_at: '2027-03-22', bio: '평생 봉제일. 아이들에게 손바느질을 가르쳐주고 싶어요.' },
     { id: 'p103', name: '이병호', gender: 'M', type: 'senior', age: 71, phone: '010-3333-3333', address: '광주광역시 광산구 우산동', emergency_contact: '010-6666-7777 (딸)', occupation: '前 공무원', skills: ['역사이야기', '바둑', '서예'], interests: ['역사', '바둑', '등산'], availability: ['평일오전', '토요일'], status: 'active', avatar_color: C.lavender, joined_at: '2027-03-25', bio: '공무원 40년 정년퇴직. 청년들에게 인생 조언을, 아이들에게 역사 이야기를 들려주고 싶어요.' },
     { id: 'p104', name: '정금자', gender: 'F', type: 'senior', age: 75, phone: '010-4444-4444', address: '광주광역시 광산구 우산동', emergency_contact: '010-8888-9999 (며느리)', occupation: '前 동네 식당 운영', skills: ['요리', '한식', '이야기'], interests: ['요리', '드라마', '꽃밭'], availability: ['평일오전', '평일오후'], status: 'active', avatar_color: C.lavender, joined_at: '2027-03-28', bio: '평생 식당. 아이들에게 손맛 김치 담그기를 가르쳐주고 싶어요.' },
-    { id: 'p105', name: '윤석철', gender: 'M', type: 'senior', age: 70, phone: '010-5555-5555', address: '광주광역시 광산구 우산동', emergency_contact: '010-0000-1111 (아들)', occupation: '前 자영업', skills: ['장기', '한자', '경험담'], interests: ['장기', '뉴스', '걷기'], availability: ['평일오전'], status: 'pending_match', avatar_color: C.lavender, joined_at: '2027-04-05', bio: '동네 토박이. 청년에게 사업 경험을 나누고 아이와 장기 두고 싶어요.' },
+    { id: 'p105', name: '윤석철', gender: 'M', type: 'senior', age: 70, phone: '010-5555-5555', address: '광주광역시 광산구 우산동', emergency_contact: '010-0000-1111 (아들)', occupation: '前 자영업', skills: ['장기', '한자', '경험담'], interests: ['장기', '뉴스', '걷기'], availability: ['평일오전'], status: 'active', avatar_color: C.lavender, joined_at: '2027-04-05', bio: '동네 토박이. 청년에게 사업 경험을 나누고 아이와 장기 두고 싶어요.' },
 
     // 양육가정 3가구
     { id: 'p201', name: '이서영', gender: 'F', type: 'parent', age: 38, phone: '010-6666-7777', address: '광주광역시 광산구 우산동', emergency_contact: '010-1010-2020 (배우자)', occupation: 'IT기업 PM (마곡)', skills: [], interests: [], availability: ['평일 저녁 7시 이후 픽업 가능'], status: 'active', avatar_color: C.peach, joined_at: '2027-03-19', child_id: 'p301', bio: '맞벌이라 퇴근 후 아이 돌봄 공백이 늘 걱정이에요.' },
@@ -91,6 +91,16 @@ const SEED_DATA = {
     { id: 'p301', name: '김유진', gender: 'F', type: 'child', age: 8, phone: '', address: '광주광역시 광산구 우산동', emergency_contact: '010-6666-7777 (모친 이서영)', occupation: '초2', skills: [], interests: ['그림', '책', '강아지'], availability: [], status: 'active', avatar_color: C.peach, joined_at: '2027-03-19', parent_id: 'p201', bio: '책 읽기를 좋아하고 그림 그리는 걸 즐겨요.' },
     { id: 'p302', name: '한도윤', gender: 'M', type: 'child', age: 9, phone: '', address: '광주광역시 광산구 우산동', emergency_contact: '010-7777-8888 (모친 한지영)', occupation: '초3', skills: [], interests: ['로봇', '레고', '축구'], availability: [], status: 'active', avatar_color: C.peach, joined_at: '2027-03-26', parent_id: 'p202', bio: '레고와 로봇을 좋아하고 축구를 잘해요.' },
     { id: 'p303', name: '김지안', gender: 'F', type: 'child', age: 7, phone: '', address: '광주광역시 광산구 우산동', emergency_contact: '010-8888-9999 (모친 김혜진)', occupation: '초1', skills: [], interests: ['공룡', '책', '노래'], availability: [], status: 'active', avatar_color: C.peach, joined_at: '2027-04-02', parent_id: 'p203', bio: '공룡에 푹 빠져 있고 노래 부르기를 좋아해요.' },
+
+    { id: 'p006', name: '강하늘', gender: 'M', type: 'youth', age: 24, phone: '010-6161-6262', address: '광주광역시 광산구 우산동', emergency_contact: '010-6363-6464 (모친)', occupation: '체육지도사', skills: ['장기', '운동지도', '진로멘토'], interests: ['운동', '바둑', '봉사'], availability: ['평일오전', '토요일'], status: 'active', avatar_color: C.sage, joined_at: '2027-05-20', bio: '생활체육지도사. 어르신과 장기 두고 아이들과 몸으로 노는 걸 좋아해요.' },
+    { id: 'p007', name: '문지호', gender: 'M', type: 'youth', age: 30, phone: '010-7171-7272', address: '광주광역시 광산구 우산동', emergency_contact: '010-7373-7474 (배우자)', occupation: '사회복지사', skills: ['상담', '학습멘토', '돌봄'], interests: ['복지', '독서', '커피'], availability: ['평일저녁', '주말'], status: 'active', avatar_color: C.sage, joined_at: '2027-06-10', bio: '복지관 근무 사회복지사. 세대를 잇는 일에 진심이에요. (매칭 대기 중)' },
+    { id: 'p106', name: '서정애', gender: 'F', type: 'senior', age: 76, phone: '010-1616-1717', address: '광주광역시 광산구 우산동 (35년 거주)', emergency_contact: '010-1818-1919 (딸)', occupation: '前 유치원 보육교사', skills: ['동화구연', '종이접기', '노래'], interests: ['손주', '합창', '화초'], availability: ['평일오전', '평일오후'], status: 'active', avatar_color: C.lavender, joined_at: '2027-05-25', bio: '유치원 보육교사 30년. 아이들에게 동화와 종이접기를 가르쳐주고 싶어요. (매칭 대기 중)' },
+    { id: 'p204', name: '송미라', gender: 'F', type: 'parent', age: 36, phone: '010-2424-2525', address: '광주광역시 광산구 우산동', emergency_contact: '010-2626-2727 (배우자)', occupation: '물류회사 사무직', skills: [], interests: [], availability: ['평일 야근 잦음'], status: 'active', avatar_color: C.peach, joined_at: '2027-05-18', child_id: 'p304', bio: '야근이 잦아 아이 저녁 돌봄이 늘 숙제예요.' },
+    { id: 'p205', name: '오정은', gender: 'F', type: 'parent', age: 33, phone: '010-2828-2929', address: '광주광역시 광산구 우산동', emergency_contact: '010-3131-3232 (모친)', occupation: '카페 운영', skills: [], interests: [], availability: ['주말 영업'], status: 'active', avatar_color: C.peach, joined_at: '2027-06-01', child_id: 'p305', bio: '주말에도 가게를 열어 아이와 시간을 못 보내 미안해요.' },
+    { id: 'p206', name: '한소희', gender: 'F', type: 'parent', age: 37, phone: '010-3434-3535', address: '광주광역시 광산구 우산동', emergency_contact: '010-3636-3737 (배우자)', occupation: '병원 행정', skills: [], interests: [], availability: ['평일 하원 후'], status: 'active', avatar_color: C.peach, joined_at: '2027-06-12', child_id: 'p306', bio: '아이가 낯을 많이 가려서 따뜻한 어른들과의 만남이 필요해요. (매칭 대기 중)' },
+    { id: 'p304', name: '송하준', gender: 'M', type: 'child', age: 8, phone: '', address: '광주광역시 광산구 우산동', emergency_contact: '010-2424-2525 (모친 송미라)', occupation: '초2', skills: [], interests: ['요리', '블록', '강아지'], availability: [], status: 'active', avatar_color: C.peach, joined_at: '2027-05-18', parent_id: 'p204', bio: '요리하는 걸 좋아하고 호기심이 많아요.' },
+    { id: 'p305', name: '오서윤', gender: 'F', type: 'child', age: 7, phone: '', address: '광주광역시 광산구 우산동', emergency_contact: '010-2828-2929 (모친 오정은)', occupation: '초1', skills: [], interests: ['그림', '장기', '동물'], availability: [], status: 'active', avatar_color: C.peach, joined_at: '2027-06-01', parent_id: 'p205', bio: '그림 그리기와 보드게임을 좋아해요.' },
+    { id: 'p306', name: '김라온', gender: 'M', type: 'child', age: 9, phone: '', address: '광주광역시 광산구 우산동', emergency_contact: '010-3434-3535 (모친 한소희)', occupation: '초3', skills: [], interests: ['공룡', '종이접기', '책'], availability: [], status: 'active', avatar_color: C.peach, joined_at: '2027-06-12', parent_id: 'p206', bio: '낯을 가리지만 종이접기엔 푹 빠져요. (매칭 대기 중)' },
   ],
 
   applications: [
@@ -99,6 +109,10 @@ const SEED_DATA = {
     { id: 'a003', participant_id: 'p201', submitted_at: '2027-03-18', consent_criminal: false, consent_guardian: true, consent_data: true, consent_photo: true },
     { id: 'a004', participant_id: 'p004', submitted_at: '2027-03-31', consent_criminal: true, consent_guardian: false, consent_data: true, consent_photo: true },
     { id: 'a005', participant_id: 'p005', submitted_at: '2027-05-11', consent_criminal: true, consent_guardian: false, consent_data: true, consent_photo: true },
+    { id: 'a006', participant_id: 'p006', submitted_at: '2027-05-19', consent_criminal: true, consent_guardian: false, consent_data: true, consent_photo: true },
+    { id: 'a007', participant_id: 'p007', submitted_at: '2027-06-09', consent_criminal: true, consent_guardian: false, consent_data: true, consent_photo: true },
+    { id: 'a008', participant_id: 'p106', submitted_at: '2027-05-24', consent_criminal: true, consent_guardian: false, consent_data: true, consent_photo: true },
+    { id: 'a009', participant_id: 'p204', submitted_at: '2027-05-17', consent_criminal: false, consent_guardian: true, consent_data: true, consent_photo: true },
   ],
 
   verifications: [
@@ -111,13 +125,18 @@ const SEED_DATA = {
     { id: 'v102', participant_id: 'p102', status: 'passed', verified_at: '2027-04-01', verified_by: '코디 한가은', notes: '범죄경력 없음.' },
     { id: 'v103', participant_id: 'p103', status: 'passed', verified_at: '2027-04-02', verified_by: '코디 한가은', notes: '범죄경력 없음.' },
     { id: 'v104', participant_id: 'p104', status: 'passed', verified_at: '2027-04-03', verified_by: '코디 한가은', notes: '범죄경력 없음.' },
-    { id: 'v105', participant_id: 'p105', status: 'in_progress', verified_at: null, verified_by: null, notes: '신청서 보완 요청 (비상연락처).' },
+    { id: 'v105', participant_id: 'p105', status: 'passed', verified_at: '2027-04-08', verified_by: '코디 한가은', notes: '범죄경력 없음. 비상연락처 보완 완료.' },
+    { id: 'v006', participant_id: 'p006', status: 'passed', verified_at: '2027-05-30', verified_by: '코디 한가은', notes: '범죄경력 없음. 체육지도사 자격 확인.' },
+    { id: 'v007', participant_id: 'p007', status: 'passed', verified_at: '2027-06-18', verified_by: '코디 한가은', notes: '범죄경력 없음. 사회복지사 1급 확인.' },
+    { id: 'v106', participant_id: 'p106', status: 'passed', verified_at: '2027-06-02', verified_by: '코디 한가은', notes: '범죄경력 없음. 보육교사 경력 확인.' },
   ],
 
   matches: [
     { id: 'm001', youth_id: 'p001', senior_id: 'p101', child_id: 'p301', match_notes: '청년-어르신 모두 우산동 거주. 어르신은 교사 출신, 청년은 IT — 디지털 코칭 시너지. 아동은 책·그림 좋아함.', status: 'active', started_at: '2027-05-01' },
     { id: 'm002', youth_id: 'p002', senior_id: 'p102', child_id: 'p302', match_notes: '대학원생 청년-어르신 모두 손글씨/바느질 관심. 아동은 만들기 좋아함.', status: 'active', started_at: '2027-05-01' },
     { id: 'm003', youth_id: 'p003', senior_id: 'p103', child_id: 'p303', match_notes: '디자이너 청년-역사 좋아하는 어르신. 아동은 공룡, 호기심 많음.', status: 'active', started_at: '2027-05-08' },
+    { id: 'm004', youth_id: 'p004', senior_id: 'p104', child_id: 'p304', match_notes: '간호사 청년-식당 운영 어르신. 건강·요리 시너지. 아동은 요리 호기심 많음.', status: 'active', started_at: '2027-05-22' },
+    { id: 'm005', youth_id: 'p006', senior_id: 'p105', child_id: 'p305', match_notes: '체육지도사 청년-장기 좋아하는 어르신. 아동은 보드게임·그림 좋아함.', status: 'active', started_at: '2027-06-05' },
   ],
 
   activities: [
@@ -153,6 +172,16 @@ const SEED_DATA = {
     { id: 'act206', match_id: 'm003', type: '학습멘토', scheduled_at: '2027-06-12 14:30', duration_hours: 1.5, location: '우산도서관 1층', status: 'completed' },
     { id: 'act207', match_id: 'm003', type: '디지털코칭', scheduled_at: '2027-07-10 13:00', duration_hours: 1.5, location: '우산도서관 1층', status: 'completed' },
     { id: 'act208', match_id: 'm003', type: '학습멘토', scheduled_at: '2027-07-10 14:30', duration_hours: 1.5, location: '우산도서관 1층', status: 'completed' },
+
+    { id: 'act301', match_id: 'm004', type: '디지털코칭', scheduled_at: '2027-05-22 14:00', duration_hours: 1.5, location: '우산동복지관', status: 'completed' },
+    { id: 'act302', match_id: 'm004', type: '학습멘토', scheduled_at: '2027-05-22 15:30', duration_hours: 1.5, location: '우산동복지관', status: 'completed' },
+    { id: 'act303', match_id: 'm004', type: '디지털코칭', scheduled_at: '2027-06-05 14:00', duration_hours: 1.5, location: '우산동복지관', status: 'completed' },
+    { id: 'act304', match_id: 'm004', type: '학습멘토', scheduled_at: '2027-06-05 15:30', duration_hours: 1.5, location: '우산동복지관', status: 'completed' },
+    { id: 'act305', match_id: 'm004', type: '디지털코칭', scheduled_at: '2027-07-17 14:00', duration_hours: 1.5, location: '우산동복지관', status: 'scheduled' },
+    { id: 'act401', match_id: 'm005', type: '진로조언받기', scheduled_at: '2027-06-05 10:00', duration_hours: 1.5, location: '우산동경로당', status: 'completed' },
+    { id: 'act402', match_id: 'm005', type: '기억아카이브', scheduled_at: '2027-06-05 11:30', duration_hours: 1.5, location: '우산동경로당', status: 'completed' },
+    { id: 'act403', match_id: 'm005', type: '디지털코칭', scheduled_at: '2027-06-19 10:00', duration_hours: 1.5, location: '우산동경로당', status: 'completed' },
+    { id: 'act404', match_id: 'm005', type: '학습멘토', scheduled_at: '2027-07-18 10:00', duration_hours: 1.5, location: '우산동경로당', status: 'scheduled' },
   ],
 
   activity_logs: [
@@ -185,6 +214,13 @@ const SEED_DATA = {
     { id: 'log206', activity_id: 'act206', participant_id: 'p003', hours: 1.5, summary: '지안이 한글 받침 — 어르신이 한자 어원으로 설명해주시니 아이가 쏙쏙 흡수.', approved: true, approved_at: '2027-06-13', approved_by: '코디 한가은', has_photo: true, mood: 4 },
     { id: 'log207', activity_id: 'act207', participant_id: 'p003', hours: 1.5, summary: '어르신과 유튜브 다큐 시청 후 토론. 디지털을 함께 즐기는 단계.', approved: false, approved_at: null, approved_by: null, has_photo: false, mood: 5 },
     { id: 'log208', activity_id: 'act208', participant_id: 'p003', hours: 1.5, summary: '지안이 책 읽기 — 공룡 다큐 책을 함께. 어휘력이 부쩍 늘었다.', approved: false, approved_at: null, approved_by: null, has_photo: true, mood: 5 },
+
+    { id: 'log301', activity_id: 'act301', participant_id: 'p004', hours: 1.5, summary: '정금자 어르신께 건강관리 앱 설치 — 혈압·복약 알림 설정. 어르신이 "이제 약 안 까먹겠다" 하시며 안심하심.', approved: true, approved_at: '2027-05-23', approved_by: '코디 한가은', has_photo: true, mood: 5 },
+    { id: 'log302', activity_id: 'act301', participant_id: 'p104', hours: 1.5, summary: '예린이가 간호사라 건강 얘기를 잘 들어줘서 든든하다. 혈압 재는 법도 다시 배웠다.', approved: true, approved_at: '2027-05-23', approved_by: '코디 한가은', has_photo: false, mood: 5 },
+    { id: 'log303', activity_id: 'act303', participant_id: 'p004', hours: 1.5, summary: '하준이와 어르신이 함께 김치전 부치기 — 아이가 반죽을 직접. 어르신 손맛 비법 전수에 아이가 신나했다.', approved: true, approved_at: '2027-06-06', approved_by: '코디 한가은', has_photo: true, mood: 5 },
+    { id: 'log401', activity_id: 'act401', participant_id: 'p006', hours: 1.5, summary: '윤석철 어르신께 사업 시절 이야기 들음. "신용이 자본이다"라는 말씀이 진로에 큰 울림. 장기도 한 수 배웠다.', approved: true, approved_at: '2027-06-06', approved_by: '코디 한가은', has_photo: false, mood: 5 },
+    { id: 'log402', activity_id: 'act402', participant_id: 'p105', hours: 1.5, summary: '내 자영업 40년 이야기를 하늘이가 진지하게 들어줘서 보람있었다. 서윤이와 장기알로 숫자놀이도 했다.', approved: true, approved_at: '2027-06-06', approved_by: '코디 한가은', has_photo: true, mood: 5 },
+    { id: 'log403', activity_id: 'act403', participant_id: 'p006', hours: 1.5, summary: '어르신 스마트폰에 장기 앱 설치·대국 방법 안내. 서윤이는 옆에서 그림으로 장기판을 그렸다.', approved: false, approved_at: null, approved_by: null, has_photo: true, mood: 5 },
   ],
 
   settlements: [
@@ -200,11 +236,16 @@ const SEED_DATA = {
     { id: 's010', participant_id: 'p003', month: '2027-06', total_hours: 6, amount_krw: 68750, voucher_code: 'KSL-2706-A005', issued_at: '2027-07-01', status: 'paid' },
     { id: 's011', participant_id: 'p103', month: '2027-05', total_hours: 6, amount_krw: 68750, voucher_code: 'KSL-2705-A006', issued_at: '2027-06-01', status: 'paid' },
     { id: 's012', participant_id: 'p103', month: '2027-06', total_hours: 6, amount_krw: 68750, voucher_code: 'KSL-2706-A006', issued_at: '2027-07-01', status: 'paid' },
+    { id: 's013', participant_id: 'p004', month: '2027-06', total_hours: 6, amount_krw: 68750, voucher_code: 'KSL-2706-A007', issued_at: '2027-07-01', status: 'paid' },
+    { id: 's014', participant_id: 'p104', month: '2027-06', total_hours: 6, amount_krw: 68750, voucher_code: 'KSL-2706-A008', issued_at: '2027-07-01', status: 'paid' },
+    { id: 's015', participant_id: 'p006', month: '2027-06', total_hours: 4.5, amount_krw: 51560, voucher_code: 'KSL-2706-A009', issued_at: '2027-07-01', status: 'paid' },
+    { id: 's016', participant_id: 'p105', month: '2027-06', total_hours: 4.5, amount_krw: 51560, voucher_code: 'KSL-2706-A010', issued_at: '2027-07-01', status: 'paid' },
   ],
 
   safety_incidents: [
     { id: 'si001', match_id: 'm002', activity_id: 'act102', reported_by: 'p002', severity: 'low', category: '경미한 안전이슈', description: '아동이 의자에서 미끄러질 뻔. 다행히 부상은 없음. 의자 안전 점검 요청.', status: 'resolved', resolved_at: '2027-05-11', resolved_by: '코디 한가은', resolution: '돌봄센터에 안전의자 교체 요청 완료. 활동공간 점검 SOP에 의자 점검 추가.', reported_at: '2027-05-09 14:30' },
     { id: 'si002', match_id: 'm001', activity_id: null, reported_by: 'p201', severity: 'low', category: '소통이슈', description: '아이 픽업 시간이 약속보다 늦어 보호자가 걱정. 코디 즉시 연결 요청.', status: 'resolved', resolved_at: '2027-06-19', resolved_by: '코디 한가은', resolution: '활동 전날 픽업시간 카카오 알림 자동 발송 추가. 1시간 전 한 번 더 리마인드.', reported_at: '2027-06-19 18:45' },
+    { id: 'si003', match_id: 'm003', activity_id: 'act205', reported_by: 'p103', severity: 'low', category: '건강이슈', description: '어르신이 활동 중 어지럼증 호소. 청년이 즉시 휴식·수분 보충 안내. 큰 문제 없이 회복.', status: 'resolved', resolved_at: '2027-06-13', resolved_by: '코디 한가은', resolution: '활동 시작 전 어르신 컨디션 체크리스트 도입. 여름철 활동 시 수분·휴식 가이드 배포.', reported_at: '2027-06-12 13:40' },
   ],
 
   surveys: [
@@ -214,6 +255,9 @@ const SEED_DATA = {
     { id: 'sv004', participant_id: 'p002', month: '2027-06', satisfaction: 4, would_continue: true, comment: '활동 시간이 좀 더 길었으면 좋겠어요.' },
     { id: 'sv005', participant_id: 'p102', month: '2027-06', satisfaction: 5, would_continue: true, comment: '집에만 있던 내가 매주 외출하니 활기가 생겼어요.' },
     { id: 'sv006', participant_id: 'p202', month: '2027-06', satisfaction: 5, would_continue: true, comment: '교대근무에도 안심하고 맡길 수 있어 마음이 가벼워요.' },
+    { id: 'sv007', participant_id: 'p004', month: '2027-06', satisfaction: 5, would_continue: true, comment: '간호 일과도 연결되고, 어르신께 배우는 게 더 많아요.' },
+    { id: 'sv008', participant_id: 'p104', month: '2027-06', satisfaction: 5, would_continue: true, comment: '손주뻘 아이와 김치 담그니 사는 재미가 생겼어요.' },
+    { id: 'sv009', participant_id: 'p006', month: '2027-06', satisfaction: 4, would_continue: true, comment: '어르신 인생 이야기가 진로에 큰 도움이 됐어요. 횟수가 더 늘면 좋겠어요.' },
   ],
 };
 
@@ -241,7 +285,13 @@ function normalizeState(s) {
   const participants = (s.participants || []).map(p =>
     p.type === 'child' ? { ...p, guardian_id: p.guardian_id || p.parent_id } : p
   );
-  return { ...s, activities, activity_logs, participants };
+  const settlements = (s.settlements || []).map(st => ({
+    ...st,
+    period: st.period || st.month,
+    amount: (st.amount != null ? st.amount : st.amount_krw),
+    hours: (st.hours != null ? st.hours : st.total_hours),
+  }));
+  return { ...s, activities, activity_logs, participants, settlements };
 }
 
 async function loadState() {
@@ -4201,7 +4251,7 @@ function CoordOverview({ state, setView, dispatch }) {
         <StatCard label="참여자" value={kpis.totalParticipants} sub={`청년 ${kpis.youthCount} / 어르신 ${kpis.seniorCount} / 양육 ${kpis.parentCount}`} color={C.brand} icon={<Users size={18} />} />
         <StatCard label="활성 매칭" value={kpis.activeMatches} sub={`목표 8건 중 ${kpis.activeMatches}건 진행`} color={C.sage} icon={<Heart size={18} />} trend={kpis.activeMatches >= 3 ? `+${kpis.activeMatches - 0}` : null} />
         <StatCard label="누적 활동시간" value={`${kpis.totalHours}h`} sub={`목표 1,440시간 중 ${Math.round(kpis.totalHours / 1440 * 100)}%`} color={C.lavender} icon={<Clock size={18} />} />
-        <StatCard label="지급 정산" value={krw(kpis.totalSettled)} sub={`${state.settlements.filter(s => s.status === 'issued').length}건 발급 완료`} color={C.gold} icon={<Wallet size={18} />} />
+        <StatCard label="지급 정산" value={krw(kpis.totalSettled)} sub={`${state.settlements.filter(s => s.status === 'issued' || s.status === 'paid').length}건 발급 완료`} color={C.gold} icon={<Wallet size={18} />} />
       </div>
 
       {/* 움직이는 인포그래픽 밴드 */}
@@ -4962,7 +5012,7 @@ function CoordSettlements({ state, dispatch, showToast, user }) {
     return arr;
   }, [state, monthFilter]);
 
-  const issued = state.settlements.filter(s => s.period === monthFilter && s.status === 'issued');
+  const issued = state.settlements.filter(s => s.period === monthFilter && (s.status === 'issued' || s.status === 'paid'));
   const pending = calculatedSettlements.filter(c => !c.existing || c.existing.status === 'pending');
 
   const issueOne = (calc) => {
@@ -5004,7 +5054,7 @@ function CoordSettlements({ state, dispatch, showToast, user }) {
         <StatCard label="이번 달 산정액" value={krw(totalAmount)} sub={`${calculatedSettlements.length}명`} color={C.brand} icon={<Wallet size={18} />} />
         <StatCard label="발급 완료" value={krw(issuedAmount)} sub={`${issued.length}건`} color={C.success} icon={<CheckCircle2 size={18} />} />
         <StatCard label="발급 대기" value={krw(totalAmount - issuedAmount)} sub={`${pending.length}건`} color={C.amber} icon={<Clock size={18} />} />
-        <StatCard label="누적 지급" value={krw(state.settlements.filter(s => s.status === 'issued').reduce((sum, s) => sum + s.amount, 0))} sub={`${state.settlements.filter(s => s.status === 'issued').length}건`} color={C.gold} icon={<Award size={18} />} />
+        <StatCard label="누적 지급" value={krw(state.settlements.filter(s => s.status === 'issued' || s.status === 'paid').reduce((sum, s) => sum + (s.amount||0), 0))} sub={`${state.settlements.filter(s => s.status === 'issued' || s.status === 'paid').length}건`} color={C.gold} icon={<Award size={18} />} />
       </div>
 
       <Card padding={20} style={{ marginBottom: 16 }}>
@@ -5034,7 +5084,7 @@ function CoordSettlements({ state, dispatch, showToast, user }) {
             <div style={{ fontSize: 13, fontWeight: 800, color: C.gold, fontFamily: SERIF_STACK }}>{krw(calc.amount)}</div>
             <div style={{ fontSize: 12, color: C.inkSoft }}>{calc.participant.type === 'youth' ? '계좌이체' : '온누리상품권'}</div>
             <div style={{ textAlign: 'right' }}>
-              {calc.existing?.status === 'issued' ? <Badge color={C.success} soft={C.successSoft} size="sm">발급</Badge> :
+              {(calc.existing?.status === 'issued' || calc.existing?.status === 'paid') ? <Badge color={C.success} soft={C.successSoft} size="sm">발급</Badge> :
                 <Button variant="brand" size="sm" onClick={() => { issueOne(calc); showToast({ type: 'success', message: `${calc.participant.name}님께 발급되었습니다.` }); }}>발급</Button>}
             </div>
           </div>
