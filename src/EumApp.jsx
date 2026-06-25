@@ -1387,11 +1387,11 @@ function ApplicationForm({ onClose, onSubmit }) {
   }
 
   const TYPES = [
-    { id: 'teen', label: '청소년', age: '만 15~18세', color: C.blue, soft: C.blueSoft, desc: '어르신·아동과 교류 + 봉사시간 인정 + 진로 탐색' },
-    { id: 'youth', label: '청년', age: '만 19~39세', color: C.sage, soft: C.sageSoft, desc: '월 27.5만 상품권 + 어르신 멘토 + 동네 정착' },
-    { id: 'adult', label: '중년·서포터', age: '만 40~64세', color: C.gold, soft: C.goldSoft, desc: '활동비 + 이웃 돌봄 참여 + 세대 잇기 서포터' },
-    { id: 'senior', label: '어르신', age: '만 65세 이상', color: C.lavender, soft: C.lavenderSoft, desc: '월 27.5만 상품권 + 디지털 자립 + 효능감 회복' },
-    { id: 'parent', label: '양육가정', age: '자녀와 함께', color: C.peach, soft: C.peachSoft, desc: '안전한 공간 + 3세대 교류 + 무료 참여' },
+    { id: 'teen', label: '청소년', age: '만 15~18세', icon: GraduationCap, color: C.blue, soft: C.blueSoft, desc: '어르신·아동과 교류 + 봉사시간 인정 + 진로 탐색' },
+    { id: 'youth', label: '청년', age: '만 19~39세', icon: Sparkles, color: C.sage, soft: C.sageSoft, desc: '월 27.5만 상품권 + 어르신 멘토 + 동네 정착' },
+    { id: 'adult', label: '중년·서포터', age: '만 40~64세', icon: Heart, color: C.gold, soft: C.goldSoft, desc: '활동비 + 이웃 돌봄 참여 + 세대 잇기 서포터' },
+    { id: 'senior', label: '어르신', age: '만 65세 이상', icon: Coffee, color: C.lavender, soft: C.lavenderSoft, desc: '월 27.5만 상품권 + 디지털 자립 + 효능감 회복' },
+    { id: 'parent', label: '양육가정', age: '자녀와 함께', icon: Users, color: C.peach, soft: C.peachSoft, desc: '안전한 공간 + 3세대 교류 + 무료 참여' },
   ];
 
   return (
@@ -1442,8 +1442,8 @@ function ApplicationForm({ onClose, onSubmit }) {
             {TYPES.map((t) => (
               <Card key={t.id} padding={16} onClick={() => set('type', t.id)} hoverable style={{ border: `2px solid ${form.type === t.id ? t.color : C.border}`, background: form.type === t.id ? t.soft : C.card }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                  <div style={{ width: 44, height: 44, borderRadius: 11, background: t.color, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700, fontFamily: SERIF_STACK }}>
-                    {t.label}
+                  <div style={{ width: 44, height: 44, borderRadius: 11, background: t.color, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    {React.createElement(t.icon, { size: 22 })}
                   </div>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: 15, fontWeight: 700, color: C.ink }}>{t.label} <span style={{ fontSize: 12, color: C.mute, fontWeight: 500 }}>({t.age})</span></div>
