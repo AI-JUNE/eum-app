@@ -4212,7 +4212,15 @@ function TrustRow() {
 // 어르신 접근성 — 큰 글씨 토글(전역 zoom)
 function AccessibilityFab() {
   const [big, setBig] = useState(false);
-  const toggle = () => { const n = !big; setBig(n); try { document.documentElement.style.zoom = n ? '1.18' : '1'; } catch (e) {} };
+  const apply = (n) => { try { document.documentElement.style.zoom = n ? '1.18' : '1'; } catch (e) {} };
+  // 저장된 접근성 설정을 새로고침 후에도 유지
+  useEffect(() => {
+    try {
+      const saved = (typeof localStorage !== 'undefined') && localStorage.getItem('eum:bigfont') === '1';
+      if (saved) { setBig(true); apply(true); }
+    } catch (e) {}
+  }, []);
+  const toggle = () => { const n = !big; setBig(n); apply(n); try { if (typeof localStorage !== 'undefined') localStorage.setItem('eum:bigfont', n ? '1' : '0'); } catch (e) {} };
   return (
     <button onClick={toggle} aria-label="큰 글씨 전환" title="큰 글씨 전환" style={{ position: 'fixed', left: 22, bottom: 24, zIndex: 9000, display: 'flex', alignItems: 'center', gap: 7, background: big ? C.ink : C.card, color: big ? '#fff' : C.ink, border: `1.5px solid ${C.ink}`, borderRadius: 999, padding: '11px 16px', fontFamily: FONT_STACK, fontWeight: 800, fontSize: 14, cursor: 'pointer', boxShadow: '0 6px 18px rgba(26,24,20,.2)' }}>
       <span style={{ fontSize: 17 }}>가</span>{big ? '기본 글씨' : '큰 글씨'}
