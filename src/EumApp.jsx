@@ -5715,7 +5715,7 @@ function App() {
     }));
 
     dispatch({ type: 'ADD_APPLICATION', payload: { participant: newParticipant, application, verifications } });
-    setShowApplication(false);
+    // 모달 즉시 닫지 않음 → 폼 자체 완료 안내(범죄경력 조회 7~14일 등) 노출, 사용자가 '확인' 시 onClose로 닫힘
     showToast({ type: 'success', message: '신청이 접수되었습니다. 코디네이터가 검토 후 연락드립니다.', duration: 5000 });
   };
 
