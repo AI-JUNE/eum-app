@@ -94,6 +94,8 @@ const SEED_DATA = {
 
     { id: 'p006', name: '강하늘', gender: 'M', type: 'youth', age: 24, phone: '010-6161-6262', address: '광주광역시 광산구 우산동', emergency_contact: '010-6363-6464 (모친)', occupation: '체육지도사', skills: ['장기', '운동지도', '진로멘토'], interests: ['운동', '바둑', '봉사'], availability: ['평일오전', '토요일'], status: 'active', avatar_color: C.sage, joined_at: '2027-05-20', bio: '생활체육지도사. 어르신과 장기 두고 아이들과 몸으로 노는 걸 좋아해요.' },
     { id: 'p007', name: '문지호', gender: 'M', type: 'youth', age: 30, phone: '010-7171-7272', address: '광주광역시 광산구 우산동', emergency_contact: '010-7373-7474 (배우자)', occupation: '사회복지사', skills: ['상담', '학습멘토', '돌봄'], interests: ['복지', '독서', '커피'], availability: ['평일저녁', '주말'], status: 'active', avatar_color: C.sage, joined_at: '2027-06-10', bio: '복지관 근무 사회복지사. 세대를 잇는 일에 진심이에요. (매칭 대기 중)' },
+    { id: 'p008', name: '배수진', gender: 'F', type: 'youth', age: 23, phone: '010-8181-8282', address: '광주광역시 광산구 우산동', emergency_contact: '010-8383-8484 (모친)', occupation: '대학생(사회복지학)', skills: ['학습멘토', '돌봄', '글쓰기'], interests: ['교육', '봉사', '글쓰기'], availability: ['평일오후', '주말'], status: 'pending', avatar_color: C.sage, joined_at: '2027-07-12', bio: '사회복지학과 4학년. 실습으로 시작했지만 진짜 이웃이 되고 싶어요. (서류 검토 중)' },
+    { id: 'p107', name: '천만복', gender: 'M', type: 'senior', age: 74, phone: '010-9191-9292', address: '광주광역시 광산구 우산동 (28년 거주)', emergency_contact: '010-9393-9494 (아들)', occupation: '前 목공소 운영', skills: ['목공', '손재주', '경험담'], interests: ['목공', '뉴스', '산책'], availability: ['평일오전'], status: 'pending', avatar_color: C.lavender, joined_at: '2027-07-14', bio: '평생 목공일. 아이들에게 나무로 뭐든 만드는 법을 가르쳐주고 싶어요. (서류 검토 중)' },
     { id: 'p106', name: '서정애', gender: 'F', type: 'senior', age: 76, phone: '010-1616-1717', address: '광주광역시 광산구 우산동 (35년 거주)', emergency_contact: '010-1818-1919 (딸)', occupation: '前 유치원 보육교사', skills: ['동화구연', '종이접기', '노래'], interests: ['손주', '합창', '화초'], availability: ['평일오전', '평일오후'], status: 'active', avatar_color: C.lavender, joined_at: '2027-05-25', bio: '유치원 보육교사 30년. 아이들에게 동화와 종이접기를 가르쳐주고 싶어요. (매칭 대기 중)' },
     { id: 'p204', name: '송미라', gender: 'F', type: 'parent', age: 36, phone: '010-2424-2525', address: '광주광역시 광산구 우산동', emergency_contact: '010-2626-2727 (배우자)', occupation: '물류회사 사무직', skills: [], interests: [], availability: ['평일 야근 잦음'], status: 'active', avatar_color: C.peach, joined_at: '2027-05-18', child_id: 'p304', bio: '야근이 잦아 아이 저녁 돌봄이 늘 숙제예요.' },
     { id: 'p205', name: '오정은', gender: 'F', type: 'parent', age: 33, phone: '010-2828-2929', address: '광주광역시 광산구 우산동', emergency_contact: '010-3131-3232 (모친)', occupation: '카페 운영', skills: [], interests: [], availability: ['주말 영업'], status: 'active', avatar_color: C.peach, joined_at: '2027-06-01', child_id: 'p305', bio: '주말에도 가게를 열어 아이와 시간을 못 보내 미안해요.' },
@@ -291,7 +293,37 @@ function normalizeState(s) {
     amount: (st.amount != null ? st.amount : st.amount_krw),
     hours: (st.hours != null ? st.hours : st.total_hours),
   }));
-  return { ...s, activities, activity_logs, participants, settlements };
+  // 신청자 관리 정합: 참여자별 application + 단계 검증(application_id 기반) 합성
+  const PT = new Set(['parent', 'teen']);
+  const stepsFor = (t) => PT.has(t) ? ['interview', 'guardian_consent', 'document'] : ['interview', 'criminal_record', 'abuse_record', 'reference'];
+  const appStatusFor = (ps) => ps === 'active' ? 'completed' : (ps === 'pending' ? 'screening' : ps === 'rejected' ? 'rejected' : 'verified');
+  const exApp = {}; (s.applications || []).forEach(a => { exApp[a.participant_id] = a; });
+  const baseVerifs = (s.verifications || []).filter(v => !(v.id && String(v.id).startsWith('vf_')));
+  const appKeyed = new Set(baseVerifs.filter(v => v.application_id).map(v => v.application_id));
+  const synthApps = []; const stepVerifs = [];
+  (participants || []).filter(p => p.type !== 'child').forEach(p => {
+    const ex = exApp[p.id] || {};
+    const appStatus = ex.status || appStatusFor(p.status);
+    const appId = ex.id || ('app_' + p.id);
+    const applied_at = ex.applied_at || ex.submitted_at || p.joined_at || p.created_at || '2027-04-01';
+    synthApps.push({
+      ...ex, id: appId, participant_id: p.id, type: p.type, status: appStatus, applied_at,
+      consent_data: ex.consent_data !== undefined ? ex.consent_data : true,
+      consent_photo: ex.consent_photo !== undefined ? ex.consent_photo : true,
+      consent_criminal_check: !PT.has(p.type),
+      consent_guardian: PT.has(p.type),
+    });
+    if (!appKeyed.has(appId)) {
+      stepsFor(p.type).forEach((step, i) => {
+        let st = 'passed';
+        if (appStatus === 'screening') st = 'pending';
+        else if (p.status === 'verifying') st = i === 0 ? 'passed' : (i === 1 ? 'in_progress' : 'pending');
+        stepVerifs.push({ id: 'vf_' + appId + '_' + step, application_id: appId, step, status: st, verified_by: st === 'passed' ? '코디 한가은' : null, verified_at: st === 'passed' ? applied_at : null, note: st === 'passed' ? '확인 완료' : (st === 'in_progress' ? '진행 중' : '') });
+      });
+    }
+  });
+  const mergedVerifs = [...baseVerifs, ...stepVerifs];
+  return { ...s, activities, activity_logs, participants, settlements, applications: synthApps, verifications: mergedVerifs };
 }
 
 async function loadState() {
