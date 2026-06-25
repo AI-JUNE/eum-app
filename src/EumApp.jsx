@@ -546,8 +546,8 @@ function Input({ value, onChange, placeholder, type = 'text', icon, style = {}, 
         placeholder={placeholder}
         disabled={disabled}
         style={{
-          width: '100%', padding: icon ? '10px 12px 10px 38px' : '10px 12px',
-          border: `1px solid ${C.border}`, borderRadius: 8,
+          width: '100%', padding: icon ? '11px 14px 11px 40px' : '11px 14px',
+          border: `1px solid ${C.border}`, borderRadius: 10,
           fontSize: 14, fontFamily: FONT_STACK, color: C.ink,
           background: disabled ? C.bg : C.card, outline: 'none',
           transition: 'border 0.15s',
@@ -568,8 +568,8 @@ function Textarea({ value, onChange, placeholder, rows = 4, style = {} }) {
       placeholder={placeholder}
       rows={rows}
       style={{
-        width: '100%', padding: '10px 12px',
-        border: `1px solid ${C.border}`, borderRadius: 8,
+        width: '100%', padding: '11px 14px',
+        border: `1px solid ${C.border}`, borderRadius: 10,
         fontSize: 14, fontFamily: FONT_STACK, color: C.ink,
         background: C.card, outline: 'none', resize: 'vertical',
         lineHeight: 1.6,
@@ -587,8 +587,8 @@ function Select({ value, onChange, options, placeholder, style = {} }) {
       value={value || ''}
       onChange={(e) => onChange && onChange(e.target.value)}
       style={{
-        width: '100%', padding: '10px 12px',
-        border: `1px solid ${C.border}`, borderRadius: 8,
+        width: '100%', padding: '11px 14px',
+        border: `1px solid ${C.border}`, borderRadius: 10,
         fontSize: 14, fontFamily: FONT_STACK, color: C.ink,
         background: C.card, outline: 'none', cursor: 'pointer',
         appearance: 'none',
@@ -1570,7 +1570,7 @@ function Field({ label, required, sub, children }) {
   return (
     <div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 6 }}>
-        <label style={{ fontSize: 13, fontWeight: 600, color: C.ink }}>{label}{required && <span style={{ color: C.red, marginLeft: 3 }}>*</span>}</label>
+        <label style={{ fontSize: 13, fontWeight: 700, color: C.ink }}>{label}{required && <span style={{ color: C.red, marginLeft: 3 }}>*</span>}</label>
       </div>
       {sub && <div style={{ fontSize: 12, color: C.mute, marginBottom: 7, lineHeight: 1.5 }}>{sub}</div>}
       {children}
