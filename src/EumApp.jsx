@@ -1,6 +1,4 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { HAS_SUPABASE } from './api/supabase.js';
-import { list as dbList } from './api/eumData.js';
 import {
   Users, UserCheck, Calendar, Award, AlertTriangle, Heart, ShieldCheck,
   Sparkles, ChevronRight, ChevronLeft, ChevronDown, Check, X, Plus, Search,
@@ -268,6 +266,18 @@ const SEED_DATA = {
 // ============================================================================
 // 3. STORAGE
 // ============================================================================
+
+// --- Supabase 인라인 연결 (외부 패키지·파일 불필요, REST fetch) ---
+const SUPA_URL = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_URL) || '';
+const SUPA_KEY = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_ANON_KEY) || '';
+const HAS_SUPABASE = !!(SUPA_URL && SUPA_KEY);
+async function dbList(table) {
+  const res = await fetch(SUPA_URL + '/rest/v1/' + table + '?select=*', {
+    headers: { apikey: SUPA_KEY, Authorization: 'Bearer ' + SUPA_KEY },
+  });
+  if (!res.ok) throw new Error('Supabase ' + table + ' ' + res.status);
+  return await res.json();
+}
 
 const STORAGE_KEY = 'eum:appdata:v1';
 
