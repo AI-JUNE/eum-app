@@ -3828,18 +3828,20 @@ function RLImpactBand({ state }) {
     { icon: TrendingUp, color: C.success, label: '지속의향', node: <RLCountUp value={d.cont} suffix="%" /> },
     { icon: Wallet, color: C.gold, label: '누적 보상', node: <span>{krw(d.settled)}</span> },
   ];
+  const isMobile = useIsMobile(560);
+  const isNarrow = useIsMobile(920);
   return (
     <Reveal>
       <div style={{ marginBottom: 72 }}>
         <RLSectionHead kicker="숫자로 보는 이음" title="이미 동네에서 일어나고 있어요" sub="2027 광주 광산구 우산동 파일럿 · 데모 시연용 샘플 데이터입니다." />
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(168px, 1fr))', gap: 14 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : isNarrow ? 'repeat(3, 1fr)' : 'repeat(6, 1fr)', gap: 12 }}>
           {tiles.map((t, i) => {
             const Icon = t.icon;
             return (
-              <div key={i} className="eum-lift" style={{ background: C.card, borderRadius: 18, padding: '22px 22px 24px', boxShadow: '0 2px 8px -4px rgba(26,26,30,0.08)', border: `1px solid ${C.borderSoft}` }}>
-                <div style={{ display: 'inline-flex', padding: 9, borderRadius: 11, background: t.color + '18', marginBottom: 16 }}><Icon size={18} color={t.color} /></div>
-                <div className="eum-serif" style={{ fontSize: 32, fontWeight: 800, color: C.ink, lineHeight: 1 }}>{t.node}</div>
-                <div style={{ fontSize: 13, color: C.mute, fontWeight: 600, marginTop: 9 }}>{t.label}</div>
+              <div key={i} className="eum-lift" style={{ background: C.card, borderRadius: 18, padding: '20px 18px 22px', boxShadow: '0 2px 8px -4px rgba(26,26,30,0.08)', border: `1px solid ${C.borderSoft}` }}>
+                <div style={{ display: 'inline-flex', padding: 9, borderRadius: 11, background: t.color + '18', marginBottom: 14 }}><Icon size={18} color={t.color} /></div>
+                <div className="eum-serif" style={{ fontSize: 'clamp(22px, 2vw, 29px)', fontWeight: 800, color: C.ink, lineHeight: 1, whiteSpace: 'nowrap' }}>{t.node}</div>
+                <div style={{ fontSize: 12.5, color: C.mute, fontWeight: 600, marginTop: 9 }}>{t.label}</div>
               </div>
             );
           })}
@@ -3894,8 +3896,13 @@ function RLFaqBand() {
   ];
   return (
     <div style={{ marginBottom: 72 }}>
-      <RLSectionHead kicker="자주 묻는 질문" title="궁금한 점을 모았어요" />
-      <div style={{ maxWidth: 760, margin: '0 auto', background: C.card, borderRadius: 20, border: `1px solid ${C.borderSoft}`, boxShadow: '0 2px 8px -4px rgba(26,26,30,0.08)', overflow: 'hidden' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '0.82fr 1.18fr', gap: isMobile ? 22 : 56, alignItems: 'start' }}>
+        <div style={{ position: isMobile ? 'static' : 'sticky', top: 92 }}>
+          <div className="eum-kicker" style={{ marginBottom: 16 }}>자주 묻는 질문</div>
+          <h2 className="eum-serif" style={{ margin: 0, fontSize: 'clamp(26px, 3.4vw, 36px)', fontWeight: 800, color: C.ink, lineHeight: 1.22 }}>궁금한 점을<br />모았어요</h2>
+          <p style={{ fontSize: 15.5, color: C.mute, lineHeight: 1.6, marginTop: 14, maxWidth: 330 }}>참여 전 가장 많이 묻는 질문들을 모았어요. 더 궁금한 점은 언제든 문의해 주세요.</p>
+        </div>
+        <div style={{ background: C.card, borderRadius: 20, border: `1px solid ${C.borderSoft}`, boxShadow: '0 2px 8px -4px rgba(26,26,30,0.08)', overflow: 'hidden' }}>
         {faqs.map((f, i) => (
           <div key={i} style={{ borderTop: i === 0 ? 'none' : `1px solid ${C.borderSoft}` }}>
             <button onClick={() => setOpen(open === i ? -1 : i)} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 14, padding: isMobile ? '18px 18px' : '20px 24px', border: 'none', background: open === i ? C.cream : 'transparent', cursor: 'pointer', fontFamily: FONT_STACK, textAlign: 'left', transition: 'background 0.2s ease' }}>
@@ -3907,6 +3914,7 @@ function RLFaqBand() {
             {open === i && <div style={{ padding: isMobile ? '0 18px 20px' : '0 24px 22px', fontSize: 14.5, color: C.inkSoft, lineHeight: 1.74 }}>{f.a}</div>}
           </div>
         ))}
+        </div>
       </div>
     </div>
   );
@@ -3983,7 +3991,7 @@ function RLBenchmarkBand() {
   return (
     <div style={{ marginBottom: 72 }}>
       <RLSectionHead kicker="왜 이음인가" title="세계가 검증한 모델, 이음이 한 걸음 더" sub="해외에서 50년 넘게 검증된 세대통합 모델에, 모두가 놓쳤던 세 세대가 동시에 주고받는 구조를 더했어요." />
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(248px, 1fr))', gap: 16, marginBottom: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', gap: 16, marginBottom: 16 }}>
         {models.map((m, i) => (
           <div key={i} className="eum-lift" style={{ background: C.card, borderRadius: 20, padding: 24, boxShadow: '0 2px 8px -4px rgba(26,26,30,0.08)', border: `1px solid ${C.borderSoft}` }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 11, marginBottom: 16 }}>
@@ -4176,12 +4184,12 @@ function RLProductShowcase() {
   return (
     <div style={{ marginBottom: 80 }}>
       <RLSectionHead kicker="이렇게 작동해요" title="설계가 아니라, 이미 돌아가는 제품" sub="신청·안전검증·트리오 매칭·정산까지 — 코디네이터는 한 화면에서 운영하고, 가족은 휴대폰으로 안심 확인해요." />
-      <div style={{ position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'flex-end', gap: isMobile ? 24 : 0, flexDirection: isMobile ? 'column' : 'row' }}>
+      <div style={{ position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: isMobile ? 24 : 32, flexDirection: isMobile ? 'column' : 'row' }}>
         <div className="eum-orb" style={{ width: 380, height: 380, background: C.brand + '1c', top: -30, left: '14%', animation: 'eumOrb 19s ease-in-out infinite' }} />
-        <div style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: 720 }}>
+        <div style={{ position: 'relative', zIndex: 1, flex: '1 1 auto', width: '100%', maxWidth: 640 }}>
           <RLDeviceBrowser><RLCoordMock /></RLDeviceBrowser>
         </div>
-        <div style={{ position: 'relative', zIndex: 2, marginLeft: isMobile ? 0 : -66, marginBottom: isMobile ? 0 : 14 }}>
+        <div style={{ position: 'relative', zIndex: 2, flexShrink: 0 }}>
           <RLPhoneMock />
         </div>
       </div>
@@ -4294,7 +4302,7 @@ function RLLanding({ state, onSelectRole, onShowApplication }) {
         </div>
 
         {/* 페르소나(역할) 카드 */}
-        <Reveal style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(236px, 1fr))', gap: 16, marginBottom: 72 }}>
+        <Reveal style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', gap: 16, marginBottom: 72 }}>
           {personas.map((p) => (
             <div key={p.role} onClick={() => onSelectRole(p.role, p.id)} className="eum-rolecard" style={{ cursor: 'pointer', borderRadius: 20, border: `1px solid ${C.borderSoft}`, background: C.card, boxShadow: '0 2px 8px -4px rgba(26,26,30,0.08)', overflow: 'hidden' }}>
               <div style={{ height: 64, background: p.gradient, position: 'relative', display: 'flex', alignItems: 'flex-end', padding: '0 18px' }}>
@@ -4323,12 +4331,15 @@ function RLLanding({ state, onSelectRole, onShowApplication }) {
         <RLPartnerStrip />
 
         {/* 신청 진입 — 토스풍 브랜드 CTA 카드 */}
-        <div className="eum-anim-gradient" style={{ background: `linear-gradient(135deg, ${C.brand} 0%, ${C.brandDark} 60%, ${C.brand} 100%)`, borderRadius: 28, padding: isMobile ? '38px 26px' : '60px 48px', textAlign: 'center', boxShadow: `0 28px 56px -22px ${C.brand}99`, position: 'relative', overflow: 'hidden' }}>
-          <div className="eum-orb" style={{ width: 260, height: 260, background: 'rgba(255,255,255,0.16)', top: -90, left: -40, animation: 'eumOrb 18s ease-in-out infinite' }} />
-          <div style={{ position: 'relative', zIndex: 1 }}>
-            <div className="eum-serif" style={{ fontSize: isMobile ? 26 : 'clamp(28px, 4vw, 40px)', fontWeight: 800, color: '#fff', lineHeight: 1.26, marginBottom: 14 }}>우리 동네 3세대 품앗이,<br />지금 시작해요</div>
-            <div style={{ fontSize: isMobile ? 15 : 16.5, color: 'rgba(255,255,255,0.92)', lineHeight: 1.6, maxWidth: 520, margin: '0 auto 30px', fontWeight: 500 }}>광주 광산구 우산동에 사시는 분이면 청소년부터 어르신까지 누구나 신청할 수 있어요. 5분이면 충분해요.</div>
-            <button onClick={onShowApplication} className="eum-cta-btn" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#fff', color: C.brand, border: 'none', borderRadius: 14, padding: '15px 32px', fontSize: 16, fontWeight: 800, cursor: 'pointer', fontFamily: FONT_STACK, boxShadow: '0 10px 24px -8px rgba(0,0,0,0.3)' }}><UserPlus size={18} /> 참여 신청하기 <ArrowRight className="eum-arrow" size={17} /></button>
+        <div className="eum-anim-gradient" style={{ background: `linear-gradient(135deg, ${C.brand} 0%, ${C.brandDark} 60%, ${C.brand} 100%)`, borderRadius: 28, padding: isMobile ? '36px 26px' : '52px 56px', boxShadow: `0 28px 56px -22px ${C.brand}99`, position: 'relative', overflow: 'hidden' }}>
+          <div className="eum-orb" style={{ width: 300, height: 300, background: 'rgba(255,255,255,0.16)', top: -120, right: -50, animation: 'eumOrb 18s ease-in-out infinite' }} />
+          <div style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: isMobile ? 24 : 40, flexWrap: 'wrap', textAlign: isMobile ? 'center' : 'left' }}>
+            <div style={{ flex: 1, minWidth: 260, display: 'flex', flexDirection: 'column', alignItems: isMobile ? 'center' : 'flex-start' }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12.5, fontWeight: 700, color: '#fff', background: 'rgba(255,255,255,0.2)', padding: '5px 12px', borderRadius: 999, marginBottom: 16 }}><Sparkles size={13} /> 2027 우산동 파일럿 참여 모집</div>
+              <div className="eum-serif" style={{ fontSize: isMobile ? 26 : 'clamp(28px, 3.6vw, 40px)', fontWeight: 800, color: '#fff', lineHeight: 1.22, marginBottom: 12 }}>우리 동네 3세대 품앗이,<br />지금 시작해요</div>
+              <div style={{ fontSize: isMobile ? 15 : 16.5, color: 'rgba(255,255,255,0.92)', lineHeight: 1.6, maxWidth: 480, fontWeight: 500 }}>광주 광산구 우산동에 사시는 분이면 청소년부터 어르신까지 누구나 신청할 수 있어요. 5분이면 충분해요.</div>
+            </div>
+            <button onClick={onShowApplication} className="eum-cta-btn" style={{ flexShrink: 0, display: 'inline-flex', alignItems: 'center', gap: 8, background: '#fff', color: C.brand, border: 'none', borderRadius: 14, padding: '16px 30px', fontSize: 16, fontWeight: 800, cursor: 'pointer', fontFamily: FONT_STACK, boxShadow: '0 10px 24px -8px rgba(0,0,0,0.3)' }}><UserPlus size={18} /> 참여 신청하기 <ArrowRight className="eum-arrow" size={17} /></button>
           </div>
         </div>
 
