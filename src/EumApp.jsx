@@ -3857,9 +3857,10 @@ function RLTestimonialBand() {
     { role: 'senior', color: C.lavender, soft: C.lavenderSoft, name: '박순자', sub: '어르신 · 73세', quote: '혼자였던 집에 아이 웃음소리가 들려요. 다시 누군가에게 쓸모 있는 사람이 된 것 같아 하루가 기다려져요.' },
     { role: 'parent', color: C.peach, soft: C.peachSoft, name: '이서영', sub: '양육가정 · 유진 엄마', quote: '맞벌이라 늘 미안했는데, 유진이가 동네에 할머니랑 삼촌이 생겼다며 좋아해요. 마음이 놓여요.' },
   ];
+  const isMobile = useIsMobile(720);
   return (
     <Reveal>
-      <div style={{ marginBottom: 72 }}>
+      <div style={{ marginBottom: 72, background: C.cream, borderRadius: 28, padding: isMobile ? '36px 22px' : '52px 48px', border: `1px solid ${C.borderSoft}` }}>
         <RLSectionHead kicker="이웃들의 이야기" title="세 세대의 목소리" sub="이음으로 이어진 이웃들이 직접 전해온 이야기예요." />
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(248px, 1fr))', gap: 16 }}>
           {items.map((t, i) => (
@@ -4239,6 +4240,7 @@ function RLLanding({ state, onSelectRole, onShowApplication }) {
   ];
 
   const isMobile = useIsMobile(820);
+  const isPhone = useIsMobile(520);
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
     const h = () => setScrolled(window.scrollY > 8);
@@ -4353,7 +4355,7 @@ function RLLanding({ state, onSelectRole, onShowApplication }) {
         </div>
 
         {/* 페르소나(역할) 카드 */}
-        <Reveal style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', gap: 16, marginBottom: 72 }}>
+        <Reveal style={{ display: 'grid', gridTemplateColumns: isPhone ? '1fr' : isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', gap: 16, marginBottom: 72 }}>
           {personas.map((p) => (
             <div key={p.role} onClick={() => onSelectRole(p.role, p.id)} className="eum-rolecard" style={{ cursor: 'pointer', borderRadius: 20, border: `1px solid ${C.borderSoft}`, background: C.card, boxShadow: '0 2px 8px -4px rgba(26,26,30,0.08)', overflow: 'hidden' }}>
               <div style={{ height: 64, background: p.gradient, position: 'relative', display: 'flex', alignItems: 'flex-end', padding: '0 18px' }}>
