@@ -25,9 +25,9 @@ const C = {
   brandSoft: '#FCE7DE',
   brandBg: '#FEF3EE',
   ink: '#1A1A1E',
-  inkSoft: '#4A4A52',
-  mute: '#8B8B93',
-  muteLight: '#B5B5BD',
+  inkSoft: '#46464E',
+  mute: '#71717A',
+  muteLight: '#A2A2AB',
   cream: '#FBF8F5',
   cardWarm: '#FCFAF7',
   bg: '#F5F4F2',
@@ -3864,8 +3864,10 @@ function RLTestimonialBand() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(248px, 1fr))', gap: 16 }}>
           {items.map((t, i) => (
             <div key={i} className="eum-lift" style={{ background: C.card, borderRadius: 20, padding: 26, display: 'flex', flexDirection: 'column', boxShadow: '0 2px 8px -4px rgba(26,26,30,0.08)', border: `1px solid ${C.borderSoft}` }}>
-              <div className="eum-serif" style={{ fontSize: 44, fontWeight: 800, color: t.color, lineHeight: 0.8, height: 28 }}>&ldquo;</div>
-              <div style={{ fontSize: 15, color: C.inkSoft, lineHeight: 1.72, marginTop: 10, marginBottom: 22, flex: 1, fontWeight: 500 }}>{t.quote}</div>
+              <div style={{ display: 'flex', gap: 2, marginBottom: 16 }}>
+                {[0, 1, 2, 3, 4].map((s) => <Star key={s} size={16} color={C.amber} fill={C.amber} strokeWidth={0} />)}
+              </div>
+              <div style={{ fontSize: 15.5, color: C.inkSoft, lineHeight: 1.72, marginBottom: 22, flex: 1, fontWeight: 500 }}>{t.quote}</div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 11, paddingTop: 16, borderTop: `1px solid ${C.borderSoft}` }}>
                 <Avatar type={t.role} name={t.name} color={t.color} size={42} />
                 <div>
