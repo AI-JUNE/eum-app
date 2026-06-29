@@ -15,36 +15,42 @@ import {
 } from 'recharts';
 
 // ============================================================================
-// 1. DESIGN TOKENS
+// 1. DESIGN TOKENS — 프리미엄 휴머니스트 에디토리얼 개편 (v22)
 // ============================================================================
 
 const C = {
-  brand: '#C75D3C',
-  brandDark: '#A04826',
-  brandSoft: '#F7E9E1',
-  brandBg: '#FCF3EE',
-  ink: '#1A1814',
-  inkSoft: '#4A4540',
-  mute: '#8A847A',
-  cream: '#FAF7F2',
-  bg: '#F6F2EB',
+  // 토스·카카오 계열 상용 팔레트 — 밝고 깨끗한 배경 + 선명한 테라코타 포인트
+  brand: '#E15A33',
+  brandDark: '#C2431F',
+  brandSoft: '#FCE7DE',
+  brandBg: '#FEF3EE',
+  ink: '#1A1A1E',
+  inkSoft: '#4A4A52',
+  mute: '#8B8B93',
+  muteLight: '#B5B5BD',
+  cream: '#FBF8F5',
+  cardWarm: '#FCFAF7',
+  bg: '#F5F4F2',
   card: '#FFFFFF',
-  border: '#E8E2D6',
-  borderSoft: '#F0EBE0',
-  sage: '#5F8556',
-  sageSoft: '#E8EFE3',
-  lavender: '#7F6FA0',
-  lavenderSoft: '#EDE9F2',
-  peach: '#D89368',
-  peachSoft: '#F8EBDD',
-  gold: '#B8884A',
-  goldSoft: '#F2E8D6',
-  red: '#C74848',
-  redSoft: '#F8E4E4',
-  blue: '#4A6FA5',
-  blueSoft: '#E4EBF3',
-  amber: '#D9A441',
-  amberSoft: '#F7EDD3',
+  border: '#EBE9E4',
+  borderSoft: '#F3F1ED',
+  sage: '#5C7C4F',
+  sageSoft: '#E7EEE0',
+  lavender: '#766B94',
+  lavenderSoft: '#EBE7F0',
+  peach: '#CE885B',
+  peachSoft: '#F6E8D9',
+  gold: '#AC8040',
+  goldSoft: '#F0E6D2',
+  red: '#BD4747',
+  redSoft: '#F6E2E2',
+  blue: '#456A9E',
+  blueSoft: '#E2E9F1',
+  amber: '#CB9836',
+  amberSoft: '#F5ECD1',
+  success: '#5C7C4F',
+  successSoft: '#E7EEE0',
+  muteSoft: '#EDE9DF',
 };
 
 const PERSONA = {
@@ -57,8 +63,9 @@ const PERSONA = {
   coordinator: { label: '코디네이터', color: C.ink, soft: '#EDEAE5', ring: 'rgba(26,24,20,0.15)' },
 };
 
-const FONT_STACK = `-apple-system, BlinkMacSystemFont, "Pretendard Variable", Pretendard, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif`;
-const SERIF_STACK = FONT_STACK; // 가독성: 세리프 → Pretendard 산세리프 통일
+const FONT_STACK = `"Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif`;
+// 디스플레이도 Pretendard 산세리프(굵게) — 토스·카카오 계열 상용 일관성
+const SERIF_STACK = FONT_STACK;
 
 // ============================================================================
 // 2. SEED DATA
@@ -524,13 +531,14 @@ function Avatar({ name, color = C.brand, size = 40, ring = false, type, gender }
 }
 
 function Badge({ children, color = C.mute, soft = C.muteSoft, size = 'sm' }) {
-  const pad = size === 'sm' ? '3px 8px' : '5px 10px';
+  const pad = size === 'sm' ? '4px 9px' : '6px 12px';
   const fs = size === 'sm' ? 11 : 12;
   return (
     <span style={{
-      display: 'inline-flex', alignItems: 'center', gap: 4,
-      background: soft, color, padding: pad, borderRadius: 6,
-      fontSize: fs, fontWeight: 600, letterSpacing: '-0.01em',
+      display: 'inline-flex', alignItems: 'center', gap: 5,
+      background: soft, color, padding: pad, borderRadius: 999,
+      border: `1px solid ${color}1f`,
+      fontSize: fs, fontWeight: 600, letterSpacing: '-0.005em',
       whiteSpace: 'nowrap', flexShrink: 0, maxWidth: '100%',
     }}>{children}</span>
   );
@@ -587,6 +595,7 @@ function Button({ children, onClick, variant = 'primary', size = 'md', disabled,
   };
   const s = sizes[size];
   const [hover, setHover] = useState(false);
+  const isSolid = ['primary', 'brand', 'danger', 'success'].includes(variant);
   return (
     <button
       type={type}
@@ -595,13 +604,17 @@ function Button({ children, onClick, variant = 'primary', size = 'md', disabled,
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
       style={{
-        display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+        display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 7,
         background: hover && !disabled ? v.hoverBg : v.bg,
         color: v.fg, border: `1px solid ${v.border}`,
         padding: s.pad, fontSize: s.fs, fontWeight: 700,
-        borderRadius: 10, cursor: disabled ? 'not-allowed' : 'pointer',
-        boxShadow: !disabled && ['primary', 'brand', 'danger', 'success'].includes(variant) ? `0 2px 8px ${v.bg}33` : 'none',
-        opacity: disabled ? 0.5 : 1, transition: 'all 0.12s ease',
+        borderRadius: 13, cursor: disabled ? 'not-allowed' : 'pointer',
+        boxShadow: !disabled && isSolid
+          ? (hover ? `0 8px 20px -8px ${v.bg}99` : `0 4px 12px -6px ${v.bg}80`)
+          : 'none',
+        opacity: disabled ? 0.5 : 1,
+        transition: 'background 0.18s ease, box-shadow 0.24s ease, transform 0.18s ease',
+        transform: hover && !disabled ? 'translateY(-1px)' : 'none',
         height: s.h, width: fullWidth ? '100%' : 'auto',
         fontFamily: FONT_STACK, letterSpacing: '-0.01em',
         ...style
@@ -624,12 +637,12 @@ function Card({ children, padding = 20, style = {}, onClick, hoverable }) {
       style={{
         background: C.card,
         border: `1px solid ${C.border}`,
-        borderRadius: 16,
+        borderRadius: 18,
         padding,
         cursor: onClick ? 'pointer' : 'default',
-        transition: 'all 0.15s ease',
-        boxShadow: hover ? '0 4px 16px rgba(26,24,20,0.06)' : 'none',
-        transform: hover ? 'translateY(-1px)' : 'none',
+        transition: 'transform 0.24s cubic-bezier(0.22,1,0.36,1), box-shadow 0.24s ease',
+        boxShadow: hover ? '0 16px 40px -16px rgba(26,26,30,0.18)' : '0 2px 8px -4px rgba(26,26,30,0.08)',
+        transform: hover ? 'translateY(-4px)' : 'none',
         ...style
       }}
     >
@@ -890,11 +903,24 @@ function AnimatedBar({ value, max = 100, color = C.brand, height = 8, track = C.
 }
 
 // 진입 애니메이션 래퍼 (마운트 시 fade + slide)
-function Reveal({ children, delay = 0, y = 10, style = {} }) {
+function Reveal({ children, delay = 0, y = 24, style = {} }) {
+  const ref = useRef(null);
   const [shown, setShown] = useState(false);
-  useEffect(() => { const id = setTimeout(() => setShown(true), delay); return () => clearTimeout(id); }, [delay]);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (typeof IntersectionObserver === 'undefined') { setShown(true); return; }
+    let timer;
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) { timer = setTimeout(() => setShown(true), delay); io.unobserve(el); }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -7% 0px' });
+    io.observe(el);
+    return () => { io.disconnect(); clearTimeout(timer); };
+  }, [delay]);
   return (
-    <div style={{ opacity: shown ? 1 : 0, transform: shown ? 'none' : `translateY(${y}px)`, transition: 'opacity 0.5s ease, transform 0.55s cubic-bezier(0.22,1,0.36,1)', ...style }}>
+    <div ref={ref} style={{ opacity: shown ? 1 : 0, transform: shown ? 'none' : `translateY(${y}px)`, transition: 'opacity 0.7s ease, transform 0.85s cubic-bezier(0.22,1,0.36,1)', willChange: 'opacity, transform', ...style }}>
       {children}
     </div>
   );
@@ -3685,6 +3711,22 @@ function RLEyebrow({ children, color = C.ink }) {
   );
 }
 
+function RLRule({ color, style = {} }) {
+  return <div style={{ height: 1, background: color || C.border, width: '100%', ...style }} />;
+}
+
+// 섹션 헤더 — 소프트 핀 키커 + 굵은 산세리프 제목 (토스·카카오 계열)
+function RLSectionHead({ index, kicker, title, sub, action, align = 'center' }) {
+  return (
+    <div style={{ marginBottom: 34, textAlign: align, display: 'flex', flexDirection: 'column', alignItems: align === 'center' ? 'center' : 'flex-start' }}>
+      {kicker && <div className="eum-kicker" style={{ marginBottom: 16 }}>{kicker}</div>}
+      {title && <h2 className="eum-serif" style={{ margin: 0, fontSize: 'clamp(27px, 3.8vw, 40px)', fontWeight: 800, color: C.ink, lineHeight: 1.24 }}>{title}</h2>}
+      {sub && <p style={{ margin: '15px 0 0', fontSize: 17, color: C.mute, lineHeight: 1.6, maxWidth: 600 }}>{sub}</p>}
+      {action && <div style={{ marginTop: 20 }}>{action}</div>}
+    </div>
+  );
+}
+
 function RLHeroScene() {
   return (
     <svg viewBox="0 0 460 440" width="100%" style={{ display: 'block' }} role="img" aria-label="청년·어르신·아동 세 세대가 함께 있는 모습">
@@ -3788,19 +3830,19 @@ function RLImpactBand({ state }) {
   ];
   return (
     <Reveal>
-      <div style={{ marginBottom: 32 }}>
-        <div style={{ textAlign: 'center', marginBottom: 18 }}>
-          <div style={{ fontSize: 11, fontWeight: 700, color: C.inkSoft, letterSpacing: '0.04em', marginBottom: 6 }}>숫자로 보는 이음</div>
-          <div style={{ fontSize: 13, color: C.mute }}>데모 시연용 샘플 데이터입니다</div>
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12 }}>
-          {tiles.map((t, i) => (
-            <div key={i} style={{ background: C.card, border: '1px solid ' + C.border, borderRadius: 12, padding: '18px 18px' }}>
-              <div style={{ fontSize: 11, color: C.muteLight, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 11 }}>{t.label}</div>
-              <div style={{ fontSize: 28, fontWeight: 700, color: C.ink, fontFamily: FONT_STACK, letterSpacing: '-0.04em', lineHeight: 1 }}>{t.node}</div>
-              <div style={{ width: 20, height: 2, background: t.color, marginTop: 12, borderRadius: 1 }} />
-            </div>
-          ))}
+      <div style={{ marginBottom: 72 }}>
+        <RLSectionHead kicker="숫자로 보는 이음" title="이미 동네에서 일어나고 있어요" sub="2027 광주 광산구 우산동 파일럿 · 데모 시연용 샘플 데이터입니다." />
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(168px, 1fr))', gap: 14 }}>
+          {tiles.map((t, i) => {
+            const Icon = t.icon;
+            return (
+              <div key={i} className="eum-lift" style={{ background: C.card, borderRadius: 18, padding: '22px 22px 24px', boxShadow: '0 2px 8px -4px rgba(26,26,30,0.08)', border: `1px solid ${C.borderSoft}` }}>
+                <div style={{ display: 'inline-flex', padding: 9, borderRadius: 11, background: t.color + '18', marginBottom: 16 }}><Icon size={18} color={t.color} /></div>
+                <div className="eum-serif" style={{ fontSize: 32, fontWeight: 800, color: C.ink, lineHeight: 1 }}>{t.node}</div>
+                <div style={{ fontSize: 13, color: C.mute, fontWeight: 600, marginTop: 9 }}>{t.label}</div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </Reveal>
@@ -3815,19 +3857,18 @@ function RLTestimonialBand() {
   ];
   return (
     <Reveal>
-      <div style={{ marginBottom: 36 }}>
-        <div style={{ textAlign: 'center', fontSize: 12, fontWeight: 700, color: C.brand, letterSpacing: '0.1em', marginBottom: 4 }}>이웃들의 이야기</div>
-        <div style={{ textAlign: 'center', fontSize: 13, color: C.mute, marginBottom: 18 }}>이음으로 이어진 세 세대의 목소리예요</div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 14 }}>
+      <div style={{ marginBottom: 72 }}>
+        <RLSectionHead kicker="이웃들의 이야기" title="세 세대의 목소리" sub="이음으로 이어진 이웃들이 직접 전해온 이야기예요." />
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(248px, 1fr))', gap: 16 }}>
           {items.map((t, i) => (
-            <div key={i} style={{ background: C.card, border: '1px solid ' + C.border, borderRadius: 16, padding: 20, display: 'flex', flexDirection: 'column' }}>
-              <div style={{ fontSize: 30, fontWeight: 800, color: t.color, lineHeight: 1, fontFamily: SERIF_STACK }}>&ldquo;</div>
-              <div style={{ fontSize: 13.5, color: C.inkSoft, lineHeight: 1.7, marginTop: 2, marginBottom: 16, flex: 1 }}>{t.quote}</div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <Avatar type={t.role} name={t.name} color={t.color} size={38} />
+            <div key={i} className="eum-lift" style={{ background: C.card, borderRadius: 20, padding: 26, display: 'flex', flexDirection: 'column', boxShadow: '0 2px 8px -4px rgba(26,26,30,0.08)', border: `1px solid ${C.borderSoft}` }}>
+              <div className="eum-serif" style={{ fontSize: 44, fontWeight: 800, color: t.color, lineHeight: 0.8, height: 28 }}>&ldquo;</div>
+              <div style={{ fontSize: 15, color: C.inkSoft, lineHeight: 1.72, marginTop: 10, marginBottom: 22, flex: 1, fontWeight: 500 }}>{t.quote}</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 11, paddingTop: 16, borderTop: `1px solid ${C.borderSoft}` }}>
+                <Avatar type={t.role} name={t.name} color={t.color} size={42} />
                 <div>
-                  <div style={{ fontSize: 13, fontWeight: 800, color: C.ink }}>{t.name}</div>
-                  <div style={{ fontSize: 11.5, color: C.mute, marginTop: 1 }}>{t.sub}</div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: C.ink }}>{t.name}</div>
+                  <div style={{ fontSize: 12, color: C.mute, marginTop: 1 }}>{t.sub}</div>
                 </div>
               </div>
             </div>
@@ -3852,17 +3893,18 @@ function RLFaqBand() {
     { q: '안심 케어 구독은 꼭 해야 하나요?', a: '아니에요. 기본 참여와 매칭·활동 일지는 무료예요. 구독은 실시간 안전 알림·주간 리포트·우선 매칭이 필요한 보호자를 위한 선택이에요.' },
   ];
   return (
-    <div style={{ marginBottom: 36 }}>
-      <div style={{ textAlign: 'center', fontSize: 12, fontWeight: 700, color: C.brand, letterSpacing: '0.1em', marginBottom: 4 }}>자주 묻는 질문</div>
-      <div style={{ textAlign: 'center', fontSize: 13, color: C.mute, marginBottom: 16 }}>궁금한 점을 모았어요</div>
-      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', alignItems: 'start', gap: 10, maxWidth: 1000, margin: '0 auto' }}>
+    <div style={{ marginBottom: 72 }}>
+      <RLSectionHead kicker="자주 묻는 질문" title="궁금한 점을 모았어요" />
+      <div style={{ maxWidth: 760, margin: '0 auto', background: C.card, borderRadius: 20, border: `1px solid ${C.borderSoft}`, boxShadow: '0 2px 8px -4px rgba(26,26,30,0.08)', overflow: 'hidden' }}>
         {faqs.map((f, i) => (
-          <div key={i} style={{ background: C.card, border: '1px solid ' + C.border, borderRadius: 12, overflow: 'hidden', alignSelf: 'start' }}>
-            <button onClick={() => setOpen(open === i ? -1 : i)} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: '15px 18px', border: 'none', background: 'transparent', cursor: 'pointer', fontFamily: FONT_STACK, textAlign: 'left' }}>
-              <span style={{ fontSize: 14, fontWeight: 700, color: C.ink }}>{f.q}</span>
-              <ChevronDown size={18} color={C.mute} style={{ transform: open === i ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+          <div key={i} style={{ borderTop: i === 0 ? 'none' : `1px solid ${C.borderSoft}` }}>
+            <button onClick={() => setOpen(open === i ? -1 : i)} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 14, padding: isMobile ? '18px 18px' : '20px 24px', border: 'none', background: open === i ? C.cream : 'transparent', cursor: 'pointer', fontFamily: FONT_STACK, textAlign: 'left', transition: 'background 0.2s ease' }}>
+              <span style={{ flex: 1, fontSize: isMobile ? 15 : 16, fontWeight: 700, color: C.ink, letterSpacing: '-0.015em' }}>{f.q}</span>
+              <span style={{ display: 'flex', width: 26, height: 26, borderRadius: '50%', background: open === i ? C.brand : C.borderSoft, alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'background 0.2s ease' }}>
+                <ChevronDown size={16} color={open === i ? '#fff' : C.mute} style={{ transform: open === i ? 'rotate(180deg)' : 'none', transition: 'transform 0.25s' }} />
+              </span>
             </button>
-            {open === i && <div style={{ padding: '0 18px 16px', fontSize: 13, color: C.inkSoft, lineHeight: 1.65 }}>{f.a}</div>}
+            {open === i && <div style={{ padding: isMobile ? '0 18px 20px' : '0 24px 22px', fontSize: 14.5, color: C.inkSoft, lineHeight: 1.74 }}>{f.a}</div>}
           </div>
         ))}
       </div>
@@ -3877,19 +3919,17 @@ function RLMoatBand() {
     { icon: Wallet, color: C.gold, soft: C.goldSoft, tag: '지자체·1365 연계', title: '활동을 보상으로 잇는 정산', desc: '활동 기록이 봉사시간과 광주상생카드 보상으로 자동 환산·발급됩니다. 통합돌봄·자원봉사 행정과 맞물리는 정산 흐름이 이미 돌아갑니다.' },
   ];
   return (
-    <div style={{ marginBottom: 36 }}>
-      <div style={{ textAlign: 'center', fontSize: 12, fontWeight: 700, color: C.brand, letterSpacing: '0.1em', marginBottom: 4 }}>이음만의 것</div>
-      <div style={{ textAlign: 'center', fontSize: 20, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK, letterSpacing: '-0.02em', marginBottom: 6 }}>따라 하기 어려운 세 가지</div>
-      <div style={{ textAlign: 'center', fontSize: 13, color: C.mute, marginBottom: 18, maxWidth: 540, marginLeft: 'auto', marginRight: 'auto', lineHeight: 1.6 }}>아이디어가 아니라, 이미 작동하는 매칭·안전·정산 기술이 이음의 진입장벽이에요</div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(232px, 1fr))', gap: 12 }}>
+    <div style={{ marginBottom: 72 }}>
+      <RLSectionHead kicker="이음만의 것" title="따라 하기 어려운 세 가지" sub="아이디어가 아니라, 이미 작동하는 매칭·안전·정산 기술이 이음의 진입장벽이에요." />
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(248px, 1fr))', gap: 16 }}>
         {items.map((m, i) => {
           const Icon = m.icon;
           return (
-            <div key={i} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, padding: 18 }}>
-              <div style={{ display: 'inline-flex', padding: 10, borderRadius: 11, background: m.soft, marginBottom: 12 }}><Icon size={20} color={m.color} /></div>
-              <div style={{ fontSize: 10.5, fontWeight: 700, color: m.color, letterSpacing: '0.04em', marginBottom: 5 }}>{m.tag}</div>
-              <div style={{ fontSize: 15, fontWeight: 800, color: C.ink, marginBottom: 7, lineHeight: 1.3 }}>{m.title}</div>
-              <div style={{ fontSize: 12.5, color: C.inkSoft, lineHeight: 1.6 }}>{m.desc}</div>
+            <div key={i} className="eum-lift" style={{ background: C.card, borderRadius: 20, padding: 28, boxShadow: '0 2px 8px -4px rgba(26,26,30,0.08)', border: `1px solid ${C.borderSoft}` }}>
+              <div style={{ display: 'inline-flex', padding: 13, borderRadius: 15, background: m.soft, marginBottom: 18 }}><Icon size={24} color={m.color} /></div>
+              <div style={{ display: 'inline-block', fontSize: 11.5, fontWeight: 700, color: m.color, background: m.soft, padding: '4px 10px', borderRadius: 999, marginBottom: 12 }}>{m.tag}</div>
+              <div className="eum-serif" style={{ fontSize: 20, fontWeight: 800, color: C.ink, marginBottom: 10, lineHeight: 1.32 }}>{m.title}</div>
+              <div style={{ fontSize: 14, color: C.inkSoft, lineHeight: 1.68 }}>{m.desc}</div>
             </div>
           );
         })}
@@ -3905,29 +3945,27 @@ function RLRevenueModelBand() {
     { icon: Wallet, color: C.gold, soft: C.goldSoft, badge: '거래 수수료', title: '매칭 · 정산 수수료', desc: '상생카드 정산과 제휴 서비스 연계에서 발생하는 수수료. 트리오가 늘수록 함께 커지는 매출이에요.' },
   ];
   return (
-    <div style={{ marginBottom: 36 }}>
-      <div style={{ textAlign: 'center', fontSize: 12, fontWeight: 700, color: C.brand, letterSpacing: '0.1em', marginBottom: 4 }}>어떻게 지속되나</div>
-      <div style={{ textAlign: 'center', fontSize: 20, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK, letterSpacing: '-0.02em', marginBottom: 6 }}>공공으로 시작해, 자립으로</div>
-      <div style={{ textAlign: 'center', fontSize: 13, color: C.mute, marginBottom: 18, maxWidth: 540, marginLeft: 'auto', marginRight: 'auto', lineHeight: 1.6 }}>한 곳에 기대지 않는 세 갈래 수익으로, 보조금이 끝나도 돌아가는 구조를 설계했어요</div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(232px, 1fr))', gap: 12, marginBottom: 16 }}>
+    <div style={{ marginBottom: 72 }}>
+      <RLSectionHead kicker="어떻게 지속되나" title="공공으로 시작해, 자립으로" sub="한 곳에 기대지 않는 세 갈래 수익으로, 보조금이 끝나도 돌아가는 구조를 설계했어요." />
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16, marginBottom: 16 }}>
         {streams.map((s, i) => {
           const Icon = s.icon;
           return (
-            <div key={i} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, padding: 18 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 10 }}>
-                <div style={{ display: 'inline-flex', padding: 9, borderRadius: 10, background: s.soft }}><Icon size={18} color={s.color} /></div>
-                <span style={{ fontSize: 11, fontWeight: 700, color: s.color, background: s.soft, padding: '3px 9px', borderRadius: 999 }}>{s.badge}</span>
+            <div key={i} className="eum-lift" style={{ background: C.card, borderRadius: 20, padding: 28, boxShadow: '0 2px 8px -4px rgba(26,26,30,0.08)', border: `1px solid ${C.borderSoft}` }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 11, marginBottom: 16 }}>
+                <div style={{ display: 'inline-flex', padding: 12, borderRadius: 14, background: s.soft }}><Icon size={20} color={s.color} /></div>
+                <span style={{ fontSize: 12, fontWeight: 700, color: s.color, background: s.soft, padding: '5px 12px', borderRadius: 999 }}>{s.badge}</span>
               </div>
-              <div style={{ fontSize: 14.5, fontWeight: 800, color: C.ink, marginBottom: 6, lineHeight: 1.3 }}>{s.title}</div>
-              <div style={{ fontSize: 12.5, color: C.inkSoft, lineHeight: 1.6 }}>{s.desc}</div>
+              <div className="eum-serif" style={{ fontSize: 19, fontWeight: 800, color: C.ink, marginBottom: 9, lineHeight: 1.32 }}>{s.title}</div>
+              <div style={{ fontSize: 14, color: C.inkSoft, lineHeight: 1.68 }}>{s.desc}</div>
             </div>
           );
         })}
       </div>
-      <div style={{ background: C.cream, border: `1px solid ${C.border}`, borderRadius: 14, padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-        <TrendingUp size={20} color={C.sage} />
-        <div style={{ flex: 1, minWidth: 240, fontSize: 13, color: C.inkSoft, lineHeight: 1.55 }}>
-          <strong style={{ color: C.ink }}>트리오 한 쌍이 늘 때마다 이익이 쌓이는 구조.</strong> 공공 위탁이 기반을 깔고, 구독·수수료가 마진을 더해 규모가 커질수록 자립도가 올라갑니다.
+      <div style={{ background: C.brandSoft, borderRadius: 18, padding: '20px 24px', display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
+        <div style={{ display: 'inline-flex', padding: 10, borderRadius: 12, background: '#fff' }}><TrendingUp size={20} color={C.brand} /></div>
+        <div style={{ flex: 1, minWidth: 240, fontSize: 14.5, color: C.inkSoft, lineHeight: 1.6 }}>
+          <strong style={{ color: C.brandDark }}>트리오 한 쌍이 늘 때마다 이익이 쌓이는 구조.</strong> 공공 위탁이 기반을 깔고, 구독·수수료가 마진을 더해 규모가 커질수록 자립도가 올라갑니다.
         </div>
       </div>
     </div>
@@ -3935,6 +3973,7 @@ function RLRevenueModelBand() {
 }
 
 function RLBenchmarkBand() {
+  const isMobile = useIsMobile(760);
   const models = [
     { flag: '🇺🇸', name: 'Foster Grandparent', country: '미국 · AmeriCorps', adopt: '어르신→아동 1:1 멘토 + 활동비 보상', limit: '두 세대(어르신·아동)만 연결' },
     { flag: '🇳🇱', name: 'Humanitas Deventer', country: '네덜란드', adopt: '청년↔어르신 교류로 무료 거주 교환', limit: '주거 자원에 한정된 1:1 교환' },
@@ -3942,40 +3981,36 @@ function RLBenchmarkBand() {
     { flag: '🇰🇷', name: '케어닥 · 자란다', country: '국내 돌봄 매칭', adopt: '앱으로 간편 매칭·일지 관리', limit: '대가 지불형 일방 돌봄 중개' },
   ];
   return (
-    <div style={{ marginBottom: 36 }}>
-      <div style={{ textAlign: 'center', fontSize: 12, fontWeight: 700, color: C.brand, letterSpacing: '0.1em', marginBottom: 4 }}>왜 이음인가</div>
-      <div style={{ textAlign: 'center', fontSize: 20, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK, letterSpacing: '-0.02em', marginBottom: 6 }}>세계가 검증한 모델, 이음이 한 걸음 더</div>
-      <div style={{ textAlign: 'center', fontSize: 13, color: C.mute, marginBottom: 18, maxWidth: 560, marginLeft: 'auto', marginRight: 'auto', lineHeight: 1.6 }}>
-        해외에서 50년 넘게 검증된 세대통합 모델에,<br />모두가 놓쳤던 <strong style={{ color: C.inkSoft }}>세 세대가 동시에 주고받는 구조</strong>를 더했어요
-      </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(232px, 1fr))', gap: 12, marginBottom: 16 }}>
+    <div style={{ marginBottom: 72 }}>
+      <RLSectionHead kicker="왜 이음인가" title="세계가 검증한 모델, 이음이 한 걸음 더" sub="해외에서 50년 넘게 검증된 세대통합 모델에, 모두가 놓쳤던 세 세대가 동시에 주고받는 구조를 더했어요." />
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(248px, 1fr))', gap: 16, marginBottom: 16 }}>
         {models.map((m, i) => (
-          <div key={i} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: 16 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-              <span style={{ fontSize: 20 }}>{m.flag}</span>
+          <div key={i} className="eum-lift" style={{ background: C.card, borderRadius: 20, padding: 24, boxShadow: '0 2px 8px -4px rgba(26,26,30,0.08)', border: `1px solid ${C.borderSoft}` }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 11, marginBottom: 16 }}>
+              <span style={{ fontSize: 26 }}>{m.flag}</span>
               <div>
-                <div style={{ fontSize: 13.5, fontWeight: 700, color: C.ink, lineHeight: 1.2 }}>{m.name}</div>
-                <div style={{ fontSize: 11, color: C.mute }}>{m.country}</div>
+                <div style={{ fontSize: 15, fontWeight: 800, color: C.ink, lineHeight: 1.2 }}>{m.name}</div>
+                <div style={{ fontSize: 12, color: C.mute }}>{m.country}</div>
               </div>
             </div>
-            <div style={{ display: 'flex', gap: 6, marginBottom: 7 }}>
-              <Check size={14} color={C.success} style={{ flexShrink: 0, marginTop: 2 }} />
-              <span style={{ fontSize: 12, color: C.inkSoft, lineHeight: 1.5 }}>{m.adopt}</span>
+            <div style={{ display: 'flex', gap: 8, marginBottom: 9, padding: '9px 12px', background: C.sageSoft, borderRadius: 12 }}>
+              <Check size={15} color={C.sage} style={{ flexShrink: 0, marginTop: 2 }} />
+              <span style={{ fontSize: 13, color: C.ink, lineHeight: 1.5, fontWeight: 500 }}>{m.adopt}</span>
             </div>
-            <div style={{ display: 'flex', gap: 6 }}>
-              <ArrowRight size={14} color={C.mute} style={{ flexShrink: 0, marginTop: 2 }} />
-              <span style={{ fontSize: 12, color: C.mute, lineHeight: 1.5 }}>{m.limit}</span>
+            <div style={{ display: 'flex', gap: 8, padding: '0 12px' }}>
+              <span style={{ color: C.muteLight, fontWeight: 700, flexShrink: 0 }}>—</span>
+              <span style={{ fontSize: 12.5, color: C.mute, lineHeight: 1.5 }}>{m.limit}</span>
             </div>
           </div>
         ))}
       </div>
-      <div style={{ background: `linear-gradient(135deg, ${C.brand} 0%, ${C.brandDark} 100%)`, borderRadius: 14, padding: '20px 24px', display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap', boxShadow: `0 10px 28px ${C.brand}33` }}>
-        <div style={{ background: 'rgba(255,255,255,0.16)', padding: 11, borderRadius: 12, display: 'flex', backdropFilter: 'blur(8px)' }}>
-          <Sparkles size={22} color="#fff" />
+      <div className="eum-anim-gradient" style={{ background: `linear-gradient(120deg, ${C.brand} 0%, ${C.brandDark} 55%, ${C.brand} 100%)`, borderRadius: 22, padding: 'clamp(26px, 4vw, 40px)', display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap', boxShadow: `0 18px 40px -18px ${C.brand}88` }}>
+        <div className="eum-float" style={{ background: 'rgba(255,255,255,0.18)', padding: 14, borderRadius: 16, display: 'flex', flexShrink: 0 }}>
+          <Sparkles size={26} color="#fff" />
         </div>
         <div style={{ flex: 1, minWidth: 240 }}>
-          <div style={{ fontSize: 15, fontWeight: 800, color: '#fff', marginBottom: 3, fontFamily: SERIF_STACK }}>이음 = 청년 · 어르신 · 아동 3세대 상호 품앗이</div>
-          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.9)', lineHeight: 1.55 }}>기존 모델은 두 세대의 일방 돌봄. 이음은 세 세대가 동시에 서로 주고받고, 도운 만큼 모두에게 보상이 돌아가는 선순환 구조예요.</div>
+          <div className="eum-serif" style={{ fontSize: 'clamp(20px, 2.6vw, 26px)', fontWeight: 800, color: '#fff', marginBottom: 6, lineHeight: 1.3 }}>이음 = 청년 · 어르신 · 아동 3세대 상호 품앗이</div>
+          <div style={{ fontSize: 14.5, color: 'rgba(255,255,255,0.9)', lineHeight: 1.6 }}>기존 모델은 두 세대의 일방 돌봄. 이음은 세 세대가 동시에 서로 주고받고, 도운 만큼 모두에게 보상이 돌아가는 선순환 구조예요.</div>
         </div>
       </div>
     </div>
@@ -4024,12 +4059,85 @@ function RLLoopInfographic() {
 function RLPartnerStrip() {
   const partners = ['광주광역시', '광산구청', '광주창조경제혁신센터', '1365 자원봉사포털', '광주상생카드'];
   return (
-    <div style={{ marginBottom: 32 }}>
-      <div style={{ textAlign: 'center', fontSize: 11.5, fontWeight: 700, color: C.mute, letterSpacing: '0.08em', marginBottom: 14 }}>함께하는 기관</div>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, justifyContent: 'center' }}>
-        {partners.map((p, i) => (
-          <div key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 14px', background: C.card, border: '1px solid ' + C.border, borderRadius: 999, fontSize: 12.5, fontWeight: 700, color: C.inkSoft }}>
-            <ShieldCheck size={13} color={C.brand} /> {p}
+    <div style={{ marginBottom: 64, textAlign: 'center' }}>
+      <div style={{ fontSize: 13, fontWeight: 700, color: C.mute, marginBottom: 18 }}>함께하는 기관</div>
+      <div className="eum-marquee-wrap">
+        <div className="eum-marquee-track">
+          {[...partners, ...partners].map((p, i) => (
+            <div key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 16px', background: C.card, border: `1px solid ${C.border}`, borderRadius: 999, fontSize: 13.5, fontWeight: 700, color: C.inkSoft, boxShadow: '0 1px 3px -1px rgba(26,26,30,0.06)', whiteSpace: 'nowrap', flexShrink: 0 }}>
+              <ShieldCheck size={14} color={C.brand} /> {p}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RLPricingBand() { return null; } // B2C 구독 섹션 제외(요청)
+
+// 디바이스 목업 — 브라우저 프레임 (실제 스크린샷으로 교체 가능: shotSrc prop)
+function RLDeviceBrowser({ children, url = 'eum-app.vercel.app', shotSrc }) {
+  return (
+    <div style={{ borderRadius: 16, overflow: 'hidden', background: '#fff', border: `1px solid ${C.border}`, boxShadow: '0 40px 80px -36px rgba(26,26,30,0.32)' }}>
+      <div style={{ height: 40, background: C.cream, borderBottom: `1px solid ${C.borderSoft}`, display: 'flex', alignItems: 'center', gap: 7, padding: '0 14px' }}>
+        <span style={{ width: 11, height: 11, borderRadius: '50%', background: '#F0625A' }} />
+        <span style={{ width: 11, height: 11, borderRadius: '50%', background: '#F6BE4F' }} />
+        <span style={{ width: 11, height: 11, borderRadius: '50%', background: '#43C95A' }} />
+        <div style={{ marginLeft: 10, flex: 1, maxWidth: 300, height: 22, borderRadius: 7, background: '#fff', border: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', gap: 6, padding: '0 10px', fontSize: 10.5, color: C.mute }}>
+          <ShieldCheck size={10} color={C.sage} /> {url}
+        </div>
+      </div>
+      {shotSrc
+        ? <img src={shotSrc} alt="이음 운영 화면" style={{ width: '100%', display: 'block' }} />
+        : <div style={{ background: C.bg }}>{children}</div>}
+    </div>
+  );
+}
+
+// 코디네이터 대시보드 미니 목업 (실제 스크린샷 받기 전 임시 — 동일 디자인 토큰)
+function RLCoordMock() {
+  const trios = [
+    { y: '김민준', s: '박순자', c: '유진', color: C.sage, status: '활동 중', sc: C.sage },
+    { y: '이지원', s: '이병호', c: '도윤', color: C.lavender, status: '매칭 대기', sc: C.amber },
+  ];
+  return (
+    <div style={{ padding: 18 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+          <div style={{ width: 30, height: 30, borderRadius: 9, background: `linear-gradient(135deg, ${C.brand}, ${C.peach})` }} />
+          <div>
+            <div style={{ fontSize: 12.5, fontWeight: 800, color: C.ink, lineHeight: 1 }}>코디네이터 대시보드</div>
+            <div style={{ fontSize: 10, color: C.mute, marginTop: 3 }}>한가은 · 광주 광산구 우산동</div>
+          </div>
+        </div>
+        <div style={{ display: 'flex', gap: 6 }}>
+          <span style={{ fontSize: 10, fontWeight: 700, color: C.sage, background: C.sageSoft, padding: '4px 9px', borderRadius: 999 }}>운영 중</span>
+        </div>
+      </div>
+      <div style={{ display: 'flex', gap: 9, marginBottom: 13 }}>
+        {[{ l: '신규 신청', v: '3', c: C.brand }, { l: '검증 대기', v: '2', c: C.amber }, { l: '활성 트리오', v: '1', c: C.sage }, { l: '이번 달 정산', v: '₩82.5만', c: C.gold }].map((s, i) => (
+          <div key={i} style={{ flex: 1, background: '#fff', border: `1px solid ${C.borderSoft}`, borderRadius: 11, padding: '11px 12px' }}>
+            <div style={{ fontSize: 9, color: C.mute, fontWeight: 700, marginBottom: 6, whiteSpace: 'nowrap' }}>{s.l}</div>
+            <div className="eum-serif" style={{ fontSize: 17, fontWeight: 800, color: C.ink, lineHeight: 1 }}>{s.v}</div>
+            <div style={{ width: 14, height: 2, background: s.c, marginTop: 7, borderRadius: 1 }} />
+          </div>
+        ))}
+      </div>
+      <div style={{ background: '#fff', border: `1px solid ${C.borderSoft}`, borderRadius: 12, overflow: 'hidden' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', borderBottom: `1px solid ${C.borderSoft}` }}>
+          <div style={{ fontSize: 11.5, fontWeight: 800, color: C.ink }}>오늘의 트리오</div>
+          <div style={{ fontSize: 10, color: C.brand, fontWeight: 700 }}>전체 보기</div>
+        </div>
+        {trios.map((t, i) => (
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '11px 14px', borderBottom: i === 0 ? `1px solid ${C.borderSoft}` : 'none' }}>
+            <div style={{ display: 'flex' }}>
+              {[t.color, C.lavender, C.peach].map((c, j) => (
+                <div key={j} style={{ width: 24, height: 24, borderRadius: '50%', background: c, border: '2px solid #fff', marginLeft: j === 0 ? 0 : -8 }} />
+              ))}
+            </div>
+            <div style={{ flex: 1, fontSize: 11, color: C.inkSoft, fontWeight: 600 }}>{t.y} · {t.s} · {t.c}</div>
+            <span style={{ fontSize: 9.5, fontWeight: 700, color: t.sc, background: t.sc + '1c', padding: '3px 8px', borderRadius: 999 }}>{t.status}</span>
           </div>
         ))}
       </div>
@@ -4037,7 +4145,50 @@ function RLPartnerStrip() {
   );
 }
 
-function RLPricingBand() { return null; } // B2C 구독 섹션 제외(요청)
+function RLPhoneMock() {
+  return (
+    <div style={{ width: 188, borderRadius: 30, background: C.ink, padding: 7, boxShadow: '0 40px 70px -30px rgba(26,26,30,0.45)' }}>
+      <div style={{ borderRadius: 24, overflow: 'hidden', background: C.bg }}>
+        <div style={{ background: `linear-gradient(135deg, ${C.brand}, ${C.brandDark})`, padding: '16px 15px 18px', color: '#fff' }}>
+          <div style={{ fontSize: 10, opacity: 0.85, fontWeight: 600 }}>안심 케어</div>
+          <div className="eum-serif" style={{ fontSize: 15, fontWeight: 800, marginTop: 3 }}>유진이는 지금 활동 중</div>
+          <div style={{ fontSize: 9.5, opacity: 0.85, marginTop: 4 }}>박순자 어르신 · 김민준 청년과 함께</div>
+        </div>
+        <div style={{ padding: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {[{ t: '14:00 하원 · 안전 도착', c: C.sage }, { t: '14:30 함께 간식·숙제', c: C.brand }, { t: '15:30 활동 사진 도착', c: C.lavender }].map((r, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#fff', border: `1px solid ${C.borderSoft}`, borderRadius: 10, padding: '9px 10px' }}>
+              <span style={{ width: 7, height: 7, borderRadius: '50%', background: r.c, flexShrink: 0 }} />
+              <span style={{ fontSize: 9.5, color: C.inkSoft, fontWeight: 600 }}>{r.t}</span>
+            </div>
+          ))}
+          <div style={{ background: C.sageSoft, borderRadius: 10, padding: '9px 11px', display: 'flex', alignItems: 'center', gap: 7 }}>
+            <ShieldCheck size={13} color={C.sage} />
+            <span style={{ fontSize: 9.5, color: C.sage, fontWeight: 700 }}>책임보험·안전검증 적용 중</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RLProductShowcase() {
+  const isMobile = useIsMobile(900);
+  return (
+    <div style={{ marginBottom: 80 }}>
+      <RLSectionHead kicker="이렇게 작동해요" title="설계가 아니라, 이미 돌아가는 제품" sub="신청·안전검증·트리오 매칭·정산까지 — 코디네이터는 한 화면에서 운영하고, 가족은 휴대폰으로 안심 확인해요." />
+      <div style={{ position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'flex-end', gap: isMobile ? 24 : 0, flexDirection: isMobile ? 'column' : 'row' }}>
+        <div className="eum-orb" style={{ width: 380, height: 380, background: C.brand + '1c', top: -30, left: '14%', animation: 'eumOrb 19s ease-in-out infinite' }} />
+        <div style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: 720 }}>
+          <RLDeviceBrowser><RLCoordMock /></RLDeviceBrowser>
+        </div>
+        <div style={{ position: 'relative', zIndex: 2, marginLeft: isMobile ? 0 : -66, marginBottom: isMobile ? 0 : 14 }}>
+          <RLPhoneMock />
+        </div>
+      </div>
+      <div style={{ textAlign: 'center', fontSize: 12.5, color: C.muteLight, marginTop: 18 }}>* 데모에서 코디네이터·가족으로 입장하면 위 화면을 실제로 조작할 수 있어요.</div>
+    </div>
+  );
+}
 
 function RLLanding({ state, onSelectRole, onShowApplication }) {
   // 시드된 페르소나 fixed assignments
@@ -4056,66 +4207,70 @@ function RLLanding({ state, onSelectRole, onShowApplication }) {
       display: 'flex', flexDirection: 'column', alignItems: 'center',
     }}>
       {/* 상단 내비게이션 (고원·Papa 벤치마크) */}
-      <div style={{ width: '100%', position: 'sticky', top: 0, zIndex: 50, background: 'rgba(244,242,236,0.82)', backdropFilter: 'blur(10px)', borderBottom: `1px solid ${C.border}` }}>
-        <div style={{ maxWidth: 1320, margin: '0 auto', padding: isMobile ? '12px 16px' : '14px 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+      <div style={{ width: '100%', position: 'sticky', top: 0, zIndex: 50, background: 'rgba(245,244,242,0.8)', backdropFilter: 'blur(12px)', borderBottom: `1px solid ${C.border}` }}>
+        <div style={{ maxWidth: 1160, margin: '0 auto', padding: isMobile ? '12px 18px' : '14px 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
           <div onClick={() => window.location.reload()} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }} role="button" aria-label="홈으로 새로고침">
             <div style={{ width: 30, height: 30, display: 'flex' }}><EumLogo size={30} /></div>
             <div style={{ lineHeight: 1.05 }}>
-              <div style={{ fontWeight: 700, color: C.ink, fontSize: 18, letterSpacing: '-0.02em', lineHeight: 1 }}>이음</div>
+              <div className="eum-serif" style={{ fontWeight: 700, color: C.ink, fontSize: 21, letterSpacing: '-0.01em', lineHeight: 1 }}>이음</div>
               <div style={{ fontSize: 10, color: C.mute, fontWeight: 600, marginTop: 2, whiteSpace: 'nowrap', letterSpacing: '0.01em' }}>3세대 상생 품앗이</div>
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
-            <span onClick={() => { const el = document.getElementById('eum-demo'); if (el) el.scrollIntoView({ behavior: 'smooth' }); }} style={{ fontSize: 13.5, color: C.inkSoft, fontWeight: 500, cursor: 'pointer' }}>둘러보기</span>
-            <Button variant="primary" size="sm" onClick={onShowApplication}>참여 신청하기</Button>
+            <span onClick={() => { const el = document.getElementById('eum-demo'); if (el) el.scrollIntoView({ behavior: 'smooth' }); }} style={{ fontSize: 14, color: C.inkSoft, fontWeight: 600, cursor: 'pointer' }}>둘러보기</span>
+            <Button variant="brand" size="sm" onClick={onShowApplication}>참여 신청하기</Button>
           </div>
         </div>
       </div>
-      <div style={{ maxWidth: 1320, width: '100%', padding: '56px 40px 72px' }}>
-        {/* 히어로 — 2단 좌측정렬 (좌: 카피·CTA / 우: 3세대 선순환 비주얼) */}
-        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.05fr 0.95fr', gap: isMobile ? 28 : 52, alignItems: 'center', margin: '8px 0 52px' }}>
-          <div style={{ textAlign: isMobile ? 'center' : 'left' }}>
-            <div style={{ fontSize: 11.5, fontWeight: 700, color: C.inkSoft, letterSpacing: '0.04em', marginBottom: 16 }}>3세대 상생 품앗이</div>
-            <h1 style={{ fontSize: isMobile ? 44 : 58, fontWeight: 700, color: C.ink, letterSpacing: '-0.05em', margin: '0 0 18px', fontFamily: FONT_STACK, lineHeight: 1.03 }}>
+      <div style={{ maxWidth: 1160, width: '100%', padding: isMobile ? '28px 20px 56px' : '64px 40px 96px' }}>
+        {/* 히어로 — 토스 계열 + 모션(그라데이션 오브·진입 스태거·플로팅) */}
+        <div style={{ position: 'relative', margin: isMobile ? '8px 0 56px' : '20px 0 80px' }}>
+          <div className="eum-orb" style={{ width: 400, height: 400, background: C.brand + '24', top: -130, right: -70, animation: 'eumOrb 17s ease-in-out infinite' }} />
+          <div className="eum-orb" style={{ width: 320, height: 320, background: C.peach + '28', bottom: -110, left: -90, animation: 'eumOrb 21s ease-in-out infinite reverse' }} />
+          <div style={{ position: 'relative', zIndex: 1, display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: isMobile ? 36 : 56, alignItems: 'center' }}>
+          <div className="eum-heroin" style={{ textAlign: isMobile ? 'center' : 'left', display: 'flex', flexDirection: 'column', alignItems: isMobile ? 'center' : 'flex-start' }}>
+            <div className="eum-kicker" style={{ marginBottom: 20 }}><Sparkles size={14} /> 광주 광산구 우산동 2027 파일럿</div>
+            <h1 className="eum-serif" style={{ fontSize: isMobile ? 'clamp(40px, 12vw, 52px)' : 'clamp(48px, 5.4vw, 68px)', fontWeight: 800, color: C.ink, lineHeight: 1.12, margin: '0 0 20px' }}>
               세대를 잇다,<br /><span style={{ color: C.brand }}>이음</span>
             </h1>
-            <p style={{ fontSize: 17, color: C.inkSoft, maxWidth: 470, margin: isMobile ? '0 auto 26px' : '0 0 26px', lineHeight: 1.6 }}>
-              혼자인 어르신, 방과후 혼자인 아이, 낯선 동네의 청년.<br />서로의 빈자리를 채우는 우리 동네 3세대 품앗이
+            <p style={{ fontSize: isMobile ? 16.5 : 19, color: C.inkSoft, maxWidth: 460, margin: '0 0 30px', lineHeight: 1.62, fontWeight: 500 }}>
+              혼자인 어르신, 방과후 혼자인 아이, 낯선 동네의 청년. 서로의 빈자리를 채우는 우리 동네 3세대 품앗이예요.
             </p>
-            <div style={{ display: 'flex', gap: 10, justifyContent: isMobile ? 'center' : 'flex-start', flexWrap: 'wrap', marginBottom: 22 }}>
-              <Button variant="primary" size="lg" onClick={onShowApplication} iconRight={<ArrowRight size={16} />}>5분 만에 참여 신청</Button>
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 24, justifyContent: isMobile ? 'center' : 'flex-start' }}>
+              <Button variant="brand" size="lg" onClick={onShowApplication} iconRight={<ArrowRight size={16} />}>5분 만에 참여 신청</Button>
               <Button variant="secondary" size="lg" onClick={() => { const el = document.getElementById('eum-demo'); if (el) el.scrollIntoView({ behavior: 'smooth' }); }}>데모 둘러보기</Button>
             </div>
-            <div style={{ display: 'flex', gap: 8, justifyContent: isMobile ? 'center' : 'flex-start', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: isMobile ? 'center' : 'flex-start' }}>
               <Badge color={C.blue} soft={C.blueSoft} size="md"><ShieldCheck size={13} /> 통합돌봄 연계</Badge>
               <Badge color={C.gold} soft={C.goldSoft} size="md"><Wallet size={13} /> 상생카드 보상</Badge>
-              <Badge color={C.success} soft={C.successSoft} size="md"><UserCheck size={13} /> 4단계 안전검증</Badge>
+              <Badge color={C.sage} soft={C.sageSoft} size="md"><UserCheck size={13} /> 4단계 안전검증</Badge>
             </div>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            <div style={{ width: '100%', maxWidth: 480, borderRadius: 24, overflow: 'hidden', boxShadow: '0 24px 60px rgba(22,20,15,0.12)', border: `1px solid ${C.border}`, animation: 'fadeUp 0.8s cubic-bezier(0.22,1,0.36,1), eumHeroFloat 7s ease-in-out 0.8s infinite' }}>
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <div style={{ width: '100%', maxWidth: 480, borderRadius: 28, overflow: 'hidden', position: 'relative', boxShadow: '0 30px 60px -24px rgba(26,26,30,0.28)', animation: 'eumHeroIn 0.9s cubic-bezier(0.22,1,0.36,1) both, eumHeroFloat 7s ease-in-out 0.9s infinite' }}>
               <img className="eum-hero-img" src="https://d8j0ntlcm91z4.cloudfront.net/user_3ENsWC9Fimdubfa90AmLsdoIGVe/hf_20260618_054046_590cd991-7eef-42e9-82c3-d7dd782d050d.png" alt="청년·어르신·아동 세 세대가 함께하는 모습" style={{ width: '100%', display: 'block' }} loading="eager" />
             </div>
+          </div>
           </div>
         </div>
 
         {/* 3세대 선순환 — 개념(애니메이션) 섹션 */}
         <Reveal>
-          <div style={{ margin: '8px 0 56px', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.05fr 0.95fr', gap: isMobile ? 28 : 52, alignItems: 'center' }}>
+          <div style={{ margin: isMobile ? '8px 0 64px' : '8px 0 88px', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.05fr 0.95fr', gap: isMobile ? 32 : 64, alignItems: 'center' }}>
             <div style={{ display: 'flex', justifyContent: 'center' }}><RLLoopInfographic /></div>
             <div style={{ textAlign: isMobile ? 'center' : 'left' }}>
-              <div style={{ fontSize: 11.5, fontWeight: 700, color: C.inkSoft, letterSpacing: '0.04em', marginBottom: 12 }}>3세대 선순환</div>
-              <h2 style={{ fontSize: 27, fontWeight: 700, color: C.ink, letterSpacing: '-0.04em', margin: '0 0 16px', fontFamily: FONT_STACK, lineHeight: 1.25 }}>세대가 함께 돌보는 동네</h2>
-              <p style={{ fontSize: 15.5, color: C.inkSoft, lineHeight: 1.7, maxWidth: 440, margin: isMobile ? '0 auto 20px' : '0 0 20px' }}>한쪽만 주는 게 아니라, 서로 주고받는 동네예요</p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, maxWidth: 520, margin: isMobile ? '0 auto' : 0 }}>
+              <div className="eum-kicker" style={{ marginBottom: 16 }}>3세대 선순환</div>
+              <h2 className="eum-serif" style={{ fontSize: isMobile ? 28 : 36, fontWeight: 800, color: C.ink, margin: '0 0 14px', lineHeight: 1.2 }}>세대가 함께 돌보는 동네</h2>
+              <p style={{ fontSize: 16.5, color: C.mute, lineHeight: 1.6, maxWidth: 440, margin: isMobile ? '0 auto 22px' : '0 0 22px', fontWeight: 500 }}>한쪽만 주는 게 아니라, 서로 주고받는 동네예요.</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, maxWidth: 520, margin: isMobile ? '0 auto' : 0, width: '100%' }}>
                 {[
                   { c: C.sage, who: '청년', what: '스마트폰·키오스크 사용법을 알려드리고, 아이의 공부를 도와요' },
                   { c: C.lavender, who: '어르신', what: '살아온 지혜와 옛이야기로 아이 곁을 든든히 지켜요' },
                   { c: C.peach, who: '아이', what: '웃음과 활력으로 어른들의 하루를 환하게 채워요' },
                 ].map((r) => (
-                  <div key={r.who} style={{ display: 'flex', alignItems: 'flex-start', gap: 14, padding: '13px 16px', borderRadius: 12, background: C.card, border: `1px solid ${C.border}` }}>
-                    <span style={{ fontSize: 14.5, fontWeight: 700, color: r.c, minWidth: 48, flexShrink: 0 }}>{r.who}</span>
-                    <span style={{ fontSize: 13.5, color: C.inkSoft, lineHeight: 1.55 }}>{r.what}</span>
+                  <div key={r.who} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 18px', borderRadius: 14, background: C.card, border: `1px solid ${C.borderSoft}`, boxShadow: '0 1px 3px -1px rgba(26,26,30,0.05)', textAlign: 'left' }}>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: r.c, background: r.c + '18', padding: '5px 12px', borderRadius: 999, minWidth: 54, textAlign: 'center', flexShrink: 0 }}>{r.who}</span>
+                    <span style={{ fontSize: 14, color: C.inkSoft, lineHeight: 1.55, fontWeight: 500 }}>{r.what}</span>
                   </div>
                 ))}
               </div>
@@ -4123,39 +4278,39 @@ function RLLanding({ state, onSelectRole, onShowApplication }) {
           </div>
         </Reveal>
 
+        <Reveal><RLProductShowcase /></Reveal>
+
         <RLImpactBand state={state} />
 
         {/* 데모 로그인 안내 */}
-        <div id="eum-demo" style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, padding: '18px 22px', marginBottom: 24, display: 'flex', alignItems: 'center', gap: 14, boxShadow: '0 1px 3px rgba(0,0,0,0.03)', scrollMarginTop: 80 }}>
-          <div style={{ background: C.amberSoft, padding: 9, borderRadius: 10, display: 'flex' }}>
-            <Sparkles size={20} color={C.amber} />
+        <div id="eum-demo" style={{ background: C.brandSoft, borderRadius: 20, padding: isMobile ? '20px 22px' : '24px 28px', marginBottom: 22, display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap', scrollMarginTop: 80 }}>
+          <div style={{ background: '#fff', padding: 12, borderRadius: 14, display: 'flex', flexShrink: 0 }}>
+            <Sparkles size={22} color={C.brand} />
           </div>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 14, fontWeight: 700, color: C.ink, marginBottom: 2 }}>2027 광주 광산구 우산동 파일럿 · 데모 모드</div>
-            <div style={{ fontSize: 13, color: C.mute }}>지금 활동 중인 15쌍의 이야기를 그대로 담아뒀어요. 역할을 골라 들어가면 모든 기능을 직접 둘러볼 수 있어요.</div>
+          <div style={{ flex: 1, minWidth: 240 }}>
+            <div style={{ fontSize: 16, fontWeight: 800, color: C.ink, marginBottom: 4 }}>역할을 골라 직접 들어가 보세요</div>
+            <div style={{ fontSize: 13.5, color: C.inkSoft, lineHeight: 1.6 }}>2027 광주 광산구 우산동 파일럿 — 지금 활동 중인 15쌍의 이야기를 그대로 담았습니다. 청년·어르신·양육가정·코디네이터 중 하나로 입장하면 모든 기능을 직접 둘러볼 수 있어요.</div>
           </div>
         </div>
 
-        {/* 페르소나 카드 */}
-        <Reveal style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 14, marginBottom: 36 }}>
+        {/* 페르소나(역할) 카드 */}
+        <Reveal style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(236px, 1fr))', gap: 16, marginBottom: 72 }}>
           {personas.map((p) => (
-            <Card key={p.role} padding={0} hoverable onClick={() => onSelectRole(p.role, p.id)} style={{ overflow: 'hidden', cursor: 'pointer' }}>
-              <div style={{ background: p.gradient, height: 70, position: 'relative', display: 'flex', alignItems: 'flex-end', padding: 14 }}>
-                <Avatar type={p.role} gender={p.gender} name={p.name} color="#fff" size={56} ring={false} />
-                <div style={{ position: 'absolute', top: 12, right: 12, fontSize: 10, fontWeight: 700, color: '#fff', letterSpacing: '0.08em', opacity: 0.85, background: 'rgba(255,255,255,0.15)', padding: '4px 8px', borderRadius: 6, backdropFilter: 'blur(8px)' }}>
-                  {PERSONA[p.role].label.toUpperCase()}
-                </div>
+            <div key={p.role} onClick={() => onSelectRole(p.role, p.id)} className="eum-rolecard" style={{ cursor: 'pointer', borderRadius: 20, border: `1px solid ${C.borderSoft}`, background: C.card, boxShadow: '0 2px 8px -4px rgba(26,26,30,0.08)', overflow: 'hidden' }}>
+              <div style={{ height: 64, background: p.gradient, position: 'relative', display: 'flex', alignItems: 'flex-end', padding: '0 18px' }}>
+                <div style={{ position: 'absolute', top: 12, right: 14, fontSize: 10, fontWeight: 700, color: '#fff', letterSpacing: '0.06em', background: 'rgba(255,255,255,0.2)', padding: '4px 9px', borderRadius: 999 }}>{PERSONA[p.role].label}</div>
+                <div style={{ transform: 'translateY(50%)' }}><Avatar type={p.role} gender={p.gender} name={p.name} color="#fff" size={52} ring /></div>
               </div>
-              <div style={{ padding: 18 }}>
-                <div style={{ fontSize: 18, fontWeight: 700, color: C.ink, letterSpacing: '-0.02em', fontFamily: SERIF_STACK }}>{p.name}</div>
-                <div style={{ fontSize: 12, color: C.mute, marginBottom: 10, marginTop: 2 }}>{p.subtitle}</div>
-                <div style={{ fontSize: 13, color: C.inkSoft, lineHeight: 1.55, minHeight: 60 }}>{p.desc}</div>
+              <div style={{ padding: '34px 20px 20px' }}>
+                <div className="eum-serif" style={{ fontSize: 19, fontWeight: 800, color: C.ink }}>{p.name}</div>
+                <div style={{ fontSize: 12, color: C.mute, marginBottom: 11, marginTop: 3 }}>{p.subtitle}</div>
+                <div style={{ fontSize: 13, color: C.inkSoft, lineHeight: 1.6, minHeight: 58 }}>{p.desc}</div>
                 <div style={{ marginTop: 14, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <span style={{ fontSize: 12, color: p.color, fontWeight: 700 }}>입장하기</span>
-                  <ArrowRight size={16} color={p.color} />
+                  <span style={{ fontSize: 13, color: p.color, fontWeight: 700 }}>입장하기</span>
+                  <span style={{ display: 'flex', width: 26, height: 26, borderRadius: '50%', background: p.color + '18', alignItems: 'center', justifyContent: 'center' }}><ArrowRight className="eum-arrow" size={14} color={p.color} /></span>
                 </div>
               </div>
-            </Card>
+            </div>
           ))}
         </Reveal>
 
@@ -4167,21 +4322,19 @@ function RLLanding({ state, onSelectRole, onShowApplication }) {
         <Reveal delay={60}><RLFaqBand /></Reveal>
         <RLPartnerStrip />
 
-        {/* 신청 페이지 진입 */}
-        <Card padding={22} style={{ background: C.cream }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
-            <div style={{ flex: 1, minWidth: 220 }}>
-              <div style={{ fontSize: 16, fontWeight: 700, color: C.ink, marginBottom: 4 }}>처음 오셨나요?</div>
-              <div style={{ fontSize: 13, color: C.mute, lineHeight: 1.55 }}>광주 광산구 우산동에 사시는 분이면 <strong style={{ color: C.inkSoft }}>청소년부터 어르신까지 누구나</strong> 신청할 수 있어요. 5분이면 충분해요.</div>
-            </div>
-            <Button variant="brand" icon={<UserPlus size={16} />} onClick={onShowApplication} size="lg">
-              참여 신청하기
-            </Button>
+        {/* 신청 진입 — 토스풍 브랜드 CTA 카드 */}
+        <div className="eum-anim-gradient" style={{ background: `linear-gradient(135deg, ${C.brand} 0%, ${C.brandDark} 60%, ${C.brand} 100%)`, borderRadius: 28, padding: isMobile ? '38px 26px' : '60px 48px', textAlign: 'center', boxShadow: `0 28px 56px -22px ${C.brand}99`, position: 'relative', overflow: 'hidden' }}>
+          <div className="eum-orb" style={{ width: 260, height: 260, background: 'rgba(255,255,255,0.16)', top: -90, left: -40, animation: 'eumOrb 18s ease-in-out infinite' }} />
+          <div style={{ position: 'relative', zIndex: 1 }}>
+            <div className="eum-serif" style={{ fontSize: isMobile ? 26 : 'clamp(28px, 4vw, 40px)', fontWeight: 800, color: '#fff', lineHeight: 1.26, marginBottom: 14 }}>우리 동네 3세대 품앗이,<br />지금 시작해요</div>
+            <div style={{ fontSize: isMobile ? 15 : 16.5, color: 'rgba(255,255,255,0.92)', lineHeight: 1.6, maxWidth: 520, margin: '0 auto 30px', fontWeight: 500 }}>광주 광산구 우산동에 사시는 분이면 청소년부터 어르신까지 누구나 신청할 수 있어요. 5분이면 충분해요.</div>
+            <button onClick={onShowApplication} className="eum-cta-btn" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#fff', color: C.brand, border: 'none', borderRadius: 14, padding: '15px 32px', fontSize: 16, fontWeight: 800, cursor: 'pointer', fontFamily: FONT_STACK, boxShadow: '0 10px 24px -8px rgba(0,0,0,0.3)' }}><UserPlus size={18} /> 참여 신청하기 <ArrowRight className="eum-arrow" size={17} /></button>
           </div>
-        </Card>
+        </div>
 
-        <div style={{ textAlign: 'center', marginTop: 36, color: C.mute, fontSize: 12 }}>
-          © 2027 이음 · 세대를 잇다
+        <div style={{ marginTop: 44, paddingTop: 26, borderTop: `1px solid ${C.border}`, textAlign: 'center', color: C.mute, fontSize: 12.5, lineHeight: 1.8 }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, fontWeight: 700, color: C.inkSoft, marginBottom: 5 }}><EumLogo size={20} /> 이음 · 세대를 잇다</div>
+          <div>© 2027 이음 · 광주 광산구 우산동 3세대 상생 품앗이 파일럿</div>
         </div>
       </div>
     </div>
@@ -5803,16 +5956,62 @@ function App() {
         @keyframes slideInLeft { from { opacity: 0; transform: translateX(-24px); } to { opacity: 1; transform: translateX(0); } }
         @keyframes modalIn { from { opacity: 0; transform: translate(-50%, -48%) scale(0.97); } to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
         @keyframes overlayIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes eumKenburns { from { transform: scale(1); } to { transform: scale(1.045); } }
+        @keyframes eumHeroFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+        @keyframes eumOrb { 0%,100% { transform: translate(0,0) scale(1); } 33% { transform: translate(24px,-18px) scale(1.1); } 66% { transform: translate(-18px,16px) scale(0.94); } }
+        @keyframes eumGradient { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        @keyframes eumMarquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+        @keyframes eumPop { from { transform: scale(0.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        @keyframes eumHeroIn { from { opacity: 0; transform: translateY(26px); } to { opacity: 1; transform: translateY(0); } }
+        .eum-anim-gradient { background-size: 220% 220%; animation: eumGradient 9s ease infinite; }
+        .eum-orb { position: absolute; border-radius: 50%; filter: blur(46px); pointer-events: none; z-index: 0; }
+        .eum-arrow { transition: transform 0.28s cubic-bezier(0.22,1,0.36,1); }
+        .eum-rolecard:hover .eum-arrow, .eum-lift:hover .eum-arrow, .eum-cta-btn:hover .eum-arrow { transform: translateX(4px); }
+        .eum-float { animation: eumHeroFloat 7s ease-in-out infinite; }
+        .eum-hero-img { transition: transform 0.7s cubic-bezier(0.22,1,0.36,1); }
+        .eum-heroin > * { animation: eumHeroIn 0.8s cubic-bezier(0.22,1,0.36,1) both; }
+        .eum-heroin > *:nth-child(1) { animation-delay: 0.02s; }
+        .eum-heroin > *:nth-child(2) { animation-delay: 0.1s; }
+        .eum-heroin > *:nth-child(3) { animation-delay: 0.18s; }
+        .eum-heroin > *:nth-child(4) { animation-delay: 0.26s; }
+        .eum-heroin > *:nth-child(5) { animation-delay: 0.34s; }
+        .eum-marquee-wrap { overflow: hidden; -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
+        .eum-marquee-track { display: flex; width: max-content; gap: 10px; animation: eumMarquee 30s linear infinite; }
+        .eum-marquee-wrap:hover .eum-marquee-track { animation-play-state: paused; }
+        .eum-cta-btn { transition: transform 0.2s cubic-bezier(0.22,1,0.36,1), box-shadow 0.24s ease; }
+        .eum-cta-btn:hover { transform: translateY(-2px); box-shadow: 0 16px 32px -10px rgba(0,0,0,0.34) !important; }
+        .eum-cta-btn:active { transform: translateY(0) scale(0.98); }
         * { box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
         #root { text-align: left; }
-        body { margin: 0; padding: 0; background: ${C.bg}; font-family: ${FONT_STACK}; }
-        button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
+        body {
+          margin: 0; padding: 0;
+          background: ${C.bg};
+          font-family: ${FONT_STACK};
+          -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+          text-rendering: optimizeLegibility;
+          letter-spacing: -0.014em;
+          word-break: keep-all; overflow-wrap: break-word;
+        }
+        /* 디스플레이 헤딩 — Pretendard 산세리프(상용 일관성) */
+        .eum-serif { font-family: ${FONT_STACK}; letter-spacing: -0.035em; }
+        h1, h2, h3 { text-wrap: balance; }
+        p { text-wrap: pretty; }
+        .eum-kicker { display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 700; letter-spacing: -0.01em; padding: 5px 12px; border-radius: 999px; background: ${C.brandSoft}; color: ${C.brand}; }
+        .eum-lift { transition: transform 0.24s cubic-bezier(0.22,1,0.36,1), box-shadow 0.24s cubic-bezier(0.22,1,0.36,1); }
+        .eum-lift:hover { transform: translateY(-4px); box-shadow: 0 16px 40px -16px rgba(26,26,30,0.18); }
+        .eum-rolecard { transition: transform 0.24s cubic-bezier(0.22,1,0.36,1), box-shadow 0.24s ease, border-color 0.24s ease; }
+        .eum-rolecard:hover { transform: translateY(-4px); box-shadow: 0 18px 40px -18px rgba(26,26,30,0.2); border-color: ${C.brand}55 !important; }
+        blockquote { quotes: none; margin: 0; }
+        ::selection { background: ${C.brand}26; color: ${C.ink}; }
+        button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible, a:focus-visible {
           outline: 2px solid ${C.brand}66; outline-offset: 2px;
         }
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar { width: 9px; height: 9px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: ${C.borderSoft}; border-radius: 999px; }
-        ::-webkit-scrollbar-thumb:hover { background: ${C.border}; }
+        ::-webkit-scrollbar-thumb { background: ${C.border}; border-radius: 999px; border: 2px solid ${C.bg}; }
+        ::-webkit-scrollbar-thumb:hover { background: ${C.muteLight}; }
+        @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; } html { scroll-behavior: auto; } }
       `}</style>
 
       {!role || !user ? (
