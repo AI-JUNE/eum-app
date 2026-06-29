@@ -4198,6 +4198,35 @@ function RLProductShowcase() {
   );
 }
 
+function RLStepsBand() {
+  const isMobile = useIsMobile(760);
+  const steps = [
+    { n: '01', icon: PenLine, color: C.sage, soft: C.sageSoft, title: '5분이면 신청 끝', desc: '동네·가능한 시간·관심사만 입력하면 신청 완료. 청소년부터 어르신까지 누구나 참여할 수 있어요.' },
+    { n: '02', icon: ShieldCheck, color: C.blue, soft: C.blueSoft, title: '4단계 안전검증', desc: '면접·범죄경력·아동학대 전력·추천인 확인까지. 모든 대면 활동은 책임보험으로 보장돼요.' },
+    { n: '03', icon: Users, color: C.brand, soft: C.brandSoft, title: '3세대 트리오 매칭', desc: '거주지·일정·관심사를 분석해 청년·어르신·아이를 연결하고, 코디네이터가 최종 확인해요.' },
+  ];
+  return (
+    <div style={{ marginBottom: 80 }}>
+      <RLSectionHead kicker="참여 방법" title="신청부터 매칭까지, 3단계면 끝" sub="복잡한 절차 없이, 안전하게 이웃과 연결돼요." />
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: 16 }}>
+        {steps.map((s, i) => {
+          const Icon = s.icon;
+          return (
+            <div key={i} className="eum-lift" style={{ position: 'relative', background: C.card, borderRadius: 20, padding: 28, border: `1px solid ${C.borderSoft}`, boxShadow: '0 2px 8px -4px rgba(26,26,30,0.08)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
+                <div style={{ display: 'inline-flex', padding: 13, borderRadius: 15, background: s.soft }}><Icon size={24} color={s.color} /></div>
+                <span className="eum-serif" style={{ fontSize: 42, fontWeight: 800, color: s.color, opacity: 0.4, lineHeight: 1 }}>{s.n}</span>
+              </div>
+              <div className="eum-serif" style={{ fontSize: 20, fontWeight: 800, color: C.ink, marginBottom: 10, lineHeight: 1.3 }}>{s.title}</div>
+              <div style={{ fontSize: 14, color: C.inkSoft, lineHeight: 1.68 }}>{s.desc}</div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function RLLanding({ state, onSelectRole, onShowApplication }) {
   // 시드된 페르소나 fixed assignments
   const personas = [
@@ -4208,14 +4237,21 @@ function RLLanding({ state, onSelectRole, onShowApplication }) {
   ];
 
   const isMobile = useIsMobile(820);
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const h = () => setScrolled(window.scrollY > 8);
+    h();
+    window.addEventListener('scroll', h, { passive: true });
+    return () => window.removeEventListener('scroll', h);
+  }, []);
 
   return (
     <div style={{
       minHeight: '100vh', background: C.bg, fontFamily: FONT_STACK,
       display: 'flex', flexDirection: 'column', alignItems: 'center',
     }}>
-      {/* 상단 내비게이션 (고원·Papa 벤치마크) */}
-      <div style={{ width: '100%', position: 'sticky', top: 0, zIndex: 50, background: 'rgba(245,244,242,0.8)', backdropFilter: 'blur(12px)', borderBottom: `1px solid ${C.border}` }}>
+      {/* 상단 내비게이션 */}
+      <div style={{ width: '100%', position: 'sticky', top: 0, zIndex: 50, background: scrolled ? 'rgba(245,244,242,0.92)' : 'rgba(245,244,242,0.8)', backdropFilter: 'blur(12px)', borderBottom: `1px solid ${scrolled ? C.border : 'transparent'}`, boxShadow: scrolled ? '0 6px 22px -10px rgba(26,26,30,0.16)' : 'none', transition: 'box-shadow 0.25s ease, border-color 0.25s ease, background 0.25s ease' }}>
         <div style={{ maxWidth: 1160, margin: '0 auto', padding: isMobile ? '12px 18px' : '14px 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
           <div onClick={() => window.location.reload()} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }} role="button" aria-label="홈으로 새로고침">
             <div style={{ width: 30, height: 30, display: 'flex' }}><EumLogo size={30} /></div>
@@ -4255,8 +4291,19 @@ function RLLanding({ state, onSelectRole, onShowApplication }) {
             </div>
           </div>
           <div style={{ display: 'flex', justifyContent: 'center' }}>
-            <div style={{ width: '100%', maxWidth: 480, borderRadius: 28, overflow: 'hidden', position: 'relative', boxShadow: '0 30px 60px -24px rgba(26,26,30,0.28)', animation: 'eumHeroIn 0.9s cubic-bezier(0.22,1,0.36,1) both, eumHeroFloat 7s ease-in-out 0.9s infinite' }}>
-              <img className="eum-hero-img" src="https://d8j0ntlcm91z4.cloudfront.net/user_3ENsWC9Fimdubfa90AmLsdoIGVe/hf_20260618_054046_590cd991-7eef-42e9-82c3-d7dd782d050d.png" alt="청년·어르신·아동 세 세대가 함께하는 모습" style={{ width: '100%', display: 'block' }} loading="eager" />
+            <div style={{ position: 'relative', width: '100%', maxWidth: 480, animation: 'eumHeroIn 0.9s cubic-bezier(0.22,1,0.36,1) both, eumHeroFloat 7s ease-in-out 0.9s infinite' }}>
+              <div style={{ borderRadius: 28, overflow: 'hidden', boxShadow: '0 30px 60px -24px rgba(26,26,30,0.28)' }}>
+                <img className="eum-hero-img" src="https://d8j0ntlcm91z4.cloudfront.net/user_3ENsWC9Fimdubfa90AmLsdoIGVe/hf_20260618_054046_590cd991-7eef-42e9-82c3-d7dd782d050d.png" alt="청년·어르신·아동 세 세대가 함께하는 모습" style={{ width: '100%', display: 'block' }} loading="eager" />
+              </div>
+              <div style={{ position: 'absolute', left: isMobile ? 10 : -16, bottom: 24, background: '#fff', borderRadius: 16, padding: '12px 16px', boxShadow: '0 18px 40px -14px rgba(26,26,30,0.3)', display: 'flex', alignItems: 'center', gap: 11, border: `1px solid ${C.borderSoft}` }}>
+                <div style={{ display: 'flex' }}>
+                  {[C.sage, C.lavender, C.peach].map((c, i) => <div key={i} style={{ width: 26, height: 26, borderRadius: '50%', background: c, border: '2px solid #fff', marginLeft: i === 0 ? 0 : -9 }} />)}
+                </div>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 800, color: C.ink, lineHeight: 1 }}>우리 동네 15쌍 활동 중</div>
+                  <div style={{ fontSize: 11, color: C.sage, fontWeight: 700, marginTop: 4, display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 6, height: 6, borderRadius: '50%', background: C.sage, display: 'inline-block' }} /> 실시간 안전 공유 중</div>
+                </div>
+              </div>
             </div>
           </div>
           </div>
@@ -4285,6 +4332,8 @@ function RLLanding({ state, onSelectRole, onShowApplication }) {
             </div>
           </div>
         </Reveal>
+
+        <Reveal><RLStepsBand /></Reveal>
 
         <Reveal><RLProductShowcase /></Reveal>
 
