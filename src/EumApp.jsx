@@ -663,14 +663,14 @@ function Input({ value, onChange, placeholder, type = 'text', icon, style = {}, 
         disabled={disabled}
         style={{
           width: '100%', padding: icon ? '11px 14px 11px 40px' : '11px 14px',
-          border: `1px solid ${C.border}`, borderRadius: 10,
+          border: `1px solid ${C.border}`, borderRadius: 12,
           fontSize: 14, fontFamily: FONT_STACK, color: C.ink,
           background: disabled ? C.bg : C.card, outline: 'none',
-          transition: 'border 0.15s',
+          transition: 'border-color 0.15s ease, box-shadow 0.15s ease',
           ...style,
         }}
-        onFocus={(e) => e.target.style.borderColor = C.ink}
-        onBlur={(e) => e.target.style.borderColor = C.border}
+        onFocus={(e) => { e.target.style.borderColor = C.brand; e.target.style.boxShadow = `0 0 0 3px ${C.brand}22`; }}
+        onBlur={(e) => { e.target.style.borderColor = C.border; e.target.style.boxShadow = 'none'; }}
       />
     </div>
   );
@@ -685,14 +685,14 @@ function Textarea({ value, onChange, placeholder, rows = 4, style = {} }) {
       rows={rows}
       style={{
         width: '100%', padding: '11px 14px',
-        border: `1px solid ${C.border}`, borderRadius: 10,
+        border: `1px solid ${C.border}`, borderRadius: 12,
         fontSize: 14, fontFamily: FONT_STACK, color: C.ink,
         background: C.card, outline: 'none', resize: 'vertical',
-        lineHeight: 1.6,
+        lineHeight: 1.6, transition: 'border-color 0.15s ease, box-shadow 0.15s ease',
         ...style
       }}
-      onFocus={(e) => e.target.style.borderColor = C.ink}
-      onBlur={(e) => e.target.style.borderColor = C.border}
+      onFocus={(e) => { e.target.style.borderColor = C.brand; e.target.style.boxShadow = `0 0 0 3px ${C.brand}22`; }}
+      onBlur={(e) => { e.target.style.borderColor = C.border; e.target.style.boxShadow = 'none'; }}
     />
   );
 }
@@ -702,13 +702,16 @@ function Select({ value, onChange, options, placeholder, style = {} }) {
     <select
       value={value || ''}
       onChange={(e) => onChange && onChange(e.target.value)}
+      onFocus={(e) => { e.target.style.borderColor = C.brand; e.target.style.boxShadow = `0 0 0 3px ${C.brand}22`; }}
+      onBlur={(e) => { e.target.style.borderColor = C.border; e.target.style.boxShadow = 'none'; }}
       style={{
         width: '100%', padding: '11px 14px',
-        border: `1px solid ${C.border}`, borderRadius: 10,
+        border: `1px solid ${C.border}`, borderRadius: 12,
         fontSize: 14, fontFamily: FONT_STACK, color: C.ink,
         background: C.card, outline: 'none', cursor: 'pointer',
         appearance: 'none',
-        backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238A847A' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
+        transition: 'border-color 0.15s ease, box-shadow 0.15s ease',
+        backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238B8B93' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
         backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center',
         paddingRight: 32,
         ...style
@@ -978,7 +981,9 @@ function SearchBar({ value, onChange, placeholder = '검색…', style = {} }) {
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        style={{ width: '100%', padding: '9px 12px 9px 34px', borderRadius: 10, border: `1px solid ${C.border}`, background: C.card, fontSize: 13.5, color: C.ink, fontFamily: FONT_STACK, outline: 'none', boxSizing: 'border-box' }}
+        onFocus={(e) => { e.target.style.borderColor = C.brand; e.target.style.boxShadow = `0 0 0 3px ${C.brand}22`; }}
+        onBlur={(e) => { e.target.style.borderColor = C.border; e.target.style.boxShadow = 'none'; }}
+        style={{ width: '100%', padding: '9px 12px 9px 34px', borderRadius: 12, border: `1px solid ${C.border}`, background: C.card, fontSize: 13.5, color: C.ink, fontFamily: FONT_STACK, outline: 'none', boxSizing: 'border-box', transition: 'border-color 0.15s ease, box-shadow 0.15s ease' }}
       />
       {value && (
         <button onClick={() => onChange('')} aria-label="지우기" style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: C.mute, display: 'flex', padding: 2 }}>
@@ -1155,22 +1160,22 @@ function Tabs({ tabs, active, onChange, style = {} }) {
           key={t.id}
           onClick={() => onChange(t.id)}
           style={{
-            padding: '10px 14px', background: 'transparent',
-            border: 'none', borderBottom: `2px solid ${active === t.id ? C.ink : 'transparent'}`,
-            color: active === t.id ? C.ink : C.mute,
-            fontWeight: active === t.id ? 700 : 500,
+            padding: '10px 15px', background: 'transparent',
+            border: 'none', borderBottom: `2.5px solid ${active === t.id ? C.brand : 'transparent'}`,
+            color: active === t.id ? C.brand : C.mute,
+            fontWeight: active === t.id ? 700 : 600,
             fontSize: 14, cursor: 'pointer', marginBottom: -1,
-            fontFamily: FONT_STACK, transition: 'all 0.12s',
+            fontFamily: FONT_STACK, transition: 'color 0.15s ease, border-color 0.15s ease',
             display: 'flex', alignItems: 'center', gap: 6,
           }}
         >
           {t.label}
           {t.count !== undefined && (
             <span style={{
-              fontSize: 11, fontWeight: 600,
-              background: active === t.id ? C.ink : C.muteSoft,
+              fontSize: 11, fontWeight: 700,
+              background: active === t.id ? C.brand : C.muteSoft,
               color: active === t.id ? '#fff' : C.mute,
-              padding: '1px 7px', borderRadius: 8,
+              padding: '1px 7px', borderRadius: 999,
             }}>{t.count}</span>
           )}
         </button>
