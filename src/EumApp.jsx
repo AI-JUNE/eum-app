@@ -4252,8 +4252,9 @@ function RLLanding({ state, onSelectRole, onShowApplication }) {
   const isMobile = useIsMobile(820);
   const isPhone = useIsMobile(520);
   const [scrolled, setScrolled] = useState(false);
+  const [showTop, setShowTop] = useState(false);
   useEffect(() => {
-    const h = () => setScrolled(window.scrollY > 8);
+    const h = () => { const y = window.scrollY; setScrolled(y > 8); setShowTop(y > 700); };
     h();
     window.addEventListener('scroll', h, { passive: true });
     return () => window.removeEventListener('scroll', h);
@@ -4452,6 +4453,11 @@ function RLLanding({ state, onSelectRole, onShowApplication }) {
           </div>
         </div>
       </div>
+      {showTop && (
+        <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} aria-label="맨 위로" style={{ position: 'fixed', right: 24, bottom: 24, zIndex: 60, width: 46, height: 46, borderRadius: '50%', background: C.ink, color: '#fff', border: 'none', boxShadow: '0 10px 28px -8px rgba(26,26,30,0.45)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', animation: 'fadeUp 0.3s ease' }}>
+          <ChevronUp size={22} />
+        </button>
+      )}
     </div>
   );
 }
