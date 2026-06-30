@@ -3329,13 +3329,17 @@ function QuickAccessStrip({ setView }) {
     { id: 'ai-match', t: 'AI 매칭', d: '자동+선택형', c: C.peach, ic: <Users size={18} /> },
   ];
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(150px,1fr))', gap: 10, marginBottom: 22 }}>
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: 12, marginBottom: 22 }}>
       {items.map(it => (
-        <button key={it.id} onClick={() => setView(it.id)} style={{ textAlign: 'left', cursor: 'pointer', fontFamily: FONT_STACK, background: C.card, border: `1px solid ${C.border}`, borderLeft: `4px solid ${it.c}`, borderRadius: 13, padding: '13px 15px', transition: 'all .15s' }}
-          onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 6px 18px rgba(26,24,20,.07)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
-          onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none'; }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 7, color: it.c, fontWeight: 800, fontSize: 13.5 }}>{it.ic}{it.t}</div>
-          <div style={{ fontSize: 11, color: C.mute, marginTop: 4 }}>{it.d}</div>
+        <button key={it.id} onClick={() => setView(it.id)} style={{ textAlign: 'left', cursor: 'pointer', fontFamily: FONT_STACK, background: C.card, border: `1px solid ${C.borderSoft}`, borderRadius: 16, padding: '14px 16px', boxShadow: '0 2px 8px -4px rgba(26,26,30,0.08)', display: 'flex', alignItems: 'center', gap: 12, transition: 'transform .18s cubic-bezier(.22,1,.36,1), box-shadow .18s' }}
+          onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 12px 28px -12px rgba(26,26,30,.18)'; e.currentTarget.style.transform = 'translateY(-3px)'; }}
+          onMouseLeave={e => { e.currentTarget.style.boxShadow = '0 2px 8px -4px rgba(26,26,30,0.08)'; e.currentTarget.style.transform = 'none'; }}>
+          <span style={{ display: 'inline-flex', padding: 10, borderRadius: 12, background: it.c + '18', color: it.c, flexShrink: 0 }}>{it.ic}</span>
+          <span style={{ flex: 1, minWidth: 0 }}>
+            <span style={{ display: 'block', color: C.ink, fontWeight: 800, fontSize: 13.5 }}>{it.t}</span>
+            <span style={{ display: 'block', fontSize: 11, color: C.mute, marginTop: 3 }}>{it.d}</span>
+          </span>
+          <ChevronRight size={16} color={C.muteLight} style={{ flexShrink: 0 }} />
         </button>
       ))}
     </div>
@@ -4413,8 +4417,11 @@ function RLLanding({ state, onSelectRole, onShowApplication }) {
               <div style={{ marginTop: 22, paddingTop: 18, borderTop: `1px solid ${C.borderSoft}` }}>
                 <div style={{ fontSize: 11, fontWeight: 700, color: C.muteLight, letterSpacing: '0.06em', marginBottom: 10 }}>운영 법인</div>
                 <div style={{ display: 'inline-flex', alignItems: 'center', background: '#fff', border: `1px solid ${C.borderSoft}`, borderRadius: 12, padding: '8px 16px', boxShadow: '0 1px 3px -1px rgba(26,26,30,0.06)' }}>
-                  <img src="/logos/gowon.png" alt="고원 GOWON" style={{ height: 28, display: 'block', objectFit: 'contain' }} onError={(e) => { e.currentTarget.style.display = 'none'; const n = e.currentTarget.nextElementSibling; if (n) n.style.display = 'inline-block'; }} />
-                  <span style={{ display: 'none', fontSize: 16, fontWeight: 800, color: C.ink, letterSpacing: '0.04em' }}>고원 · GOWON</span>
+                  <img src="/logos/gowon.png" alt="고원 GOWON" style={{ height: 28, display: 'block', objectFit: 'contain' }} onError={(e) => { e.currentTarget.style.display = 'none'; const n = e.currentTarget.nextElementSibling; if (n) n.style.display = 'inline-flex'; }} />
+                  <span style={{ display: 'none', alignItems: 'center', gap: 9, fontSize: 19, fontWeight: 800, color: C.ink, letterSpacing: '0.08em' }}>
+                    <span style={{ width: 18, height: 18, borderRadius: '50%', background: 'conic-gradient(from 200deg, #E15A33, #F6BE4F, #43C95A, #456A9E, #766B94, #E15A33)', display: 'inline-block', flexShrink: 0 }} />
+                    GOWON
+                  </span>
                 </div>
               </div>
             </div>
