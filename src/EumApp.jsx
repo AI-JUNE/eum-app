@@ -1292,13 +1292,14 @@ function Sidebar({ role, currentView, onNavigate, onLogout, userName, dataCount 
               onClick={() => onNavigate(item.id)}
               style={{
                 width: '100%', display: 'flex', alignItems: 'center', gap: 11,
-                padding: isSenior ? '13px 12px' : '10px 12px', marginBottom: 2,
-                background: active ? C.bg : 'transparent', color: active ? C.ink : C.inkSoft,
-                border: 'none', borderRadius: 8, cursor: 'pointer',
+                padding: isSenior ? '13px 13px' : '10px 13px', marginBottom: 3,
+                background: active ? persona.soft : 'transparent', color: active ? persona.color : C.inkSoft,
+                border: 'none', borderRadius: 11, cursor: 'pointer',
                 fontWeight: active ? 700 : 500,
                 fontSize: isSenior ? 16 : 14, textAlign: 'left',
                 fontFamily: FONT_STACK,
-                transition: 'all 0.12s', position: 'relative',
+                transition: 'background 0.15s ease, color 0.15s ease', position: 'relative',
+                boxShadow: active ? `inset 3px 0 0 ${persona.color}` : 'none',
               }}
               onMouseEnter={(e) => !active && (e.currentTarget.style.background = C.cream)}
               onMouseLeave={(e) => !active && (e.currentTarget.style.background = 'transparent')}
