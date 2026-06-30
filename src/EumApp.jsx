@@ -1340,6 +1340,7 @@ function Sidebar({ role, currentView, onNavigate, onLogout, userName, dataCount 
             <LogOut size={16} />
           </button>
         </div>
+        <div style={{ fontSize: 10, color: C.muteLight, textAlign: 'center', marginTop: 8, fontWeight: 600, letterSpacing: '0.02em' }}>운영 · 고원(GOWON)</div>
       </div>
     </div>
   );
@@ -4409,6 +4410,13 @@ function RLLanding({ state, onSelectRole, onShowApplication }) {
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11.5, fontWeight: 700, color: C.sage, background: C.sageSoft, padding: '5px 11px', borderRadius: 999 }}><ShieldCheck size={12} /> 4단계 안전검증</span>
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11.5, fontWeight: 700, color: C.brand, background: C.brandSoft, padding: '5px 11px', borderRadius: 999 }}><Heart size={12} /> 책임보험 적용</span>
               </div>
+              <div style={{ marginTop: 22, paddingTop: 18, borderTop: `1px solid ${C.borderSoft}` }}>
+                <div style={{ fontSize: 11, fontWeight: 700, color: C.muteLight, letterSpacing: '0.06em', marginBottom: 10 }}>운영 법인</div>
+                <div style={{ display: 'inline-flex', alignItems: 'center', background: '#fff', border: `1px solid ${C.borderSoft}`, borderRadius: 12, padding: '8px 16px', boxShadow: '0 1px 3px -1px rgba(26,26,30,0.06)' }}>
+                  <img src="/logos/gowon.png" alt="고원 GOWON" style={{ height: 28, display: 'block', objectFit: 'contain' }} onError={(e) => { e.currentTarget.style.display = 'none'; const n = e.currentTarget.nextElementSibling; if (n) n.style.display = 'inline-block'; }} />
+                  <span style={{ display: 'none', fontSize: 16, fontWeight: 800, color: C.ink, letterSpacing: '0.04em' }}>고원 · GOWON</span>
+                </div>
+              </div>
             </div>
             <div>
               <div style={{ fontSize: 12, fontWeight: 800, color: C.ink, letterSpacing: '0.02em', marginBottom: 14 }}>서비스</div>
@@ -4428,7 +4436,7 @@ function RLLanding({ state, onSelectRole, onShowApplication }) {
             </div>
           </div>
           <div style={{ paddingTop: 22, borderTop: `1px solid ${C.borderSoft}`, display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, fontSize: 12.5, color: C.mute, letterSpacing: '0.01em' }}>
-            <span>© 2027 이음 · 세대를 잇다</span>
+            <span>© 2027 이음 · 운영 주식회사 고원(GOWON)</span>
             <span>광주 광산구 우산동 3세대 상생 품앗이 파일럿 · 데모 모드</span>
           </div>
         </div>
