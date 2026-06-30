@@ -3986,10 +3986,10 @@ function RLRevenueModelBand() {
 function RLBenchmarkBand() {
   const isMobile = useIsMobile(760);
   const models = [
-    { flag: '🇺🇸', name: 'Foster Grandparent', country: '미국 · AmeriCorps', adopt: '어르신→아동 1:1 멘토 + 활동비 보상', limit: '두 세대(어르신·아동)만 연결' },
-    { flag: '🇳🇱', name: 'Humanitas Deventer', country: '네덜란드', adopt: '청년↔어르신 교류로 무료 거주 교환', limit: '주거 자원에 한정된 1:1 교환' },
-    { flag: '🇬🇧', name: 'The Cares Family', country: '영국 런던·맨체스터', adopt: '도시 청년↔어르신 외로움 해소', limit: '아동·양육가정은 포함되지 않음' },
-    { flag: '🇰🇷', name: '케어닥 · 자란다', country: '국내 돌봄 매칭', adopt: '앱으로 간편 매칭·일지 관리', limit: '대가 지불형 일방 돌봄 중개' },
+    { flag: 'US', name: 'Foster Grandparent', country: '미국 · AmeriCorps', adopt: '어르신→아동 1:1 멘토 + 활동비 보상', limit: '두 세대(어르신·아동)만 연결' },
+    { flag: 'NL', name: 'Humanitas Deventer', country: '네덜란드', adopt: '청년↔어르신 교류로 무료 거주 교환', limit: '주거 자원에 한정된 1:1 교환' },
+    { flag: 'UK', name: 'The Cares Family', country: '영국 런던·맨체스터', adopt: '도시 청년↔어르신 외로움 해소', limit: '아동·양육가정은 포함되지 않음' },
+    { flag: 'KR', name: '케어닥 · 자란다', country: '국내 돌봄 매칭', adopt: '앱으로 간편 매칭·일지 관리', limit: '대가 지불형 일방 돌봄 중개' },
   ];
   return (
     <div style={{ marginBottom: 72 }}>
@@ -3998,7 +3998,7 @@ function RLBenchmarkBand() {
         {models.map((m, i) => (
           <div key={i} className="eum-lift" style={{ background: C.card, borderRadius: 20, padding: 24, boxShadow: '0 2px 8px -4px rgba(26,26,30,0.08)', border: `1px solid ${C.borderSoft}` }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 11, marginBottom: 16 }}>
-              <span style={{ fontSize: 26 }}>{m.flag}</span>
+              <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 36, height: 36, borderRadius: 11, background: C.bg, border: `1px solid ${C.border}`, fontSize: 12.5, fontWeight: 800, color: C.inkSoft, letterSpacing: '0.03em', flexShrink: 0 }}>{m.flag}</span>
               <div>
                 <div style={{ fontSize: 15, fontWeight: 800, color: C.ink, lineHeight: 1.2 }}>{m.name}</div>
                 <div style={{ fontSize: 12, color: C.mute }}>{m.country}</div>
@@ -4396,9 +4396,40 @@ function RLLanding({ state, onSelectRole, onShowApplication }) {
           </div>
         </div>
 
-        <div style={{ marginTop: 44, paddingTop: 26, borderTop: `1px solid ${C.border}`, textAlign: 'center', color: C.mute, fontSize: 12.5, lineHeight: 1.8 }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, fontWeight: 700, color: C.inkSoft, marginBottom: 5 }}><EumLogo size={20} /> 이음 · 세대를 잇다</div>
-          <div>© 2027 이음 · 광주 광산구 우산동 3세대 상생 품앗이 파일럿</div>
+        <div style={{ marginTop: 64, paddingTop: 40, borderTop: `1px solid ${C.border}` }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.5fr 1fr 1fr', gap: isMobile ? 28 : 32, marginBottom: 36 }}>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 14 }}>
+                <EumLogo size={28} />
+                <span className="eum-serif" style={{ fontSize: 20, fontWeight: 800, color: C.ink }}>이음</span>
+              </div>
+              <div style={{ fontSize: 13.5, color: C.mute, lineHeight: 1.7, maxWidth: 340 }}>청년·어르신·아동 세 세대를 잇는 광주 광산구형 3세대 상생 품앗이 플랫폼이에요.</div>
+              <div style={{ display: 'flex', gap: 8, marginTop: 16, flexWrap: 'wrap' }}>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11.5, fontWeight: 700, color: C.sage, background: C.sageSoft, padding: '5px 11px', borderRadius: 999 }}><ShieldCheck size={12} /> 4단계 안전검증</span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11.5, fontWeight: 700, color: C.brand, background: C.brandSoft, padding: '5px 11px', borderRadius: 999 }}><Heart size={12} /> 책임보험 적용</span>
+              </div>
+            </div>
+            <div>
+              <div style={{ fontSize: 12, fontWeight: 800, color: C.ink, letterSpacing: '0.02em', marginBottom: 14 }}>서비스</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <span onClick={() => { const el = document.getElementById('eum-demo'); if (el) el.scrollIntoView({ behavior: 'smooth' }); }} style={{ fontSize: 13.5, color: C.inkSoft, fontWeight: 500, cursor: 'pointer' }}>둘러보기 · 데모 체험</span>
+                <span onClick={onShowApplication} style={{ fontSize: 13.5, color: C.inkSoft, fontWeight: 500, cursor: 'pointer' }}>5분 참여 신청</span>
+                <span style={{ fontSize: 13.5, color: C.inkSoft, fontWeight: 500 }}>자주 묻는 질문</span>
+              </div>
+            </div>
+            <div>
+              <div style={{ fontSize: 12, fontWeight: 800, color: C.ink, letterSpacing: '0.02em', marginBottom: 14 }}>함께하는 기관</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {['광주광역시 · 광산구청', '광주창조경제혁신센터', '1365 자원봉사포털', '광주상생카드'].map((p, i) => (
+                  <span key={i} style={{ fontSize: 13.5, color: C.mute, fontWeight: 500 }}>{p}</span>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div style={{ paddingTop: 22, borderTop: `1px solid ${C.borderSoft}`, display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, fontSize: 12.5, color: C.mute, letterSpacing: '0.01em' }}>
+            <span>© 2027 이음 · 세대를 잇다</span>
+            <span>광주 광산구 우산동 3세대 상생 품앗이 파일럿 · 데모 모드</span>
+          </div>
         </div>
       </div>
     </div>
