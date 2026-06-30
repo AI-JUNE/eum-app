@@ -4417,7 +4417,7 @@ function RLLanding({ state, onSelectRole, onShowApplication }) {
               <div style={{ marginTop: 22, paddingTop: 18, borderTop: `1px solid ${C.borderSoft}` }}>
                 <div style={{ fontSize: 11, fontWeight: 700, color: C.muteLight, letterSpacing: '0.06em', marginBottom: 10 }}>운영 법인</div>
                 <div style={{ display: 'inline-flex', alignItems: 'center', background: '#fff', border: `1px solid ${C.borderSoft}`, borderRadius: 12, padding: '8px 16px', boxShadow: '0 1px 3px -1px rgba(26,26,30,0.06)' }}>
-                  <img src="/logos/gowon.png" alt="고원 GOWON" style={{ height: 28, display: 'block', objectFit: 'contain' }} onError={(e) => { e.currentTarget.style.display = 'none'; const n = e.currentTarget.nextElementSibling; if (n) n.style.display = 'inline-flex'; }} />
+                  <img src="/logos/gowon.jpg" alt="고원 GOWON" style={{ height: 30, display: 'block', objectFit: 'contain' }} onError={(e) => { e.currentTarget.style.display = 'none'; const n = e.currentTarget.nextElementSibling; if (n) n.style.display = 'inline-flex'; }} />
                   <span style={{ display: 'none', alignItems: 'center', gap: 9, fontSize: 19, fontWeight: 800, color: C.ink, letterSpacing: '0.08em' }}>
                     <span style={{ width: 18, height: 18, borderRadius: '50%', background: 'conic-gradient(from 200deg, #E15A33, #F6BE4F, #43C95A, #456A9E, #766B94, #E15A33)', display: 'inline-block', flexShrink: 0 }} />
                     GOWON
