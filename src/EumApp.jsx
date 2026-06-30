@@ -1340,7 +1340,11 @@ function Sidebar({ role, currentView, onNavigate, onLogout, userName, dataCount 
             <LogOut size={16} />
           </button>
         </div>
-        <div style={{ fontSize: 10, color: C.muteLight, textAlign: 'center', marginTop: 8, fontWeight: 600, letterSpacing: '0.02em' }}>운영 · 고원(GOWON)</div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, marginTop: 10 }}>
+          <span style={{ fontSize: 9.5, color: C.muteLight, fontWeight: 600 }}>운영</span>
+          <img src="/logos/gowon.png" alt="고원 GOWON" style={{ height: 15, objectFit: 'contain', opacity: 0.92 }} onError={(e) => { e.currentTarget.style.display = 'none'; const n = e.currentTarget.nextElementSibling; if (n) n.style.display = 'inline'; }} />
+          <span style={{ display: 'none', fontSize: 9.5, color: C.muteLight, fontWeight: 700 }}>고원(GOWON)</span>
+        </div>
       </div>
     </div>
   );
@@ -4415,9 +4419,9 @@ function RLLanding({ state, onSelectRole, onShowApplication }) {
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11.5, fontWeight: 700, color: C.brand, background: C.brandSoft, padding: '5px 11px', borderRadius: 999 }}><Heart size={12} /> 책임보험 적용</span>
               </div>
               <div style={{ marginTop: 22, paddingTop: 18, borderTop: `1px solid ${C.borderSoft}` }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: C.muteLight, letterSpacing: '0.06em', marginBottom: 10 }}>운영 법인</div>
-                <div style={{ display: 'inline-flex', alignItems: 'center', background: '#fff', border: `1px solid ${C.borderSoft}`, borderRadius: 12, padding: '8px 16px', boxShadow: '0 1px 3px -1px rgba(26,26,30,0.06)' }}>
-                  <img src="/logos/gowon.jpg" alt="고원 GOWON" style={{ height: 30, display: 'block', objectFit: 'contain' }} onError={(e) => { e.currentTarget.style.display = 'none'; const n = e.currentTarget.nextElementSibling; if (n) n.style.display = 'inline-flex'; }} />
+                <div style={{ fontSize: 11, fontWeight: 700, color: C.muteLight, letterSpacing: '0.06em', marginBottom: 12 }}>운영 법인</div>
+                <div style={{ display: 'inline-flex', alignItems: 'center' }}>
+                  <img src="/logos/gowon.png" alt="고원 GOWON" style={{ height: 32, display: 'block', objectFit: 'contain' }} onError={(e) => { e.currentTarget.style.display = 'none'; const n = e.currentTarget.nextElementSibling; if (n) n.style.display = 'inline-flex'; }} />
                   <span style={{ display: 'none', alignItems: 'center', gap: 9, fontSize: 19, fontWeight: 800, color: C.ink, letterSpacing: '0.08em' }}>
                     <span style={{ width: 18, height: 18, borderRadius: '50%', background: 'conic-gradient(from 200deg, #E15A33, #F6BE4F, #43C95A, #456A9E, #766B94, #E15A33)', display: 'inline-block', flexShrink: 0 }} />
                     GOWON
