@@ -1347,7 +1347,7 @@ function Sidebar({ role, currentView, onNavigate, onLogout, userName, dataCount 
         </div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, marginTop: 10 }}>
           <span style={{ fontSize: 9.5, color: C.muteLight, fontWeight: 600 }}>운영</span>
-          <img src="/logos/gowon.png" alt="고원 GOWON" style={{ height: 15, objectFit: 'contain', opacity: 0.92 }} onError={(e) => { e.currentTarget.style.display = 'none'; const n = e.currentTarget.nextElementSibling; if (n) n.style.display = 'inline'; }} />
+          <img src="/logos/gowon.png" alt="고원 GOWON" loading="lazy" decoding="async" style={{ height: 15, objectFit: 'contain', opacity: 0.92 }} onError={(e) => { e.currentTarget.style.display = 'none'; const n = e.currentTarget.nextElementSibling; if (n) n.style.display = 'inline'; }} />
           <span style={{ display: 'none', fontSize: 9.5, color: C.muteLight, fontWeight: 700 }}>고원(GOWON)</span>
         </div>
       </div>
@@ -4313,7 +4313,7 @@ function RLLanding({ state, onSelectRole, onShowApplication }) {
           <div style={{ display: 'flex', justifyContent: 'center' }}>
             <div style={{ position: 'relative', width: '100%', maxWidth: 480, animation: 'eumHeroIn 0.9s cubic-bezier(0.22,1,0.36,1) both, eumHeroFloat 7s ease-in-out 0.9s infinite' }}>
               <div style={{ borderRadius: 28, overflow: 'hidden', boxShadow: '0 30px 60px -24px rgba(26,26,30,0.28)' }}>
-                <img className="eum-hero-img" src="https://d8j0ntlcm91z4.cloudfront.net/user_3ENsWC9Fimdubfa90AmLsdoIGVe/hf_20260618_054046_590cd991-7eef-42e9-82c3-d7dd782d050d.png" alt="청년·어르신·아동 세 세대가 함께하는 모습" style={{ width: '100%', display: 'block' }} loading="eager" />
+                <img className="eum-hero-img" src="https://d8j0ntlcm91z4.cloudfront.net/user_3ENsWC9Fimdubfa90AmLsdoIGVe/hf_20260618_054046_590cd991-7eef-42e9-82c3-d7dd782d050d.png" alt="청년·어르신·아동 세 세대가 함께하는 모습" style={{ width: '100%', display: 'block' }} loading="eager" decoding="async" fetchPriority="high" />
               </div>
               <div style={{ position: 'absolute', left: isMobile ? 10 : -16, bottom: 24, background: '#fff', borderRadius: 16, padding: '12px 16px', boxShadow: '0 18px 40px -14px rgba(26,26,30,0.3)', display: 'flex', alignItems: 'center', gap: 11, border: `1px solid ${C.borderSoft}` }}>
                 <div style={{ display: 'flex' }}>
@@ -4427,7 +4427,7 @@ function RLLanding({ state, onSelectRole, onShowApplication }) {
               <div style={{ marginTop: 22, paddingTop: 18, borderTop: `1px solid ${C.borderSoft}` }}>
                 <div style={{ fontSize: 11, fontWeight: 700, color: C.muteLight, letterSpacing: '0.06em', marginBottom: 12 }}>운영 법인</div>
                 <div style={{ display: 'inline-flex', alignItems: 'center' }}>
-                  <img src="/logos/gowon.png" alt="고원 GOWON" style={{ height: 32, display: 'block', objectFit: 'contain' }} onError={(e) => { e.currentTarget.style.display = 'none'; const n = e.currentTarget.nextElementSibling; if (n) n.style.display = 'inline-flex'; }} />
+                  <img src="/logos/gowon.png" alt="고원 GOWON" loading="lazy" decoding="async" style={{ height: 32, display: 'block', objectFit: 'contain' }} onError={(e) => { e.currentTarget.style.display = 'none'; const n = e.currentTarget.nextElementSibling; if (n) n.style.display = 'inline-flex'; }} />
                   <span style={{ display: 'none', alignItems: 'center', gap: 9, fontSize: 19, fontWeight: 800, color: C.ink, letterSpacing: '0.08em' }}>
                     <span style={{ width: 18, height: 18, borderRadius: '50%', background: 'conic-gradient(from 200deg, #E15A33, #F6BE4F, #43C95A, #456A9E, #766B94, #E15A33)', display: 'inline-block', flexShrink: 0 }} />
                     GOWON
@@ -6089,8 +6089,9 @@ function App() {
         @keyframes eumMarquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
         @keyframes eumPop { from { transform: scale(0.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         @keyframes eumHeroIn { from { opacity: 0; transform: translateY(26px); } to { opacity: 1; transform: translateY(0); } }
-        .eum-anim-gradient { background-size: 220% 220%; animation: eumGradient 9s ease infinite; }
-        .eum-orb { position: absolute; border-radius: 50%; filter: blur(46px); pointer-events: none; z-index: 0; }
+        /* 정적 그라데이션 — 지속 repaint 제거(성능) */
+        .eum-anim-gradient { background-size: 140% 140%; background-position: 30% 50%; }
+        .eum-orb { position: absolute; border-radius: 50%; filter: blur(42px); pointer-events: none; z-index: 0; will-change: transform; }
         .eum-arrow { transition: transform 0.28s cubic-bezier(0.22,1,0.36,1); }
         .eum-rolecard:hover .eum-arrow, .eum-lift:hover .eum-arrow, .eum-cta-btn:hover .eum-arrow { transform: translateX(4px); }
         .eum-float { animation: eumHeroFloat 7s ease-in-out infinite; }
