@@ -4697,7 +4697,7 @@ function CoordOverview({ state, setView, dispatch }) {
                 <XAxis dataKey="month" stroke={C.mute} fontSize={11} fontFamily={FONT_STACK} />
                 <YAxis stroke={C.mute} fontSize={11} fontFamily={FONT_STACK} />
                 <Tooltip contentStyle={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 8, fontFamily: FONT_STACK, fontSize: 12 }} />
-                <Area type="monotone" dataKey="cumulative" stroke={C.brand} strokeWidth={2.5} fill="url(#hours)" name="누적 활동시간" />
+                <Area type="monotone" dataKey="cumulative" stroke={C.brand} strokeWidth={2.5} fill="url(#hours)" name="누적 활동시간" isAnimationActive={false} />
               </AreaChart>
             </ResponsiveContainer>
           )}
@@ -4708,7 +4708,7 @@ function CoordOverview({ state, setView, dispatch }) {
           {typeChart.length === 0 ? <Empty icon={<Activity size={28} />} title="활동 없음" /> : (
             <ResponsiveContainer width="100%" height={240}>
               <PieChart>
-                <Pie data={typeChart} dataKey="value" cx="50%" cy="50%" innerRadius={50} outerRadius={85} paddingAngle={3}>
+                <Pie data={typeChart} dataKey="value" cx="50%" cy="50%" innerRadius={50} outerRadius={85} paddingAngle={3} isAnimationActive={false}>
                   {typeChart.map((entry, idx) => <Cell key={idx} fill={entry.color} />)}
                 </Pie>
                 <Tooltip contentStyle={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 8, fontFamily: FONT_STACK, fontSize: 12 }} />
@@ -5805,7 +5805,7 @@ JSON 형식으로만 답변:
               <XAxis dataKey="name" stroke={C.mute} fontSize={11} fontFamily={FONT_STACK} />
               <YAxis stroke={C.mute} fontSize={11} fontFamily={FONT_STACK} />
               <Tooltip contentStyle={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 8, fontFamily: FONT_STACK, fontSize: 12 }} />
-              <Bar dataKey="hours" fill={C.brand} radius={[8, 8, 0, 0]} name="시간" />
+              <Bar dataKey="hours" fill={C.brand} radius={[8, 8, 0, 0]} name="시간" isAnimationActive={false} />
             </BarChart>
           </ResponsiveContainer>
         )}
