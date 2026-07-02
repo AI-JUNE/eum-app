@@ -6109,13 +6109,14 @@ function App() {
         .eum-cta-btn:hover { transform: translateY(-2px); box-shadow: 0 16px 32px -10px rgba(0,0,0,0.34) !important; }
         .eum-cta-btn:active { transform: translateY(0) scale(0.98); }
         * { box-sizing: border-box; }
-        html { scroll-behavior: smooth; }
+        html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
         #root { text-align: left; }
         body {
           margin: 0; padding: 0;
           background: ${C.bg};
           font-family: ${FONT_STACK};
           -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+          -webkit-tap-highlight-color: transparent;
           text-rendering: optimizeLegibility;
           letter-spacing: -0.014em;
           word-break: keep-all; overflow-wrap: break-word;
@@ -6132,7 +6133,7 @@ function App() {
         blockquote { quotes: none; margin: 0; }
         ::selection { background: ${C.brand}26; color: ${C.ink}; }
         button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible, a:focus-visible {
-          outline: 2px solid ${C.brand}66; outline-offset: 2px;
+          outline: 2.5px solid ${C.brand}; outline-offset: 3px; border-radius: 4px;
         }
         ::-webkit-scrollbar { width: 9px; height: 9px; }
         ::-webkit-scrollbar-track { background: transparent; }
