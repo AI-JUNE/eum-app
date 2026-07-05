@@ -660,6 +660,7 @@ function Input({ value, onChange, placeholder, type = 'text', icon, style = {}, 
         value={value || ''}
         onChange={(e) => onChange && onChange(e.target.value)}
         placeholder={placeholder}
+        aria-label={placeholder}
         disabled={disabled}
         style={{
           width: '100%', padding: icon ? '11px 14px 11px 40px' : '11px 14px',
@@ -682,6 +683,7 @@ function Textarea({ value, onChange, placeholder, rows = 4, style = {} }) {
       value={value || ''}
       onChange={(e) => onChange && onChange(e.target.value)}
       placeholder={placeholder}
+      aria-label={placeholder}
       rows={rows}
       style={{
         width: '100%', padding: '11px 14px',
@@ -777,7 +779,7 @@ function Modal({ open, onClose, title, children, size = 'md', footer }) {
         {title && (
           <div style={{ padding: '18px 24px', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div style={{ fontSize: 16, fontWeight: 700, color: C.ink, letterSpacing: '-0.02em' }}>{title}</div>
-            <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: C.mute, padding: 4, display: 'flex' }}>
+            <button onClick={onClose} aria-label="닫기" style={{ background: 'none', border: 'none', cursor: 'pointer', color: C.mute, padding: 4, display: 'flex' }}>
               <X size={20} />
             </button>
           </div>
@@ -978,9 +980,11 @@ function SearchBar({ value, onChange, placeholder = '검색…', style = {} }) {
     <div style={{ position: 'relative', ...style }}>
       <Search size={15} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: C.mute, pointerEvents: 'none' }} />
       <input
+        type="search"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
+        aria-label={placeholder}
         onFocus={(e) => { e.target.style.borderColor = C.brand; e.target.style.boxShadow = `0 0 0 3px ${C.brand}22`; }}
         onBlur={(e) => { e.target.style.borderColor = C.border; e.target.style.boxShadow = 'none'; }}
         style={{ width: '100%', padding: '9px 12px 9px 34px', borderRadius: 12, border: `1px solid ${C.border}`, background: C.card, fontSize: 13.5, color: C.ink, fontFamily: FONT_STACK, outline: 'none', boxSizing: 'border-box', transition: 'border-color 0.15s ease, box-shadow 0.15s ease' }}
@@ -3486,7 +3490,7 @@ function WelfareFab({ role }) {
           <div onClick={e => e.stopPropagation()} style={{ background: C.card, borderRadius: 18, width: '100%', maxWidth: 460, maxHeight: '86vh', overflowY: 'auto', padding: 22, fontFamily: FONT_STACK }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 17, fontWeight: 800, color: C.lavender }}><Sparkles size={20} /> 복지 어드바이저</div>
-              <button onClick={() => setOpen(false)} style={{ border: 'none', background: 'none', cursor: 'pointer', color: C.mute }}><X size={20} /></button>
+              <button onClick={() => setOpen(false)} aria-label="닫기" style={{ border: 'none', background: 'none', cursor: 'pointer', color: C.mute }}><X size={20} /></button>
             </div>
             <div style={{ fontSize: 12.5, color: C.inkSoft, lineHeight: 1.55, marginBottom: 14 }}>몇 가지만 고르면 <b>받을 수 있는 복지</b>를 찾아드려요. 가입 없이 바로요.</div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
@@ -3613,7 +3617,7 @@ function YouthDiscover({ user, totalHours, showToast, setView }) {
       {/* 검색 + 카테고리 칩 */}
       <div style={{ position: 'relative', marginBottom: 12 }}>
         <Search size={16} style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: C.mute }} />
-        <input value={q} onChange={e => setQ(e.target.value)} placeholder="활동·기관 검색" style={{ width: '100%', padding: '11px 13px 11px 38px', borderRadius: 11, border: `1px solid ${C.border}`, fontFamily: FONT_STACK, fontSize: 14 }} />
+        <input type="search" value={q} onChange={e => setQ(e.target.value)} placeholder="활동·기관 검색" aria-label="활동·기관 검색" style={{ width: '100%', padding: '11px 13px 11px 38px', borderRadius: 11, border: `1px solid ${C.border}`, fontFamily: FONT_STACK, fontSize: 14 }} />
       </div>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
         {DISCOVER_CATS.map(c => (
