@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# build/probe temp artifacts (do not commit)
+.eumcheck_tmp.js
+.mountprobe.txt

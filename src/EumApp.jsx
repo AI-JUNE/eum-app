@@ -1191,7 +1191,7 @@ function Tabs({ tabs, active, onChange, style = {} }) {
 function Empty({ icon, title, sub, action }) {
   return (
     <div style={{ textAlign: 'center', padding: '56px 20px', color: C.mute }}>
-      {icon && <div style={{ width: 64, height: 64, borderRadius: 18, background: C.bg, color: C.mute, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>{icon}</div>}
+      {icon && <div aria-hidden="true" style={{ width: 64, height: 64, borderRadius: 18, background: C.bg, color: C.mute, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>{icon}</div>}
       <div style={{ fontSize: 16, fontWeight: 700, color: C.ink, marginBottom: 6 }}>{title}</div>
       {sub && <div style={{ fontSize: 13.5, marginBottom: 18, lineHeight: 1.6, maxWidth: 360, marginLeft: 'auto', marginRight: 'auto' }}>{sub}</div>}
       {action}
@@ -6143,6 +6143,8 @@ function App() {
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: ${C.border}; border-radius: 999px; border: 2px solid ${C.bg}; }
         ::-webkit-scrollbar-thumb:hover { background: ${C.muteLight}; }
+        /* Firefox 스크롤바 — webkit과 톤 일관 */
+        html { scrollbar-width: thin; scrollbar-color: ${C.border} transparent; }
         @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; } html { scroll-behavior: auto; } }
       `}</style>
 
