@@ -26,3 +26,5 @@ dist-ssr
 # build/probe temp artifacts (do not commit)
 .eumcheck_tmp.js
 .mountprobe.txt
+mp.js
+.mountprobe.txt

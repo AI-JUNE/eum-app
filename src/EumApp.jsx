@@ -852,6 +852,9 @@ function useCountUp(target, duration = 950) {
   const raf = useRef();
   useEffect(() => {
     const num = typeof target === 'number' ? target : parseFloat(String(target).replace(/[^0-9.-]/g, '')) || 0;
+    const reduce = typeof window !== 'undefined' && window.matchMedia
+      && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) { setVal(num); return; }
     let start;
     const tick = (t) => {
       if (start === undefined) start = t;
@@ -4119,7 +4122,7 @@ function RLDeviceBrowser({ children, url = 'eum-app.vercel.app', shotSrc }) {
         </div>
       </div>
       {shotSrc
-        ? <img src={shotSrc} alt="이음 운영 화면" style={{ width: '100%', display: 'block' }} />
+        ? <img src={shotSrc} alt="이음 운영 화면" loading="lazy" decoding="async" style={{ width: '100%', display: 'block' }} />
         : <div style={{ background: C.bg }}>{children}</div>}
     </div>
   );
@@ -6166,7 +6169,7 @@ function App() {
       <AccessibilityFab />
 
       {/* Toast 컨테이너 */}
-      <div style={{ position: 'fixed', top: 20, right: 20, zIndex: 9999, display: 'flex', flexDirection: 'column', gap: 10, pointerEvents: 'none' }}>
+      <div role="region" aria-live="polite" aria-atomic="false" aria-label="알림" style={{ position: 'fixed', top: 20, right: 20, zIndex: 9999, display: 'flex', flexDirection: 'column', gap: 10, pointerEvents: 'none' }}>
         {toasts.map(t => (
           <div key={t.id} style={{ pointerEvents: 'auto' }}>
             <Toast toast={t} onClose={() => setToasts(prev => prev.filter(x => x.id !== t.id))} />
