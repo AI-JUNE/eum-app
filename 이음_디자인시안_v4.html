@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>이음 — 세대를 잇다, 마음을 나누다</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&display=swap">
+<style>
+  :root{
+    --ink:#241d17; --paper:#ffffff; --cream:#fbf7f2; --cream2:#f4ede4;
+    --coral:#BE5535; --coral-d:#9E4329; --coral-soft:#f4e7e0;
+    --green:#4b7a52; --green-soft:#e9f1e7; --purple:#6a5aa0; --purple-soft:#efeaf6;
+    --clay:#9a6a52; --sub:#5f564d; --mut:#9b9186; --line:#eee6dc;
+    --e1:0 1px 3px rgba(36,29,23,.05); --e2:0 12px 32px rgba(36,29,23,.09); --e3:0 30px 70px rgba(36,29,23,.14);
+    --ease:cubic-bezier(.16,1,.3,1);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{font-family:"Pretendard Variable",Pretendard,-apple-system,system-ui,sans-serif; color:var(--ink);
+    background:var(--paper); line-height:1.62; -webkit-font-smoothing:antialiased; letter-spacing:-.1px;
+    word-break:keep-all; line-break:strict;}
+  h1,h2,h3,p,span,div{word-break:keep-all;} h1,h2{text-wrap:balance;} p{text-wrap:pretty;}
+  img{display:block; max-width:100%;}
+  a{color:inherit; text-decoration:none;}
+  .wrap{max-width:1180px; margin:0 auto; padding:0 28px;}
+  .num{font-variant-numeric:tabular-nums;}
+  .kick{font-size:13px; font-weight:700; color:var(--coral); letter-spacing:1.4px; text-transform:uppercase; margin-bottom:16px;}
+
+  .btn{display:inline-flex; align-items:center; gap:8px; font-weight:700; border-radius:13px; padding:13px 22px; font-size:15px; cursor:pointer; border:1.5px solid transparent; transition:transform .16s var(--ease), box-shadow .16s var(--ease), background .16s;}
+  .btn:focus-visible{outline:3px solid rgba(190,85,53,.4); outline-offset:2px;}
+  .btn-p{background:var(--coral); color:#fff; box-shadow:0 8px 20px rgba(190,85,53,.24);}
+  .btn-p:hover{background:var(--coral-d); transform:translateY(-2px); box-shadow:0 14px 30px rgba(190,85,53,.3);}
+  .btn-g{background:var(--paper); color:var(--ink); border-color:var(--line);}
+  .btn-g:hover{border-color:var(--clay); transform:translateY(-2px);}
+  .btn-lg{padding:16px 28px; font-size:16px; border-radius:15px;}
+
+  nav{position:sticky; top:0; z-index:60; background:rgba(255,255,255,.8); backdrop-filter:blur(14px); border-bottom:1px solid transparent; transition:box-shadow .25s, border-color .25s;}
+  nav.solid{border-color:var(--line); box-shadow:var(--e1);}
+  .nav-in{display:flex; align-items:center; justify-content:space-between; height:72px; transition:height .25s var(--ease);}
+  nav.solid .nav-in{height:62px;}
+  .brand{display:flex; align-items:center; gap:9px;}
+  .brand img{width:32px; height:32px; border-radius:9px;}
+  .brand .wm{font-size:21px; font-weight:800; color:var(--ink); letter-spacing:-.5px;}
+  .nav-menu{display:flex; gap:30px; font-size:15px; color:var(--sub); font-weight:500;}
+  .nav-menu a{position:relative;}
+  .nav-menu a::after{content:""; position:absolute; left:0; right:0; bottom:-6px; height:2px; background:var(--coral); transform:scaleX(0); transform-origin:left; transition:transform .25s var(--ease);}
+  .nav-menu a:hover{color:var(--ink);} .nav-menu a:hover::after{transform:scaleX(1);}
+
+  /* browser frame for real product shots */
+  .win{border-radius:16px; overflow:hidden; border:1px solid var(--line); box-shadow:var(--e2); background:#fff;}
+  .win .bar{display:flex; align-items:center; gap:8px; padding:10px 14px; background:#f6f2ec; border-bottom:1px solid var(--line);}
+  .win .bar i{width:10px; height:10px; border-radius:50%; background:#dcd4c9;}
+  .win .bar .url{margin-left:10px; font-size:12px; color:var(--mut); background:#fff; border:1px solid var(--line); border-radius:8px; padding:4px 12px;}
+  .win img{width:100%; display:block;}
+
+  .hero{background:linear-gradient(180deg,#fff, var(--cream)); overflow:hidden;}
+  .hero-grid{display:grid; grid-template-columns:1.02fr .98fr; gap:56px; align-items:center; padding:76px 0 88px;}
+  .hero-eye{display:inline-flex; align-items:center; gap:8px; font-size:13px; font-weight:700; letter-spacing:.4px; color:var(--coral); background:var(--coral-soft); padding:7px 14px; border-radius:999px; margin-bottom:22px;}
+  h1.hero-h{font-size:clamp(38px,5.2vw,62px); line-height:1.12; font-weight:800; letter-spacing:-1.8px;}
+  h1.hero-h .ac{color:var(--coral);}
+  .hero-sub{font-size:clamp(17px,1.5vw,20px); color:var(--sub); margin:24px 0 34px; max-width:33ch;}
+  .hero-cta{display:flex; gap:12px; flex-wrap:wrap;}
+  .hero-media{position:relative; will-change:transform;}
+  .float{position:absolute; left:-24px; bottom:-20px; background:#fff; border:1px solid var(--line); border-radius:16px; padding:12px 16px; box-shadow:var(--e3); display:flex; align-items:center; gap:12px;}
+  .float .dots{display:flex;}
+  .float .dots i{width:26px; height:26px; border-radius:50%; border:2px solid #fff; margin-left:-9px;}
+  .float .ft{font-size:13px; color:var(--sub);} .float .ft b{color:var(--ink);}
+  .float .live{display:inline-flex; align-items:center; gap:5px; font-size:11px; color:var(--green); font-weight:700; margin-top:2px;}
+  .float .live::before{content:""; width:7px; height:7px; border-radius:50%; background:var(--green);}
+
+  .marq{border-top:1px solid var(--line); border-bottom:1px solid var(--line); background:var(--paper);}
+  .marq-in{display:flex; align-items:center; gap:36px; padding:22px 0; flex-wrap:wrap; justify-content:center; color:var(--mut); font-weight:600; font-size:15px;}
+  .marq-in .lbl{font-size:12px; letter-spacing:1.2px; color:var(--clay); font-weight:700;}
+
+  section{padding:100px 0;}
+  .lead{max-width:680px; margin-bottom:52px;}
+  h2{font-size:clamp(29px,3.4vw,44px); line-height:1.18; font-weight:800; letter-spacing:-1.1px;}
+  h2 .ac{color:var(--coral);}
+  .lead p{font-size:18px; color:var(--sub); margin-top:16px;}
+
+  .feat{display:grid; grid-template-columns:repeat(3,1fr); gap:28px;}
+  .card{background:var(--paper); border:1px solid var(--line); border-radius:22px; overflow:hidden; box-shadow:var(--e1); transition:transform .2s var(--ease), box-shadow .2s var(--ease);}
+  .card:hover{transform:translateY(-6px); box-shadow:var(--e2);}
+  .card .panel{aspect-ratio:16/10; display:flex; align-items:center; justify-content:center; font-size:52px;}
+  .card .bd{padding:22px 26px 30px;}
+  .card h3{font-size:21px; font-weight:700; margin:0 0 8px; letter-spacing:-.5px;}
+  .card p{font-size:15px; color:var(--sub);}
+  .card .more{display:inline-flex; align-items:center; gap:6px; margin-top:16px; font-size:14px; font-weight:700; color:var(--coral);}
+  .card .more span{transition:transform .2s var(--ease);} .card:hover .more span{transform:translateX(4px);}
+
+  .band{background:var(--cream);}
+  .prod{display:grid; grid-template-columns:1fr 1.15fr; gap:60px; align-items:center;}
+  .prod .win{transform:perspective(1600px) rotateY(-4deg);}
+  .steps{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:14px;}
+  .step{padding:0 22px;}
+  .step .n{font-family:"Fraunces",serif; font-size:42px; font-weight:500; color:var(--coral); line-height:1;}
+  .step h3{font-size:19px; font-weight:700; margin:12px 0 6px;}
+  .step p{font-size:14px; color:var(--sub);}
+  .step:not(:last-child){border-right:1px solid var(--line);}
+
+  .split{display:grid; grid-template-columns:1fr 1.05fr; gap:64px; align-items:center;}
+  .checks{margin-top:24px; display:grid; gap:14px;}
+  .checks .c{display:flex; gap:13px; align-items:flex-start; font-size:16px;}
+  .checks .c b{color:var(--ink); font-weight:700;}
+  .checks .c .k{color:#fff; background:var(--coral); width:24px; height:24px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:13px; flex:none; margin-top:1px;}
+  .checks .c small{display:block; color:var(--mut); font-weight:400; font-size:14px;}
+
+  .statb{background:var(--cream2);}
+  .statb .row{display:grid; grid-template-columns:repeat(3,1fr); gap:40px; text-align:center;}
+  .statb .v{font-family:"Fraunces",serif; font-size:clamp(44px,6vw,72px); font-weight:500; letter-spacing:-1px; line-height:1; color:var(--coral);}
+  .statb .l{font-size:15px; color:var(--sub); margin-top:12px; font-weight:500;}
+
+  .quote{max-width:900px; margin:0 auto; text-align:center;}
+  .stars{color:#e6a12f; font-size:18px; letter-spacing:3px; margin-bottom:20px;}
+  .quote .q{font-family:"Fraunces",serif; font-size:clamp(22px,3vw,32px); font-weight:400; line-height:1.5; letter-spacing:-.3px;}
+  .quote .who{display:flex; align-items:center; justify-content:center; gap:12px; margin-top:28px;}
+  .quote .who .ini{width:52px; height:52px; border-radius:50%; background:var(--coral-soft); color:var(--coral-d); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:18px;}
+  .quote .who .nm{font-weight:700;} .quote .who .rl{font-size:14px; color:var(--mut);}
+
+  .appshow{display:grid; grid-template-columns:1fr 330px; gap:60px; align-items:center;}
+  .phone{background:#241d17; border-radius:46px; padding:11px; box-shadow:var(--e3); width:318px; margin:0 auto;}
+  .phone .scr{background:#fff; border-radius:36px; overflow:hidden;}
+  .phone .top{padding:20px 18px 14px;}
+  .phone .apphdr{display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;}
+  .phone .apphdr .lg{display:flex; align-items:center; gap:7px; font-size:18px; font-weight:800; color:var(--coral);}
+  .phone .apphdr .lg img{width:24px; height:24px; border-radius:7px;}
+  .greet{font-size:22px; font-weight:800; letter-spacing:-.6px; line-height:1.3;}
+  .greet small{display:block; font-size:14px; font-weight:400; color:var(--sub); margin-top:4px;}
+  .balance{background:linear-gradient(135deg, var(--coral), #d3794f); color:#fff; border-radius:20px; padding:20px; margin:16px 0;}
+  .balance .l{font-size:13px; opacity:.92;}
+  .balance .v{font-family:"Fraunces",serif; font-size:36px; font-weight:500; letter-spacing:-1px; margin-top:2px;}
+  .req{border:1px solid var(--line); border-radius:16px; padding:12px; margin-bottom:10px; display:flex; gap:12px; align-items:center;}
+  .req .tile{width:46px; height:46px; border-radius:12px; flex:none; display:flex; align-items:center; justify-content:center; font-size:22px;}
+  .req .rt{font-size:14px; font-weight:700;} .req .rd{font-size:12px; color:var(--mut);}
+  .req .rp{margin-left:auto; font-size:11px; font-weight:700; color:#0f8a3c; background:#e8f6ec; padding:4px 9px; border-radius:999px;}
+  .navbar{display:flex; justify-content:space-around; padding:14px 0 16px; border-top:1px solid var(--line); font-size:20px;}
+
+  .cta{text-align:center; border-radius:30px; margin:0 28px; padding:80px 24px; background:var(--coral-soft); border:1px solid var(--line);}
+  .cta h2{margin-bottom:14px;}
+  .cta p{color:var(--sub); font-size:18px; margin-bottom:30px;}
+
+  footer{padding:56px 0 76px; border-top:1px solid var(--line); color:var(--mut); font-size:14px;}
+  .foot-in{display:flex; justify-content:space-between; flex-wrap:wrap; gap:20px; align-items:center;}
+  .foot-in .brand .wm{font-size:19px;}
+
+  .rv{opacity:0; transform:translateY(24px); transition:opacity .8s var(--ease), transform .8s var(--ease);}
+  .rv.in{opacity:1; transform:none;}
+  @media(prefers-reduced-motion:reduce){ .rv{opacity:1; transform:none; transition:none;} }
+
+  @media(max-width:880px){
+    .hero-grid,.split,.appshow,.prod{grid-template-columns:1fr; gap:36px;}
+    .hero-media{order:-1;} .prod .win{transform:none;}
+    .float{left:12px; bottom:12px;}
+    .feat,.steps,.statb .row{grid-template-columns:1fr;}
+    .step:not(:last-child){border-right:none; border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:22px;}
+    .nav-menu{display:none;} section{padding:64px 0;}
+  }
+</style>
+</head>
+<body>
+
+<nav id="nav"><div class="wrap nav-in">
+  <div class="brand"><img src="ieum_icon_1024.png" alt="이음 로고"><span class="wm">이음</span></div>
+  <div class="nav-menu"><a href="#care">돌봄 매칭</a><a href="#product">둘러보기</a><a href="#trust">안심 정책</a><a href="#app">참여 방법</a></div>
+  <button class="btn btn-p" style="padding:11px 20px;">시작하기</button>
+</div></nav>
+
+<header class="hero"><div class="wrap"><div class="hero-grid">
+  <div class="hero-l">
+    <span class="hero-eye rv">🤝 청년·어르신·아동 3세대 돌봄</span>
+    <h1 class="hero-h rv">세대를 잇다,<br><span class="ac">마음</span>을 나누다</h1>
+    <p class="hero-sub rv">혼자인 어르신, 방과 후 혼자인 아이, 낯선 동네의 청년. 서로의 빈자리를 채우는 우리 동네 3세대 돌봄이에요.</p>
+    <div class="hero-cta rv">
+      <button class="btn btn-p btn-lg">5분 만에 참여 신청 →</button>
+      <button class="btn btn-g btn-lg">데모 둘러보기</button>
+    </div>
+  </div>
+  <div class="hero-media rv" id="heroMedia">
+    <div class="win">
+      <div class="bar"><i></i><i></i><i></i><span class="url">eum-app.vercel.app</span></div>
+      <img src="시안_이미지/둘러보기.png" alt="이음 역할별 둘러보기 화면">
+    </div>
+    <div class="float">
+      <div class="dots"><i style="background:var(--green)"></i><i style="background:var(--purple)"></i><i style="background:var(--coral)"></i></div>
+      <div class="ft"><b>우리 동네 15쌍 활동 중</b><span class="live">실시간 안전 공유 중</span></div>
+    </div>
+  </div>
+</div></div></header>
+
+<div class="marq"><div class="wrap marq-in">
+  <span class="lbl">함께하는 곳</span>
+  <span>지자체</span><span>복지관</span><span>지역돌봄센터</span><span>사회적협동조합</span><span>고원</span>
+</div></div>
+
+<section id="care"><div class="wrap">
+  <div class="lead">
+    <div class="kick rv">Why 이음</div>
+    <h2 class="rv">혼자가 아니라,<br><span class="ac">함께</span> 돌보는 동네</h2>
+    <p class="rv">한쪽만 주는 게 아니라, 서로 주고받는 동네예요. 돌봄이 필요한 이웃을 먼저 찾아가고, 현장 운영과 복지 사각지대 발굴까지 이음이 함께합니다.</p>
+  </div>
+  <div class="feat">
+    <div class="card rv"><div class="panel" style="background:var(--coral-soft);">🤝</div>
+      <div class="bd"><h3>세대를 잇는 매칭</h3><p>청년·어르신·아동을 거리와 필요에 맞춰 안전하게 연결합니다.</p><span class="more">자세히 <span>→</span></span></div></div>
+    <div class="card rv"><div class="panel" style="background:var(--purple-soft);">💛</div>
+      <div class="bd"><h3>안심 케어 · 이상징후 감지</h3><p>활동을 기록하고, 도움이 필요한 신호를 먼저 살펴 찾아갑니다.</p><span class="more">자세히 <span>→</span></span></div></div>
+    <div class="card rv"><div class="panel" style="background:var(--green-soft);">📱</div>
+      <div class="bd"><h3>카톡 · 웹 참여</h3><p>앱 설치 없이 카카오톡·웹으로 누구나 쉽게 신청합니다.</p><span class="more">자세히 <span>→</span></span></div></div>
+  </div>
+</div></section>
+
+<section id="product" class="band"><div class="wrap prod">
+  <div class="txt">
+    <div class="kick rv">직접 둘러보기</div>
+    <h2 class="rv">담당자는 한 화면에서,<br><span class="ac">모두</span>를 돌봅니다</h2>
+    <p class="rv" style="font-size:17px; color:var(--sub); margin-top:14px;">신청·검증·매칭·활동·안전·정산·실적보고까지. AI가 최적의 3세대 트리오를 추천하고, 코디네이터는 한 곳에서 운영합니다.</p>
+    <div class="steps rv">
+      <div class="step"><div class="n">01</div><h3>신청</h3><p>카톡·웹으로 간편 신청</p></div>
+      <div class="step"><div class="n">02</div><h3>AI 매칭</h3><p>적합도 기반 자동 추천</p></div>
+      <div class="step"><div class="n">03</div><h3>안심 활동</h3><p>기록·정산·안전 관리</p></div>
+    </div>
+  </div>
+  <div class="win rv">
+    <div class="bar"><i></i><i></i><i></i><span class="url">이음 · 코디네이터 · 매칭 보드</span></div>
+    <img src="시안_이미지/매칭보드.png" alt="이음 AI 매칭 보드 화면">
+  </div>
+</div></section>
+
+<section id="trust"><div class="wrap split">
+  <div class="win rv">
+    <div class="bar"><i></i><i></i><i></i><span class="url">이음 · 운영 리포트</span></div>
+    <img src="시안_이미지/리포트.png" alt="이음 운영 리포트 화면">
+  </div>
+  <div class="txt">
+    <div class="kick rv">Safety first</div>
+    <h2 class="rv">믿고 맡길 수 있는 <span class="ac">이유</span></h2>
+    <p class="rv" style="font-size:17px; color:var(--sub); margin-top:14px;">이음은 신뢰를 가장 중요하게 생각합니다. 모든 이웃은 본인 확인을 거치고, 활동 하나하나가 기록으로 남습니다.</p>
+    <div class="checks">
+      <div class="c rv"><span class="k">✓</span><div><b>실명·연락처 본인 확인</b><small>참여 시 검증 절차를 거칩니다.</small></div></div>
+      <div class="c rv"><span class="k">✓</span><div><b>활동 이력·후기 투명 공개</b><small>매칭 전에 상대의 후기를 확인해요.</small></div></div>
+      <div class="c rv"><span class="k">✓</span><div><b>이상징후 감지·안전 대응</b><small>도움이 필요한 신호를 먼저 살핍니다.</small></div></div>
+      <div class="c rv"><span class="k">✓</span><div><b>개인정보 암호화 보관</b><small>민감 정보는 안전하게 관리됩니다.</small></div></div>
+    </div>
+  </div>
+</div></section>
+
+<section class="statb"><div class="wrap"><div class="row">
+  <div class="rv"><div class="v num count" data-to="15" data-suffix="쌍">0</div><div class="l">동네 활동 매칭</div></div>
+  <div class="rv"><div class="v num count" data-to="2400" data-suffix="+">0</div><div class="l">참여 이웃</div></div>
+  <div class="rv"><div class="v num count" data-to="98" data-suffix="%">0</div><div class="l">다시 이용 의향</div></div>
+</div></div></section>
+
+<section><div class="wrap quote">
+  <div class="stars rv">★★★★★</div>
+  <div class="q rv">“퇴근이 늦는 날, 옆 동 어르신이 아이를 봐주세요. 저는 주말에 병원 동행으로 시간을 갚고요. 이음 덕분에 마을이 생겼어요.”</div>
+  <div class="who rv"><div class="ini">민</div>
+    <div style="text-align:left;"><div class="nm">김민준</div><div class="rl">이음 청년 돌봄단 · 27세</div></div></div>
+</div></section>
+
+<section id="app" class="band"><div class="wrap appshow">
+  <div class="txt">
+    <div class="kick rv">참여 방법</div>
+    <h2 class="rv" style="margin:8px 0 16px;">앱 설치 없이,<br>카톡으로 <span class="ac">이음</span></h2>
+    <p class="rv" style="font-size:17px; color:var(--sub); margin-bottom:26px; max-width:33ch;">카카오톡 채널·웹으로 바로 참여합니다. 큰 글씨와 단순한 흐름으로 어르신도 쉽게 사용합니다.</p>
+    <button class="btn btn-p btn-lg rv">카카오톡으로 시작하기</button>
+  </div>
+  <div class="phone rv"><div class="scr">
+    <div class="top">
+      <div class="apphdr"><span class="lg"><img src="ieum_icon_1024.png" alt="">이음</span><span style="font-size:20px;">🔔</span></div>
+      <div class="greet">안녕하세요, 민준님<small>오늘도 따뜻하게 나눠요</small></div>
+      <div class="balance"><div class="l">이번 주 적립 시간</div><div class="v num">3.5<span style="font-size:16px; font-weight:700; font-family:Pretendard;">시간</span></div></div>
+      <div style="font-size:14px; font-weight:700; margin-bottom:10px;">가까운 돌봄 요청</div>
+      <div class="req"><div class="tile" style="background:var(--green-soft);">🧒</div><div><div class="rt">아이 하원 돌봄</div><div class="rd">도보 5분 · 오후 4시</div></div><span class="rp">모집중</span></div>
+      <div class="req"><div class="tile" style="background:var(--purple-soft);">👵</div><div><div class="rt">어르신 말벗</div><div class="rd">도보 8분 · 내일 오전</div></div><span class="rp">모집중</span></div>
+    </div>
+    <div class="navbar"><span>🏠</span><span style="opacity:.35;">🔍</span><span style="opacity:.35;">❤️</span><span style="opacity:.35;">👤</span></div>
+  </div></div>
+</div></section>
+
+<section style="padding:20px 0 96px;"><div class="wrap"><div class="cta rv">
+  <div class="kick" style="color:var(--coral);">Start today</div>
+  <h2>오늘, 이웃과 마음을 이어보세요</h2>
+  <p>참여는 1분이면 충분합니다.</p>
+  <button class="btn btn-p btn-lg">무료로 시작하기</button>
+</div></div></section>
+
+<footer><div class="wrap foot-in">
+  <div class="brand"><img src="ieum_icon_1024.png" alt="이음" style="width:28px;height:28px;border-radius:8px;"><span class="wm">이음</span></div>
+  <div>© 2026 이음 · 3세대 상생 AI 돌봄 플랫폼 &nbsp;·&nbsp; 운영 고원</div>
+</div></footer>
+
+<script>
+  const nav=document.getElementById('nav');
+  const onScroll=()=>nav.classList.toggle('solid', window.scrollY>30);
+  onScroll(); addEventListener('scroll', onScroll, {passive:true});
+
+  const io=new IntersectionObserver((es)=>es.forEach(e=>{
+    if(e.isIntersecting){
+      const el=e.target, sibs=[...el.parentElement.children].filter(c=>c.classList.contains('rv'));
+      const i=Math.max(0, sibs.indexOf(el));
+      el.style.transitionDelay=(i*85)+'ms';
+      el.classList.add('in'); io.unobserve(el);
+    }
+  }),{threshold:.14});
+  document.querySelectorAll('.rv').forEach(el=>io.observe(el));
+
+  const hm=document.getElementById('heroMedia');
+  const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+  if(hm && !reduce){ addEventListener('scroll',()=>{ const y=Math.min(window.scrollY,600); hm.style.transform='translateY('+(y*0.04)+'px)'; },{passive:true}); }
+
+  const cio=new IntersectionObserver((es)=>es.forEach(e=>{
+    if(!e.isIntersecting) return; const el=e.target; cio.unobserve(el);
+    const to=+el.dataset.to, comma=el.dataset.comma, suf=el.dataset.suffix||''; const dur=1300, t0=performance.now();
+    const ease=x=>1-Math.pow(1-x,3);
+    const tick=(t)=>{ let p=Math.min((t-t0)/dur,1); let v=Math.round(to*ease(p));
+      el.textContent=(comma?v.toLocaleString():v)+suf; if(p<1)requestAnimationFrame(tick); };
+    requestAnimationFrame(tick);
+  }),{threshold:.6});
+  document.querySelectorAll('.count').forEach(el=>cio.observe(el));
+</script>
+</body>
+</html>

@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>이음 — 세대를 잇다, 마음을 나누다</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&display=swap">
+<style>
+  :root{
+    --ink:#231b15; --paper:#fffdfb; --cream:#f7f2ea; --cream2:#efe6db;
+    --coral:#DB512C; --coral-d:#B83E1E; --coral-soft:#f6e6de;
+    --clay:#8a5a44; --sub:#5c534b; --mut:#978d82; --line:#ece3d9;
+    --e1:0 1px 2px rgba(35,27,21,.05); --e2:0 8px 24px rgba(35,27,21,.08); --e3:0 24px 60px rgba(35,27,21,.14);
+    --grade:contrast(1.04) saturate(.94) brightness(1.02);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{font-family:"Pretendard Variable",Pretendard,-apple-system,system-ui,sans-serif; color:var(--ink); background:var(--paper); line-height:1.62; -webkit-font-smoothing:antialiased; letter-spacing:-.1px;}
+  img{display:block; max-width:100%;}
+  a{color:inherit; text-decoration:none;}
+  .wrap{max-width:1180px; margin:0 auto; padding:0 28px;}
+  .num{font-variant-numeric:tabular-nums;}
+  .serif{font-family:"Fraunces",Georgia,serif;}
+  .kick{font-family:"Fraunces",serif; font-style:italic; font-size:15px; color:var(--coral); letter-spacing:.2px;}
+  .over{position:relative;}
+  .over::after{content:""; position:absolute; inset:0; background:linear-gradient(180deg, rgba(35,27,21,.04), rgba(219,81,44,.10)); mix-blend-mode:multiply; pointer-events:none;}
+  .over img{filter:var(--grade);}
+
+  .btn{display:inline-flex; align-items:center; gap:8px; font-weight:700; border-radius:13px; padding:13px 22px; font-size:15px; cursor:pointer; border:1.5px solid transparent; transition:transform .14s ease, box-shadow .14s ease, background .14s;}
+  .btn:focus-visible{outline:3px solid rgba(219,81,44,.4); outline-offset:2px;}
+  .btn-p{background:var(--coral); color:#fff; box-shadow:0 8px 20px rgba(219,81,44,.26);}
+  .btn-p:hover{background:var(--coral-d); transform:translateY(-2px); box-shadow:0 12px 28px rgba(219,81,44,.32);}
+  .btn-g{background:var(--paper); color:var(--ink); border-color:var(--line);}
+  .btn-g:hover{border-color:var(--clay); transform:translateY(-2px);}
+  .btn-lg{padding:16px 28px; font-size:16px; border-radius:15px;}
+
+  nav{position:sticky; top:0; z-index:60; transition:background .25s, box-shadow .25s, border-color .25s; border-bottom:1px solid transparent;}
+  nav.solid{background:rgba(255,253,251,.86); backdrop-filter:blur(14px); border-color:var(--line); box-shadow:var(--e1);}
+  .nav-in{display:flex; align-items:center; justify-content:space-between; height:70px;}
+  .logo{font-size:23px; font-weight:800; color:var(--coral); letter-spacing:-.5px;}
+  .nav-menu{display:flex; gap:30px; font-size:15px; color:var(--sub); font-weight:500;}
+  .nav-menu a:hover{color:var(--ink);}
+  nav:not(.solid) .logo, nav:not(.solid) .nav-menu{color:#fff;}
+  nav:not(.solid) .logo{color:#fff;}
+
+  .hero{position:relative; margin-top:-70px; padding-top:70px; background:var(--ink);}
+  .hero-grid{display:grid; grid-template-columns:1.04fr .96fr; min-height:640px; align-items:center;}
+  .hero-l{padding:60px 56px 60px 0; color:#fff;}
+  .hero-eye{display:inline-block; font-family:"Fraunces",serif; font-style:italic; font-size:16px; color:#f0b9a6; margin-bottom:20px;}
+  h1.hero-h{font-size:clamp(40px,5.4vw,66px); line-height:1.08; font-weight:800; letter-spacing:-2px;}
+  .hero-h em{font-family:"Fraunces",serif; font-style:italic; font-weight:400; color:#f2a98f;}
+  .hero-sub{font-size:clamp(17px,1.5vw,20px); color:rgba(255,255,255,.82); margin:24px 0 34px; max-width:36ch; font-weight:400;}
+  .hero-cta{display:flex; gap:12px; flex-wrap:wrap;}
+  .hero-r{position:relative; height:100%; min-height:640px;}
+  .hero-r img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; filter:var(--grade);}
+  .hero-r::after{content:""; position:absolute; inset:0; background:linear-gradient(90deg, var(--ink) 0%, rgba(35,27,21,.35) 22%, rgba(35,27,21,.1) 60%, rgba(219,81,44,.14) 100%); mix-blend-mode:multiply;}
+  .float{position:absolute; left:-46px; bottom:44px; z-index:5; background:rgba(255,253,251,.94); backdrop-filter:blur(8px); border:1px solid var(--line); border-radius:18px; padding:16px 20px; box-shadow:var(--e3); display:flex; align-items:center; gap:14px;}
+  .float .av{display:flex;}
+  .float .av span{width:34px; height:34px; border-radius:50%; border:2px solid #fff; margin-left:-10px; background-size:cover;}
+  .float .ft{font-size:13px; color:var(--sub);}
+  .float .ft b{color:var(--ink);}
+
+  .marq{border-top:1px solid var(--line); border-bottom:1px solid var(--line); background:var(--cream);}
+  .marq-in{display:flex; align-items:center; gap:44px; padding:22px 0; flex-wrap:wrap; justify-content:center; color:var(--mut); font-weight:600; font-size:15px;}
+  .marq-in .lbl{font-size:12px; letter-spacing:1px; color:var(--clay); font-weight:700;}
+
+  section{padding:104px 0;}
+  .lead{max-width:660px; margin-bottom:56px;}
+  h2{font-size:clamp(30px,3.6vw,46px); line-height:1.16; font-weight:800; letter-spacing:-1.2px;}
+  h2 em{font-family:"Fraunces",serif; font-style:italic; font-weight:400; color:var(--coral);}
+  .lead p{font-size:18px; color:var(--sub); margin-top:16px;}
+
+  .feat{display:grid; grid-template-columns:repeat(3,1fr); gap:28px;}
+  .card{background:var(--paper); border:1px solid var(--line); border-radius:22px; overflow:hidden; box-shadow:var(--e1); transition:transform .18s ease, box-shadow .18s ease;}
+  .card:hover{transform:translateY(-6px); box-shadow:var(--e2);}
+  .card .ph{aspect-ratio:5/4; overflow:hidden;}
+  .card .ph img{width:100%; height:100%; object-fit:cover; transition:transform .5s ease;}
+  .card:hover .ph img{transform:scale(1.05);}
+  .card .bd{padding:24px 26px 30px;}
+  .card .ic{font-size:24px;}
+  .card h3{font-size:21px; font-weight:700; margin:12px 0 8px; letter-spacing:-.5px;}
+  .card p{font-size:15px; color:var(--sub);}
+  .card .more{display:inline-flex; align-items:center; gap:6px; margin-top:16px; font-size:14px; font-weight:700; color:var(--coral);}
+
+  .steps{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; position:relative;}
+  .step{padding:0 22px;}
+  .step .n{font-family:"Fraunces",serif; font-size:46px; font-weight:500; color:var(--coral); line-height:1;}
+  .step h3{font-size:20px; font-weight:700; margin:14px 0 8px;}
+  .step p{font-size:15px; color:var(--sub);}
+  .step:not(:last-child){border-right:1px solid var(--line);}
+
+  .band{background:var(--cream);}
+  .split{display:grid; grid-template-columns:1fr 1.05fr; gap:72px; align-items:center;}
+  .split .media{border-radius:26px; overflow:hidden; box-shadow:var(--e2);}
+  .split .media img{width:100%; aspect-ratio:5/4.4; object-fit:cover; filter:var(--grade);}
+  .checks{margin-top:26px; display:grid; gap:14px;}
+  .checks .c{display:flex; gap:13px; align-items:flex-start; font-size:16px;}
+  .checks .c b{color:var(--ink); font-weight:700;}
+  .checks .c .k{color:#fff; background:var(--coral); width:24px; height:24px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:13px; flex:none; margin-top:1px;}
+  .checks .c small{display:block; color:var(--mut); font-weight:400; font-size:14px;}
+
+  .statb{background:var(--ink); color:#fff;}
+  .statb .row{display:grid; grid-template-columns:repeat(3,1fr); gap:40px; text-align:center;}
+  .statb .v{font-family:"Fraunces",serif; font-size:clamp(44px,6vw,72px); font-weight:500; letter-spacing:-1px; line-height:1;}
+  .statb .l{font-size:15px; color:rgba(255,255,255,.66); margin-top:12px;}
+
+  .quote{max-width:900px; margin:0 auto; text-align:center;}
+  .stars{color:#e8a33d; font-size:18px; letter-spacing:2px; margin-bottom:20px;}
+  .quote .q{font-family:"Fraunces",serif; font-size:clamp(24px,3.2vw,34px); font-weight:400; line-height:1.45; letter-spacing:-.4px;}
+  .quote .who{display:flex; align-items:center; justify-content:center; gap:13px; margin-top:30px;}
+  .quote .who img{width:54px; height:54px; border-radius:50%; object-fit:cover; filter:var(--grade);}
+  .quote .who .nm{font-weight:700;}
+  .quote .who .rl{font-size:14px; color:var(--mut);}
+
+  .appshow{display:grid; grid-template-columns:1fr 330px; gap:64px; align-items:center;}
+  .phone{background:#231b15; border-radius:46px; padding:11px; box-shadow:var(--e3); width:318px; margin:0 auto;}
+  .phone .scr{background:#fff; border-radius:36px; overflow:hidden;}
+  .phone .top{padding:20px 18px 14px;}
+  .phone .apphdr{display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;}
+  .phone .apphdr .lg{font-size:19px; font-weight:800; color:var(--coral);}
+  .greet{font-size:22px; font-weight:800; letter-spacing:-.6px; line-height:1.3;}
+  .greet small{display:block; font-size:14px; font-weight:400; color:var(--sub); margin-top:4px;}
+  .balance{background:linear-gradient(135deg, var(--coral), #e8763f); color:#fff; border-radius:20px; padding:20px; margin:16px 0;}
+  .balance .l{font-size:13px; opacity:.92;}
+  .balance .v{font-family:"Fraunces",serif; font-size:36px; font-weight:500; letter-spacing:-1px; margin-top:2px;}
+  .req{border:1px solid var(--line); border-radius:16px; padding:12px; margin-bottom:10px; display:flex; gap:12px; align-items:center;}
+  .req .rimg{width:46px; height:46px; border-radius:12px; object-fit:cover; flex:none; filter:var(--grade);}
+  .req .rt{font-size:14px; font-weight:700;}
+  .req .rd{font-size:12px; color:var(--mut);}
+  .req .rp{margin-left:auto; font-size:11px; font-weight:700; color:#0f8a3c; background:#e8f6ec; padding:4px 9px; border-radius:999px;}
+  .navbar{display:flex; justify-content:space-around; padding:14px 0 16px; border-top:1px solid var(--line); font-size:20px;}
+
+  .cta{position:relative; overflow:hidden; text-align:center; border-radius:30px; margin:0 28px; padding:88px 24px; color:#fff;}
+  .cta .cbg{position:absolute; inset:0;}
+  .cta .cbg img{width:100%; height:100%; object-fit:cover; filter:var(--grade);}
+  .cta .cbg::after{content:""; position:absolute; inset:0; background:linear-gradient(120deg, rgba(35,27,21,.86), rgba(184,62,30,.72));}
+  .cta .ci{position:relative;}
+  .cta h2{color:#fff; margin-bottom:14px;}
+  .cta p{color:rgba(255,255,255,.82); font-size:18px; margin-bottom:30px;}
+
+  footer{padding:60px 0 80px; border-top:1px solid var(--line); color:var(--mut); font-size:14px;}
+  .foot-in{display:flex; justify-content:space-between; flex-wrap:wrap; gap:20px;}
+
+  .rv{opacity:0; transform:translateY(22px); transition:opacity .7s ease, transform .7s ease;}
+  .rv.in{opacity:1; transform:none;}
+
+  @media(max-width:880px){
+    .hero-grid,.split,.appshow{grid-template-columns:1fr;}
+    .hero-l{padding:44px 0 40px;}
+    .hero-r{min-height:320px; height:320px; order:-1;}
+    .float{left:16px; bottom:16px;}
+    .feat,.steps,.statb .row{grid-template-columns:1fr;}
+    .step:not(:last-child){border-right:none; border-bottom:1px solid var(--line); padding-bottom:26px; margin-bottom:26px;}
+    .nav-menu{display:none;} section{padding:68px 0;}
+  }
+</style>
+</head>
+<body>
+
+<nav id="nav"><div class="wrap nav-in">
+  <span class="logo">이음</span>
+  <div class="nav-menu"><a href="#care">돌봄 매칭</a><a href="#how">이용 방법</a><a href="#trust">안심 정책</a><a href="#app">앱 소개</a></div>
+  <button class="btn btn-p" style="padding:11px 20px;">시작하기</button>
+</div></nav>
+
+<header class="hero"><div class="wrap"><div class="hero-grid">
+  <div class="hero-l">
+    <span class="hero-eye">A neighbourhood of care</span>
+    <h1 class="hero-h">세대를 잇다,<br><em>마음</em>을 나누다</h1>
+    <p class="hero-sub">아이부터 어르신까지, 가까운 이웃과 돌봄을 주고받는 시간. 이음이 안전하게 연결합니다.</p>
+    <div class="hero-cta">
+      <button class="btn btn-p btn-lg">돌봄 시작하기</button>
+      <button class="btn btn-g btn-lg" style="background:rgba(255,255,255,.1); color:#fff; border-color:rgba(255,255,255,.34);">서비스 둘러보기 →</button>
+    </div>
+  </div>
+  <div class="hero-r">
+    <img src="https://picsum.photos/seed/eum-hero-warm-community/1400/1500" alt="세대가 어울리는 마을">
+    <div class="float">
+      <div class="av">
+        <span style="background-image:url('https://picsum.photos/seed/a1/80')"></span>
+        <span style="background-image:url('https://picsum.photos/seed/a2/80')"></span>
+        <span style="background-image:url('https://picsum.photos/seed/a3/80')"></span>
+      </div>
+      <div class="ft"><b>2,400+ 이웃</b>이<br>오늘도 함께 나눠요</div>
+    </div>
+  </div>
+</div></div></header>
+
+<div class="marq"><div class="wrap marq-in">
+  <span class="lbl">함께하는 곳</span>
+  <span>광주광역시</span><span>광산구청</span><span>사회적협동조합</span><span>지역돌봄센터</span><span>GOWON</span>
+</div></div>
+
+<section id="care"><div class="wrap">
+  <div class="lead rv">
+    <div class="kick">Why 이음</div>
+    <h2>혼자가 아니라,<br><em>함께</em> 키우고 함께 돌봅니다</h2>
+    <p>이웃의 손길이 필요한 순간, 신뢰할 수 있는 이웃과 연결합니다. 도움을 준 시간은 포인트로 적립되어 내가 필요할 때 돌려받습니다.</p>
+  </div>
+  <div class="feat">
+    <div class="card rv"><div class="ph over"><img src="https://picsum.photos/seed/eum-childcare-v2/800/640" alt="아이 돌봄"></div>
+      <div class="bd"><div class="ic">👶</div><h3>이웃 돌봄 매칭</h3><p>거리·시간대·돌봄 유형으로 딱 맞는 이웃을 찾아 연결합니다.</p><span class="more">자세히 →</span></div></div>
+    <div class="card rv"><div class="ph over"><img src="https://picsum.photos/seed/eum-timebank-v2/800/640" alt="시간 적립"></div>
+      <div class="bd"><div class="ic">⏳</div><h3>시간 적립 품앗이</h3><p>도움을 준 시간이 포인트로 쌓이고, 필요할 때 돌려받습니다.</p><span class="more">자세히 →</span></div></div>
+    <div class="card rv"><div class="ph over"><img src="https://picsum.photos/seed/eum-trust-v2/800/640" alt="안심 검증"></div>
+      <div class="bd"><div class="ic">🛡️</div><h3>안심 검증</h3><p>본인 확인과 활동 후기로, 안전한 돌봄 문화를 만듭니다.</p><span class="more">자세히 →</span></div></div>
+  </div>
+</div></section>
+
+<section id="how" class="band"><div class="wrap">
+  <div class="lead rv"><div class="kick">How it works</div><h2>세 단계면 <em>충분</em>합니다</h2></div>
+  <div class="steps rv">
+    <div class="step"><div class="n">01</div><h3>이웃 찾기</h3><p>필요한 돌봄을 등록하면 가까운 이웃을 추천해 드립니다.</p></div>
+    <div class="step"><div class="n">02</div><h3>안심 매칭</h3><p>후기와 검증 정보를 확인하고 편하게 약속을 잡습니다.</p></div>
+    <div class="step"><div class="n">03</div><h3>시간 적립</h3><p>돌봄이 끝나면 시간이 포인트로 적립되어 다시 쓸 수 있습니다.</p></div>
+  </div>
+</div></section>
+
+<section id="trust"><div class="wrap split">
+  <div class="media rv over"><img src="https://picsum.photos/seed/eum-elderly-child-v2/1000/880" alt="세대가 함께하는 순간"></div>
+  <div class="txt rv">
+    <div class="kick">Safety first</div>
+    <h2>믿고 맡길 수 있는 <em>이유</em></h2>
+    <p style="font-size:17px; color:var(--sub); margin-top:14px;">이음은 신뢰를 가장 중요하게 생각합니다. 모든 이웃은 본인 확인을 거치고, 활동 하나하나가 기록으로 남습니다.</p>
+    <div class="checks">
+      <div class="c"><span class="k">✓</span><div><b>실명·연락처 본인 확인</b><small>가입 시 검증 절차를 거칩니다.</small></div></div>
+      <div class="c"><span class="k">✓</span><div><b>활동 이력·후기 투명 공개</b><small>매칭 전에 상대의 후기를 확인해요.</small></div></div>
+      <div class="c"><span class="k">✓</span><div><b>안전사고 대응 절차</b><small>문제 발생 시 즉시 지원합니다.</small></div></div>
+      <div class="c"><span class="k">✓</span><div><b>개인정보 암호화 보관</b><small>민감 정보는 안전하게 관리됩니다.</small></div></div>
+    </div>
+  </div>
+</div></section>
+
+<section class="statb"><div class="wrap"><div class="row rv">
+  <div><div class="v num">2,400+</div><div class="l">참여 이웃</div></div>
+  <div><div class="v num">18,900</div><div class="l">나눈 돌봄 시간</div></div>
+  <div><div class="v num">98%</div><div class="l">다시 이용 의향</div></div>
+</div></div></section>
+
+<section class="band"><div class="wrap quote rv">
+  <div class="stars">★★★★★</div>
+  <div class="q">“퇴근이 늦는 날, 옆 동 할머니가 아이를 봐주세요. 저는 주말에 병원 동행으로 시간을 갚고요. 이음 덕분에 마을이 생겼어요.”</div>
+  <div class="who"><img src="https://picsum.photos/seed/eum-user-minji-v2/120/120" alt="이용자">
+    <div style="text-align:left;"><div class="nm">김민지</div><div class="rl">이음 이용자 · 광산구 수완동</div></div></div>
+</div></section>
+
+<section id="app"><div class="wrap appshow">
+  <div class="txt rv">
+    <div class="kick">Mobile app</div>
+    <h2 style="margin:8px 0 16px;">손안에서,<br>언제든 <em>이음</em></h2>
+    <p style="font-size:17px; color:var(--sub); margin-bottom:26px; max-width:34ch;">등록부터 매칭·적립까지 앱 하나로. 큰 글씨와 단순한 흐름으로 어르신도 쉽게 사용합니다.</p>
+    <button class="btn btn-p btn-lg">앱 다운로드</button>
+  </div>
+  <div class="phone rv"><div class="scr">
+    <div class="top">
+      <div class="apphdr"><span class="lg">이음</span><span style="font-size:20px;">🔔</span></div>
+      <div class="greet">안녕하세요, 민지님<small>오늘도 따뜻하게 나눠요</small></div>
+      <div class="balance"><div class="l">이번 주 적립 시간</div><div class="v num">3.5<span style="font-size:16px; font-weight:700; font-family:Pretendard;">시간</span></div></div>
+      <div style="font-size:14px; font-weight:700; margin-bottom:10px;">가까운 돌봄 요청</div>
+      <div class="req"><img class="rimg" src="https://picsum.photos/seed/eum-r1v2/100" alt=""><div><div class="rt">아이 하원 돌봄</div><div class="rd">도보 5분 · 오후 4시</div></div><span class="rp">모집중</span></div>
+      <div class="req"><img class="rimg" src="https://picsum.photos/seed/eum-r2v2/100" alt=""><div><div class="rt">어르신 말벗</div><div class="rd">도보 8분 · 내일 오전</div></div><span class="rp">모집중</span></div>
+    </div>
+    <div class="navbar"><span>🏠</span><span style="opacity:.35;">🔍</span><span style="opacity:.35;">❤️</span><span style="opacity:.35;">👤</span></div>
+  </div></div>
+</div></section>
+
+<section style="padding:20px 0 100px;"><div class="wrap"><div class="cta rv">
+  <div class="cbg"><img src="https://picsum.photos/seed/eum-cta-hands/1600/700" alt=""></div>
+  <div class="ci">
+    <div class="kick" style="color:#f2b6a3;">Start today</div>
+    <h2>오늘, 이웃과 마음을 이어보세요</h2>
+    <p>가입은 1분이면 충분합니다.</p>
+    <button class="btn btn-p btn-lg" style="background:#fff; color:var(--coral);">무료로 시작하기</button>
+  </div>
+</div></div></section>
+
+<footer><div class="wrap foot-in">
+  <div><span class="logo" style="font-size:20px;">이음</span><div style="margin-top:8px;">3세대 상생 품앗이 · 광주 광산구</div></div>
+  <div>© 2026 이음 · GOWON &nbsp;·&nbsp; 사진은 시안용 플레이스홀더입니다.</div>
+</div></footer>
+
+<script>
+  const nav=document.getElementById('nav');
+  const onScroll=()=>nav.classList.toggle('solid', window.scrollY>40);
+  onScroll(); addEventListener('scroll', onScroll, {passive:true});
+  const io=new IntersectionObserver((es)=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in'); io.unobserve(e.target);}}),{threshold:.12});
+  document.querySelectorAll('.rv').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>

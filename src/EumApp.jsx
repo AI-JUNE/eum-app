@@ -1281,7 +1281,7 @@ function Sidebar({ role, currentView, onNavigate, onLogout, userName, dataCount 
       position: 'sticky', top: 0,
     }}>
       <div style={{ padding: '22px 20px 18px', borderBottom: `1px solid ${C.borderSoft}` }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 9, cursor: 'pointer' }} onClick={() => onNavigate('overview')} role="button" aria-label="대시보드로">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 9, cursor: 'pointer' }} onClick={() => onNavigate('overview')} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onNavigate('overview'); } }} role="button" tabIndex={0} aria-label="대시보드로">
           <div style={{ borderRadius: 9, boxShadow: `0 2px 8px ${C.brand}40`, display: 'flex' }}>
             <EumLogo size={32} />
           </div>
@@ -2449,7 +2449,7 @@ function ConsumerLayout({ role, view, setView, user, dispatch, state, children }
       <div style={{ width: '100%', maxWidth: isSenior ? 840 : 700, minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'transparent', position: 'relative' }}>
         {/* 상단 앱바 */}
         <div style={{ position: 'sticky', top: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: isSenior ? '15px 22px' : '12px 18px', background: 'rgba(250,247,242,0.82)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderBottom: `1px solid ${C.borderSoft}` }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 9, cursor: 'pointer' }} onClick={() => setView(items[0]?.id || 'dashboard')} role="button" aria-label="홈으로">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 9, cursor: 'pointer' }} onClick={() => setView(items[0]?.id || 'dashboard')} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setView(items[0]?.id || 'dashboard'); } }} role="button" tabIndex={0} aria-label="홈으로">
             <div style={{ display: 'flex', borderRadius: 8, boxShadow: `0 2px 8px ${C.brand}33` }}><EumLogo size={isSenior ? 34 : 28} /></div>
             <div>
               <div style={{ fontSize: isSenior ? 17 : 15, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK, letterSpacing: '-0.02em', lineHeight: 1.1 }}>이음</div>
@@ -4280,7 +4280,7 @@ function RLLanding({ state, onSelectRole, onShowApplication }) {
       {/* 상단 내비게이션 */}
       <div style={{ width: '100%', position: 'sticky', top: 0, zIndex: 50, background: scrolled ? 'rgba(245,244,242,0.92)' : 'rgba(245,244,242,0.8)', backdropFilter: 'blur(12px)', borderBottom: `1px solid ${scrolled ? C.border : 'transparent'}`, boxShadow: scrolled ? '0 6px 22px -10px rgba(26,26,30,0.16)' : 'none', transition: 'box-shadow 0.25s ease, border-color 0.25s ease, background 0.25s ease' }}>
         <div style={{ maxWidth: 1160, margin: '0 auto', padding: isMobile ? '12px 18px' : '14px 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-          <div onClick={() => window.location.reload()} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }} role="button" aria-label="홈으로 새로고침">
+          <div onClick={() => window.location.reload()} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); window.location.reload(); } }} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }} role="button" tabIndex={0} aria-label="홈으로 새로고침">
             <div style={{ width: 30, height: 30, display: 'flex' }}><EumLogo size={30} /></div>
             <div style={{ lineHeight: 1.05 }}>
               <div className="eum-serif" style={{ fontWeight: 700, color: C.ink, fontSize: 21, letterSpacing: '-0.01em', lineHeight: 1 }}>이음</div>

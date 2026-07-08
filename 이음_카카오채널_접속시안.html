@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>이음 — 카카오톡 채널 접속 시안</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<style>
+  :root{ --ink:#241d17; --coral:#BE5535; --coral-d:#9E4329; --sub:#5f564d; --mut:#9b9186;
+    --line:#eee6dc; --kakao:#FEE500; --kakaoText:#191600; --chatbg:#b2c7da;
+    --ease:cubic-bezier(.16,1,.3,1); }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{font-family:"Pretendard Variable",Pretendard,-apple-system,system-ui,sans-serif; color:var(--ink);
+    background:#faf7f2; line-height:1.6; -webkit-font-smoothing:antialiased; word-break:keep-all; letter-spacing:-.1px;}
+  img{display:block; max-width:100%;}
+  .wrap{max-width:920px; margin:0 auto; padding:40px 24px 64px;}
+  .head{margin-bottom:8px;}
+  .kick{font-size:13px; font-weight:700; color:var(--coral); letter-spacing:1.4px; text-transform:uppercase;}
+  h1{font-size:28px; font-weight:800; letter-spacing:-1px; margin:8px 0 6px;}
+  .head p{color:var(--sub); font-size:16px;}
+
+  .stage{display:flex; gap:28px; align-items:center; justify-content:center; flex-wrap:wrap; margin-top:36px;}
+  .col{display:flex; flex-direction:column; align-items:center; gap:12px;}
+  .caption{font-size:13px; font-weight:700; color:var(--sub);}
+  .caption b{color:var(--coral);}
+  .arrow{display:flex; flex-direction:column; align-items:center; gap:6px; color:var(--mut);}
+  .arrow .a{font-size:26px; color:var(--coral);}
+  .arrow .t{font-size:12px; font-weight:700; max-width:110px; text-align:center;}
+
+  .phone{width:300px; background:#211a15; border-radius:42px; padding:9px; box-shadow:0 30px 70px rgba(36,29,23,.16);}
+  .screen{background:#fff; border-radius:34px; overflow:hidden; height:600px; display:flex; flex-direction:column;}
+
+  /* KakaoTalk channel */
+  .kkTop{background:#fff; border-bottom:1px solid #eee; padding:12px 14px; display:flex; align-items:center; gap:10px;}
+  .kkTop .bk{font-size:20px; color:#333;}
+  .kkTop .ci{width:34px; height:34px; border-radius:50%; object-fit:cover; border:1px solid var(--line);}
+  .kkTop .nm{font-size:15px; font-weight:700;}
+  .kkTop .nm small{display:block; font-size:11px; color:var(--mut); font-weight:500;}
+  .kkTop .sp{margin-left:auto; display:flex; gap:14px; color:#555; font-size:18px;}
+  .chat{flex:1; background:var(--chatbg); padding:14px 12px; overflow:hidden;}
+  .day{text-align:center; margin-bottom:12px;}
+  .day span{background:rgba(0,0,0,.12); color:#fff; font-size:11px; padding:3px 12px; border-radius:999px;}
+  .msg{display:flex; gap:8px; margin-bottom:12px;}
+  .msg .av{width:36px; height:36px; border-radius:14px; object-fit:cover; flex:none; border:1px solid rgba(0,0,0,.06);}
+  .msg .body{max-width:210px;}
+  .msg .who{font-size:11px; color:#33404d; margin:0 0 4px 2px; font-weight:600;}
+  .bubble{background:#fff; border-radius:4px 16px 16px 16px; padding:11px 13px; font-size:13.5px; box-shadow:0 1px 1px rgba(0,0,0,.06);}
+  .rich{background:#fff; border-radius:4px 16px 16px 16px; overflow:hidden; box-shadow:0 1px 2px rgba(0,0,0,.08); width:222px;}
+  .rich img{width:100%; height:118px; object-fit:cover;}
+  .rich .rb{padding:12px 13px 6px;}
+  .rich .rt{font-size:14px; font-weight:700;}
+  .rich .rd{font-size:12px; color:var(--sub); margin-top:3px;}
+  .rich .btns{margin-top:8px; border-top:1px solid #f0efec;}
+  .rich .btns a{display:block; text-align:center; padding:11px; font-size:13.5px; font-weight:600; color:#3d4a5c; border-top:1px solid #f0efec;}
+  .rich .btns a:first-child{border-top:none; color:var(--coral);}
+  .quicks{display:flex; gap:7px; padding:0 2px 4px; flex-wrap:wrap;}
+  .quicks span{background:#fff; border:1px solid rgba(0,0,0,.08); color:#33404d; font-size:12px; font-weight:600; padding:7px 12px; border-radius:999px;}
+  .kkInput{background:#fff; border-top:1px solid #eee; padding:9px 12px; display:flex; align-items:center; gap:10px; color:#999;}
+  .kkInput .box{flex:1; background:#f2f1ee; border-radius:999px; padding:8px 14px; font-size:13px; color:#9a938a;}
+  .kkInput .snd{width:32px; height:32px; border-radius:50%; background:var(--kakao); display:flex; align-items:center; justify-content:center; font-size:15px; color:var(--kakaoText);}
+
+  /* 이음 webview */
+  .wvTop{background:#fff; border-bottom:1px solid var(--line); padding:12px 14px; display:flex; align-items:center; gap:10px;}
+  .wvTop .bk{font-size:19px; color:#333;}
+  .wvTop .u{font-size:14px; font-weight:700; display:flex; align-items:center; gap:7px;}
+  .wvTop .u img{width:22px; height:22px; border-radius:6px;}
+  .wvTop .x{margin-left:auto; font-size:18px; color:#888;}
+  .wv{flex:1; overflow:hidden; padding:18px 16px;}
+  .greet{font-size:21px; font-weight:800; letter-spacing:-.5px; line-height:1.3;}
+  .greet small{display:block; font-size:13px; font-weight:400; color:var(--sub); margin-top:4px;}
+  .balance{background:linear-gradient(135deg,var(--coral),#e8763f); color:#fff; border-radius:18px; padding:18px; margin:14px 0;}
+  .balance .l{font-size:12px; opacity:.92;}
+  .balance .v{font-size:32px; font-weight:800; letter-spacing:-1px; margin-top:2px;}
+  .sec{font-size:13px; font-weight:700; margin-bottom:9px;}
+  .req{border:1px solid var(--line); border-radius:14px; padding:11px; margin-bottom:9px; display:flex; gap:11px; align-items:center;}
+  .req img{width:44px; height:44px; border-radius:11px; object-fit:cover; flex:none;}
+  .req .rt{font-size:13.5px; font-weight:700;} .req .rd{font-size:12px; color:var(--mut);}
+  .req .rp{margin-left:auto; font-size:11px; font-weight:700; color:#0f8a3c; background:#e8f6ec; padding:3px 8px; border-radius:999px;}
+  .cta{display:block; text-align:center; background:var(--coral); color:#fff; font-weight:700; border-radius:13px; padding:13px; margin-top:6px;}
+
+  .note{margin-top:40px; background:#fff; border:1px solid var(--line); border-radius:16px; padding:18px 20px; font-size:14px; color:var(--sub);}
+  .note b{color:var(--ink);}
+  @media(max-width:760px){ .stage{flex-direction:column;} .arrow{transform:rotate(90deg);} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <div class="kick">Kakao Channel</div>
+    <h1>카카오톡 채널로 이음 접속</h1>
+    <p>앱 설치 없이 카카오톡 채널에서 바로 신청 → 이음 웹이 열립니다.</p>
+  </div>
+
+  <div class="stage">
+    <div class="col">
+      <div class="phone"><div class="screen">
+        <div class="kkTop">
+          <span class="bk">‹</span>
+          <img class="ci" src="ieum_icon_1024.png" alt="이음 채널">
+          <div class="nm">이음 돌봄<small>채널 · 공식</small></div>
+          <div class="sp"><span>🔍</span><span>☰</span></div>
+        </div>
+        <div class="chat">
+          <div class="day"><span>오늘</span></div>
+          <div class="msg">
+            <img class="av" src="ieum_icon_1024.png" alt="">
+            <div class="body">
+              <div class="who">이음 돌봄</div>
+              <div class="bubble">안녕하세요! 이음 돌봄 채널이에요 😊<br>무엇을 도와드릴까요?</div>
+            </div>
+          </div>
+          <div class="msg">
+            <img class="av" src="ieum_icon_1024.png" alt="">
+            <div class="body">
+              <div class="rich">
+                <img src="https://loremflickr.com/440/240/volunteer,elderly,community?lock=71" alt="이웃 돌봄">
+                <div class="rb"><div class="rt">이웃과 함께하는 돌봄</div><div class="rd">필요한 돌봄을 신청하고, 나눈 시간을 적립받으세요.</div></div>
+                <div class="btns">
+                  <a>💛 돌봄 신청하기</a>
+                  <a>⏱ 내 적립 시간</a>
+                  <a>❓ 자주 묻는 질문</a>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="quicks"><span>돌봄 신청</span><span>적립 확인</span><span>자주 묻는 질문</span></div>
+        </div>
+        <div class="kkInput"><span>＋</span><div class="box">메시지 입력</div><span class="snd">↑</span></div>
+      </div></div>
+      <div class="caption">① 카카오톡 <b>이음 돌봄</b> 채널</div>
+    </div>
+
+    <div class="arrow"><span class="a">→</span><span class="t">‘돌봄 신청하기’ 탭</span></div>
+
+    <div class="col">
+      <div class="phone"><div class="screen">
+        <div class="wvTop">
+          <span class="bk">‹</span>
+          <span class="u"><img src="ieum_icon_1024.png" alt="">이음</span>
+          <span class="x">✕</span>
+        </div>
+        <div class="wv">
+          <div class="greet">안녕하세요, 민지님<small>오늘도 따뜻하게 나눠요</small></div>
+          <div class="balance"><div class="l">이번 주 적립 시간</div><div class="v num">3.5<span style="font-size:15px;font-weight:700;">시간</span></div></div>
+          <div class="sec">가까운 돌봄 요청</div>
+          <div class="req"><img src="https://loremflickr.com/100/100/child,school?lock=72" alt=""><div><div class="rt">아이 하원 돌봄</div><div class="rd">도보 5분 · 오후 4시</div></div><span class="rp">모집중</span></div>
+          <div class="req"><img src="https://loremflickr.com/100/100/elderly?lock=73" alt=""><div><div class="rt">어르신 말벗</div><div class="rd">도보 8분 · 내일 오전</div></div><span class="rp">모집중</span></div>
+          <a class="cta">돌봄 신청하기</a>
+        </div>
+      </div></div>
+      <div class="caption">② 열리는 <b>이음</b> 웹 화면</div>
+    </div>
+  </div>
+
+  <div class="note">
+    <b>접속 흐름:</b> 카카오톡에서 <b>‘이음 돌봄’</b> 채널 추가 → 채널 메시지의 버튼(돌봄 신청·적립 확인·자주 묻는 질문) → 이음 웹이 채널 안에서 열립니다. 앱 설치가 필요 없어 어르신도 쉽게 접근합니다. 사진은 시안용입니다. · 운영 고원
+  </div>
+</div>
+</body>
+</html>
