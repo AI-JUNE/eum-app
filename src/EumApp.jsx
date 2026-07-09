@@ -4250,6 +4250,60 @@ function RLAXBand({ isMobile }) {
   );
 }
 
+function RLSafetyBand({ isMobile }) {
+  const checks = [
+    { t: '면접 · 신원 확인', d: '참여 전 대면·비대면 면접을 진행합니다.' },
+    { t: '범죄경력 조회', d: '경찰청 연계로 범죄경력을 확인합니다.' },
+    { t: '아동학대 전력 조회', d: '아동 동반 활동은 전력을 필수 조회합니다.' },
+    { t: '추천인 확인 · 대면 책임보험', d: '추천인 검증과 활동 중 사고 보상까지.' },
+  ];
+  return (
+    <div style={{ margin: isMobile ? '8px 0 64px' : '8px 0 88px', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '0.92fr 1.08fr', gap: isMobile ? 32 : 56, alignItems: 'center' }}>
+      <div style={{ borderRadius: 24, overflow: 'hidden', boxShadow: '0 24px 50px -22px rgba(26,26,30,0.26)', order: isMobile ? 2 : 1 }}>
+        <img src="/safety-3gen.png" alt="세대가 함께하는 따뜻한 순간" style={{ width: '100%', display: 'block', aspectRatio: '4 / 3.6', objectFit: 'cover' }} loading="lazy" decoding="async" />
+      </div>
+      <div style={{ order: isMobile ? 1 : 2, textAlign: isMobile ? 'center' : 'left' }}>
+        <div className="eum-kicker" style={{ marginBottom: 14, color: C.blue }}>Safety First</div>
+        <h2 className="eum-serif" style={{ fontSize: isMobile ? 28 : 38, fontWeight: 800, color: C.ink, margin: '0 0 14px', lineHeight: 1.2 }}>믿고 맡길 수 있는 이유</h2>
+        <p style={{ fontSize: 16.5, color: C.mute, lineHeight: 1.6, maxWidth: 460, margin: isMobile ? '0 auto 26px' : '0 0 26px', fontWeight: 500 }}>아이가 어른들과 만나는 만큼, 안전이 최우선입니다. 모든 참여자는 4단계 안전검증을 거치고, 대면 활동은 책임보험으로 보장돼요.</p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, maxWidth: 480, margin: isMobile ? '0 auto' : 0 }}>
+          {checks.map((c) => (
+            <div key={c.t} style={{ display: 'flex', alignItems: 'flex-start', gap: 13, textAlign: 'left' }}>
+              <div style={{ width: 26, height: 26, borderRadius: '50%', background: C.brand, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 800, flexShrink: 0, marginTop: 1 }}>✓</div>
+              <div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: C.ink, lineHeight: 1.4 }}>{c.t}</div>
+                <div style={{ fontSize: 13.5, color: C.inkSoft, lineHeight: 1.55, marginTop: 2 }}>{c.d}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RLKakaoBand({ isMobile, onShowApplication }) {
+  return (
+    <div style={{ margin: isMobile ? '8px 0 64px' : '8px 0 88px', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: isMobile ? 36 : 56, alignItems: 'center' }}>
+      <div style={{ textAlign: isMobile ? 'center' : 'left', display: 'flex', flexDirection: 'column', alignItems: isMobile ? 'center' : 'flex-start' }}>
+        <div className="eum-kicker" style={{ marginBottom: 16 }}>참여 방법</div>
+        <h2 className="eum-serif" style={{ fontSize: isMobile ? 28 : 40, fontWeight: 800, color: C.ink, margin: '0 0 14px', lineHeight: 1.18 }}>앱 설치 없이,<br /><span style={{ color: C.brand }}>카톡으로 이음</span></h2>
+        <p style={{ fontSize: 16.5, color: C.mute, lineHeight: 1.6, maxWidth: 420, margin: isMobile ? '0 auto 28px' : '0 0 28px', fontWeight: 500 }}>카카오톡 채널·웹으로 바로 참여합니다. 큰 글씨와 단순한 흐름으로 어르신도 쉽게 사용해요.</p>
+        <button onClick={onShowApplication} style={{ display: 'inline-flex', alignItems: 'center', gap: 9, background: '#FEE500', color: '#3A1D1D', border: 'none', borderRadius: 14, padding: '15px 26px', fontSize: 16, fontWeight: 800, cursor: 'pointer', boxShadow: '0 10px 24px -12px rgba(180,160,0,0.8)', fontFamily: 'inherit' }}>
+          <span style={{ fontSize: 18 }}>💬</span> 카카오톡으로 시작하기
+        </button>
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'center' }}>
+        <div style={{ position: 'relative', width: 264, borderRadius: 40, background: '#1A1814', padding: 9, boxShadow: '0 30px 60px -22px rgba(26,26,30,0.4)' }}>
+          <div style={{ borderRadius: 32, overflow: 'hidden', background: '#B2C7DA' }}>
+            <img src="/kakao-main.png" alt="카카오톡 이음 돌봄 채널" style={{ width: '100%', display: 'block' }} loading="lazy" decoding="async" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function RLStepsBand() {
   const isMobile = useIsMobile(760);
   const steps = [
@@ -4347,7 +4401,7 @@ function RLLanding({ state, onSelectRole, onShowApplication }) {
           <div style={{ display: 'flex', justifyContent: 'center' }}>
             <div style={{ position: 'relative', width: '100%', maxWidth: 480, animation: 'eumHeroIn 0.9s cubic-bezier(0.22,1,0.36,1) both, eumHeroFloat 7s ease-in-out 0.9s infinite' }}>
               <div style={{ borderRadius: 28, overflow: 'hidden', boxShadow: '0 30px 60px -24px rgba(26,26,30,0.28)' }}>
-                <img className="eum-hero-img" src="https://d8j0ntlcm91z4.cloudfront.net/user_3ENsWC9Fimdubfa90AmLsdoIGVe/hf_20260618_054046_590cd991-7eef-42e9-82c3-d7dd782d050d.png" alt="청년·어르신·아동 3세대가 함께하는 모습" style={{ width: '100%', display: 'block' }} loading="eager" decoding="async" fetchPriority="high" />
+                <img className="eum-hero-img" src="/hero-3gen.png" alt="청년·어르신·아동 3세대가 함께하는 모습" style={{ width: '100%', display: 'block', aspectRatio: '4 / 3.4', objectFit: 'cover', objectPosition: 'center 30%' }} loading="eager" decoding="async" fetchPriority="high" />
               </div>
               <div style={{ position: 'absolute', left: isMobile ? 10 : -16, bottom: 24, background: '#fff', borderRadius: 16, padding: '12px 16px', boxShadow: '0 18px 40px -14px rgba(26,26,30,0.3)', display: 'flex', alignItems: 'center', gap: 11, border: `1px solid ${C.borderSoft}` }}>
                 <div style={{ display: 'flex' }}>
@@ -4392,6 +4446,10 @@ function RLLanding({ state, onSelectRole, onShowApplication }) {
         <Reveal><RLAXBand isMobile={isMobile} /></Reveal>
 
         <Reveal><RLProductShowcase /></Reveal>
+
+        <Reveal><RLSafetyBand isMobile={isMobile} /></Reveal>
+
+        <Reveal><RLKakaoBand isMobile={isMobile} onShowApplication={onShowApplication} /></Reveal>
 
         <RLImpactBand state={state} />
 
