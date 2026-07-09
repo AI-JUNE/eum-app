@@ -4452,7 +4452,7 @@ function TobeStyles() { return <style dangerouslySetInnerHTML={{ __html: TOBE_CS
 function FullBand({ bg, isMobile, children }) {
   return (
     <div style={{ position: 'relative', width: '100vw', marginLeft: 'calc(50% - 50vw)', background: bg, borderTop: '1px solid #EDE9E3', borderBottom: '1px solid #EDE9E3' }}>
-      <div style={{ maxWidth: 1720, margin: '0 auto', padding: isMobile ? '48px 20px' : '82px clamp(28px, 4.5vw, 96px)' }}>
+      <div style={{ maxWidth: 1440, margin: '0 auto', padding: isMobile ? '48px 20px' : '82px clamp(28px, 4.5vw, 96px)' }}>
         {children}
       </div>
     </div>
@@ -4489,7 +4489,7 @@ function RLSafetyBand({ isMobile }) {
     { t: '추천인 확인 · 대면 책임보험', d: '추천인 검증과 활동 중 사고 보상까지.' },
   ];
   return (
-    <div style={{ margin: 0, display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '0.92fr 1.08fr', gap: isMobile ? 32 : 56, alignItems: 'center' }}>
+    <div style={{ margin: '0 auto', maxWidth: isMobile ? 'none' : 1120, display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '0.9fr 1.1fr', gap: isMobile ? 32 : 56, alignItems: 'center' }}>
       <div style={{ borderRadius: 24, overflow: 'hidden', boxShadow: '0 24px 50px -22px rgba(26,26,30,0.26)', order: isMobile ? 2 : 1 }}>
         <img src="/safety-3gen.png" alt="세대가 함께하는 따뜻한 순간" style={{ width: '100%', display: 'block', aspectRatio: '4 / 4.5', objectFit: 'cover', objectPosition: 'center 22%' }} loading="lazy" decoding="async" />
       </div>
@@ -4585,7 +4585,7 @@ function RLLanding({ state, onSelectRole, onShowApplication }) {
     }}>
       {/* 상단 내비게이션 */}
       <div style={{ width: '100%', position: 'sticky', top: 0, zIndex: 50, background: scrolled ? 'rgba(245,244,242,0.92)' : 'rgba(245,244,242,0.8)', backdropFilter: 'blur(12px)', borderBottom: `1px solid ${scrolled ? C.border : 'transparent'}`, boxShadow: scrolled ? '0 6px 22px -10px rgba(26,26,30,0.16)' : 'none', transition: 'box-shadow 0.25s ease, border-color 0.25s ease, background 0.25s ease' }}>
-        <div style={{ maxWidth: 1720, margin: '0 auto', padding: isMobile ? '12px 18px' : '14px clamp(28px, 4.5vw, 96px)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+        <div style={{ maxWidth: 1440, margin: '0 auto', padding: isMobile ? '12px 18px' : '14px clamp(28px, 4.5vw, 96px)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
           <div onClick={() => window.location.reload()} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); window.location.reload(); } }} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }} role="button" tabIndex={0} aria-label="홈으로 새로고침">
             <div style={{ width: 30, height: 30, display: 'flex' }}><EumLogo size={30} /></div>
             <div style={{ lineHeight: 1.05 }}>
@@ -4599,7 +4599,7 @@ function RLLanding({ state, onSelectRole, onShowApplication }) {
           </div>
         </div>
       </div>
-      <div style={{ maxWidth: 1720, width: '100%', padding: isMobile ? '28px 20px 56px' : '64px clamp(28px, 4.5vw, 96px) 96px' }}>
+      <div style={{ maxWidth: 1440, width: '100%', padding: isMobile ? '28px 20px 56px' : '64px clamp(28px, 4.5vw, 96px) 96px' }}>
         {/* 히어로 — 토스 계열 + 모션(그라데이션 오브·진입 스태거·플로팅) */}
         <div style={{ position: 'relative', margin: isMobile ? '8px 0 56px' : '20px 0 80px' }}>
           <div className="eum-orb" style={{ width: 400, height: 400, background: C.brand + '24', top: -130, right: -70, animation: 'eumOrb 17s ease-in-out infinite' }} />
@@ -4644,7 +4644,7 @@ function RLLanding({ state, onSelectRole, onShowApplication }) {
 
         {/* 3세대 선순환 — 개념(애니메이션) 섹션 */}
         <Reveal>
-          <div style={{ margin: isMobile ? '8px 0 64px' : '8px 0 88px', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.05fr 0.95fr', gap: isMobile ? 32 : 64, alignItems: 'center' }}>
+          <div style={{ margin: isMobile ? '8px auto 64px' : '8px auto 96px', maxWidth: isMobile ? 'none' : 1120, display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: isMobile ? 32 : 48, alignItems: 'center' }}>
             <div style={{ display: 'flex', justifyContent: 'center' }}><RLLoopInfographic /></div>
             <div style={{ textAlign: isMobile ? 'center' : 'left' }}>
               <div className="eum-kicker" style={{ marginBottom: 16 }}>3세대 선순환</div>
