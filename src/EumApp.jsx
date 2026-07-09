@@ -3990,7 +3990,7 @@ function RLRevenueModelBand() {
   ];
   return (
     <div style={{ marginBottom: 72 }}>
-      <RLSectionHead kicker="어떻게 지속되나" title="보조금이 끊겨도 스스로 도는 구조" sub="한 곳에 기대지 않는 세 갈래 수익으로, 공공 지원이 끝나도 지속되도록 설계했어요." />
+      <RLSectionHead kicker="어떻게 지속되나" title="정부와 함께하는 서비스 모델" sub="지자체 위탁·구독·수수료가 서로를 받쳐, 공공 지원이 끝나도 지속되도록 설계했어요." />
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16, marginBottom: 16 }}>
         {streams.map((s, i) => {
           const Icon = s.icon;
