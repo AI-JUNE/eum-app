@@ -4349,7 +4349,7 @@ const TOBE_CSS = `.eum-tobe{--ink:#241d17;--paper:#fff;--cream:#fbf7f2;--cream2:
 .eum-tobe .axrow .tag{display:inline-block;font-size:12px;font-weight:700;color:var(--coral-d);background:var(--coral-soft);padding:5px 12px;border-radius:999px;margin-bottom:12px;}
 .eum-tobe .axrow h3{font-size:23px;font-weight:800;letter-spacing:-.6px;margin-bottom:8px;color:var(--ink);}
 .eum-tobe .axrow p{font-size:16px;color:var(--sub);}
-.eum-tobe .axphone{width:300px;margin:0 auto;background:#1c1712;border-radius:46px;padding:8px;box-shadow:0 30px 70px rgba(36,29,23,.2),inset 0 0 0 2px #3a2c22;}
+.eum-tobe .axphone{width:min(300px,100%);margin:0 auto;background:#1c1712;border-radius:46px;padding:8px;box-shadow:0 30px 70px rgba(36,29,23,.2),inset 0 0 0 2px #3a2c22;}
 .eum-tobe .axsc{background:#faf3ee;border-radius:38px;overflow:hidden;position:relative;min-height:544px;}
 .eum-tobe .axnotch{position:absolute;top:9px;left:50%;transform:translateX(-50%);width:104px;height:20px;background:#1c1712;border-radius:12px;z-index:6;}
 .eum-tobe .axstat{display:flex;justify-content:space-between;align-items:center;padding:11px 22px 3px;font-size:12px;font-weight:700;color:var(--ink);}
@@ -4398,7 +4398,7 @@ const TOBE_CSS = `.eum-tobe{--ink:#241d17;--paper:#fff;--cream:#fbf7f2;--cream2:
 .eum-tobe .mbwait>span:first-child{color:var(--sub);font-weight:600;}
 .eum-tobe .mbwaitp{background:var(--cream2);padding:6px 11px;border-radius:999px;font-weight:600;color:var(--ink);}
 .eum-tobe .appshow{display:grid;grid-template-columns:1fr 330px;gap:60px;align-items:center;}
-.eum-tobe .phone{background:#241d17;border-radius:46px;padding:11px;box-shadow:0 30px 70px rgba(36,29,23,.16);width:318px;margin:0 auto;}
+.eum-tobe .phone{background:#241d17;border-radius:46px;padding:11px;box-shadow:0 30px 70px rgba(36,29,23,.16);width:min(318px,100%);margin:0 auto;}
 .eum-tobe .phone .scr{background:#fff;border-radius:36px;overflow:hidden;}
 .eum-tobe .scr.kk{display:flex;flex-direction:column;height:566px;}
 .eum-tobe .kkTop{display:flex;align-items:center;gap:9px;padding:14px 14px 12px;border-bottom:1px solid #eee;}
@@ -4429,7 +4429,7 @@ const TOBE_CSS = `.eum-tobe{--ink:#241d17;--paper:#fff;--cream:#fbf7f2;--cream2:
 .eum-tobe .kInput .plus{color:#999;font-size:16px;}
 .eum-tobe .kInput .kbox{flex:1;background:#f2f1ee;border-radius:999px;padding:7px 13px;font-size:12px;color:#9a938a;}
 .eum-tobe .kInput .ksnd{width:28px;height:28px;border-radius:50%;background:#FEE500;display:flex;align-items:center;justify-content:center;font-size:14px;color:#191600;}
-@media(max-width:880px){.eum-tobe .axrow,.eum-tobe .axrow.rev,.eum-tobe .prod,.eum-tobe .appshow{grid-template-columns:1fr;gap:30px;}.eum-tobe .steps{grid-template-columns:1fr;}.eum-tobe .step{padding:0;}.eum-tobe .step:not(:last-child){border-right:none;border-bottom:1px solid var(--line);padding-bottom:18px;margin-bottom:18px;}}`;
+@media(max-width:880px){.eum-tobe .axrow,.eum-tobe .axrow.rev,.eum-tobe .prod,.eum-tobe .appshow{grid-template-columns:1fr;gap:30px;}.eum-tobe .axrow.rev > .axphone{order:2;}.eum-tobe .steps{grid-template-columns:1fr;}.eum-tobe .step{padding:0;}.eum-tobe .step:not(:last-child){border-right:none;border-bottom:1px solid var(--line);padding-bottom:18px;margin-bottom:18px;}.eum-tobe .axrow .txt,.eum-tobe .appshow .txt{text-align:center;}.eum-tobe .axrow .tag{margin-left:auto;margin-right:auto;}}@media(max-width:560px){.eum-tobe .mbgrid{grid-template-columns:1fr;}.eum-tobe .mbwrap{padding:14px;}}`;
 function TobeStyles() { return <style dangerouslySetInnerHTML={{ __html: TOBE_CSS }} />; }
 
 function RLProductShowcase() {
