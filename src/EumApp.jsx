@@ -4452,7 +4452,7 @@ function TobeStyles() { return <style dangerouslySetInnerHTML={{ __html: TOBE_CS
 function FullBand({ bg, isMobile, children }) {
   return (
     <div style={{ position: 'relative', width: '100vw', marginLeft: 'calc(50% - 50vw)', background: bg, borderTop: '1px solid #EDE9E3', borderBottom: '1px solid #EDE9E3' }}>
-      <div style={{ maxWidth: 1360, margin: '0 auto', padding: isMobile ? '48px 20px' : '82px 40px' }}>
+      <div style={{ maxWidth: 1720, margin: '0 auto', padding: isMobile ? '48px 20px' : '82px clamp(28px, 4.5vw, 96px)' }}>
         {children}
       </div>
     </div>
@@ -4585,7 +4585,7 @@ function RLLanding({ state, onSelectRole, onShowApplication }) {
     }}>
       {/* 상단 내비게이션 */}
       <div style={{ width: '100%', position: 'sticky', top: 0, zIndex: 50, background: scrolled ? 'rgba(245,244,242,0.92)' : 'rgba(245,244,242,0.8)', backdropFilter: 'blur(12px)', borderBottom: `1px solid ${scrolled ? C.border : 'transparent'}`, boxShadow: scrolled ? '0 6px 22px -10px rgba(26,26,30,0.16)' : 'none', transition: 'box-shadow 0.25s ease, border-color 0.25s ease, background 0.25s ease' }}>
-        <div style={{ maxWidth: 1360, margin: '0 auto', padding: isMobile ? '12px 18px' : '14px 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+        <div style={{ maxWidth: 1720, margin: '0 auto', padding: isMobile ? '12px 18px' : '14px clamp(28px, 4.5vw, 96px)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
           <div onClick={() => window.location.reload()} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); window.location.reload(); } }} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }} role="button" tabIndex={0} aria-label="홈으로 새로고침">
             <div style={{ width: 30, height: 30, display: 'flex' }}><EumLogo size={30} /></div>
             <div style={{ lineHeight: 1.05 }}>
@@ -4599,7 +4599,7 @@ function RLLanding({ state, onSelectRole, onShowApplication }) {
           </div>
         </div>
       </div>
-      <div style={{ maxWidth: 1360, width: '100%', padding: isMobile ? '28px 20px 56px' : '64px 40px 96px' }}>
+      <div style={{ maxWidth: 1720, width: '100%', padding: isMobile ? '28px 20px 56px' : '64px clamp(28px, 4.5vw, 96px) 96px' }}>
         {/* 히어로 — 토스 계열 + 모션(그라데이션 오브·진입 스태거·플로팅) */}
         <div style={{ position: 'relative', margin: isMobile ? '8px 0 56px' : '20px 0 80px' }}>
           <div className="eum-orb" style={{ width: 400, height: 400, background: C.brand + '24', top: -130, right: -70, animation: 'eumOrb 17s ease-in-out infinite' }} />
