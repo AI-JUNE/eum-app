@@ -3951,13 +3951,13 @@ function RLFaqBand() {
         <div style={{ background: C.card, borderRadius: 20, border: `1px solid ${C.borderSoft}`, boxShadow: '0 2px 8px -4px rgba(26,26,30,0.08)', overflow: 'hidden' }}>
         {faqs.map((f, i) => (
           <div key={i} style={{ borderTop: i === 0 ? 'none' : `1px solid ${C.borderSoft}` }}>
-            <button onClick={() => setOpen(open === i ? -1 : i)} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 14, padding: isMobile ? '18px 18px' : '20px 24px', border: 'none', background: open === i ? C.cream : 'transparent', cursor: 'pointer', fontFamily: FONT_STACK, textAlign: 'left', transition: 'background 0.2s ease' }}>
+            <button type="button" aria-expanded={open === i} aria-controls={`faq-panel-${i}`} onClick={() => setOpen(open === i ? -1 : i)} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 14, padding: isMobile ? '18px 18px' : '20px 24px', border: 'none', background: open === i ? C.cream : 'transparent', cursor: 'pointer', fontFamily: FONT_STACK, textAlign: 'left', transition: 'background 0.2s ease' }}>
               <span style={{ flex: 1, fontSize: isMobile ? 15 : 16, fontWeight: 700, color: C.ink, letterSpacing: '-0.015em' }}>{f.q}</span>
               <span style={{ display: 'flex', width: 26, height: 26, borderRadius: '50%', background: open === i ? C.brand : C.borderSoft, alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'background 0.2s ease' }}>
                 <ChevronDown size={16} color={open === i ? '#fff' : C.mute} style={{ transform: open === i ? 'rotate(180deg)' : 'none', transition: 'transform 0.25s' }} />
               </span>
             </button>
-            {open === i && <div style={{ padding: isMobile ? '0 18px 20px' : '0 24px 22px', fontSize: 14.5, color: C.inkSoft, lineHeight: 1.74 }}>{f.a}</div>}
+            {open === i && <div id={`faq-panel-${i}`} role="region" aria-label={f.q} style={{ padding: isMobile ? '0 18px 20px' : '0 24px 22px', fontSize: 14.5, color: C.inkSoft, lineHeight: 1.74 }}>{f.a}</div>}
           </div>
         ))}
         </div>
