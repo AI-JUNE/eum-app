@@ -3990,7 +3990,7 @@ function RLRevenueModelBand() {
   ];
   return (
     <div style={{ marginBottom: 72 }}>
-      <RLSectionHead kicker="어떻게 지속되나" title="공공으로 시작해, 자립으로" sub="한 곳에 기대지 않는 세 갈래 수익으로, 보조금이 끝나도 돌아가는 구조를 설계했어요." />
+      <RLSectionHead kicker="어떻게 지속되나" title="보조금이 끊겨도 스스로 도는 구조" sub="한 곳에 기대지 않는 세 갈래 수익으로, 공공 지원이 끝나도 지속되도록 설계했어요." />
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16, marginBottom: 16 }}>
         {streams.map((s, i) => {
           const Icon = s.icon;
@@ -4432,6 +4432,16 @@ const TOBE_CSS = `.eum-tobe{--ink:#241d17;--paper:#fff;--cream:#fbf7f2;--cream2:
 @media(max-width:880px){.eum-tobe .axrow,.eum-tobe .axrow.rev,.eum-tobe .prod,.eum-tobe .appshow{grid-template-columns:1fr;gap:30px;}.eum-tobe .axrow.rev > .axphone{order:2;}.eum-tobe .steps{grid-template-columns:1fr;}.eum-tobe .step{padding:0;}.eum-tobe .step:not(:last-child){border-right:none;border-bottom:1px solid var(--line);padding-bottom:18px;margin-bottom:18px;}.eum-tobe .axrow .txt,.eum-tobe .appshow .txt{text-align:center;}.eum-tobe .axrow .tag{margin-left:auto;margin-right:auto;}}@media(max-width:560px){.eum-tobe .mbgrid{grid-template-columns:1fr;}.eum-tobe .mbwrap{padding:14px;}}`;
 function TobeStyles() { return <style dangerouslySetInnerHTML={{ __html: TOBE_CSS }} />; }
 
+function FullBand({ bg, isMobile, children }) {
+  return (
+    <div style={{ position: 'relative', width: '100vw', marginLeft: 'calc(50% - 50vw)', background: bg, borderTop: '1px solid #EDE9E3', borderBottom: '1px solid #EDE9E3' }}>
+      <div style={{ maxWidth: 1160, margin: '0 auto', padding: isMobile ? '48px 20px' : '82px 40px' }}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
 function RLProductShowcase() {
   const isMobile = useIsMobile(900);
   return (
@@ -4443,7 +4453,7 @@ function RLProductShowcase() {
 
 function RLAXBand({ isMobile }) {
   return (
-    <div className="eum-tobe" style={{ margin: isMobile ? '8px 0 64px' : '12px 0 96px' }}>
+    <div className="eum-tobe" style={{ margin: 0 }}>
       <div style={{ maxWidth: 680, marginBottom: 44 }}>
         <div className="kick">AX · AI Experience</div>
         <h2>기술로 완성하는 <span className="ac">안심 돌봄</span></h2>
@@ -4462,7 +4472,7 @@ function RLSafetyBand({ isMobile }) {
     { t: '추천인 확인 · 대면 책임보험', d: '추천인 검증과 활동 중 사고 보상까지.' },
   ];
   return (
-    <div style={{ margin: isMobile ? '8px 0 64px' : '8px 0 88px', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '0.92fr 1.08fr', gap: isMobile ? 32 : 56, alignItems: 'center' }}>
+    <div style={{ margin: 0, display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '0.92fr 1.08fr', gap: isMobile ? 32 : 56, alignItems: 'center' }}>
       <div style={{ borderRadius: 24, overflow: 'hidden', boxShadow: '0 24px 50px -22px rgba(26,26,30,0.26)', order: isMobile ? 2 : 1 }}>
         <img src="/safety-3gen.png" alt="세대가 함께하는 따뜻한 순간" style={{ width: '100%', display: 'block', aspectRatio: '4 / 4.5', objectFit: 'cover', objectPosition: 'center 22%' }} loading="lazy" decoding="async" />
       </div>
@@ -4488,7 +4498,7 @@ function RLSafetyBand({ isMobile }) {
 
 function RLKakaoBand({ isMobile, onShowApplication }) {
   return (
-    <div className="eum-tobe" style={{ margin: isMobile ? '8px 0 64px' : '12px 0 96px' }}>
+    <div className="eum-tobe" style={{ margin: 0 }}>
       <div className="appshow">
         <div className="txt" style={{ textAlign: isMobile ? 'center' : 'left' }}>
           <div className="kick">참여 방법</div>
@@ -4553,7 +4563,7 @@ function RLLanding({ state, onSelectRole, onShowApplication }) {
 
   return (
     <div style={{
-      minHeight: '100vh', background: C.bg, fontFamily: FONT_STACK,
+      minHeight: '100vh', background: C.bg, fontFamily: FONT_STACK, overflowX: 'hidden',
       display: 'flex', flexDirection: 'column', alignItems: 'center',
     }}>
       {/* 상단 내비게이션 */}
@@ -4642,13 +4652,13 @@ function RLLanding({ state, onSelectRole, onShowApplication }) {
         <Reveal><RLStepsBand /></Reveal>
 
         <TobeStyles />
-        <Reveal><RLAXBand isMobile={isMobile} /></Reveal>
+        <FullBand isMobile={isMobile} bg="#FFFFFF"><Reveal><RLAXBand isMobile={isMobile} /></Reveal></FullBand>
 
         <Reveal><RLProductShowcase /></Reveal>
 
-        <Reveal><RLSafetyBand isMobile={isMobile} /></Reveal>
+        <FullBand isMobile={isMobile} bg="#FAF6F1"><Reveal><RLSafetyBand isMobile={isMobile} /></Reveal></FullBand>
 
-        <Reveal><RLKakaoBand isMobile={isMobile} onShowApplication={onShowApplication} /></Reveal>
+        <FullBand isMobile={isMobile} bg="#FFFFFF"><Reveal><RLKakaoBand isMobile={isMobile} onShowApplication={onShowApplication} /></Reveal></FullBand>
 
         <RLImpactBand state={state} />
 
