@@ -240,4 +240,406 @@
   .balance .v{font-family:"Fraunces",serif; font-size:36px; font-weight:500; letter-spacing:-1px; margin-top:2px;}
   .req{border:1px solid var(--line); border-radius:16px; padding:12px; margin-bottom:10px; display:flex; gap:12px; align-items:center;}
   .req .tile{width:46px; height:46px; border-radius:12px; flex:none; display:flex; align-items:center; justify-content:center; font-size:22px;}
-  .req .rt{font-siz
+  .req .rt{font-size:14px; font-weight:700;} .req .rd{font-size:12px; color:var(--mut);}
+  .req .rp{margin-left:auto; font-size:11px; font-weight:700; color:#0f8a3c; background:#e8f6ec; padding:4px 9px; border-radius:999px;}
+  .navbar{display:flex; justify-content:space-around; padding:14px 0 16px; border-top:1px solid var(--line); font-size:20px;}
+
+  .scr.kk{display:flex; flex-direction:column; height:566px;}
+  .kkTop{display:flex; align-items:center; gap:9px; padding:14px 14px 12px; border-bottom:1px solid #eee;}
+  .kkTop .bk{font-size:19px; color:#333;}
+  .kkTop .ci{width:30px; height:30px; border-radius:50%; object-fit:cover; border:1px solid var(--line);}
+  .kkTop .nm{font-size:14px; font-weight:700; line-height:1.15;}
+  .kkTop .nm small{display:block; font-size:10px; color:var(--mut); font-weight:500;}
+  .kkTop .sp{margin-left:auto; display:flex; gap:12px; color:#666; font-size:15px;}
+  .chat{flex:1; background:#b2c7da; padding:12px 11px; overflow:hidden;}
+  .day{text-align:center; margin-bottom:10px;}
+  .day span{background:rgba(0,0,0,.12); color:#fff; font-size:10px; padding:3px 10px; border-radius:999px;}
+  .kmsg{display:flex; gap:7px; margin-bottom:10px;}
+  .kav{width:32px; height:32px; border-radius:12px; object-fit:cover; flex:none;}
+  .kwho{font-size:10px; color:#33404d; margin:0 0 3px 2px; font-weight:600;}
+  .kbubble{background:#fff; border-radius:3px 13px 13px 13px; padding:9px 11px; font-size:12.5px; max-width:180px;}
+  .krich{background:#fff; border-radius:3px 13px 13px 13px; overflow:hidden; width:202px; box-shadow:0 1px 2px rgba(0,0,0,.08);}
+  .krimg{height:94px; overflow:hidden;} .krimg img{width:100%; height:100%; object-fit:cover; object-position:center 20%;}
+  .krb{padding:10px 11px 6px;} .krt{font-size:13px; font-weight:700;} .krd{font-size:11px; color:var(--sub); margin-top:2px;}
+  .krbtns{margin-top:6px; border-top:1px solid #f0efec;}
+  .krbtns a{display:block; text-align:center; padding:9px; font-size:12.5px; font-weight:600; color:#3d4a5c; border-top:1px solid #f0efec;}
+  .krbtns a:first-child{border-top:none; color:var(--coral);}
+  .kquicks{display:flex; gap:6px; flex-wrap:wrap;}
+  .kquicks span{background:#fff; border:1px solid rgba(0,0,0,.08); color:#33404d; font-size:11px; font-weight:600; padding:6px 10px; border-radius:999px;}
+  .kInput{background:#fff; border-top:1px solid #eee; padding:8px 11px; display:flex; align-items:center; gap:9px;}
+  .kInput .plus{color:#999; font-size:16px;}
+  .kInput .kbox{flex:1; background:#f2f1ee; border-radius:999px; padding:7px 13px; font-size:12px; color:#9a938a;}
+  .kInput .ksnd{width:28px; height:28px; border-radius:50%; background:#FEE500; display:flex; align-items:center; justify-content:center; font-size:14px; color:#191600;}
+
+  .cta{text-align:center; border-radius:30px; margin:0 28px; padding:80px 24px; background:var(--coral-soft); border:1px solid var(--line);}
+  .cta h2{margin-bottom:14px;}
+  .cta p{color:var(--sub); font-size:18px; margin-bottom:30px;}
+
+  footer{padding:56px 0 76px; border-top:1px solid var(--line); color:var(--mut); font-size:14px;}
+  .foot-in{display:flex; justify-content:space-between; flex-wrap:wrap; gap:20px; align-items:center;}
+  .foot-in .brand .wm{font-size:19px;}
+
+  .rv{opacity:0; transform:translateY(24px); transition:opacity .8s var(--ease), transform .8s var(--ease);}
+  .rv.in{opacity:1; transform:none;}
+  @media(prefers-reduced-motion:reduce){ .rv{opacity:1; transform:none; transition:none;} }
+
+  @media(max-width:880px){
+    .hero-grid,.split,.appshow,.prod{grid-template-columns:1fr; gap:36px;}
+    .hero-media,.split .illust{order:-1;}
+    .float{left:12px; bottom:12px;}
+    .vals,.axgrid,.steps,.statb .row{grid-template-columns:1fr;}
+    .axrow,.axrow.rev{grid-template-columns:1fr; gap:24px;} .axrow .win{order:-1;}
+    .step:not(:last-child){border-right:none; border-bottom:1px solid var(--line); padding-bottom:22px; margin-bottom:22px;}
+    .nav-menu{display:none;} section{padding:60px 0;}
+  }
+</style>
+</head>
+<body>
+
+<nav id="nav"><div class="wrap nav-in">
+  <div class="brand"><img src="assets/ieum_icon_1024.png" alt="이음 로고"><span class="wm">이음</span></div>
+  <div class="nav-menu"><a href="#care">돌봄 매칭</a><a href="#ax">AX 기술</a><a href="#trust">안심 정책</a><a href="#pricing">요금제</a><a href="#faq">FAQ</a></div>
+  <button class="btn btn-p" style="padding:11px 20px;">시작하기</button>
+</div></nav>
+
+<header class="hero"><div class="wrap"><div class="hero-grid">
+  <div class="hero-l">
+    <span class="hero-eye rv">🤝 청년·어르신·아동 3세대 돌봄</span>
+    <h1 class="hero-h rv">세대를 잇다,<br><span class="ac">마음</span>을 나누다</h1>
+    <p class="hero-sub rv">혼자인 어르신, 방과 후 혼자인 아이, 낯선 동네의 청년. 서로의 빈자리를 채우는 우리 동네 3세대 품앗이예요.</p>
+    <div class="hero-cta rv">
+      <button class="btn btn-p btn-lg">5분 만에 참여 신청 →</button>
+      <button class="btn btn-g btn-lg">데모 둘러보기</button>
+    </div>
+    <div class="hbadges rv">
+      <span class="hbadge">🛡 통합돌봄 연계</span>
+      <span class="hbadge">💳 상생카드 보상</span>
+      <span class="hbadge">✅ 4단계 안전검증</span>
+    </div>
+  </div>
+  <div class="hero-media rv" id="heroMedia">
+    <div class="photoframe"><img src="assets/3.png" alt="함께 웃는 3세대 이웃"></div>
+    <div class="float">
+      <div class="dots"><i style="background:var(--green)"></i><i style="background:var(--purple)"></i><i style="background:var(--coral)"></i></div>
+      <div class="ft"><b>우리 동네 15쌍 활동 중</b><span class="live">실시간 안전 공유 중</span></div>
+    </div>
+  </div>
+</div></div></header>
+
+<div class="marq"><div class="wrap marq-in">
+  <span class="lbl">함께하는 곳</span>
+  <span>광주광역시</span><span>광산구청</span><span>광주창조경제혁신센터</span><span>1365 자원봉사포털</span><span>광주상생카드</span>
+</div></div>
+
+<section id="care"><div class="wrap">
+  <div class="split">
+    <div class="txt">
+      <div class="kick rv">Why 이음</div>
+      <h2 class="rv">혼자가 아니라,<br><span class="ac">함께</span> 돌보는 동네</h2>
+      <p class="rv" style="font-size:18px; color:var(--sub); margin-top:16px;">한쪽만 주는 게 아니라, 서로 주고받는 동네예요. 청년은 디지털을, 어르신은 지혜를, 아이는 웃음을 나눕니다. 이음이 안전하게 연결합니다.</p>
+    </div>
+    <div class="illust rv"><img src="assets/hero_illust.png" alt="청년·어르신·아이가 함께하는 우리 동네 3세대 돌봄 일러스트"></div>
+  </div>
+  <div class="cyclehd">
+    <div class="kick rv">3세대 선순환</div>
+    <h2 class="rv">한쪽만 주는 게 아니라, <span class="ac">서로</span> 주고받아요</h2>
+  </div>
+  <div class="cycle rv">
+    <div class="cnode"><div class="e">🧑</div><div class="t">청년</div><div class="s">재능·디지털</div></div>
+    <span class="carrow">→</span>
+    <div class="cnode"><div class="e">👵</div><div class="t">어르신</div><div class="s">지혜·돌봄</div></div>
+    <span class="carrow">→</span>
+    <div class="cnode"><div class="e">🧒</div><div class="t">아이</div><div class="s">활력·웃음</div></div>
+    <span class="carrow">↺</span>
+  </div>
+  <div class="roles">
+    <div class="role rv"><span class="bg" style="background:var(--green-soft); color:var(--green);">청년</span><p>스마트폰·키오스크 사용법을 알려드리고, 아이의 공부를 도와요.</p></div>
+    <div class="role rv"><span class="bg" style="background:var(--purple-soft); color:var(--purple);">어르신</span><p>살아온 지혜와 옛이야기로 아이 곁을 든든히 지켜요.</p></div>
+    <div class="role rv"><span class="bg" style="background:var(--coral-soft); color:var(--coral-d);">아이</span><p>웃음과 활력으로 어르신의 하루를 환하게 채워요.</p></div>
+  </div>
+
+  <div class="vals" style="margin-top:56px;">
+    <div class="val rv"><div class="ic" style="background:var(--coral-soft);">🤝</div><h3>세대를 잇는 매칭</h3><p>거리·시간·필요에 맞춰 청년·어르신·아동을 안전하게 연결합니다.</p></div>
+    <div class="val rv"><div class="ic" style="background:var(--purple-soft);">💛</div><h3>안심 케어</h3><p>활동을 기록하고, 도움이 필요한 신호를 먼저 살펴 찾아갑니다.</p></div>
+    <div class="val rv"><div class="ic" style="background:var(--green-soft);">💬</div><h3>카톡·웹 참여</h3><p>앱 설치 없이 카카오톡·웹으로 누구나 쉽게 신청합니다.</p></div>
+  </div>
+</div></section>
+
+<section id="ax" class="band"><div class="wrap">
+  <div class="lead">
+    <div class="kick rv">AX · AI Experience</div>
+    <h2 class="rv">기술로 완성하는 <span class="ac">안심 돌봄</span></h2>
+    <p class="rv">이음은 15년 AX·AICC 경험과 고원의 AI 콜봇·보이는 ARS 자산을 복지에 연결합니다. 사람이 놓치는 순간을 기술이 먼저 살핍니다.</p>
+  </div>
+  <div class="axrows">
+    <div class="axrow">
+      <div class="txt rv"><span class="tag">AI 복지 콜봇</span><h3>말로 신청하는 복지</h3><p>어르신이 말씀만 하시면 기초연금·돌봄을 음성으로 신청·안내합니다. 복잡하면 담당자에게 즉시 연결됩니다.</p></div>
+      <div class="axphone rv"><div class="axsc">
+        <div class="axnotch"></div>
+        <div class="axstat"><span>9:41</span><span class="r"><span class="bars"><i style="height:5px"></i><i style="height:7px"></i><i style="height:9px"></i><i style="height:11px"></i></span><span class="batt"></span></span></div>
+        <div class="axhd"><span class="bk">‹</span><span class="ico">이</span><span class="tt">복지 상담 전화<small>어르신 음성 복지 신청</small></span></div>
+        <div class="axbd" style="text-align:center;">
+          <div style="font-size:20px; font-weight:800; margin:2px 0 4px;">말씀만 하세요</div>
+          <div style="font-size:12px; color:var(--sub); margin-bottom:18px;">복지 신청·안내를 도와드려요</div>
+          <div style="width:92px; height:92px; border-radius:50%; background:var(--coral); margin:0 auto 12px; display:flex; align-items:center; justify-content:center; font-size:38px; box-shadow:0 0 0 9px var(--coral-soft);">🎤</div>
+          <div style="font-size:12px; color:var(--coral); font-weight:700; margin-bottom:16px;">● 듣고 있어요…</div>
+          <div style="background:var(--coral-soft); color:var(--coral-d); border-radius:12px; padding:9px 12px; font-size:12px; display:inline-block; margin-bottom:10px;">기초연금 신청하고 싶어요</div>
+          <div style="background:#fff; border:1px solid #f0e7dd; border-radius:12px; padding:10px 12px; font-size:12px; color:var(--sub); text-align:left;">네, 기초연금 신청을 도와드릴게요. 생년월일을 말씀해 주세요.</div>
+        </div>
+      </div></div>
+    </div>
+    <div class="axrow rev">
+      <div class="axphone rv"><div class="axsc">
+        <div class="axnotch"></div>
+        <div class="axstat"><span>9:41</span><span class="r"><span class="bars"><i style="height:5px"></i><i style="height:7px"></i><i style="height:9px"></i><i style="height:11px"></i></span><span class="batt"></span></span></div>
+        <div class="axhd"><span class="bk">‹</span><span class="ico">이</span><span class="tt">복지 서비스 시작<small>무엇을 도와드릴까요?</small></span></div>
+        <div class="axbd">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:9px;">
+            <div class="axtile"><div class="e">❤️</div><div class="l">돌봄 신청</div></div>
+            <div class="axtile"><div class="e">📅</div><div class="l">방문 예약</div></div>
+            <div class="axtile"><div class="e">💊</div><div class="l">복지 정보</div></div>
+            <div class="axtile"><div class="e">🍚</div><div class="l">식사·배달</div></div>
+            <div class="axtile"><div class="e">🚗</div><div class="l">교통 지원</div></div>
+            <div class="axtile"><div class="e">🎧</div><div class="l">상담 연결</div></div>
+          </div>
+          <div class="axbtn" style="margin-top:12px;">상담사 문자 받기</div>
+        </div>
+      </div></div>
+      <div class="txt rv"><span class="tag">보이는 ARS</span><h3>세대별 맞춤 화면</h3><p>문자·웹·D-ARS로 어르신·청년 눈높이에 맞춘 복지 상담 창구를 제공합니다.</p></div>
+    </div>
+    <div class="axrow">
+      <div class="txt rv"><span class="tag">AI 안전 도우미</span><h3>위험 신호 먼저 감지</h3><p>활동 대화를 분석해 건강·고립 위험을 감지하고, 코디네이터에게 즉시 연계합니다.</p></div>
+      <div class="axphone rv"><div class="axsc">
+        <div class="axnotch"></div>
+        <div class="axstat"><span>9:41</span><span class="r"><span class="bars"><i style="height:5px"></i><i style="height:7px"></i><i style="height:9px"></i><i style="height:11px"></i></span><span class="batt"></span></span></div>
+        <div class="axhd"><span class="bk">‹</span><span class="ico">이</span><span class="tt">AI 안심 케어<small>이상 징후 감지</small></span></div>
+        <div class="axbd">
+          <div style="background:#fbeaea; border:1px solid #f2c9c9; border-radius:13px; padding:11px 13px; margin-bottom:12px;">
+            <div style="font-size:13px; font-weight:700; color:#c0392b;">⚠ 이상 징후 감지 · 위험</div>
+            <div style="font-size:11px; color:#a15b5b; margin-top:2px;">식사 이슈 · 활동량 저하 · 위험도 높음</div>
+          </div>
+          <div class="axrowc"><span class="ic">🎧</span><div><b>코디네이터 즉시 연결</b><small>지금 바로 도와드려요</small></div></div>
+          <div class="axrowc"><span class="ic">🏠</span><div><b>긴급 방문 요청</b><small>담당자에게 전달</small></div></div>
+          <div class="axrowc"><span class="ic">🔔</span><div><b>가족에게 알림</b><small>보호자에게 상황 알림</small></div></div>
+          <div style="text-align:center; font-size:11px; color:var(--coral); font-weight:700; margin-top:8px;">응급 상황 시 119 자동 연결</div>
+        </div>
+      </div></div>
+    </div>
+  </div>
+</div></section>
+
+<section id="diff"><div class="wrap">
+  <div class="lead" style="text-align:center; max-width:none; margin:0 auto 48px;">
+    <div class="kick rv" style="display:inline-block;">이음만의 것</div>
+    <h2 class="rv">따라 하기 <span class="ac">어려운</span> 세 가지</h2>
+    <p class="rv" style="max-width:560px; margin:16px auto 0;">아이디어가 아니라, 이미 작동하는 매칭·안전·정산 기술이 이음의 진입장벽이에요.</p>
+  </div>
+  <div class="diffgrid">
+    <div class="diffcard rv"><div class="dtop"><span class="ic" style="background:var(--coral-soft);">✨</span><span class="dtag" style="background:var(--coral-soft); color:var(--coral-d);">특허 출원 준비 중</span></div><h3>3세대 트리오 매칭 엔진</h3><p>거주 근접·생활 일정·관심 시너지·안전 적합·상호 보완 다섯 요소를 가중 점수화해 한 번에 3세대를 묶습니다. 한 명을 다른 한 명에 붙이는 1:1 중개와는 구조가 달라요.</p></div>
+    <div class="diffcard rv"><div class="dtop"><span class="ic" style="background:var(--purple-soft);">🛡️</span><span class="dtag" style="background:var(--purple-soft); color:var(--purple);">아동 동반 필수 절차</span></div><h3>4단계 안전검증 · 책임보험 내장</h3><p>면접·범죄경력·아동학대 전력·추천인 확인을 거치고, 모든 대면 활동은 책임보험으로 보장합니다. 미성년 보호자 5종 전자동의까지 시스템에 들어가 있어요.</p></div>
+    <div class="diffcard rv"><div class="dtop"><span class="ic" style="background:var(--green-soft);">💳</span><span class="dtag" style="background:var(--green-soft); color:var(--green);">지자체·1365 연계</span></div><h3>활동을 보상으로 잇는 정산</h3><p>활동 기록이 봉사시간과 상생카드 보상으로 자동 환산·발급됩니다. 통합돌봄·자원봉사 행정과 맞물리는 정산 흐름이 이미 돌아갑니다.</p></div>
+  </div>
+</div></section>
+
+<section id="product"><div class="wrap prod">
+  <div class="txt">
+    <div class="kick rv">직접 둘러보기</div>
+    <h2 class="rv">담당자는 한 화면에서,<br><span class="ac">모두</span>를 돌봅니다</h2>
+    <p class="rv" style="font-size:17px; color:var(--sub); margin-top:14px;">신청·검증·매칭·활동·안전·정산·실적보고까지. AI가 최적의 3세대 트리오를 추천하고, 코디네이터는 한 곳에서 운영합니다.</p>
+    <div class="steps rv">
+      <div class="step"><div class="n">01</div><h3>5분 신청</h3><p>동네·시간·관심사만 입력</p></div>
+      <div class="step"><div class="n">02</div><h3>4단계 안전검증</h3><p>면접·경력·전력·추천인</p></div>
+      <div class="step"><div class="n">03</div><h3>트리오 매칭</h3><p>청년·어르신·아동 연결</p></div>
+    </div>
+  </div>
+  <div class="win rv">
+    <div class="bar"><i></i><i></i><i></i><span class="url">이음 · 코디네이터 · 매칭 보드</span></div>
+    <div class="mbwrap">
+      <div class="mbtop">
+        <div><div class="mbtitle">매칭 보드</div><div class="mbsub">활동 중 3건 · 제안 1건</div></div>
+        <span class="mbai">✨ AI 매칭 추천</span>
+      </div>
+      <div class="mbgrid">
+        <div class="mbcard">
+          <div class="mbhd"><span class="mbid">● M001</span><span class="mbfit">적합도 98%</span></div>
+          <div class="mbavs">
+            <div><div class="av" style="background:var(--green-soft);">🧑</div><div class="nm">김민준</div><div class="rl">청년</div></div>
+            <div><div class="av" style="background:var(--purple-soft);">👵</div><div class="nm">박순자</div><div class="rl">어르신</div></div>
+            <div><div class="av" style="background:var(--coral-soft);">🧒</div><div class="nm">김유진</div><div class="rl">아동</div></div>
+          </div>
+          <div class="mbft"><span>⏱ 15h · 10회</span><span>2027.05.01</span></div>
+        </div>
+        <div class="mbcard">
+          <div class="mbhd"><span class="mbid">● M002</span><span class="mbfit">적합도 95%</span></div>
+          <div class="mbavs">
+            <div><div class="av" style="background:var(--green-soft);">🧑</div><div class="nm">이지원</div><div class="rl">청년</div></div>
+            <div><div class="av" style="background:var(--purple-soft);">🧓</div><div class="nm">김복례</div><div class="rl">어르신</div></div>
+            <div><div class="av" style="background:var(--coral-soft);">👧</div><div class="nm">한도윤</div><div class="rl">아동</div></div>
+          </div>
+          <div class="mbft"><span>⏱ 10.5h · 7회</span><span>2027.05.01</span></div>
+        </div>
+      </div>
+      <div class="mbwait"><span>매칭 대기 · 미배정 1명</span><span class="mbwaitp">👵 정금자 · 75세 · 요리</span></div>
+    </div>
+  </div>
+</div></section>
+
+<section id="trust" class="band"><div class="wrap split">
+  <div class="portframe rv"><img src="assets/1.png" alt="세대가 함께하는 따뜻한 순간"></div>
+  <div class="txt">
+    <div class="kick rv">Safety first</div>
+    <h2 class="rv">믿고 맡길 수 있는 <span class="ac">이유</span></h2>
+    <p class="rv" style="font-size:17px; color:var(--sub); margin-top:14px;">아이가 어른들과 만나는 만큼, 안전이 최우선입니다. 모든 참여자는 <b>4단계 안전검증</b>을 거치고, 모든 대면 활동은 <b>책임보험</b>으로 보장돼요.</p>
+    <div class="checks">
+      <div class="c rv"><span class="k">✓</span><div><b>면접 · 신원 확인</b><small>참여 전 대면/비대면 면접을 진행합니다.</small></div></div>
+      <div class="c rv"><span class="k">✓</span><div><b>범죄경력 조회</b><small>경찰청 연계로 범죄경력을 확인합니다.</small></div></div>
+      <div class="c rv"><span class="k">✓</span><div><b>아동학대 전력 조회</b><small>아동 동반 활동 필수 절차입니다.</small></div></div>
+      <div class="c rv"><span class="k">✓</span><div><b>추천인 확인 · 대면 책임보험</b><small>추천인 검증 + 활동 중 사고 보장.</small></div></div>
+    </div>
+  </div>
+</div></section>
+
+<section class="statb"><div class="wrap"><div class="row">
+  <div class="rv"><div class="v num count" data-to="15" data-suffix="쌍">0</div><div class="l">동네 활동 매칭</div></div>
+  <div class="rv"><div class="v num count" data-to="2400" data-suffix="+">0</div><div class="l">참여 이웃</div></div>
+  <div class="rv"><div class="v num count" data-to="98" data-suffix="%">0</div><div class="l">다시 이용 의향</div></div>
+</div></div></section>
+
+<section><div class="wrap">
+  <div class="lead" style="text-align:center; max-width:none; margin:0 auto 48px;">
+    <div class="kick rv" style="display:inline-block;">이웃들의 이야기</div>
+    <h2 class="rv">3세대의 <span class="ac">목소리</span></h2>
+    <p class="rv" style="max-width:520px; margin:16px auto 0;">이음으로 이어진 이웃들이 직접 전해온 이야기예요.</p>
+  </div>
+  <div class="tgrid">
+    <div class="tcard rv"><div class="sts">★★★★★</div><div class="tq">“할머니께 키오스크를 알려드렸는데, 다음엔 저한테 옛날 이야기를 들려주셨어요. 제가 더 배우고 가는 기분이에요.”</div><div class="tw"><div class="ini" style="background:var(--green-soft);">🧑</div><div><div class="nm">김민준</div><div class="rl">청년 · 27세</div></div></div></div>
+    <div class="tcard rv"><div class="sts">★★★★★</div><div class="tq">“혼자였던 집에 아이 웃음소리가 들려요. 다시 누군가에게 쓸모 있는 사람이 된 것 같아 하루가 기다려져요.”</div><div class="tw"><div class="ini" style="background:var(--purple-soft);">👵</div><div><div class="nm">박순자</div><div class="rl">어르신 · 73세</div></div></div></div>
+    <div class="tcard rv"><div class="sts">★★★★★</div><div class="tq">“맞벌이라 늘 미안했는데, 유진이가 동네에 할머니랑 삼촌이 생겼다며 좋아해요. 마음이 놓여요.”</div><div class="tw"><div class="ini" style="background:var(--coral-soft);">🧒</div><div><div class="nm">이서영</div><div class="rl">양육가정 · 유진 엄마</div></div></div></div>
+  </div>
+</div></section>
+
+<section id="app" class="band"><div class="wrap appshow">
+  <div class="txt">
+    <div class="kick rv">참여 방법</div>
+    <h2 class="rv" style="margin:8px 0 16px;">앱 설치 없이,<br>카톡으로 <span class="ac">이음</span></h2>
+    <p class="rv" style="font-size:17px; color:var(--sub); margin-bottom:26px; max-width:33ch;">카카오톡 채널·웹으로 바로 참여합니다. 큰 글씨와 단순한 흐름으로 어르신도 쉽게 사용합니다.</p>
+    <button class="btn btn-p btn-lg rv">카카오톡으로 시작하기</button>
+  </div>
+  <div class="phone rv"><div class="scr kk">
+    <div class="kkTop">
+      <span class="bk">‹</span>
+      <img class="ci" src="assets/ieum_icon_1024.png" alt="이음 채널">
+      <div class="nm">이음 돌봄<small>채널 · 공식</small></div>
+      <div class="sp"><span>🔍</span><span>☰</span></div>
+    </div>
+    <div class="chat">
+      <div class="day"><span>오늘</span></div>
+      <div class="kmsg">
+        <img class="kav" src="assets/ieum_icon_1024.png" alt="">
+        <div><div class="kwho">이음 돌봄</div><div class="kbubble">안녕하세요! 이음 돌봄 채널이에요 😊<br>무엇을 도와드릴까요?</div></div>
+      </div>
+      <div class="kmsg">
+        <img class="kav" src="assets/ieum_icon_1024.png" alt="">
+        <div class="krich">
+          <div class="krimg"><img src="assets/hero_illust.png" alt="이웃 돌봄"></div>
+          <div class="krb"><div class="krt">이웃과 함께하는 돌봄</div><div class="krd">필요한 돌봄을 신청하고, 나눈 시간을 적립받으세요.</div></div>
+          <div class="krbtns"><a>💛 돌봄 신청하기</a><a>⏱ 내 적립 시간</a><a>❓ 자주 묻는 질문</a></div>
+        </div>
+      </div>
+      <div class="kquicks"><span>돌봄 신청</span><span>적립 확인</span><span>자주 묻는 질문</span></div>
+    </div>
+    <div class="kInput"><span class="plus">＋</span><div class="kbox">메시지 입력</div><span class="ksnd">↑</span></div>
+  </div></div>
+</div></section>
+
+<section id="b2g"><div class="wrap">
+  <div class="lead">
+    <div class="kick rv">공공 성과 · B2G</div>
+    <h2 class="rv">지자체가 도입 즉시 보는 <span class="ac">효과</span></h2>
+    <p class="rv">설계가 아니라 이미 돌아가는 제품. 통합돌봄을 ‘바로 굴릴’ 실행 도구로 납품합니다.</p>
+  </div>
+  <div class="pubgrid">
+    <div class="pubcard rv"><div class="v num">70%↓</div><div class="l">전산 도입비</div><div class="s">구축 0 · 사용료형 SaaS</div></div>
+    <div class="pubcard rv"><div class="v num">40%↓</div><div class="l">통합돌봄 1인 행정비</div><div class="s">매칭·정산·보고 자동화</div></div>
+    <div class="pubcard rv"><div class="v num">1 : 2.3</div><div class="l">SROI 사회적 투자수익</div><div class="s">고립·돌봄공백 절감 추정</div></div>
+    <div class="pubcard rv"><div class="v num">1365</div><div class="l">봉사실적 연계</div><div class="s">자원봉사 행정과 자동 연동</div></div>
+  </div>
+</div></section>
+
+<section id="pricing" class="band"><div class="wrap">
+  <div class="lead">
+    <div class="kick rv">요금제</div>
+    <h2 class="rv">품앗이는 무료, <span class="ac">안심</span>은 선택</h2>
+    <p class="rv">참여비는 전혀 없어요. 활동하면 봉사시간·상생카드로 보상받고, 보호자 안심 케어만 선택 구독입니다.</p>
+  </div>
+  <div class="plans">
+    <div class="plan rv"><div class="nm">무료</div><div class="pr">₩0</div><div class="sub">동네 품앗이 기본</div><ul><li>트리오 매칭·활동 일지</li><li>봉사시간·상생카드 보상</li></ul></div>
+    <div class="plan hot rv"><div class="pbadge">인기</div><div class="nm">안심 베이직</div><div class="pr">₩19,900<span style="font-size:13px;color:var(--mut);font-weight:400;">/월</span></div><div class="sub">맞벌이 보호자에게</div><ul><li>실시간 체크인·위치 알림</li><li>주간 활동 리포트</li></ul></div>
+    <div class="plan rv"><div class="nm">안심 프리미엄</div><div class="pr">₩39,900<span style="font-size:13px;color:var(--mut);font-weight:400;">/월</span></div><div class="sub">가장 깊은 안심</div><ul><li>우선 매칭</li><li>월간 성장 리포트·상담</li></ul></div>
+  </div>
+</div></section>
+
+<section id="faq"><div class="wrap">
+  <div class="lead" style="text-align:center; max-width:none; margin:0 auto 48px;">
+    <div class="kick rv" style="display:inline-block;">자주 묻는 질문</div>
+    <h2 class="rv">궁금한 점, <span class="ac">먼저</span> 답해드려요</h2>
+  </div>
+  <div class="faq">
+    <div class="faqi rv"><div class="q">누가 신청할 수 있나요?</div><div class="a">청소년부터 어르신까지 누구나 참여할 수 있어요. 동네·가능한 시간·관심사만 입력하면 5분 안에 신청이 끝납니다.</div></div>
+    <div class="faqi rv"><div class="q">참여하는 데 비용이 드나요?</div><div class="a">참여비는 전혀 없어요. 오히려 활동에 따라 상생카드와 봉사시간으로 보상을 받습니다. 보호자 안심 케어 구독만 선택이에요.</div></div>
+    <div class="faqi rv"><div class="q">아이가 어른들과 만나는데 안전한가요?</div><div class="a">모든 참여자는 4단계 안전검증(면접·범죄경력·아동학대 전력 조회·추천인 확인)을 거치고, 대면 활동은 책임보험으로 보장돼요.</div></div>
+    <div class="faqi rv"><div class="q">보상은 어떻게 받나요?</div><div class="a">활동 기록이 승인되면 봉사시간과 상생카드 포인트로 자동 환산돼요. 1365 자원봉사 실적과도 연계됩니다.</div></div>
+    <div class="faqi rv"><div class="q">매칭까지 얼마나 걸리나요?</div><div class="a">신청과 안전검증을 마치면 보통 1~2주 안에 트리오를 제안해 드려요. 가능 시간과 동네가 가까울수록 더 빨라요.</div></div>
+    <div class="faqi rv"><div class="q">어떻게 매칭되나요?</div><div class="a">거주지·일정·관심사를 분석해 청년·어르신·아동을 3세대 트리오로 연결하고, 코디네이터가 최종 확인합니다.</div></div>
+    <div class="faqi rv"><div class="q">활동 중 문제가 생기면 어떻게 하나요?</div><div class="a">코디네이터에게 즉시 연결되고, 모든 대면 활동은 책임보험으로 보장돼요. 이상징후가 감지되면 담당자에게 자동 알림이 갑니다.</div></div>
+    <div class="faqi rv"><div class="q">안심 케어 구독은 꼭 해야 하나요?</div><div class="a">아니요, 선택입니다. 무료로도 매칭·활동·보상이 모두 가능하고, 실시간 체크인·리포트가 필요한 보호자만 안심 케어를 구독하시면 돼요.</div></div>
+  </div>
+</div></section>
+
+<section style="padding:20px 0 96px;"><div class="wrap"><div class="cta rv">
+  <div class="kick" style="color:var(--coral);">Start today</div>
+  <h2>오늘, 이웃과 마음을 이어보세요</h2>
+  <p>참여는 1분이면 충분합니다.</p>
+  <button class="btn btn-p btn-lg">무료로 시작하기</button>
+</div></div></section>
+
+<footer class="ftr"><div class="wrap">
+  <div class="fg">
+    <div class="fbrand">
+      <div class="brand"><img src="assets/ieum_icon_1024.png" alt="이음" style="width:30px;height:30px;border-radius:8px;"><span class="wm">이음</span></div>
+      <p>청년·어르신·아동 3세대를 잇는 상생 품앗이 플랫폼이에요.</p>
+      <div class="fb"><span>🛡 4단계 안전검증</span><span>💛 책임보험 적용</span></div>
+      <div style="margin-top:20px; font-size:12px; color:#8f8175;">운영 법인 · 주식회사 고원</div>
+    </div>
+    <div><h4>서비스</h4><ul><li>둘러보기 · 데모 체험</li><li>5분 참여 신청</li><li>자주 묻는 질문</li></ul></div>
+    <div><h4>함께하는 기관</h4><ul><li>광주광역시 · 광산구청</li><li>광주창조경제혁신센터</li><li>1365 자원봉사포털</li><li>광주상생카드</li></ul></div>
+  </div>
+  <div class="fbot"><span>© 2026 이음 · 운영 주식회사 고원</span><span>3세대 상생 품앗이 플랫폼 · 데모 모드</span></div>
+</div></footer>
+
+<script>
+  const nav=document.getElementById('nav');
+  const onScroll=()=>nav.classList.toggle('solid', window.scrollY>30);
+  onScroll(); addEventListener('scroll', onScroll, {passive:true});
+  const io=new IntersectionObserver((es)=>es.forEach(e=>{
+    if(e.isIntersecting){
+      const el=e.target, sibs=[...el.parentElement.children].filter(c=>c.classList.contains('rv'));
+      const i=Math.max(0, sibs.indexOf(el));
+      el.style.transitionDelay=(i*85)+'ms'; el.classList.add('in'); io.unobserve(el);
+    }
+  }),{threshold:.14});
+  document.querySelectorAll('.rv').forEach(el=>io.observe(el));
+  const hm=document.getElementById('heroMedia'); const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+  if(hm && !reduce){ addEventListener('scroll',()=>{ const y=Math.min(window.scrollY,600); hm.style.transform='translateY('+(y*0.04)+'px)'; },{passive:true}); }
+  const cio=new IntersectionObserver((es)=>es.forEach(e=>{
+    if(!e.isIntersecting) return; const el=e.target; cio.unobserve(el);
+    const to=+el.dataset.to, comma=el.dataset.comma, suf=el.dataset.suffix||''; const dur=1300, t0=performance.now();
+    const ease=x=>1-Math.pow(1-x,3);
+    const tick=(t)=>{ let p=Math.min((t-t0)/dur,1); let v=Math.round(to*ease(p));
+      el.textContent=(comma?v.toLocaleString():v)+suf; if(p<1)requestAnimationFrame(tick); };
+    requestAnimationFrame(tick);
+  }),{threshold:.6});
+  document.querySelectorAll('.count').forEach(el=>cio.observe(el));
+</script>
+</body>
+</html>
