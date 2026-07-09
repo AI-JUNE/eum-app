@@ -3753,8 +3753,8 @@ function RLSectionHead({ index, kicker, title, sub, action, align = 'center' }) 
   return (
     <div style={{ marginBottom: 34, textAlign: align, display: 'flex', flexDirection: 'column', alignItems: align === 'center' ? 'center' : 'flex-start' }}>
       {kicker && <div className="eum-kicker" style={{ marginBottom: 16 }}>{kicker}</div>}
-      {title && <h2 className="eum-serif" style={{ margin: 0, fontSize: 'clamp(27px, 3.8vw, 40px)', fontWeight: 800, color: C.ink, lineHeight: 1.24 }}>{title}</h2>}
-      {sub && <p style={{ margin: '15px 0 0', fontSize: 17, color: C.mute, lineHeight: 1.6, maxWidth: 600 }}>{sub}</p>}
+      {title && <h2 className="eum-serif" style={{ margin: 0, fontSize: 'clamp(31px, 4.1vw, 46px)', fontWeight: 800, color: C.ink, lineHeight: 1.2 }}>{title}</h2>}
+      {sub && <p style={{ margin: '16px 0 0', fontSize: 18.5, color: C.mute, lineHeight: 1.6, maxWidth: 640 }}>{sub}</p>}
       {action && <div style={{ marginTop: 20 }}>{action}</div>}
     </div>
   );
@@ -4610,7 +4610,7 @@ function RLLanding({ state, onSelectRole, onShowApplication }) {
             <h1 className="eum-serif" style={{ fontSize: isMobile ? 'clamp(40px, 12vw, 52px)' : 'clamp(48px, 5.4vw, 68px)', fontWeight: 800, color: C.ink, lineHeight: 1.12, margin: '0 0 20px' }}>
               세대를 잇다,<br /><span style={{ color: C.brand }}>이음</span>
             </h1>
-            <p style={{ fontSize: isMobile ? 16.5 : 19, color: C.inkSoft, maxWidth: 460, margin: '0 0 30px', lineHeight: 1.62, fontWeight: 500 }}>
+            <p style={{ fontSize: isMobile ? 17 : 21, color: C.inkSoft, maxWidth: 500, margin: '0 0 32px', lineHeight: 1.62, fontWeight: 500 }}>
               혼자인 어르신, 방과후 혼자인 아이, 낯선 동네의 청년. 서로의 빈자리를 채우는 우리 동네 3세대 품앗이예요.
             </p>
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 24, justifyContent: isMobile ? 'center' : 'flex-start' }}>
@@ -4624,7 +4624,7 @@ function RLLanding({ state, onSelectRole, onShowApplication }) {
             </div>
           </div>
           <div style={{ display: 'flex', justifyContent: 'center' }}>
-            <div style={{ position: 'relative', width: '100%', maxWidth: 480, animation: 'eumHeroIn 0.9s cubic-bezier(0.22,1,0.36,1) both, eumHeroFloat 7s ease-in-out 0.9s infinite' }}>
+            <div style={{ position: 'relative', width: '100%', maxWidth: 540, animation: 'eumHeroIn 0.9s cubic-bezier(0.22,1,0.36,1) both, eumHeroFloat 7s ease-in-out 0.9s infinite' }}>
               <div style={{ borderRadius: 28, overflow: 'hidden', boxShadow: '0 30px 60px -24px rgba(26,26,30,0.28)' }}>
                 <img className="eum-hero-img" src="/hero-3gen.png" alt="청년·어르신·아동 3세대가 함께하는 모습" style={{ width: '100%', display: 'block', aspectRatio: '4 / 3.4', objectFit: 'cover', objectPosition: 'center 30%' }} loading="eager" decoding="async" fetchPriority="high" />
               </div>
@@ -4645,20 +4645,20 @@ function RLLanding({ state, onSelectRole, onShowApplication }) {
         {/* 3세대 선순환 — 개념(애니메이션) 섹션 */}
         <Reveal>
           <div style={{ margin: isMobile ? '8px 0 64px' : '8px 0 96px', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.05fr 0.95fr', gap: isMobile ? 32 : 56, alignItems: 'center' }}>
-            <div style={{ display: 'flex', justifyContent: 'center' }}><RLLoopInfographic /></div>
+            <div style={{ display: 'flex', justifyContent: isMobile ? 'center' : 'flex-start' }}><div style={{ transform: isMobile ? 'none' : 'scale(1.24)', transformOrigin: 'left center' }}><RLLoopInfographic /></div></div>
             <div style={{ textAlign: isMobile ? 'center' : 'left' }}>
               <div className="eum-kicker" style={{ marginBottom: 16 }}>3세대 선순환</div>
-              <h2 className="eum-serif" style={{ fontSize: isMobile ? 28 : 36, fontWeight: 800, color: C.ink, margin: '0 0 14px', lineHeight: 1.2 }}>세대가 함께 돌보는 동네</h2>
-              <p style={{ fontSize: 16.5, color: C.mute, lineHeight: 1.6, maxWidth: 440, margin: isMobile ? '0 auto 22px' : '0 0 22px', fontWeight: 500 }}>한쪽만 주는 게 아니라, 서로 주고받는 동네예요.</p>
+              <h2 className="eum-serif" style={{ fontSize: isMobile ? 30 : 44, fontWeight: 800, color: C.ink, margin: '0 0 16px', lineHeight: 1.18 }}>세대가 함께 돌보는 동네</h2>
+              <p style={{ fontSize: 18.5, color: C.mute, lineHeight: 1.6, maxWidth: 480, margin: isMobile ? '0 auto 24px' : '0 0 24px', fontWeight: 500 }}>한쪽만 주는 게 아니라, 서로 주고받는 동네예요.</p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10, maxWidth: 520, margin: isMobile ? '0 auto' : 0, width: '100%' }}>
                 {[
                   { c: C.sage, who: '청년', what: '스마트폰·키오스크 사용법을 알려드리고, 아이의 공부를 도와요' },
                   { c: C.lavender, who: '어르신', what: '살아온 지혜와 옛이야기로 아이 곁을 든든히 지켜요' },
                   { c: C.peach, who: '아이', what: '웃음과 활력으로 어른들의 하루를 환하게 채워요' },
                 ].map((r) => (
-                  <div key={r.who} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 18px', borderRadius: 14, background: C.card, border: `1px solid ${C.borderSoft}`, boxShadow: '0 1px 3px -1px rgba(26,26,30,0.05)', textAlign: 'left' }}>
-                    <span style={{ fontSize: 13, fontWeight: 700, color: r.c, background: r.c + '18', padding: '5px 12px', borderRadius: 999, minWidth: 54, textAlign: 'center', flexShrink: 0 }}>{r.who}</span>
-                    <span style={{ fontSize: 14, color: C.inkSoft, lineHeight: 1.55, fontWeight: 500 }}>{r.what}</span>
+                  <div key={r.who} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '16px 20px', borderRadius: 14, background: C.card, border: `1px solid ${C.borderSoft}`, boxShadow: '0 1px 3px -1px rgba(26,26,30,0.05)', textAlign: 'left' }}>
+                    <span style={{ fontSize: 14.5, fontWeight: 700, color: r.c, background: r.c + '18', padding: '6px 14px', borderRadius: 999, minWidth: 60, textAlign: 'center', flexShrink: 0 }}>{r.who}</span>
+                    <span style={{ fontSize: 15.5, color: C.inkSoft, lineHeight: 1.55, fontWeight: 500 }}>{r.what}</span>
                   </div>
                 ))}
               </div>
