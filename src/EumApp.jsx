@@ -3753,8 +3753,8 @@ function RLSectionHead({ index, kicker, title, sub, action, align = 'center' }) 
   return (
     <div style={{ marginBottom: 34, textAlign: align, display: 'flex', flexDirection: 'column', alignItems: align === 'center' ? 'center' : 'flex-start' }}>
       {kicker && <div className="eum-kicker" style={{ marginBottom: 16 }}>{kicker}</div>}
-      {title && <h2 className="eum-serif" style={{ margin: 0, fontSize: 'clamp(27px, 3.9vw, 40px)', fontWeight: 800, color: C.ink, lineHeight: 1.24 }}>{title}</h2>}
-      {sub && <p style={{ margin: '15px 0 0', fontSize: 17, color: C.mute, lineHeight: 1.6, maxWidth: 620 }}>{sub}</p>}
+      {title && <h2 className="eum-serif" style={{ margin: 0, fontSize: 'clamp(31px, 4.4vw, 48px)', fontWeight: 800, color: C.ink, lineHeight: 1.18 }}>{title}</h2>}
+      {sub && <p style={{ margin: '17px 0 0', fontSize: 18.5, color: C.mute, lineHeight: 1.6, maxWidth: 660 }}>{sub}</p>}
       {action && <div style={{ marginTop: 20 }}>{action}</div>}
     </div>
   );
@@ -4336,7 +4336,7 @@ const KAKAO_PHONE_HTML = `<div class="scr kk">
 const TOBE_CSS = `.eum-tobe{--ink:#241d17;--paper:#fff;--cream:#fbf7f2;--cream2:#f4ede4;--coral:#BE5535;--coral-d:#9E4329;--coral-soft:#f4e7e0;--green:#4b7a52;--green-soft:#e9f1e7;--purple:#6a5aa0;--purple-soft:#efeaf6;--clay:#9a6a52;--sub:#5f564d;--mut:#9b9186;--line:#eee6dc;word-break:keep-all;-webkit-font-smoothing:antialiased;}
 .eum-tobe *{box-sizing:border-box;}
 .eum-tobe .kick{font-size:13px;font-weight:700;color:var(--coral);letter-spacing:1.4px;text-transform:uppercase;margin-bottom:16px;}
-.eum-tobe h2{font-size:clamp(28px,3.4vw,42px);line-height:1.18;font-weight:800;letter-spacing:-1.1px;margin:0;color:var(--ink);}
+.eum-tobe h2{font-size:clamp(31px,3.9vw,48px);line-height:1.14;font-weight:800;letter-spacing:-1.1px;margin:0;color:var(--ink);}
 .eum-tobe h2 .ac,.eum-tobe .ac{color:var(--coral);}
 .eum-tobe .txt p{text-wrap:pretty;}
 .eum-tobe .win{border-radius:16px;overflow:hidden;border:1px solid var(--line);box-shadow:0 12px 32px rgba(36,29,23,.09);background:#fff;width:100%;}
@@ -4452,7 +4452,7 @@ function TobeStyles() { return <style dangerouslySetInnerHTML={{ __html: TOBE_CS
 function FullBand({ bg, isMobile, children }) {
   return (
     <div style={{ position: 'relative', width: '100vw', marginLeft: 'calc(50% - 50vw)', background: bg, borderTop: '1px solid #EDE9E3', borderBottom: '1px solid #EDE9E3' }}>
-      <div style={{ maxWidth: 1120, margin: '0 auto', padding: isMobile ? '48px 20px' : '82px 40px' }}>
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: isMobile ? '48px 20px' : '82px 40px' }}>
         {children}
       </div>
     </div>
@@ -4585,7 +4585,7 @@ function RLLanding({ state, onSelectRole, onShowApplication }) {
     }}>
       {/* 상단 내비게이션 */}
       <div style={{ width: '100%', position: 'sticky', top: 0, zIndex: 50, background: scrolled ? 'rgba(245,244,242,0.92)' : 'rgba(245,244,242,0.8)', backdropFilter: 'blur(12px)', borderBottom: `1px solid ${scrolled ? C.border : 'transparent'}`, boxShadow: scrolled ? '0 6px 22px -10px rgba(26,26,30,0.16)' : 'none', transition: 'box-shadow 0.25s ease, border-color 0.25s ease, background 0.25s ease' }}>
-        <div style={{ maxWidth: 1120, margin: '0 auto', padding: isMobile ? '12px 18px' : '14px 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto', padding: isMobile ? '12px 18px' : '14px 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
           <div onClick={() => window.location.reload()} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); window.location.reload(); } }} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }} role="button" tabIndex={0} aria-label="홈으로 새로고침">
             <div style={{ width: 30, height: 30, display: 'flex' }}><EumLogo size={30} /></div>
             <div style={{ lineHeight: 1.05 }}>
@@ -4599,7 +4599,7 @@ function RLLanding({ state, onSelectRole, onShowApplication }) {
           </div>
         </div>
       </div>
-      <div style={{ maxWidth: 1120, width: '100%', padding: isMobile ? '28px 20px 56px' : '64px 40px 96px' }}>
+      <div style={{ maxWidth: 1200, width: '100%', padding: isMobile ? '28px 20px 56px' : '64px 40px 96px' }}>
         {/* 히어로 — 토스 계열 + 모션(그라데이션 오브·진입 스태거·플로팅) */}
         <div style={{ position: 'relative', margin: isMobile ? '8px 0 56px' : '20px 0 80px' }}>
           <div className="eum-orb" style={{ width: 400, height: 400, background: C.brand + '24', top: -130, right: -70, animation: 'eumOrb 17s ease-in-out infinite' }} />
@@ -4607,10 +4607,10 @@ function RLLanding({ state, onSelectRole, onShowApplication }) {
           <div style={{ position: 'relative', zIndex: 1, display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: isMobile ? 36 : 56, alignItems: 'center' }}>
           <div className="eum-heroin" style={{ textAlign: isMobile ? 'center' : 'left', display: 'flex', flexDirection: 'column', alignItems: isMobile ? 'center' : 'flex-start' }}>
             <div className="eum-kicker" style={{ marginBottom: 20 }}><Sparkles size={14} /> 청년·어르신·아동 3세대 · 2027 파일럿</div>
-            <h1 className="eum-serif" style={{ fontSize: isMobile ? 'clamp(38px, 11vw, 50px)' : 'clamp(42px, 5vw, 60px)', fontWeight: 800, color: C.ink, lineHeight: 1.12, margin: '0 0 20px' }}>
+            <h1 className="eum-serif" style={{ fontSize: isMobile ? 'clamp(40px, 12vw, 54px)' : 'clamp(48px, 5.6vw, 70px)', fontWeight: 800, color: C.ink, lineHeight: 1.12, margin: '0 0 20px' }}>
               세대를 잇다,<br /><span style={{ color: C.brand }}>이음</span>
             </h1>
-            <p style={{ fontSize: isMobile ? 16.5 : 19, color: C.inkSoft, maxWidth: 460, margin: '0 0 30px', lineHeight: 1.62, fontWeight: 500 }}>
+            <p style={{ fontSize: isMobile ? 17.5 : 22, color: C.inkSoft, maxWidth: 520, margin: '0 0 34px', lineHeight: 1.6, fontWeight: 500 }}>
               혼자인 어르신, 방과후 혼자인 아이, 낯선 동네의 청년. 서로의 빈자리를 채우는 우리 동네 3세대 품앗이예요.
             </p>
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 24, justifyContent: isMobile ? 'center' : 'flex-start' }}>
@@ -4624,7 +4624,7 @@ function RLLanding({ state, onSelectRole, onShowApplication }) {
             </div>
           </div>
           <div style={{ display: 'flex', justifyContent: 'center' }}>
-            <div style={{ position: 'relative', width: '100%', maxWidth: 480, animation: 'eumHeroIn 0.9s cubic-bezier(0.22,1,0.36,1) both, eumHeroFloat 7s ease-in-out 0.9s infinite' }}>
+            <div style={{ position: 'relative', width: '100%', maxWidth: 560, animation: 'eumHeroIn 0.9s cubic-bezier(0.22,1,0.36,1) both, eumHeroFloat 7s ease-in-out 0.9s infinite' }}>
               <div style={{ borderRadius: 28, overflow: 'hidden', boxShadow: '0 30px 60px -24px rgba(26,26,30,0.28)' }}>
                 <img className="eum-hero-img" src="/hero-3gen.png" alt="청년·어르신·아동 3세대가 함께하는 모습" style={{ width: '100%', display: 'block', aspectRatio: '4 / 3.4', objectFit: 'cover', objectPosition: 'center 30%' }} loading="eager" decoding="async" fetchPriority="high" />
               </div>
@@ -4645,20 +4645,20 @@ function RLLanding({ state, onSelectRole, onShowApplication }) {
         {/* 3세대 선순환 — 개념(애니메이션) 섹션 */}
         <Reveal>
           <div style={{ margin: isMobile ? '8px 0 64px' : '8px 0 96px', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.05fr 0.95fr', gap: isMobile ? 32 : 56, alignItems: 'center' }}>
-            <div style={{ display: 'flex', justifyContent: isMobile ? 'center' : 'flex-start' }}><div style={{ transform: isMobile ? 'none' : 'scale(1.12)', transformOrigin: 'left center' }}><RLLoopInfographic /></div></div>
+            <div style={{ display: 'flex', justifyContent: isMobile ? 'center' : 'flex-start' }}><div style={{ transform: isMobile ? 'none' : 'scale(1.4)', transformOrigin: 'left center' }}><RLLoopInfographic /></div></div>
             <div style={{ textAlign: isMobile ? 'center' : 'left' }}>
               <div className="eum-kicker" style={{ marginBottom: 16 }}>3세대 선순환</div>
-              <h2 className="eum-serif" style={{ fontSize: isMobile ? 27 : 38, fontWeight: 800, color: C.ink, margin: '0 0 14px', lineHeight: 1.22 }}>세대가 함께 돌보는 동네</h2>
-              <p style={{ fontSize: 16.5, color: C.mute, lineHeight: 1.6, maxWidth: 440, margin: isMobile ? '0 auto 22px' : '0 0 22px', fontWeight: 500 }}>한쪽만 주는 게 아니라, 서로 주고받는 동네예요.</p>
+              <h2 className="eum-serif" style={{ fontSize: isMobile ? 30 : 46, fontWeight: 800, color: C.ink, margin: '0 0 16px', lineHeight: 1.16 }}>세대가 함께 돌보는 동네</h2>
+              <p style={{ fontSize: 19, color: C.mute, lineHeight: 1.6, maxWidth: 500, margin: isMobile ? '0 auto 26px' : '0 0 26px', fontWeight: 500 }}>한쪽만 주는 게 아니라, 서로 주고받는 동네예요.</p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10, maxWidth: 520, margin: isMobile ? '0 auto' : 0, width: '100%' }}>
                 {[
                   { c: C.sage, who: '청년', what: '스마트폰·키오스크 사용법을 알려드리고, 아이의 공부를 도와요' },
                   { c: C.lavender, who: '어르신', what: '살아온 지혜와 옛이야기로 아이 곁을 든든히 지켜요' },
                   { c: C.peach, who: '아이', what: '웃음과 활력으로 어른들의 하루를 환하게 채워요' },
                 ].map((r) => (
-                  <div key={r.who} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 18px', borderRadius: 14, background: C.card, border: `1px solid ${C.borderSoft}`, boxShadow: '0 1px 3px -1px rgba(26,26,30,0.05)', textAlign: 'left' }}>
-                    <span style={{ fontSize: 13, fontWeight: 700, color: r.c, background: r.c + '18', padding: '5px 12px', borderRadius: 999, minWidth: 54, textAlign: 'center', flexShrink: 0 }}>{r.who}</span>
-                    <span style={{ fontSize: 14, color: C.inkSoft, lineHeight: 1.55, fontWeight: 500 }}>{r.what}</span>
+                  <div key={r.who} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '17px 22px', borderRadius: 15, background: C.card, border: `1px solid ${C.borderSoft}`, boxShadow: '0 1px 3px -1px rgba(26,26,30,0.05)', textAlign: 'left' }}>
+                    <span style={{ fontSize: 14.5, fontWeight: 700, color: r.c, background: r.c + '18', padding: '7px 15px', borderRadius: 999, minWidth: 62, textAlign: 'center', flexShrink: 0 }}>{r.who}</span>
+                    <span style={{ fontSize: 16, color: C.inkSoft, lineHeight: 1.55, fontWeight: 500 }}>{r.what}</span>
                   </div>
                 ))}
               </div>
