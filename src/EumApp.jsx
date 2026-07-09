@@ -4208,7 +4208,7 @@ function RLProductShowcase() {
   const isMobile = useIsMobile(900);
   return (
     <div style={{ marginBottom: 80 }}>
-      <RLSectionHead kicker="이렇게 작동해요" title="설계가 아니라, 이미 돌아가는 제품" sub="신청·안전검증·트리오 매칭·정산까지 — 코디네이터는 한 화면에서 운영하고, 가족은 휴대폰으로 안심 확인해요." />
+      <RLSectionHead kicker="이렇게 작동해요" title="담당자는 한 화면에서, 모두를 돌봐요" sub="신청·안전검증·트리오 매칭·정산까지 — 코디네이터는 한 화면에서 운영하고, 가족은 휴대폰으로 안심 확인해요." />
       <div style={{ position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: isMobile ? 24 : 32, flexDirection: isMobile ? 'column' : 'row' }}>
         <div className="eum-orb" style={{ width: 380, height: 380, background: C.brand + '1c', top: -30, left: '14%', animation: 'eumOrb 19s ease-in-out infinite' }} />
         <div style={{ position: 'relative', zIndex: 1, flex: '1 1 auto', width: '100%', maxWidth: 640 }}>
@@ -4294,7 +4294,7 @@ function RLKakaoBand({ isMobile, onShowApplication }) {
         </button>
       </div>
       <div style={{ display: 'flex', justifyContent: 'center' }}>
-        <div style={{ position: 'relative', width: 264, borderRadius: 40, background: '#1A1814', padding: 9, boxShadow: '0 30px 60px -22px rgba(26,26,30,0.4)' }}>
+        <div style={{ position: 'relative', width: isMobile ? 300 : 340, borderRadius: 44, background: '#1A1814', padding: 10, boxShadow: '0 34px 66px -22px rgba(26,26,30,0.42)' }}>
           <div style={{ borderRadius: 32, overflow: 'hidden', background: '#B2C7DA' }}>
             <img src="/kakao-main.png" alt="카카오톡 이음 돌봄 채널" style={{ width: '100%', display: 'block' }} loading="lazy" decoding="async" />
           </div>
