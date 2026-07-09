@@ -88,7 +88,8 @@
   .portframe{border-radius:24px; overflow:hidden; box-shadow:var(--e2); border:1px solid var(--line);}
   .portframe img{width:100%; aspect-ratio:4/4.7; object-fit:cover; object-position:center 26%; display:block;}
   .vals{display:grid; grid-template-columns:repeat(3,1fr); gap:20px; margin-top:52px;}
-  .val{background:var(--paper); border:1px solid var(--line); border-radius:18px; padding:22px 22px 24px;}
+  .val{background:var(--paper); border:1px solid var(--line); border-radius:18px; padding:22px 22px 24px; transition:transform .18s var(--ease), box-shadow .18s var(--ease);}
+  .val:hover{transform:translateY(-4px); box-shadow:var(--e2);}
   .val .ic{width:46px; height:46px; border-radius:13px; display:flex; align-items:center; justify-content:center; font-size:24px; margin-bottom:14px;}
   .val h3{font-size:18px; font-weight:700; margin-bottom:6px;}
   .val p{font-size:14px; color:var(--sub);}
@@ -160,7 +161,8 @@
   .hbadges{display:flex; gap:8px; flex-wrap:wrap; margin-top:20px;}
   .hbadge{display:inline-flex; align-items:center; gap:6px; font-size:12.5px; font-weight:700; padding:7px 13px; border-radius:999px; background:var(--paper); border:1px solid var(--line); color:var(--sub);}
   .pubgrid{display:grid; grid-template-columns:repeat(4,1fr); gap:16px;}
-  .pubcard{background:var(--paper); border:1px solid var(--line); border-radius:16px; padding:22px 20px; box-shadow:var(--e1);}
+  .pubcard{background:var(--paper); border:1px solid var(--line); border-radius:16px; padding:22px 20px; box-shadow:var(--e1); transition:transform .18s var(--ease), box-shadow .18s var(--ease);}
+  .pubcard:hover{transform:translateY(-4px); box-shadow:var(--e2);}
   .pubcard .v{font-family:"Fraunces",serif; font-size:34px; font-weight:600; color:var(--coral); letter-spacing:-1px;}
   .pubcard .l{font-size:13px; font-weight:700; margin-top:8px;} .pubcard .s{font-size:12px; color:var(--mut); margin-top:3px;}
   .plans{display:grid; grid-template-columns:repeat(3,1fr); gap:20px;}
@@ -298,8 +300,8 @@
 
 <nav id="nav"><div class="wrap nav-in">
   <div class="brand"><img src="assets/ieum_icon_1024.png" alt="이음 로고"><span class="wm">이음</span></div>
-  <div class="nav-menu"><a href="#care">돌봄 매칭</a><a href="#ax">AX 기술</a><a href="#trust">안심 정책</a><a href="#pricing">요금제</a><a href="#faq">FAQ</a></div>
-  <button class="btn btn-p" style="padding:11px 20px;">시작하기</button>
+  <div class="nav-menu"><a href="#care">돌봄 매칭</a><a href="#ax">AX 기술</a><a href="#product">둘러보기</a><a href="#trust">안심 정책</a><a href="#faq">FAQ</a></div>
+  <button class="btn btn-p" style="padding:11px 20px;" onclick="location.href='/'">참여 신청하기</button>
 </div></nav>
 
 <header class="hero"><div class="wrap"><div class="hero-grid">
@@ -308,8 +310,8 @@
     <h1 class="hero-h rv">세대를 잇다,<br><span class="ac">마음</span>을 나누다</h1>
     <p class="hero-sub rv">혼자인 어르신, 방과 후 혼자인 아이, 낯선 동네의 청년. 서로의 빈자리를 채우는 우리 동네 3세대 품앗이예요.</p>
     <div class="hero-cta rv">
-      <button class="btn btn-p btn-lg">5분 만에 참여 신청 →</button>
-      <button class="btn btn-g btn-lg">데모 둘러보기</button>
+      <button class="btn btn-p btn-lg" onclick="location.href='/'">5분 만에 참여 신청 →</button>
+      <button class="btn btn-g btn-lg" onclick="document.getElementById('product').scrollIntoView({behavior:'smooth'})">데모 둘러보기</button>
     </div>
     <div class="hbadges rv">
       <span class="hbadge">🛡 통합돌봄 연계</span>
@@ -523,7 +525,7 @@
     <div class="kick rv">참여 방법</div>
     <h2 class="rv" style="margin:8px 0 16px;">앱 설치 없이,<br>카톡으로 <span class="ac">이음</span></h2>
     <p class="rv" style="font-size:17px; color:var(--sub); margin-bottom:26px; max-width:33ch;">카카오톡 채널·웹으로 바로 참여합니다. 큰 글씨와 단순한 흐름으로 어르신도 쉽게 사용합니다.</p>
-    <button class="btn btn-p btn-lg rv">카카오톡으로 시작하기</button>
+    <button class="btn btn-p btn-lg rv" onclick="location.href='/'">카카오톡으로 시작하기</button>
   </div>
   <div class="phone rv"><div class="scr kk">
     <div class="kkTop">
@@ -566,19 +568,6 @@
   </div>
 </div></section>
 
-<section id="pricing" class="band"><div class="wrap">
-  <div class="lead">
-    <div class="kick rv">요금제</div>
-    <h2 class="rv">품앗이는 무료, <span class="ac">안심</span>은 선택</h2>
-    <p class="rv">참여비는 전혀 없어요. 활동하면 봉사시간·상생카드로 보상받고, 보호자 안심 케어만 선택 구독입니다.</p>
-  </div>
-  <div class="plans">
-    <div class="plan rv"><div class="nm">무료</div><div class="pr">₩0</div><div class="sub">동네 품앗이 기본</div><ul><li>트리오 매칭·활동 일지</li><li>봉사시간·상생카드 보상</li></ul></div>
-    <div class="plan hot rv"><div class="pbadge">인기</div><div class="nm">안심 베이직</div><div class="pr">₩19,900<span style="font-size:13px;color:var(--mut);font-weight:400;">/월</span></div><div class="sub">맞벌이 보호자에게</div><ul><li>실시간 체크인·위치 알림</li><li>주간 활동 리포트</li></ul></div>
-    <div class="plan rv"><div class="nm">안심 프리미엄</div><div class="pr">₩39,900<span style="font-size:13px;color:var(--mut);font-weight:400;">/월</span></div><div class="sub">가장 깊은 안심</div><ul><li>우선 매칭</li><li>월간 성장 리포트·상담</li></ul></div>
-  </div>
-</div></section>
-
 <section id="faq"><div class="wrap">
   <div class="lead" style="text-align:center; max-width:none; margin:0 auto 48px;">
     <div class="kick rv" style="display:inline-block;">자주 묻는 질문</div>
@@ -600,7 +589,7 @@
   <div class="kick" style="color:var(--coral);">Start today</div>
   <h2>오늘, 이웃과 마음을 이어보세요</h2>
   <p>참여는 1분이면 충분합니다.</p>
-  <button class="btn btn-p btn-lg">무료로 시작하기</button>
+  <button class="btn btn-p btn-lg" onclick="location.href='/'">무료로 시작하기</button>
 </div></div></section>
 
 <footer class="ftr"><div class="wrap">
