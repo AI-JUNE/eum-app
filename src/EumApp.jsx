@@ -703,6 +703,7 @@ function Select({ value, onChange, options, placeholder, style = {} }) {
   return (
     <select
       value={value || ''}
+      aria-label={placeholder}
       onChange={(e) => onChange && onChange(e.target.value)}
       onFocus={(e) => { e.target.style.borderColor = C.brand; e.target.style.boxShadow = `0 0 0 3px ${C.brand}22`; }}
       onBlur={(e) => { e.target.style.borderColor = C.border; e.target.style.boxShadow = 'none'; }}
@@ -755,6 +756,12 @@ function Checkbox({ checked, onChange, label, sublabel, required }) {
 }
 
 function Modal({ open, onClose, title, children, size = 'md', footer }) {
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e) => { if (e.key === 'Escape' && onClose) onClose(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open, onClose]);
   if (!open) return null;
   const widths = { sm: 420, md: 560, lg: 720, xl: 920 };
   return (
@@ -768,6 +775,9 @@ function Modal({ open, onClose, title, children, size = 'md', footer }) {
       }}
     >
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={typeof title === 'string' ? title : undefined}
         onClick={(e) => e.stopPropagation()}
         style={{
           background: C.card, borderRadius: 16, maxWidth: widths[size], width: '100%',
@@ -812,7 +822,7 @@ function Toast({ toast, onClose }) {
   };
   const c = colors[toast.type || 'info'];
   return (
-    <div style={{
+    <div role="status" aria-live={toast.type === 'error' ? 'assertive' : 'polite'} style={{
       position: 'fixed', bottom: 24, right: 24, zIndex: 2000,
       background: c.bg, color: '#fff', padding: '13px 18px',
       borderRadius: 12, display: 'flex', alignItems: 'center', gap: 10,
