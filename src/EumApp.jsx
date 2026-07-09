@@ -1202,6 +1202,17 @@ function Empty({ icon, title, sub, action }) {
   );
 }
 
+// 스켈레톤 — 로딩 시 콘텐츠 형태를 미리 보여주는 회색 블록(디자인 시스템: 스켈레톤 우선, 스피너 보조)
+function Skeleton({ w = '100%', h = 14, r = 8, style = {} }) {
+  return (
+    <div
+      aria-hidden="true"
+      className="eum-skeleton"
+      style={{ width: w, height: h, borderRadius: r, ...style }}
+    />
+  );
+}
+
 
 // ============================================================================
 // 6. LAYOUT — SIDEBAR + HEADER
@@ -4204,48 +4215,241 @@ function RLPhoneMock() {
   );
 }
 
+const AX_ROWS_HTML = `<div class="axrow">
+  <div class="txt"><span class="tag">AI 복지 콜봇</span><h3>말로 신청하는 복지</h3><p>어르신이 말씀만 하시면 기초연금·돌봄을 음성으로 신청·안내합니다. 복잡하면 담당자에게 즉시 연결됩니다.</p></div>
+  <div class="axphone"><div class="axsc">
+    <div class="axnotch"></div>
+    <div class="axstat"><span>9:41</span><span class="r"><span class="bars"><i style="height:5px"></i><i style="height:7px"></i><i style="height:9px"></i><i style="height:11px"></i></span><span class="batt"></span></span></div>
+    <div class="axhd"><span class="bk">‹</span><span class="ico">이</span><span class="tt">복지 상담 전화<small>어르신 음성 복지 신청</small></span></div>
+    <div class="axbd" style="text-align:center;">
+      <div style="font-size:20px; font-weight:800; margin:2px 0 4px;">말씀만 하세요</div>
+      <div style="font-size:12px; color:var(--sub); margin-bottom:18px;">복지 신청·안내를 도와드려요</div>
+      <div style="width:92px; height:92px; border-radius:50%; background:var(--coral); margin:0 auto 12px; display:flex; align-items:center; justify-content:center; font-size:38px; box-shadow:0 0 0 9px var(--coral-soft);">🎤</div>
+      <div style="font-size:12px; color:var(--coral); font-weight:700; margin-bottom:16px;">● 듣고 있어요…</div>
+      <div style="background:var(--coral-soft); color:var(--coral-d); border-radius:12px; padding:9px 12px; font-size:12px; display:inline-block; margin-bottom:10px;">기초연금 신청하고 싶어요</div>
+      <div style="background:#fff; border:1px solid #f0e7dd; border-radius:12px; padding:10px 12px; font-size:12px; color:var(--sub); text-align:left;">네, 기초연금 신청을 도와드릴게요. 생년월일을 말씀해 주세요.</div>
+    </div>
+  </div></div>
+</div>
+<div class="axrow rev">
+  <div class="axphone"><div class="axsc">
+    <div class="axnotch"></div>
+    <div class="axstat"><span>9:41</span><span class="r"><span class="bars"><i style="height:5px"></i><i style="height:7px"></i><i style="height:9px"></i><i style="height:11px"></i></span><span class="batt"></span></span></div>
+    <div class="axhd"><span class="bk">‹</span><span class="ico">이</span><span class="tt">복지 서비스 시작<small>무엇을 도와드릴까요?</small></span></div>
+    <div class="axbd">
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:9px;">
+        <div class="axtile"><div class="e">❤️</div><div class="l">돌봄 신청</div></div>
+        <div class="axtile"><div class="e">📅</div><div class="l">방문 예약</div></div>
+        <div class="axtile"><div class="e">💊</div><div class="l">복지 정보</div></div>
+        <div class="axtile"><div class="e">🍚</div><div class="l">식사·배달</div></div>
+        <div class="axtile"><div class="e">🚗</div><div class="l">교통 지원</div></div>
+        <div class="axtile"><div class="e">🎧</div><div class="l">상담 연결</div></div>
+      </div>
+      <div class="axbtn" style="margin-top:12px;">상담사 문자 받기</div>
+    </div>
+  </div></div>
+  <div class="txt"><span class="tag">보이는 ARS</span><h3>세대별 맞춤 화면</h3><p>문자·웹·D-ARS로 어르신·청년 눈높이에 맞춘 복지 상담 창구를 제공합니다.</p></div>
+</div>
+<div class="axrow">
+  <div class="txt"><span class="tag">AI 안전 도우미</span><h3>위험 신호 먼저 감지</h3><p>활동 대화를 분석해 건강·고립 위험을 감지하고, 코디네이터에게 즉시 연계합니다.</p></div>
+  <div class="axphone"><div class="axsc">
+    <div class="axnotch"></div>
+    <div class="axstat"><span>9:41</span><span class="r"><span class="bars"><i style="height:5px"></i><i style="height:7px"></i><i style="height:9px"></i><i style="height:11px"></i></span><span class="batt"></span></span></div>
+    <div class="axhd"><span class="bk">‹</span><span class="ico">이</span><span class="tt">AI 안심 케어<small>이상 징후 감지</small></span></div>
+    <div class="axbd">
+      <div style="background:#fbeaea; border:1px solid #f2c9c9; border-radius:13px; padding:11px 13px; margin-bottom:12px;">
+        <div style="font-size:13px; font-weight:700; color:#c0392b;">⚠ 이상 징후 감지 · 위험</div>
+        <div style="font-size:11px; color:#a15b5b; margin-top:2px;">식사 이슈 · 활동량 저하 · 위험도 높음</div>
+      </div>
+      <div class="axrowc"><span class="ic">🎧</span><div><b>코디네이터 즉시 연결</b><small>지금 바로 도와드려요</small></div></div>
+      <div class="axrowc"><span class="ic">🏠</span><div><b>긴급 방문 요청</b><small>담당자에게 전달</small></div></div>
+      <div class="axrowc"><span class="ic">🔔</span><div><b>가족에게 알림</b><small>보호자에게 상황 알림</small></div></div>
+      <div style="text-align:center; font-size:11px; color:var(--coral); font-weight:700; margin-top:8px;">응급 상황 시 119 자동 연결</div>
+    </div>
+  </div></div>
+</div>`;
+const PROD_HTML = `<div class="txt">
+  <div class="kick">직접 둘러보기</div>
+  <h2>담당자는 한 화면에서,<br><span class="ac">모두</span>를 돌봅니다</h2>
+  <p style="font-size:17px; color:var(--sub); margin-top:14px;">신청·검증·매칭·활동·안전·정산·실적보고까지. AI가 최적의 3세대 트리오를 추천하고, 코디네이터는 한 곳에서 운영합니다.</p>
+  <div class="steps">
+    <div class="step"><div class="n">01</div><h3>5분 신청</h3><p>동네·시간·관심사만 입력</p></div>
+    <div class="step"><div class="n">02</div><h3>4단계 안전검증</h3><p>면접·경력·전력·추천인</p></div>
+    <div class="step"><div class="n">03</div><h3>트리오 매칭</h3><p>청년·어르신·아동 연결</p></div>
+  </div>
+</div>
+<div class="win">
+  <div class="bar"><i></i><i></i><i></i><span class="url">이음 · 코디네이터 · 매칭 보드</span></div>
+  <div class="mbwrap">
+    <div class="mbtop">
+      <div><div class="mbtitle">매칭 보드</div><div class="mbsub">활동 중 3건 · 제안 1건</div></div>
+      <span class="mbai">✨ AI 매칭 추천</span>
+    </div>
+    <div class="mbgrid">
+      <div class="mbcard">
+        <div class="mbhd"><span class="mbid">● M001</span><span class="mbfit">적합도 98%</span></div>
+        <div class="mbavs">
+          <div><div class="av" style="background:var(--green-soft);">🧑</div><div class="nm">김민준</div><div class="rl">청년</div></div>
+          <div><div class="av" style="background:var(--purple-soft);">👵</div><div class="nm">박순자</div><div class="rl">어르신</div></div>
+          <div><div class="av" style="background:var(--coral-soft);">🧒</div><div class="nm">김유진</div><div class="rl">아동</div></div>
+        </div>
+        <div class="mbft"><span>⏱ 15h · 10회</span><span>2027.05.01</span></div>
+      </div>
+      <div class="mbcard">
+        <div class="mbhd"><span class="mbid">● M002</span><span class="mbfit">적합도 95%</span></div>
+        <div class="mbavs">
+          <div><div class="av" style="background:var(--green-soft);">🧑</div><div class="nm">이지원</div><div class="rl">청년</div></div>
+          <div><div class="av" style="background:var(--purple-soft);">🧓</div><div class="nm">김복례</div><div class="rl">어르신</div></div>
+          <div><div class="av" style="background:var(--coral-soft);">👧</div><div class="nm">한도윤</div><div class="rl">아동</div></div>
+        </div>
+        <div class="mbft"><span>⏱ 10.5h · 7회</span><span>2027.05.01</span></div>
+      </div>
+    </div>
+    <div class="mbwait"><span>매칭 대기 · 미배정 1명</span><span class="mbwaitp">👵 정금자 · 75세 · 요리</span></div>
+  </div>
+</div>`;
+const KAKAO_PHONE_HTML = `<div class="scr kk">
+  <div class="kkTop">
+    <span class="bk">‹</span>
+    <img class="ci" src="/tobe/ieum_icon_1024.png" alt="이음 채널">
+    <div class="nm">이음 돌봄<small>채널 · 공식</small></div>
+    <div class="sp"><span>🔍</span><span>☰</span></div>
+  </div>
+  <div class="chat">
+    <div class="day"><span>오늘</span></div>
+    <div class="kmsg">
+      <img class="kav" src="/tobe/ieum_icon_1024.png" alt="">
+      <div><div class="kwho">이음 돌봄</div><div class="kbubble">안녕하세요! 이음 돌봄 채널이에요 😊<br>무엇을 도와드릴까요?</div></div>
+    </div>
+    <div class="kmsg">
+      <img class="kav" src="/tobe/ieum_icon_1024.png" alt="">
+      <div class="krich">
+        <div class="krimg"><img src="/tobe/hero_illust.png" alt="이웃 돌봄"></div>
+        <div class="krb"><div class="krt">이웃과 함께하는 돌봄</div><div class="krd">필요한 돌봄을 신청하고, 나눈 시간을 적립받으세요.</div></div>
+        <div class="krbtns"><a>💛 돌봄 신청하기</a><a>⏱ 내 적립 시간</a><a>❓ 자주 묻는 질문</a></div>
+      </div>
+    </div>
+    <div class="kquicks"><span>돌봄 신청</span><span>적립 확인</span><span>자주 묻는 질문</span></div>
+  </div>
+  <div class="kInput"><span class="plus">＋</span><div class="kbox">메시지 입력</div><span class="ksnd">↑</span></div>
+</div>`;
+const TOBE_CSS = `.eum-tobe{--ink:#241d17;--paper:#fff;--cream:#fbf7f2;--cream2:#f4ede4;--coral:#BE5535;--coral-d:#9E4329;--coral-soft:#f4e7e0;--green:#4b7a52;--green-soft:#e9f1e7;--purple:#6a5aa0;--purple-soft:#efeaf6;--clay:#9a6a52;--sub:#5f564d;--mut:#9b9186;--line:#eee6dc;word-break:keep-all;-webkit-font-smoothing:antialiased;}
+.eum-tobe *{box-sizing:border-box;}
+.eum-tobe .kick{font-size:13px;font-weight:700;color:var(--coral);letter-spacing:1.4px;text-transform:uppercase;margin-bottom:16px;}
+.eum-tobe h2{font-size:clamp(28px,3.4vw,42px);line-height:1.18;font-weight:800;letter-spacing:-1.1px;margin:0;color:var(--ink);}
+.eum-tobe h2 .ac,.eum-tobe .ac{color:var(--coral);}
+.eum-tobe .txt p{text-wrap:pretty;}
+.eum-tobe .win{border-radius:16px;overflow:hidden;border:1px solid var(--line);box-shadow:0 12px 32px rgba(36,29,23,.09);background:#fff;width:100%;}
+.eum-tobe .win .bar{display:flex;align-items:center;gap:8px;padding:10px 14px;background:#f6f2ec;border-bottom:1px solid var(--line);}
+.eum-tobe .win .bar i{width:10px;height:10px;border-radius:50%;background:#dcd4c9;}
+.eum-tobe .win .bar .url{margin-left:10px;font-size:12px;color:var(--mut);background:#fff;border:1px solid var(--line);border-radius:8px;padding:4px 12px;}
+.eum-tobe .axrows{display:grid;gap:56px;margin-top:8px;}
+.eum-tobe .axrow{display:grid;grid-template-columns:1fr 1.12fr;gap:56px;align-items:center;}
+.eum-tobe .axrow.rev{grid-template-columns:1.12fr 1fr;}
+.eum-tobe .axrow .tag{display:inline-block;font-size:12px;font-weight:700;color:var(--coral-d);background:var(--coral-soft);padding:5px 12px;border-radius:999px;margin-bottom:12px;}
+.eum-tobe .axrow h3{font-size:23px;font-weight:800;letter-spacing:-.6px;margin-bottom:8px;color:var(--ink);}
+.eum-tobe .axrow p{font-size:16px;color:var(--sub);}
+.eum-tobe .axphone{width:300px;margin:0 auto;background:#1c1712;border-radius:46px;padding:8px;box-shadow:0 30px 70px rgba(36,29,23,.2),inset 0 0 0 2px #3a2c22;}
+.eum-tobe .axsc{background:#faf3ee;border-radius:38px;overflow:hidden;position:relative;min-height:544px;}
+.eum-tobe .axnotch{position:absolute;top:9px;left:50%;transform:translateX(-50%);width:104px;height:20px;background:#1c1712;border-radius:12px;z-index:6;}
+.eum-tobe .axstat{display:flex;justify-content:space-between;align-items:center;padding:11px 22px 3px;font-size:12px;font-weight:700;color:var(--ink);}
+.eum-tobe .axstat .r{display:inline-flex;align-items:center;gap:6px;}
+.eum-tobe .axstat .bars{display:inline-flex;gap:2px;align-items:flex-end;}
+.eum-tobe .axstat .bars i{width:3px;background:var(--ink);border-radius:1px;}
+.eum-tobe .axstat .batt{display:inline-block;width:20px;height:11px;border:1.5px solid var(--ink);border-radius:3px;position:relative;}
+.eum-tobe .axstat .batt::after{content:'';position:absolute;left:1.5px;top:1.5px;bottom:1.5px;width:68%;background:var(--ink);border-radius:1px;}
+.eum-tobe .axhd{background:#fff;padding:8px 15px 11px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #f2e9df;}
+.eum-tobe .axhd .bk{font-size:19px;color:#a99e93;}
+.eum-tobe .axhd .ico{width:26px;height:26px;border-radius:8px;background:var(--coral);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex:none;}
+.eum-tobe .axhd .tt{font-size:14px;font-weight:700;line-height:1.15;color:var(--ink);}
+.eum-tobe .axhd .tt small{display:block;font-size:10px;color:var(--mut);font-weight:500;}
+.eum-tobe .axbd{padding:18px 16px 22px;}
+.eum-tobe .axtile{background:#fff;border:1px solid #f0e7dd;border-radius:12px;padding:12px 8px;text-align:center;}
+.eum-tobe .axtile .e{font-size:20px;}
+.eum-tobe .axtile .l{font-size:12px;font-weight:700;margin-top:5px;color:var(--ink);}
+.eum-tobe .axrowc{background:#fff;border:1px solid #f0e7dd;border-radius:13px;padding:11px 12px;margin-bottom:9px;display:flex;align-items:center;gap:10px;}
+.eum-tobe .axrowc .ic{width:34px;height:34px;border-radius:9px;background:var(--coral-soft);display:flex;align-items:center;justify-content:center;font-size:16px;flex:none;}
+.eum-tobe .axrowc b{font-weight:700;font-size:13px;color:var(--ink);}
+.eum-tobe .axrowc small{display:block;color:var(--mut);font-size:11px;}
+.eum-tobe .axbtn{background:var(--coral);color:#fff;text-align:center;border-radius:12px;padding:12px;font-weight:700;font-size:14px;margin-top:4px;}
+.eum-tobe .prod{display:grid;grid-template-columns:1fr 1.15fr;gap:60px;align-items:center;}
+.eum-tobe .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px;}
+.eum-tobe .step{padding:0 22px;}
+.eum-tobe .step .n{font-family:"Fraunces",serif;font-size:42px;font-weight:500;color:var(--coral);line-height:1;}
+.eum-tobe .step h3{font-size:19px;font-weight:700;margin:12px 0 6px;color:var(--ink);}
+.eum-tobe .step p{font-size:14px;color:var(--sub);}
+.eum-tobe .step:not(:last-child){border-right:1px solid var(--line);}
+.eum-tobe .mbwrap{background:#faf7f2;padding:20px;}
+.eum-tobe .mbtop{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.eum-tobe .mbtitle{font-size:17px;font-weight:800;color:var(--ink);}
+.eum-tobe .mbsub{font-size:12px;color:var(--mut);margin-top:2px;}
+.eum-tobe .mbai{background:var(--coral);color:#fff;font-size:12px;font-weight:700;padding:8px 14px;border-radius:10px;}
+.eum-tobe .mbgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.eum-tobe .mbcard{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;}
+.eum-tobe .mbhd{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.eum-tobe .mbid{font-size:13px;font-weight:700;color:var(--ink);}
+.eum-tobe .mbfit{font-size:11px;font-weight:700;color:#0f8a3c;background:#e8f6ec;padding:3px 9px;border-radius:999px;}
+.eum-tobe .mbavs{display:flex;justify-content:space-around;text-align:center;}
+.eum-tobe .mbavs .av{width:40px;height:40px;border-radius:50%;margin:0 auto;display:flex;align-items:center;justify-content:center;font-size:19px;}
+.eum-tobe .mbavs .nm{font-size:12px;font-weight:700;margin-top:5px;color:var(--ink);}
+.eum-tobe .mbavs .rl{font-size:10px;color:var(--mut);}
+.eum-tobe .mbft{display:flex;justify-content:space-between;font-size:11px;color:var(--mut);margin-top:12px;padding-top:10px;border-top:1px solid var(--line);}
+.eum-tobe .mbwait{display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:12px;}
+.eum-tobe .mbwait>span:first-child{color:var(--sub);font-weight:600;}
+.eum-tobe .mbwaitp{background:var(--cream2);padding:6px 11px;border-radius:999px;font-weight:600;color:var(--ink);}
+.eum-tobe .appshow{display:grid;grid-template-columns:1fr 330px;gap:60px;align-items:center;}
+.eum-tobe .phone{background:#241d17;border-radius:46px;padding:11px;box-shadow:0 30px 70px rgba(36,29,23,.16);width:318px;margin:0 auto;}
+.eum-tobe .phone .scr{background:#fff;border-radius:36px;overflow:hidden;}
+.eum-tobe .scr.kk{display:flex;flex-direction:column;height:566px;}
+.eum-tobe .kkTop{display:flex;align-items:center;gap:9px;padding:14px 14px 12px;border-bottom:1px solid #eee;}
+.eum-tobe .kkTop .bk{font-size:19px;color:#333;}
+.eum-tobe .kkTop .ci{width:30px;height:30px;border-radius:50%;object-fit:cover;border:1px solid var(--line);}
+.eum-tobe .kkTop .nm{font-size:14px;font-weight:700;line-height:1.15;color:var(--ink);}
+.eum-tobe .kkTop .nm small{display:block;font-size:10px;color:var(--mut);font-weight:500;}
+.eum-tobe .kkTop .sp{margin-left:auto;display:flex;gap:12px;color:#666;font-size:15px;}
+.eum-tobe .chat{flex:1;background:#b2c7da;padding:12px 11px;overflow:hidden;}
+.eum-tobe .day{text-align:center;margin-bottom:10px;}
+.eum-tobe .day span{background:rgba(0,0,0,.12);color:#fff;font-size:10px;padding:3px 10px;border-radius:999px;}
+.eum-tobe .kmsg{display:flex;gap:7px;margin-bottom:10px;}
+.eum-tobe .kav{width:32px;height:32px;border-radius:12px;object-fit:cover;flex:none;}
+.eum-tobe .kwho{font-size:10px;color:#33404d;margin:0 0 3px 2px;font-weight:600;}
+.eum-tobe .kbubble{background:#fff;border-radius:3px 13px 13px 13px;padding:9px 11px;font-size:12.5px;max-width:180px;color:var(--ink);}
+.eum-tobe .krich{background:#fff;border-radius:3px 13px 13px 13px;overflow:hidden;width:202px;box-shadow:0 1px 2px rgba(0,0,0,.08);}
+.eum-tobe .krimg{height:94px;overflow:hidden;}
+.eum-tobe .krimg img{width:100%;height:100%;object-fit:cover;object-position:center 20%;}
+.eum-tobe .krb{padding:10px 11px 6px;}
+.eum-tobe .krt{font-size:13px;font-weight:700;color:var(--ink);}
+.eum-tobe .krd{font-size:11px;color:var(--sub);margin-top:2px;}
+.eum-tobe .krbtns{margin-top:6px;border-top:1px solid #f0efec;}
+.eum-tobe .krbtns a{display:block;text-align:center;padding:9px;font-size:12.5px;font-weight:600;color:#3d4a5c;border-top:1px solid #f0efec;}
+.eum-tobe .krbtns a:first-child{border-top:none;color:var(--coral);}
+.eum-tobe .kquicks{display:flex;gap:6px;flex-wrap:wrap;}
+.eum-tobe .kquicks span{background:#fff;border:1px solid rgba(0,0,0,.08);color:#33404d;font-size:11px;font-weight:600;padding:6px 10px;border-radius:999px;}
+.eum-tobe .kInput{background:#fff;border-top:1px solid #eee;padding:8px 11px;display:flex;align-items:center;gap:9px;}
+.eum-tobe .kInput .plus{color:#999;font-size:16px;}
+.eum-tobe .kInput .kbox{flex:1;background:#f2f1ee;border-radius:999px;padding:7px 13px;font-size:12px;color:#9a938a;}
+.eum-tobe .kInput .ksnd{width:28px;height:28px;border-radius:50%;background:#FEE500;display:flex;align-items:center;justify-content:center;font-size:14px;color:#191600;}
+@media(max-width:880px){.eum-tobe .axrow,.eum-tobe .axrow.rev,.eum-tobe .prod,.eum-tobe .appshow{grid-template-columns:1fr;gap:30px;}.eum-tobe .steps{grid-template-columns:1fr;}.eum-tobe .step{padding:0;}.eum-tobe .step:not(:last-child){border-right:none;border-bottom:1px solid var(--line);padding-bottom:18px;margin-bottom:18px;}}`;
+function TobeStyles() { return <style dangerouslySetInnerHTML={{ __html: TOBE_CSS }} />; }
+
 function RLProductShowcase() {
   const isMobile = useIsMobile(900);
   return (
-    <div style={{ marginBottom: 80 }}>
-      <RLSectionHead kicker="이렇게 작동해요" title="담당자는 한 화면에서, 모두를 돌봐요" sub="신청·안전검증·트리오 매칭·정산까지 — 코디네이터는 한 화면에서 운영하고, 가족은 휴대폰으로 안심 확인해요." />
-      <div style={{ position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: isMobile ? 24 : 32, flexDirection: isMobile ? 'column' : 'row' }}>
-        <div className="eum-orb" style={{ width: 380, height: 380, background: C.brand + '1c', top: -30, left: '14%', animation: 'eumOrb 19s ease-in-out infinite' }} />
-        <div style={{ position: 'relative', zIndex: 1, flex: '1 1 auto', width: '100%', maxWidth: 640 }}>
-          <RLDeviceBrowser><RLCoordMock /></RLDeviceBrowser>
-        </div>
-        <div style={{ position: 'relative', zIndex: 2, flexShrink: 0 }}>
-          <RLPhoneMock />
-        </div>
-      </div>
-      <div style={{ textAlign: 'center', fontSize: 12.5, color: C.muteLight, marginTop: 18 }}>* 데모에서 코디네이터·가족으로 입장하면 위 화면을 실제로 조작할 수 있어요.</div>
+    <div className="eum-tobe" style={{ margin: isMobile ? '8px 0 64px' : '12px 0 96px' }}>
+      <div className="prod" dangerouslySetInnerHTML={{ __html: PROD_HTML }} />
     </div>
   );
 }
 
 function RLAXBand({ isMobile }) {
-  const items = [
-    { tag: 'AI 복지 콜봇', title: '말로 신청하는 복지', desc: '어르신이 말씀만 하시면 기초연금·돌봄을 음성으로 신청·안내합니다.', icon: '🎙', bg: C.brandSoft },
-    { tag: '보이는 ARS', title: '세대별 맞춤 화면', desc: '문자·웹·D-ARS로 어르신·청년 눈높이에 맞춘 복지 상담 창구를 제공합니다.', icon: '📱', bg: C.lavender + '22' },
-    { tag: 'AI 안전 도우미', title: '위험 신호 먼저 감지', desc: '활동 대화를 분석해 건강·고립 위험을 감지하고, 코디네이터에게 즉시 연계합니다.', icon: '🛡️', bg: C.sage + '22' },
-  ];
   return (
-    <div style={{ margin: isMobile ? '8px 0 64px' : '8px 0 88px' }}>
-      <div style={{ textAlign: 'center', marginBottom: 40 }}>
-        <div className="eum-kicker" style={{ marginBottom: 14 }}>AX · AI Experience</div>
-        <h2 className="eum-serif" style={{ fontSize: isMobile ? 28 : 38, fontWeight: 800, color: C.ink, margin: 0, lineHeight: 1.2 }}>기술로 완성하는 안심 돌봄</h2>
-        <p style={{ fontSize: 16.5, color: C.mute, maxWidth: 540, margin: '14px auto 0', lineHeight: 1.6, fontWeight: 500 }}>15년 AX·AICC 경험과 고원의 AI 콜봇·보이는 ARS 자산을 복지에 연결합니다.</p>
+    <div className="eum-tobe" style={{ margin: isMobile ? '8px 0 64px' : '12px 0 96px' }}>
+      <div style={{ maxWidth: 680, marginBottom: 44 }}>
+        <div className="kick">AX · AI Experience</div>
+        <h2>기술로 완성하는 <span className="ac">안심 돌봄</span></h2>
+        <p style={{ fontSize: 17, color: '#5f564d', marginTop: 16, lineHeight: 1.62 }}>이음은 15년 AX·AICC 경험과 고원의 AI 콜봇·보이는 ARS 자산을 복지에 연결합니다. 사람이 놓치는 순간을 기술이 먼저 살핍니다.</p>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: 24 }}>
-        {items.map((it) => (
-          <div key={it.tag} className="eum-lift" style={{ background: C.card, border: `1px solid ${C.borderSoft}`, borderRadius: 20, padding: 28, boxShadow: '0 2px 8px -4px rgba(26,26,30,0.08)' }}>
-            <div style={{ width: 52, height: 52, borderRadius: 15, background: it.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, marginBottom: 16 }}>{it.icon}</div>
-            <div style={{ fontSize: 12, fontWeight: 700, color: C.brand, background: C.brandSoft, display: 'inline-block', padding: '4px 11px', borderRadius: 999, marginBottom: 10 }}>{it.tag}</div>
-            <div className="eum-serif" style={{ fontSize: 20, fontWeight: 800, color: C.ink, marginBottom: 9, lineHeight: 1.3 }}>{it.title}</div>
-            <p style={{ fontSize: 14.5, color: C.inkSoft, lineHeight: 1.6, fontWeight: 500, margin: 0 }}>{it.desc}</p>
-          </div>
-        ))}
-      </div>
+      <div className="axrows" dangerouslySetInnerHTML={{ __html: AX_ROWS_HTML }} />
     </div>
   );
 }
@@ -4284,21 +4488,15 @@ function RLSafetyBand({ isMobile }) {
 
 function RLKakaoBand({ isMobile, onShowApplication }) {
   return (
-    <div style={{ margin: isMobile ? '8px 0 64px' : '8px 0 88px', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: isMobile ? 36 : 56, alignItems: 'center' }}>
-      <div style={{ textAlign: isMobile ? 'center' : 'left', display: 'flex', flexDirection: 'column', alignItems: isMobile ? 'center' : 'flex-start' }}>
-        <div className="eum-kicker" style={{ marginBottom: 16 }}>참여 방법</div>
-        <h2 className="eum-serif" style={{ fontSize: isMobile ? 28 : 40, fontWeight: 800, color: C.ink, margin: '0 0 14px', lineHeight: 1.18 }}>앱 설치 없이,<br /><span style={{ color: C.brand }}>카톡으로 이음</span></h2>
-        <p style={{ fontSize: 16.5, color: C.mute, lineHeight: 1.6, maxWidth: 420, margin: isMobile ? '0 auto 28px' : '0 0 28px', fontWeight: 500 }}>카카오톡 채널·웹으로 바로 참여합니다. 큰 글씨와 단순한 흐름으로 어르신도 쉽게 사용해요.</p>
-        <button onClick={onShowApplication} style={{ display: 'inline-flex', alignItems: 'center', gap: 9, background: '#FEE500', color: '#3A1D1D', border: 'none', borderRadius: 14, padding: '15px 26px', fontSize: 16, fontWeight: 800, cursor: 'pointer', boxShadow: '0 10px 24px -12px rgba(180,160,0,0.8)', fontFamily: 'inherit' }}>
-          <span style={{ fontSize: 18 }}>💬</span> 카카오톡으로 시작하기
-        </button>
-      </div>
-      <div style={{ display: 'flex', justifyContent: 'center' }}>
-        <div style={{ position: 'relative', width: isMobile ? 300 : 340, borderRadius: 44, background: '#1A1814', padding: 10, boxShadow: '0 34px 66px -22px rgba(26,26,30,0.42)' }}>
-          <div style={{ borderRadius: 32, overflow: 'hidden', background: '#B2C7DA' }}>
-            <img src="/kakao-main.png" alt="카카오톡 이음 돌봄 채널" style={{ width: '100%', display: 'block' }} loading="lazy" decoding="async" />
-          </div>
+    <div className="eum-tobe" style={{ margin: isMobile ? '8px 0 64px' : '12px 0 96px' }}>
+      <div className="appshow">
+        <div className="txt" style={{ textAlign: isMobile ? 'center' : 'left' }}>
+          <div className="kick">참여 방법</div>
+          <h2 style={{ margin: '8px 0 16px' }}>앱 설치 없이,<br />카톡으로 <span className="ac">이음</span></h2>
+          <p style={{ fontSize: 17, color: '#5f564d', marginBottom: 26, maxWidth: '33ch', lineHeight: 1.62, marginLeft: isMobile ? 'auto' : 0, marginRight: isMobile ? 'auto' : 0 }}>카카오톡 채널·웹으로 바로 참여합니다. 큰 글씨와 단순한 흐름으로 어르신도 쉽게 사용합니다.</p>
+          <button onClick={onShowApplication} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontWeight: 700, borderRadius: 15, padding: '16px 28px', fontSize: 16, cursor: 'pointer', border: '1.5px solid transparent', background: '#BE5535', color: '#fff', boxShadow: '0 8px 20px rgba(190,85,53,.24)', fontFamily: 'inherit' }}>카카오톡으로 시작하기</button>
         </div>
+        <div className="phone" dangerouslySetInnerHTML={{ __html: KAKAO_PHONE_HTML }} />
       </div>
     </div>
   );
@@ -4443,6 +4641,7 @@ function RLLanding({ state, onSelectRole, onShowApplication }) {
 
         <Reveal><RLStepsBand /></Reveal>
 
+        <TobeStyles />
         <Reveal><RLAXBand isMobile={isMobile} /></Reveal>
 
         <Reveal><RLProductShowcase /></Reveal>
@@ -5210,10 +5409,28 @@ JSON 형식으로만 응답해주세요 (다른 텍스트 없이):
 
       <Modal open={aiOpen} onClose={() => setAiOpen(false)} title="AI 매칭 추천" size="lg">
         {aiLoading && (
-          <div style={{ padding: '40px 20px', textAlign: 'center' }}>
-            <Loader2 size={36} style={{ color: C.brand, animation: 'spin 1s linear infinite' }} />
-            <div style={{ marginTop: 16, fontSize: 14, color: C.inkSoft }}>참여자 프로필을 분석하고 있습니다…</div>
-            <div style={{ marginTop: 6, fontSize: 12, color: C.mute }}>잠시만 기다려주세요</div>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16, fontSize: 13, color: C.inkSoft }}>
+              <Loader2 size={15} style={{ color: C.brand, animation: 'spin 1s linear infinite' }} />
+              참여자 프로필을 분석하고 있습니다…
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              {[0, 1, 2].map((i) => (
+                <div key={i} style={{ padding: 16, borderRadius: 12, border: `1px solid ${C.border}`, background: C.cardWarm }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+                    <Skeleton w={118} h={14} />
+                    <Skeleton w={56} h={22} r={999} />
+                  </div>
+                  <div style={{ display: 'flex', gap: 10 }}>
+                    <Skeleton w={44} h={44} r={12} />
+                    <Skeleton w={44} h={44} r={12} />
+                    <Skeleton w={44} h={44} r={12} />
+                  </div>
+                  <div style={{ marginTop: 14 }}><Skeleton h={12} w="92%" /></div>
+                  <div style={{ marginTop: 8 }}><Skeleton h={12} w="68%" /></div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
         {aiResult && (
@@ -5851,9 +6068,21 @@ JSON 형식으로만 답변:
       </div>
 
       {aiLoading && (
-        <Card padding={32} style={{ marginBottom: 18, textAlign: 'center' }}>
-          <Loader2 size={36} style={{ color: C.brand, animation: 'spin 1s linear infinite' }} />
-          <div style={{ marginTop: 14, fontSize: 14, color: C.inkSoft }}>활동 데이터를 분석해 월간 리포트를 작성하고 있습니다…</div>
+        <Card padding={28} style={{ marginBottom: 18, background: `linear-gradient(135deg, ${C.brand}06 0%, ${C.peach}06 100%)`, border: `1px solid ${C.brand}30` }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+            <Loader2 size={16} style={{ color: C.brand, animation: 'spin 1s linear infinite' }} />
+            <div style={{ fontSize: 12, fontWeight: 700, color: C.brand, letterSpacing: '0.08em' }}>월간 리포트 작성 중 · {period}</div>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {[0, 1, 2].map((i) => (
+              <div key={i}>
+                <Skeleton w={140} h={13} style={{ marginBottom: 9 }} />
+                <Skeleton h={12} w="96%" style={{ marginBottom: 7 }} />
+                <Skeleton h={12} w="88%" style={{ marginBottom: 7 }} />
+                <Skeleton h={12} w="58%" />
+              </div>
+            ))}
+          </div>
         </Card>
       )}
 
@@ -6183,6 +6412,10 @@ function App() {
         @keyframes eumMarquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
         @keyframes eumPop { from { transform: scale(0.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         @keyframes eumHeroIn { from { opacity: 0; transform: translateY(26px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes eumShimmer { 100% { transform: translateX(100%); } }
+        .eum-skeleton { position: relative; overflow: hidden; background: ${C.borderSoft}; }
+        .eum-skeleton::after { content: ''; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, rgba(255,255,255,0.65), transparent); animation: eumShimmer 1.4s ease-in-out infinite; }
+        @media (prefers-reduced-motion: reduce) { .eum-skeleton::after { animation: none; } }
         /* 정적 그라데이션 — 지속 repaint 제거(성능) */
         .eum-anim-gradient { background-size: 140% 140%; background-position: 30% 50%; }
         .eum-orb { position: absolute; border-radius: 50%; filter: blur(42px); pointer-events: none; z-index: 0; will-change: transform; }
