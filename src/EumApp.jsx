@@ -1408,7 +1408,7 @@ function RoleSelect({ state, onSelectRole, onShowApplication }) {
             세대를 잇다, <span style={{ color: C.brand, fontStyle: 'italic' }}>이음</span>
           </h1>
           <p style={{ fontSize: 16, color: C.inkSoft, maxWidth: 560, margin: '0 auto', lineHeight: 1.6 }}>
-            청년·어르신·아동 세 세대가 서로 돕고 모두 보상받는<br />
+            청년·어르신·아동 3세대가 서로 돕고 모두 보상받는<br />
             <span style={{ color: C.ink, fontWeight: 600 }}>우리동네 3세대 상생 품앗이 플랫폼</span>
           </p>
           <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 24, flexWrap: 'wrap' }}>
@@ -3751,7 +3751,7 @@ function RLSectionHead({ index, kicker, title, sub, action, align = 'center' }) 
 
 function RLHeroScene() {
   return (
-    <svg viewBox="0 0 460 440" width="100%" style={{ display: 'block' }} role="img" aria-label="청년·어르신·아동 세 세대가 함께 있는 모습">
+    <svg viewBox="0 0 460 440" width="100%" style={{ display: 'block' }} role="img" aria-label="청년·어르신·아동 3세대가 함께 있는 모습">
       <rect x="0" y="0" width="460" height="440" fill="#FBF8F2" />
       {/* 배경 — 동네 */}
       <circle cx="402" cy="250" r="44" fill="#CBD9BC" />
@@ -3883,7 +3883,7 @@ function RLTestimonialBand() {
   return (
     <Reveal>
       <div style={{ marginBottom: 72, background: C.cream, borderRadius: 28, padding: isMobile ? '36px 22px' : '52px 48px', border: `1px solid ${C.borderSoft}` }}>
-        <RLSectionHead kicker="이웃들의 이야기" title="세 세대의 목소리" sub="이음으로 이어진 이웃들이 직접 전해온 이야기예요." />
+        <RLSectionHead kicker="이웃들의 이야기" title="3세대의 목소리" sub="이음으로 이어진 이웃들이 직접 전해온 이야기예요." />
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(248px, 1fr))', gap: 16 }}>
           {items.map((t, i) => (
             <div key={i} className="eum-lift" style={{ background: C.card, borderRadius: 20, padding: 26, display: 'flex', flexDirection: 'column', boxShadow: '0 2px 8px -4px rgba(26,26,30,0.08)', border: `1px solid ${C.borderSoft}` }}>
@@ -3947,7 +3947,7 @@ function RLFaqBand() {
 
 function RLMoatBand() {
   const items = [
-    { icon: Sparkles, color: C.brand, soft: C.brandSoft, tag: '특허 출원 준비 중', title: '3세대 트리오 매칭 엔진', desc: '거주 근접·생활 일정·관심 시너지·안전 적합·상호 보완 다섯 요소를 가중 점수화해 한 번에 세 세대를 묶습니다. 한 명을 다른 한 명에게 붙이는 1:1 중개와는 구조가 달라요.' },
+    { icon: Sparkles, color: C.brand, soft: C.brandSoft, tag: '특허 출원 준비 중', title: '3세대 트리오 매칭 엔진', desc: '거주 근접·생활 일정·관심 시너지·안전 적합·상호 보완 다섯 요소를 가중 점수화해 한 번에 3세대를 묶습니다. 한 명을 다른 한 명에게 붙이는 1:1 중개와는 구조가 달라요.' },
     { icon: ShieldCheck, color: C.blue, soft: C.blueSoft, tag: '아동 동반 필수 절차', title: '4단계 안전검증 · 책임보험 내장', desc: '면접·범죄경력·아동학대 전력·추천인 확인을 거치고, 모든 대면 활동은 책임보험으로 보장합니다. 미성년 보호자 5종 전자동의까지 시스템에 들어가 있어요.' },
     { icon: Wallet, color: C.gold, soft: C.goldSoft, tag: '지자체·1365 연계', title: '활동을 보상으로 잇는 정산', desc: '활동 기록이 봉사시간과 광주상생카드 보상으로 자동 환산·발급됩니다. 통합돌봄·자원봉사 행정과 맞물리는 정산 흐름이 이미 돌아갑니다.' },
   ];
@@ -4015,7 +4015,7 @@ function RLBenchmarkBand() {
   ];
   return (
     <div style={{ marginBottom: 72 }}>
-      <RLSectionHead kicker="왜 이음인가" title="세계가 검증한 모델, 이음이 한 걸음 더" sub="해외에서 50년 넘게 검증된 세대통합 모델에, 모두가 놓쳤던 세 세대가 동시에 주고받는 구조를 더했어요." />
+      <RLSectionHead kicker="왜 이음인가" title="세계가 검증한 모델, 이음이 한 걸음 더" sub="해외에서 50년 넘게 검증된 세대통합 모델에, 모두가 놓쳤던 3세대가 동시에 주고받는 구조를 더했어요." />
       <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', gap: 16, marginBottom: 16 }}>
         {models.map((m, i) => (
           <div key={i} className="eum-lift" style={{ background: C.card, borderRadius: 20, padding: 24, boxShadow: '0 2px 8px -4px rgba(26,26,30,0.08)', border: `1px solid ${C.borderSoft}` }}>
@@ -4043,7 +4043,7 @@ function RLBenchmarkBand() {
         </div>
         <div style={{ flex: 1, minWidth: 240 }}>
           <div className="eum-serif" style={{ fontSize: 'clamp(20px, 2.6vw, 26px)', fontWeight: 800, color: '#fff', marginBottom: 6, lineHeight: 1.3 }}>이음 = 청년 · 어르신 · 아동 3세대 상호 품앗이</div>
-          <div style={{ fontSize: 14.5, color: 'rgba(255,255,255,0.9)', lineHeight: 1.6 }}>기존 모델은 두 세대의 일방 돌봄. 이음은 세 세대가 동시에 서로 주고받고, 도운 만큼 모두에게 보상이 돌아가는 선순환 구조예요.</div>
+          <div style={{ fontSize: 14.5, color: 'rgba(255,255,255,0.9)', lineHeight: 1.6 }}>기존 모델은 두 세대의 일방 돌봄. 이음은 3세대가 동시에 서로 주고받고, 도운 만큼 모두에게 보상이 돌아가는 선순환 구조예요.</div>
         </div>
       </div>
     </div>
@@ -4300,7 +4300,7 @@ function RLLanding({ state, onSelectRole, onShowApplication }) {
           <div className="eum-orb" style={{ width: 320, height: 320, background: C.peach + '28', bottom: -110, left: -90, animation: 'eumOrb 21s ease-in-out infinite reverse' }} />
           <div style={{ position: 'relative', zIndex: 1, display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: isMobile ? 36 : 56, alignItems: 'center' }}>
           <div className="eum-heroin" style={{ textAlign: isMobile ? 'center' : 'left', display: 'flex', flexDirection: 'column', alignItems: isMobile ? 'center' : 'flex-start' }}>
-            <div className="eum-kicker" style={{ marginBottom: 20 }}><Sparkles size={14} /> 광주 광산구 우산동 2027 파일럿</div>
+            <div className="eum-kicker" style={{ marginBottom: 20 }}><Sparkles size={14} /> 청년·어르신·아동 3세대 · 2027 파일럿</div>
             <h1 className="eum-serif" style={{ fontSize: isMobile ? 'clamp(40px, 12vw, 52px)' : 'clamp(48px, 5.4vw, 68px)', fontWeight: 800, color: C.ink, lineHeight: 1.12, margin: '0 0 20px' }}>
               세대를 잇다,<br /><span style={{ color: C.brand }}>이음</span>
             </h1>
@@ -4320,7 +4320,7 @@ function RLLanding({ state, onSelectRole, onShowApplication }) {
           <div style={{ display: 'flex', justifyContent: 'center' }}>
             <div style={{ position: 'relative', width: '100%', maxWidth: 480, animation: 'eumHeroIn 0.9s cubic-bezier(0.22,1,0.36,1) both, eumHeroFloat 7s ease-in-out 0.9s infinite' }}>
               <div style={{ borderRadius: 28, overflow: 'hidden', boxShadow: '0 30px 60px -24px rgba(26,26,30,0.28)' }}>
-                <img className="eum-hero-img" src="https://d8j0ntlcm91z4.cloudfront.net/user_3ENsWC9Fimdubfa90AmLsdoIGVe/hf_20260618_054046_590cd991-7eef-42e9-82c3-d7dd782d050d.png" alt="청년·어르신·아동 세 세대가 함께하는 모습" style={{ width: '100%', display: 'block' }} loading="eager" decoding="async" fetchPriority="high" />
+                <img className="eum-hero-img" src="https://d8j0ntlcm91z4.cloudfront.net/user_3ENsWC9Fimdubfa90AmLsdoIGVe/hf_20260618_054046_590cd991-7eef-42e9-82c3-d7dd782d050d.png" alt="청년·어르신·아동 3세대가 함께하는 모습" style={{ width: '100%', display: 'block' }} loading="eager" decoding="async" fetchPriority="high" />
               </div>
               <div style={{ position: 'absolute', left: isMobile ? 10 : -16, bottom: 24, background: '#fff', borderRadius: 16, padding: '12px 16px', boxShadow: '0 18px 40px -14px rgba(26,26,30,0.3)', display: 'flex', alignItems: 'center', gap: 11, border: `1px solid ${C.borderSoft}` }}>
                 <div style={{ display: 'flex' }}>
@@ -4426,7 +4426,7 @@ function RLLanding({ state, onSelectRole, onShowApplication }) {
                 <EumLogo size={28} />
                 <span className="eum-serif" style={{ fontSize: 20, fontWeight: 800, color: C.ink }}>이음</span>
               </div>
-              <div style={{ fontSize: 13.5, color: C.mute, lineHeight: 1.7, maxWidth: 340 }}>청년·어르신·아동 세 세대를 잇는 광주 광산구형 3세대 상생 품앗이 플랫폼이에요.</div>
+              <div style={{ fontSize: 13.5, color: C.mute, lineHeight: 1.7, maxWidth: 340 }}>청년·어르신·아동 3세대를 잇는 광주 광산구형 3세대 상생 품앗이 플랫폼이에요.</div>
               <div style={{ display: 'flex', gap: 8, marginTop: 16, flexWrap: 'wrap' }}>
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11.5, fontWeight: 700, color: C.sage, background: C.sageSoft, padding: '5px 11px', borderRadius: 999 }}><ShieldCheck size={12} /> 4단계 안전검증</span>
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11.5, fontWeight: 700, color: C.brand, background: C.brandSoft, padding: '5px 11px', borderRadius: 999 }}><Heart size={12} /> 책임보험 적용</span>
