@@ -4464,7 +4464,7 @@ function RLSafetyBand({ isMobile }) {
   return (
     <div style={{ margin: isMobile ? '8px 0 64px' : '8px 0 88px', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '0.92fr 1.08fr', gap: isMobile ? 32 : 56, alignItems: 'center' }}>
       <div style={{ borderRadius: 24, overflow: 'hidden', boxShadow: '0 24px 50px -22px rgba(26,26,30,0.26)', order: isMobile ? 2 : 1 }}>
-        <img src="/safety-3gen.png" alt="세대가 함께하는 따뜻한 순간" style={{ width: '100%', display: 'block', aspectRatio: '4 / 3.6', objectFit: 'cover' }} loading="lazy" decoding="async" />
+        <img src="/safety-3gen.png" alt="세대가 함께하는 따뜻한 순간" style={{ width: '100%', display: 'block', aspectRatio: '4 / 4.5', objectFit: 'cover', objectPosition: 'center 22%' }} loading="lazy" decoding="async" />
       </div>
       <div style={{ order: isMobile ? 1 : 2, textAlign: isMobile ? 'center' : 'left' }}>
         <div className="eum-kicker" style={{ marginBottom: 14, color: C.blue }}>Safety First</div>
