@@ -4223,6 +4223,33 @@ function RLProductShowcase() {
   );
 }
 
+function RLAXBand({ isMobile }) {
+  const items = [
+    { tag: 'AI 복지 콜봇', title: '말로 신청하는 복지', desc: '어르신이 말씀만 하시면 기초연금·돌봄을 음성으로 신청·안내합니다.', icon: '🎙', bg: C.brandSoft },
+    { tag: '보이는 ARS', title: '세대별 맞춤 화면', desc: '문자·웹·D-ARS로 어르신·청년 눈높이에 맞춘 복지 상담 창구를 제공합니다.', icon: '📱', bg: C.lavender + '22' },
+    { tag: 'AI 안전 도우미', title: '위험 신호 먼저 감지', desc: '활동 대화를 분석해 건강·고립 위험을 감지하고, 코디네이터에게 즉시 연계합니다.', icon: '🛡️', bg: C.sage + '22' },
+  ];
+  return (
+    <div style={{ margin: isMobile ? '8px 0 64px' : '8px 0 88px' }}>
+      <div style={{ textAlign: 'center', marginBottom: 40 }}>
+        <div className="eum-kicker" style={{ marginBottom: 14 }}>AX · AI Experience</div>
+        <h2 className="eum-serif" style={{ fontSize: isMobile ? 28 : 38, fontWeight: 800, color: C.ink, margin: 0, lineHeight: 1.2 }}>기술로 완성하는 안심 돌봄</h2>
+        <p style={{ fontSize: 16.5, color: C.mute, maxWidth: 540, margin: '14px auto 0', lineHeight: 1.6, fontWeight: 500 }}>15년 AX·AICC 경험과 고원의 AI 콜봇·보이는 ARS 자산을 복지에 연결합니다.</p>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: 24 }}>
+        {items.map((it) => (
+          <div key={it.tag} className="eum-lift" style={{ background: C.card, border: `1px solid ${C.borderSoft}`, borderRadius: 20, padding: 28, boxShadow: '0 2px 8px -4px rgba(26,26,30,0.08)' }}>
+            <div style={{ width: 52, height: 52, borderRadius: 15, background: it.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, marginBottom: 16 }}>{it.icon}</div>
+            <div style={{ fontSize: 12, fontWeight: 700, color: C.brand, background: C.brandSoft, display: 'inline-block', padding: '4px 11px', borderRadius: 999, marginBottom: 10 }}>{it.tag}</div>
+            <div className="eum-serif" style={{ fontSize: 20, fontWeight: 800, color: C.ink, marginBottom: 9, lineHeight: 1.3 }}>{it.title}</div>
+            <p style={{ fontSize: 14.5, color: C.inkSoft, lineHeight: 1.6, fontWeight: 500, margin: 0 }}>{it.desc}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function RLStepsBand() {
   const isMobile = useIsMobile(760);
   const steps = [
@@ -4361,6 +4388,8 @@ function RLLanding({ state, onSelectRole, onShowApplication }) {
         </Reveal>
 
         <Reveal><RLStepsBand /></Reveal>
+
+        <Reveal><RLAXBand isMobile={isMobile} /></Reveal>
 
         <Reveal><RLProductShowcase /></Reveal>
 
