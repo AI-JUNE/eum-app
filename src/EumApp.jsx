@@ -4224,8 +4224,8 @@ const AX_ROWS_HTML = `<div class="axrow">
     <div class="axbd" style="text-align:center;">
       <div style="font-size:20px; font-weight:800; margin:2px 0 4px;">말씀만 하세요</div>
       <div style="font-size:12px; color:var(--sub); margin-bottom:18px;">복지 신청·안내를 도와드려요</div>
-      <div style="width:92px; height:92px; border-radius:50%; background:var(--coral); margin:0 auto 12px; display:flex; align-items:center; justify-content:center; font-size:38px; box-shadow:0 0 0 9px var(--coral-soft);">🎤</div>
-      <div style="font-size:12px; color:var(--coral); font-weight:700; margin-bottom:16px;">● 듣고 있어요…</div>
+      <div class="axmic" style="width:92px; height:92px; border-radius:50%; background:var(--coral); margin:0 auto 12px; display:flex; align-items:center; justify-content:center; font-size:38px;">🎤</div>
+      <div class="axlisten" style="font-size:12px; color:var(--coral); font-weight:700; margin-bottom:16px;">● 듣고 있어요…</div>
       <div style="background:var(--coral-soft); color:var(--coral-d); border-radius:12px; padding:9px 12px; font-size:12px; display:inline-block; margin-bottom:10px;">기초연금 신청하고 싶어요</div>
       <div style="background:#fff; border:1px solid #f0e7dd; border-radius:12px; padding:10px 12px; font-size:12px; color:var(--sub); text-align:left;">네, 기초연금 신청을 도와드릴게요. 생년월일을 말씀해 주세요.</div>
     </div>
@@ -4429,13 +4429,30 @@ const TOBE_CSS = `.eum-tobe{--ink:#241d17;--paper:#fff;--cream:#fbf7f2;--cream2:
 .eum-tobe .kInput .plus{color:#999;font-size:16px;}
 .eum-tobe .kInput .kbox{flex:1;background:#f2f1ee;border-radius:999px;padding:7px 13px;font-size:12px;color:#9a938a;}
 .eum-tobe .kInput .ksnd{width:28px;height:28px;border-radius:50%;background:#FEE500;display:flex;align-items:center;justify-content:center;font-size:14px;color:#191600;}
-@media(max-width:880px){.eum-tobe .axrow,.eum-tobe .axrow.rev,.eum-tobe .prod,.eum-tobe .appshow{grid-template-columns:1fr;gap:30px;}.eum-tobe .axrow.rev > .axphone{order:2;}.eum-tobe .steps{grid-template-columns:1fr;}.eum-tobe .step{padding:0;}.eum-tobe .step:not(:last-child){border-right:none;border-bottom:1px solid var(--line);padding-bottom:18px;margin-bottom:18px;}.eum-tobe .axrow .txt,.eum-tobe .appshow .txt{text-align:center;}.eum-tobe .axrow .tag{margin-left:auto;margin-right:auto;}}@media(max-width:560px){.eum-tobe .mbgrid{grid-template-columns:1fr;}.eum-tobe .mbwrap{padding:14px;}}`;
+@media(max-width:880px){.eum-tobe .axrow,.eum-tobe .axrow.rev,.eum-tobe .prod,.eum-tobe .appshow{grid-template-columns:1fr;gap:30px;}.eum-tobe .axrow.rev > .axphone{order:2;}.eum-tobe .steps{grid-template-columns:1fr;}.eum-tobe .step{padding:0;}.eum-tobe .step:not(:last-child){border-right:none;border-bottom:1px solid var(--line);padding-bottom:18px;margin-bottom:18px;}.eum-tobe .axrow .txt,.eum-tobe .appshow .txt{text-align:center;}.eum-tobe .axrow .tag{margin-left:auto;margin-right:auto;}}@media(max-width:560px){.eum-tobe .mbgrid{grid-template-columns:1fr;}.eum-tobe .mbwrap{padding:14px;}}
+@keyframes eumFloatP{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+@keyframes eumPulseMic{0%{box-shadow:0 0 0 0 rgba(190,85,53,.4)}70%{box-shadow:0 0 0 20px rgba(190,85,53,0)}100%{box-shadow:0 0 0 0 rgba(190,85,53,0)}}
+@keyframes eumBlink{0%,100%{opacity:1}50%{opacity:.35}}
+.eum-tobe .axphone{animation:eumFloatP 6.5s ease-in-out infinite;will-change:transform;}
+.eum-tobe .axrow.rev .axphone{animation-duration:7.4s;animation-delay:.6s;}
+.eum-tobe .phone{animation:eumFloatP 7.8s ease-in-out infinite;will-change:transform;}
+.eum-tobe .axmic{animation:eumPulseMic 2s ease-out infinite;}
+.eum-tobe .axlisten{animation:eumBlink 1.4s ease-in-out infinite;}
+.eum-tobe .mbcard{transition:transform .2s ease,box-shadow .2s ease;}
+.eum-tobe .mbcard:hover{transform:translateY(-4px);box-shadow:0 16px 34px rgba(36,29,23,.12);}
+.eum-tobe .axtile{transition:transform .16s ease,background .16s ease,box-shadow .16s ease;}
+.eum-tobe .axtile:hover{transform:translateY(-3px);background:#fff7f2;box-shadow:0 10px 22px rgba(36,29,23,.08);}
+.eum-tobe .axrowc{transition:transform .16s ease,box-shadow .16s ease;}
+.eum-tobe .axrowc:hover{transform:translateX(3px);box-shadow:0 8px 18px rgba(36,29,23,.07);}
+.eum-tobe .krbtns a{transition:background .14s ease;}
+.eum-tobe .krbtns a:hover{background:#faf6f2;}
+@media(prefers-reduced-motion:reduce){.eum-tobe .axphone,.eum-tobe .phone,.eum-tobe .axmic,.eum-tobe .axlisten{animation:none;}}`;
 function TobeStyles() { return <style dangerouslySetInnerHTML={{ __html: TOBE_CSS }} />; }
 
 function FullBand({ bg, isMobile, children }) {
   return (
     <div style={{ position: 'relative', width: '100vw', marginLeft: 'calc(50% - 50vw)', background: bg, borderTop: '1px solid #EDE9E3', borderBottom: '1px solid #EDE9E3' }}>
-      <div style={{ maxWidth: 1280, margin: '0 auto', padding: isMobile ? '48px 20px' : '82px 40px' }}>
+      <div style={{ maxWidth: 1360, margin: '0 auto', padding: isMobile ? '48px 20px' : '82px 40px' }}>
         {children}
       </div>
     </div>
@@ -4568,7 +4585,7 @@ function RLLanding({ state, onSelectRole, onShowApplication }) {
     }}>
       {/* 상단 내비게이션 */}
       <div style={{ width: '100%', position: 'sticky', top: 0, zIndex: 50, background: scrolled ? 'rgba(245,244,242,0.92)' : 'rgba(245,244,242,0.8)', backdropFilter: 'blur(12px)', borderBottom: `1px solid ${scrolled ? C.border : 'transparent'}`, boxShadow: scrolled ? '0 6px 22px -10px rgba(26,26,30,0.16)' : 'none', transition: 'box-shadow 0.25s ease, border-color 0.25s ease, background 0.25s ease' }}>
-        <div style={{ maxWidth: 1280, margin: '0 auto', padding: isMobile ? '12px 18px' : '14px 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+        <div style={{ maxWidth: 1360, margin: '0 auto', padding: isMobile ? '12px 18px' : '14px 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
           <div onClick={() => window.location.reload()} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); window.location.reload(); } }} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }} role="button" tabIndex={0} aria-label="홈으로 새로고침">
             <div style={{ width: 30, height: 30, display: 'flex' }}><EumLogo size={30} /></div>
             <div style={{ lineHeight: 1.05 }}>
@@ -4582,7 +4599,7 @@ function RLLanding({ state, onSelectRole, onShowApplication }) {
           </div>
         </div>
       </div>
-      <div style={{ maxWidth: 1280, width: '100%', padding: isMobile ? '28px 20px 56px' : '64px 40px 96px' }}>
+      <div style={{ maxWidth: 1360, width: '100%', padding: isMobile ? '28px 20px 56px' : '64px 40px 96px' }}>
         {/* 히어로 — 토스 계열 + 모션(그라데이션 오브·진입 스태거·플로팅) */}
         <div style={{ position: 'relative', margin: isMobile ? '8px 0 56px' : '20px 0 80px' }}>
           <div className="eum-orb" style={{ width: 400, height: 400, background: C.brand + '24', top: -130, right: -70, animation: 'eumOrb 17s ease-in-out infinite' }} />
