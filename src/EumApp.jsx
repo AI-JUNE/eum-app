@@ -843,7 +843,7 @@ function StatCard({ label, value, sub, color = C.ink, icon, trend }) {
         <div style={{ fontSize: 12, color: C.mute, fontWeight: 700, letterSpacing: '0.01em' }}>{label}</div>
         {icon && <div style={{ background: color + '14', color, padding: 7, borderRadius: 10, display: 'flex' }}>{icon}</div>}
       </div>
-      <div style={{ fontSize: 28, fontWeight: 800, color, letterSpacing: '-0.03em', lineHeight: 1.05 }}>
+      <div style={{ fontSize: 28, fontWeight: 800, color, letterSpacing: '-0.03em', lineHeight: 1.05, fontVariantNumeric: 'tabular-nums' }}>
         {typeof value === 'number' ? <CountUp value={value} /> : value}
       </div>
       {sub && (
@@ -882,7 +882,8 @@ function useCountUp(target, duration = 950) {
 function CountUp({ value, decimals = 0, prefix = '', suffix = '', duration = 950 }) {
   const v = useCountUp(value, duration);
   const n = (decimals > 0 ? v : Math.round(v)).toLocaleString('ko-KR', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
-  return <>{prefix}{n}{suffix}</>;
+  // 숫자는 tabular-nums로 고정폭 — 카운트업 중 흔들림 방지·금액 열 정렬(디자인 시스템)
+  return <span style={{ fontVariantNumeric: 'tabular-nums' }}>{prefix}{n}{suffix}</span>;
 }
 
 // 애니메이션 진행 도넛(링)
@@ -901,7 +902,7 @@ function Ring({ value, max = 100, size = 96, stroke = 9, color = C.brand, track 
           style={{ transition: `stroke-dashoffset ${duration}ms cubic-bezier(0.22,1,0.36,1)` }} />
       </svg>
       <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-        {label != null && <div style={{ fontSize: Math.round(size * 0.27), fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK, letterSpacing: '-0.02em', lineHeight: 1 }}>{label}</div>}
+        {label != null && <div style={{ fontSize: Math.round(size * 0.27), fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK, letterSpacing: '-0.02em', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>{label}</div>}
         {sublabel && <div style={{ fontSize: Math.max(10, Math.round(size * 0.12)), color: C.mute, marginTop: 3, fontWeight: 600 }}>{sublabel}</div>}
       </div>
     </div>
@@ -3388,7 +3389,7 @@ function BigStat({ label, value, sub, color }) {
   return (
     <Card padding={18} style={{ borderTop: `3px solid ${color}` }}>
       <div style={{ fontSize: 11.5, color: C.mute, fontWeight: 700 }}>{label}</div>
-      <div style={{ fontSize: 24, fontWeight: 800, color: C.ink, marginTop: 5, letterSpacing: '-0.02em' }}>{value}</div>
+      <div style={{ fontSize: 24, fontWeight: 800, color: C.ink, marginTop: 5, letterSpacing: '-0.02em', fontVariantNumeric: 'tabular-nums' }}>{value}</div>
       {sub && <div style={{ fontSize: 11, color: C.inkSoft, marginTop: 4, lineHeight: 1.45 }}>{sub}</div>}
     </Card>
   );
@@ -3720,7 +3721,8 @@ function RLuseCountUp(target, duration = 950) {
 function RLCountUp({ value, decimals = 0, prefix = '', suffix = '', duration = 950 }) {
   const v = RLuseCountUp(value, duration);
   const n = (decimals > 0 ? v : Math.round(v)).toLocaleString('ko-KR', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
-  return <>{prefix}{n}{suffix}</>;
+  // 숫자는 tabular-nums로 고정폭 — 카운트업 중 흔들림 방지(디자인 시스템)
+  return <span style={{ fontVariantNumeric: 'tabular-nums' }}>{prefix}{n}{suffix}</span>;
 }
 
 function RLRing({ value, max = 100, size = 96, stroke = 9, color = C.brand, track = C.borderSoft, label, sublabel, duration = 1100 }) {
@@ -3738,7 +3740,7 @@ function RLRing({ value, max = 100, size = 96, stroke = 9, color = C.brand, trac
           style={{ transition: `stroke-dashoffset ${duration}ms cubic-bezier(0.22,1,0.36,1)` }} />
       </svg>
       <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-        {label != null && <div style={{ fontSize: Math.round(size * 0.28), fontWeight: 700, color: C.ink, fontFamily: FONT_STACK, letterSpacing: '-0.04em', lineHeight: 1 }}>{label}</div>}
+        {label != null && <div style={{ fontSize: Math.round(size * 0.28), fontWeight: 700, color: C.ink, fontFamily: FONT_STACK, letterSpacing: '-0.04em', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>{label}</div>}
         {sublabel && <div style={{ fontSize: Math.max(10, Math.round(size * 0.12)), color: C.mute, marginTop: 3, fontWeight: 600 }}>{sublabel}</div>}
       </div>
     </div>
