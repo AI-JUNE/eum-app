@@ -629,9 +629,13 @@ function Button({ children, onClick, variant = 'primary', size = 'md', disabled,
 
 function Card({ children, padding = 20, style = {}, onClick, hoverable }) {
   const [hover, setHover] = useState(false);
+  const clickable = !!onClick;
   return (
     <div
       onClick={onClick}
+      role={clickable ? 'button' : undefined}
+      tabIndex={clickable ? 0 : undefined}
+      onKeyDown={clickable ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(e); } } : undefined}
       onMouseEnter={() => hoverable && setHover(true)}
       onMouseLeave={() => hoverable && setHover(false)}
       style={{
@@ -1172,10 +1176,13 @@ function CheckInOutCard({ activity, user, dispatch, showToast, color = C.sage })
 
 function Tabs({ tabs, active, onChange, style = {} }) {
   return (
-    <div style={{ display: 'flex', gap: 4, borderBottom: `1px solid ${C.border}`, ...style }}>
+    <div role="tablist" style={{ display: 'flex', gap: 4, borderBottom: `1px solid ${C.border}`, ...style }}>
       {tabs.map((t) => (
         <button
           key={t.id}
+          type="button"
+          role="tab"
+          aria-selected={active === t.id}
           onClick={() => onChange(t.id)}
           style={{
             padding: '10px 15px', background: 'transparent',
@@ -1204,11 +1211,19 @@ function Tabs({ tabs, active, onChange, style = {} }) {
 
 function Empty({ icon, title, sub, action }) {
   return (
-    <div style={{ textAlign: 'center', padding: '56px 20px', color: C.mute }}>
-      {icon && <div aria-hidden="true" style={{ width: 64, height: 64, borderRadius: 18, background: C.bg, color: C.mute, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>{icon}</div>}
-      <div style={{ fontSize: 16, fontWeight: 700, color: C.ink, marginBottom: 6 }}>{title}</div>
-      {sub && <div style={{ fontSize: 13.5, marginBottom: 18, lineHeight: 1.6, maxWidth: 360, marginLeft: 'auto', marginRight: 'auto' }}>{sub}</div>}
-      {action}
+    <div style={{ textAlign: 'center', padding: '60px 24px', color: C.mute }}>
+      {icon && (
+        <div aria-hidden="true" style={{
+          width: 72, height: 72, borderRadius: 22,
+          background: `linear-gradient(155deg, ${C.brandBg}, ${C.card})`,
+          color: C.brand, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          margin: '0 auto 18px',
+          boxShadow: `inset 0 0 0 1px ${C.brandSoft}, 0 8px 22px -14px ${C.brand}55`,
+        }}>{icon}</div>
+      )}
+      <div style={{ fontSize: 16.5, fontWeight: 700, color: C.ink, marginBottom: 7, letterSpacing: '-0.01em' }}>{title}</div>
+      {sub && <div style={{ fontSize: 14, marginBottom: 20, lineHeight: 1.65, maxWidth: 340, marginLeft: 'auto', marginRight: 'auto', color: C.mute }}>{sub}</div>}
+      {action && <div style={{ marginTop: 4 }}>{action}</div>}
     </div>
   );
 }
@@ -6498,7 +6513,8 @@ function App() {
         .eum-rolecard:hover { transform: translateY(-4px); box-shadow: 0 18px 40px -18px rgba(26,26,30,0.2); border-color: ${C.brand}55 !important; }
         blockquote { quotes: none; margin: 0; }
         ::selection { background: ${C.brand}26; color: ${C.ink}; }
-        button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible, a:focus-visible {
+        button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible, a:focus-visible,
+        [role="button"]:focus-visible, [role="tab"]:focus-visible {
           outline: 2.5px solid ${C.brand}; outline-offset: 3px; border-radius: 4px;
         }
         ::-webkit-scrollbar { width: 9px; height: 9px; }
