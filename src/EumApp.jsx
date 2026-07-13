@@ -4160,7 +4160,7 @@ const AX_ROWS_HTML = `<div class="axrow">
   <div class="axphone"><div class="axsc">
     <div class="axnotch"></div>
     <div class="axstat"><span>9:41</span><span class="r"><span class="bars"><i style="height:5px"></i><i style="height:7px"></i><i style="height:9px"></i><i style="height:11px"></i></span><span class="batt"></span></span></div>
-    <div class="axhd"><span class="bk">‹</span><span class="ico">이</span><span class="tt">복지 상담 전화<small>어르신 음성 복지 신청</small></span></div>
+    <div class="axhd"><span class="bk">‹</span><img class="ico" src="/tobe/ieum_icon_1024.png" alt="이음"><span class="tt">복지 상담 전화<small>어르신 음성 복지 신청</small></span></div>
     <div class="axbd" style="text-align:center;">
       <div style="font-size:20px; font-weight:800; margin:2px 0 4px;">말씀만 하세요</div>
       <div style="font-size:12px; color:var(--sub); margin-bottom:18px;">복지 신청·안내를 도와드려요</div>
@@ -4175,7 +4175,7 @@ const AX_ROWS_HTML = `<div class="axrow">
   <div class="axphone"><div class="axsc">
     <div class="axnotch"></div>
     <div class="axstat"><span>9:41</span><span class="r"><span class="bars"><i style="height:5px"></i><i style="height:7px"></i><i style="height:9px"></i><i style="height:11px"></i></span><span class="batt"></span></span></div>
-    <div class="axhd"><span class="bk">‹</span><span class="ico">이</span><span class="tt">복지 서비스 시작<small>무엇을 도와드릴까요?</small></span></div>
+    <div class="axhd"><span class="bk">‹</span><img class="ico" src="/tobe/ieum_icon_1024.png" alt="이음"><span class="tt">복지 서비스 시작<small>무엇을 도와드릴까요?</small></span></div>
     <div class="axbd">
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:9px;">
         <div class="axtile"><div class="e">❤️</div><div class="l">돌봄 신청</div></div>
@@ -4195,7 +4195,7 @@ const AX_ROWS_HTML = `<div class="axrow">
   <div class="axphone"><div class="axsc">
     <div class="axnotch"></div>
     <div class="axstat"><span>9:41</span><span class="r"><span class="bars"><i style="height:5px"></i><i style="height:7px"></i><i style="height:9px"></i><i style="height:11px"></i></span><span class="batt"></span></span></div>
-    <div class="axhd"><span class="bk">‹</span><span class="ico">이</span><span class="tt">AI 안심 케어<small>이상 징후 감지</small></span></div>
+    <div class="axhd"><span class="bk">‹</span><img class="ico" src="/tobe/ieum_icon_1024.png" alt="이음"><span class="tt">AI 안심 케어<small>이상 징후 감지</small></span></div>
     <div class="axbd">
       <div style="background:#fbeaea; border:1px solid #f2c9c9; border-radius:13px; padding:11px 13px; margin-bottom:12px;">
         <div style="font-size:13px; font-weight:700; color:#c0392b;">⚠ 이상 징후 감지 · 위험</div>
@@ -4273,7 +4273,7 @@ const KAKAO_PHONE_HTML = `<div class="scr kk">
   </div>
   <div class="kInput"><span class="plus">＋</span><div class="kbox">메시지 입력</div><span class="ksnd">↑</span></div>
 </div>`;
-const TOBE_CSS = `.eum-tobe{--ink:#241d17;--paper:#fff;--cream:#fbf7f2;--cream2:#f4ede4;--coral:#BE5535;--coral-d:#9E4329;--coral-soft:#f4e7e0;--green:#4b7a52;--green-soft:#e9f1e7;--purple:#6a5aa0;--purple-soft:#efeaf6;--clay:#9a6a52;--sub:#5f564d;--mut:#9b9186;--line:#eee6dc;word-break:keep-all;-webkit-font-smoothing:antialiased;}
+const TOBE_CSS = `.eum-tobe{--ink:#241d17;--paper:#fff;--cream:#fbf7f2;--cream2:#f4ede4;--coral:#FC5028;--coral-d:#D63C18;--coral-soft:#FFE4DC;--green:#4b7a52;--green-soft:#e9f1e7;--purple:#6a5aa0;--purple-soft:#efeaf6;--clay:#9a6a52;--sub:#5f564d;--mut:#9b9186;--line:#eee6dc;word-break:keep-all;-webkit-font-smoothing:antialiased;}
 .eum-tobe *{box-sizing:border-box;}
 .eum-tobe .kick{font-size:13px;font-weight:700;color:var(--coral);letter-spacing:1.4px;text-transform:uppercase;margin-bottom:16px;}
 .eum-tobe h2{font-size:clamp(31px,3.9vw,48px);line-height:1.14;font-weight:800;letter-spacing:-1.1px;margin:0;color:var(--ink);}
@@ -4300,7 +4300,7 @@ const TOBE_CSS = `.eum-tobe{--ink:#241d17;--paper:#fff;--cream:#fbf7f2;--cream2:
 .eum-tobe .axstat .batt::after{content:'';position:absolute;left:1.5px;top:1.5px;bottom:1.5px;width:68%;background:var(--ink);border-radius:1px;}
 .eum-tobe .axhd{background:#fff;padding:8px 15px 11px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #f2e9df;}
 .eum-tobe .axhd .bk{font-size:19px;color:#a99e93;}
-.eum-tobe .axhd .ico{width:26px;height:26px;border-radius:8px;background:var(--coral);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex:none;}
+.eum-tobe .axhd .ico{width:26px;height:26px;border-radius:8px;object-fit:cover;flex:none;display:block;}
 .eum-tobe .axhd .tt{font-size:14px;font-weight:700;line-height:1.15;color:var(--ink);}
 .eum-tobe .axhd .tt small{display:block;font-size:10px;color:var(--mut);font-weight:500;}
 .eum-tobe .axbd{padding:18px 16px 22px;}
