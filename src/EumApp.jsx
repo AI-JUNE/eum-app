@@ -759,13 +759,70 @@ function Checkbox({ checked, onChange, label, sublabel, required }) {
   );
 }
 
+// 오버레이가 열려 있는 동안 배경 스크롤 잠금 (열린 오버레이 수를 세어 중첩 안전)
+let __eumLockCount = 0;
+function useBodyScrollLock(open) {
+  useEffect(() => {
+    if (!open || typeof document === 'undefined') return undefined;
+    const body = document.body;
+    if (__eumLockCount === 0) {
+      body.dataset.eumPrevOverflow = body.style.overflow || '';
+      body.style.overflow = 'hidden';
+    }
+    __eumLockCount += 1;
+    return () => {
+      __eumLockCount = Math.max(0, __eumLockCount - 1);
+      if (__eumLockCount === 0) {
+        body.style.overflow = body.dataset.eumPrevOverflow || '';
+        delete body.dataset.eumPrevOverflow;
+      }
+    };
+  }, [open]);
+}
+
+// 다이얼로그 내부에서만 Tab 순환(포커스 트랩) + 닫힐 때 이전 포커스 복원
+const FOCUSABLE_SEL = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+function useFocusTrap(open, panelRef) {
+  useEffect(() => {
+    if (!open || typeof document === 'undefined') return undefined;
+    const prev = document.activeElement;
+    const onKey = (e) => {
+      if (e.key !== 'Tab' || !panelRef.current) return;
+      const items = Array.from(panelRef.current.querySelectorAll(FOCUSABLE_SEL))
+        .filter((el) => el.offsetParent !== null || el === document.activeElement);
+      if (items.length === 0) { e.preventDefault(); panelRef.current.focus(); return; }
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (e.shiftKey && (document.activeElement === first || document.activeElement === panelRef.current)) {
+        e.preventDefault(); last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault(); first.focus();
+      }
+    };
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      if (prev && typeof prev.focus === 'function') prev.focus();
+    };
+  }, [open, panelRef]);
+}
+
 function Modal({ open, onClose, title, children, size = 'md', footer }) {
+  const panelRef = useRef(null);
+  useBodyScrollLock(open);
+  useFocusTrap(open, panelRef);
   useEffect(() => {
     if (!open) return;
     const onKey = (e) => { if (e.key === 'Escape' && onClose) onClose(); };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [open, onClose]);
+  // 열릴 때 포커스를 다이얼로그로 이동 (스크린리더·키보드 사용자)
+  useEffect(() => {
+    if (!open) return;
+    const t = setTimeout(() => { if (panelRef.current) panelRef.current.focus(); }, 0);
+    return () => clearTimeout(t);
+  }, [open]);
   if (!open) return null;
   const widths = { sm: 420, md: 560, lg: 720, xl: 920 };
   return (
@@ -779,6 +836,8 @@ function Modal({ open, onClose, title, children, size = 'md', footer }) {
       }}
     >
       <div
+        ref={panelRef}
+        tabIndex={-1}
         role="dialog"
         aria-modal="true"
         aria-label={typeof title === 'string' ? title : undefined}
@@ -788,6 +847,7 @@ function Modal({ open, onClose, title, children, size = 'md', footer }) {
           maxHeight: '90vh', display: 'flex', flexDirection: 'column',
           boxShadow: '0 20px 60px rgba(0,0,0,0.2)',
           animation: 'slideUp 0.2s ease',
+          outline: 'none',
         }}
       >
         {title && (
@@ -1089,6 +1149,13 @@ function CheckInOutCard({ activity, user, dispatch, showToast, color = C.sage })
   const [summary, setSummary] = useState('');
   const [computedHours, setComputedHours] = useState(0);
   const [, force] = useState(0);
+  useBodyScrollLock(feedbackOpen);
+  useEffect(() => {
+    if (!feedbackOpen) return undefined;
+    const onKey = (e) => { if (e.key === 'Escape') setFeedbackOpen(false); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [feedbackOpen]);
 
   // 진행 중이면 1초마다 경과시간 갱신
   useEffect(() => {
@@ -1150,7 +1217,7 @@ function CheckInOutCard({ activity, user, dispatch, showToast, color = C.sage })
 
       {feedbackOpen && (
         <div onClick={() => setFeedbackOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(26,24,20,0.55)', backdropFilter: 'blur(4px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
-          <div onClick={(e) => e.stopPropagation()} style={{ background: C.card, borderRadius: 18, maxWidth: 440, width: '100%', padding: 28, boxShadow: '0 24px 70px rgba(0,0,0,0.28)', animation: 'slideUp 0.22s ease', textAlign: 'left' }}>
+          <div role="dialog" aria-modal="true" aria-label="활동 후기 작성" onClick={(e) => e.stopPropagation()} style={{ background: C.card, borderRadius: 18, maxWidth: 440, width: '100%', padding: 28, boxShadow: '0 24px 70px rgba(0,0,0,0.28)', animation: 'slideUp 0.22s ease', textAlign: 'left' }}>
             <div style={{ fontSize: 18, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK, marginBottom: 4 }}>활동 후기</div>
             <div style={{ fontSize: 13, color: C.inkSoft, marginBottom: 18 }}>약 <strong style={{ color }}>{computedHours}시간</strong> 활동했어요. 오늘 어땠는지 남겨주세요.</div>
             <div style={{ fontSize: 12, fontWeight: 700, color: C.mute, marginBottom: 8 }}>오늘 만족도</div>
@@ -1525,6 +1592,7 @@ function ApplicationForm({ onClose, onSubmit }) {
     consent_data: false, consent_photo: false, consent_criminal: false, consent_guardian: false,
   });
   const [submitted, setSubmitted] = useState(false);
+  useBodyScrollLock(true);
 
   const SKILL_OPTIONS = ['디지털코칭', '학습멘토', '코딩교육', '예술교육', '건강관리', '독서지도', '글쓰기', '수학교육', '돌봄', '바느질', '뜨개질', '요리', '서예', '동화구연', '역사이야기', '바둑', '장기', '한자', '경험담', '응급처치'];
   const INTEREST_OPTIONS = ['IT', '진로상담', '여행', '교육', '문학', '심리', '디자인', '사진', '카페', '건강', '운동', '요리', '경제', '독서', '러닝', '손주', '드라마', '꽃', '산책', '역사', '등산', '뉴스', '걷기'];
@@ -1556,7 +1624,7 @@ function ApplicationForm({ onClose, onSubmit }) {
   if (submitted) {
     return (
       <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(26,24,20,0.55)', backdropFilter: 'blur(4px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, animation: 'fadeIn 0.15s ease' }}>
-        <div onClick={(e) => e.stopPropagation()} style={{ background: C.card, borderRadius: 18, maxWidth: 460, width: '100%', boxShadow: '0 24px 70px rgba(0,0,0,0.28)', animation: 'slideUp 0.22s ease' }}>
+        <div role="dialog" aria-modal="true" aria-label="신청 접수 완료" onClick={(e) => e.stopPropagation()} style={{ background: C.card, borderRadius: 18, maxWidth: 460, width: '100%', boxShadow: '0 24px 70px rgba(0,0,0,0.28)', animation: 'slideUp 0.22s ease' }}>
           <div style={{ textAlign: 'center', padding: '44px 28px' }}>
         <div style={{ width: 72, height: 72, borderRadius: '50%', background: C.sageSoft, color: C.sage, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
           <Check size={36} strokeWidth={3} />
@@ -1584,7 +1652,7 @@ function ApplicationForm({ onClose, onSubmit }) {
 
   return (
     <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(26,24,20,0.55)', backdropFilter: 'blur(4px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, animation: 'fadeIn 0.15s ease' }}>
-      <div onClick={(e) => e.stopPropagation()} style={{ background: C.card, borderRadius: 18, maxWidth: 600, width: '100%', maxHeight: '92vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 24px 70px rgba(0,0,0,0.28)', animation: 'slideUp 0.22s ease' }}>
+      <div role="dialog" aria-modal="true" aria-label="참여 신청" onClick={(e) => e.stopPropagation()} style={{ background: C.card, borderRadius: 18, maxWidth: 600, width: '100%', maxHeight: '92vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 24px 70px rgba(0,0,0,0.28)', animation: 'slideUp 0.22s ease' }}>
         {/* Header */}
         <div style={{ padding: '18px 24px 16px', borderBottom: `1px solid ${C.border}`, flexShrink: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
@@ -2539,6 +2607,16 @@ function Layout({ role, view, setView, user, dispatch, children, state }) {
   const handleLogout = () => dispatch({ type: 'LOGOUT' });
   const isMobile = useIsMobile(900);
   const [drawer, setDrawer] = useState(false);
+  const drawerRef = useRef(null);
+  useBodyScrollLock(drawer);
+  useFocusTrap(drawer, drawerRef);
+  useEffect(() => {
+    if (!drawer) return undefined;
+    const onKey = (e) => { if (e.key === 'Escape') setDrawer(false); };
+    window.addEventListener('keydown', onKey);
+    const t = setTimeout(() => { if (drawerRef.current) drawerRef.current.focus(); }, 0);
+    return () => { window.removeEventListener('keydown', onKey); clearTimeout(t); };
+  }, [drawer]);
 
   if (isMobile) {
     return (
@@ -2547,7 +2625,7 @@ function Layout({ role, view, setView, user, dispatch, children, state }) {
         <div style={{ position: 'sticky', top: 0, zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '11px 16px', background: 'rgba(250,247,242,0.92)', backdropFilter: 'blur(12px)', borderBottom: `1px solid ${C.borderSoft}` }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <button onClick={() => setDrawer(true)} aria-label="메뉴" style={{ display: 'flex', border: `1px solid ${C.border}`, background: C.card, borderRadius: 10, padding: 8, cursor: 'pointer', color: C.ink }}><Menu size={18} /></button>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }} onClick={() => setView('overview')}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }} onClick={() => setView('overview')} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setView('overview'); } }} role="button" tabIndex={0} aria-label="대시보드로">
               <EumLogo size={26} />
               <span style={{ fontSize: 15, fontWeight: 800, fontFamily: SERIF_STACK, color: C.ink }}>이음 <span style={{ fontSize: 11, color: C.mute, fontWeight: 600 }}>관리자</span></span>
             </div>
@@ -2557,7 +2635,7 @@ function Layout({ role, view, setView, user, dispatch, children, state }) {
         {/* 드로어 */}
         {drawer && (
           <div onClick={() => setDrawer(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(26,24,20,0.45)', zIndex: 70, animation: 'fadeIn 0.15s ease' }}>
-            <div onClick={(e) => e.stopPropagation()} style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 260, animation: 'slideInLeft 0.22s ease' }}>
+            <div ref={drawerRef} tabIndex={-1} role="dialog" aria-modal="true" aria-label="메뉴" onClick={(e) => e.stopPropagation()} style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 260, outline: 'none', animation: 'slideInLeft 0.22s ease' }}>
               <Sidebar role={role} currentView={view} onNavigate={(v) => { setView(v); setDrawer(false); }} onLogout={handleLogout} userName={user?.name} dataCount={dataCount} />
             </div>
           </div>
@@ -3516,6 +3594,13 @@ function WelfareFab({ role }) {
   const [open, setOpen] = useState(false);
   const [pf, setPf] = useState({ age: 73, alone: true, income: '저소득', digitalWeak: true, careNeed: false, familyCareYouth: false, gets: [] });
   const [run, setRun] = useState(false);
+  useBodyScrollLock(open);
+  useEffect(() => {
+    if (!open) return undefined;
+    const onKey = (e) => { if (e.key === 'Escape') setOpen(false); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open]);
   const res = run ? aiWelfare(pf) : [];
   const big = role === 'senior';
   const bottom = role === 'coordinator' ? 24 : 86;
@@ -3527,7 +3612,7 @@ function WelfareFab({ role }) {
       </button>
       {open && (
         <div onClick={() => setOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 9400, background: 'rgba(26,24,20,.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
-          <div onClick={e => e.stopPropagation()} style={{ background: C.card, borderRadius: 18, width: '100%', maxWidth: 460, maxHeight: '86vh', overflowY: 'auto', padding: 22, fontFamily: FONT_STACK }}>
+          <div role="dialog" aria-modal="true" aria-label="복지 어드바이저" onClick={e => e.stopPropagation()} style={{ background: C.card, borderRadius: 18, width: '100%', maxWidth: 460, maxHeight: '86vh', overflowY: 'auto', padding: 22, fontFamily: FONT_STACK }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 17, fontWeight: 800, color: C.lavender }}><Sparkles size={20} /> 복지 어드바이저</div>
               <button onClick={() => setOpen(false)} aria-label="닫기" style={{ border: 'none', background: 'none', cursor: 'pointer', color: C.mute }}><X size={20} /></button>
@@ -4621,7 +4706,7 @@ function RLLanding({ state, onSelectRole, onShowApplication }) {
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
-            <span onClick={() => { const el = document.getElementById('eum-demo'); if (el) el.scrollIntoView({ behavior: 'smooth' }); }} style={{ fontSize: 14, color: C.inkSoft, fontWeight: 600, cursor: 'pointer' }}>둘러보기</span>
+            <button type="button" onClick={() => { const el = document.getElementById('eum-demo'); if (el) el.scrollIntoView({ behavior: 'smooth' }); }} style={{ fontSize: 14, color: C.inkSoft, fontWeight: 600, cursor: 'pointer', background: 'none', border: 'none', padding: 0, fontFamily: FONT_STACK }}>둘러보기</button>
             <Button variant="brand" size="sm" onClick={onShowApplication}>참여 신청하기</Button>
           </div>
         </div>
