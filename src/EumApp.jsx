@@ -2390,7 +2390,7 @@ function ConsumerLayout({ role, view, setView, user, dispatch, state, children }
           </div>
         </div>
         {/* 본문 (탭 전환 시 부드러운 진입) */}
-        <div key={view} style={{ flex: 1, padding: isSenior ? '22px 22px 100px' : '20px 18px 92px', overflowX: 'hidden', animation: 'fadeUp 0.42s cubic-bezier(0.22,1,0.36,1)' }}>
+        <div key={view} id="eum-main" role="main" tabIndex={-1} style={{ flex: 1, padding: isSenior ? '22px 22px 100px' : '20px 18px 92px', overflowX: 'hidden', outline: 'none', animation: 'fadeUp 0.42s cubic-bezier(0.22,1,0.36,1)' }}>
           {children}
         </div>
         {/* 하단 탭 네비 */}
@@ -2467,7 +2467,7 @@ function Layout({ role, view, setView, user, dispatch, children, state }) {
           </div>
         )}
         {/* 본문 (화면 전환 시 부드러운 진입 — 소비자 앱과 동일한 모션 언어) */}
-        <div key={view} style={{ padding: '18px 16px 40px', overflowX: 'hidden', animation: 'fadeUp 0.42s cubic-bezier(0.22,1,0.36,1)' }}>{children}</div>
+        <div key={view} id="eum-main" role="main" tabIndex={-1} style={{ padding: '18px 16px 40px', overflowX: 'hidden', outline: 'none', animation: 'fadeUp 0.42s cubic-bezier(0.22,1,0.36,1)' }}>{children}</div>
       </div>
     );
   }
@@ -2482,7 +2482,7 @@ function Layout({ role, view, setView, user, dispatch, children, state }) {
         </div>
         <div style={{ flex: 1, padding: '16px 36px 36px' }}>
           {/* 화면 전환 시 부드러운 진입 — 관리자 콘솔도 동일 모션 언어 */}
-          <div key={view} style={{ maxWidth: 1320, margin: '0 auto', animation: 'fadeUp 0.42s cubic-bezier(0.22,1,0.36,1)' }}>
+          <div key={view} id="eum-main" role="main" tabIndex={-1} style={{ maxWidth: 1320, margin: '0 auto', outline: 'none', animation: 'fadeUp 0.42s cubic-bezier(0.22,1,0.36,1)' }}>
             {children}
           </div>
         </div>
@@ -6266,6 +6266,18 @@ function App() {
     setState(prev => appReducer(prev, action));
   }, []);
 
+  // 문서 제목 동기화 — 역할별 화면임을 탭·방문기록·스크린리더에서 바로 알 수 있게
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    const titleByRole = {
+      youth: '청년 · 이음',
+      senior: '어르신 · 이음',
+      parent: '학부모 · 이음',
+      coordinator: '코디네이터 콘솔 · 이음',
+    };
+    document.title = titleByRole[state.currentRole] || '이음 · 세대를 잇다';
+  }, [state.currentRole]);
+
   // 브라우저 뒤로가기 시 사이트 밖으로 나가지 않도록 트랩 (앱 내부 → 역할 선택으로)
   useEffect(() => {
     try { window.history.pushState({ eum: true }, ''); } catch (e) {}
@@ -6430,6 +6442,16 @@ function App() {
         [role="button"]:focus-visible, [role="tab"]:focus-visible {
           outline: 2.5px solid ${C.brand}; outline-offset: 3px; border-radius: 4px;
         }
+        /* 본문 바로가기 — 키보드/스크린리더 사용자가 상단 네비를 건너뛰도록 (평소 숨김, 포커스 시 노출) */
+        .eum-skip {
+          position: fixed; top: -80px; left: 16px; z-index: 10000;
+          display: inline-block; padding: 12px 18px; border-radius: 12px;
+          background: ${C.brand}; color: #fff; font-size: 14px; font-weight: 700;
+          font-family: ${FONT_STACK}; text-decoration: none;
+          box-shadow: 0 10px 28px rgba(26,24,20,0.24);
+          transition: top 0.18s cubic-bezier(0.22,1,0.36,1);
+        }
+        .eum-skip:focus, .eum-skip:focus-visible { top: 14px; }
         ::-webkit-scrollbar { width: 9px; height: 9px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: ${C.border}; border-radius: 999px; border: 2px solid ${C.bg}; }
@@ -6438,6 +6460,20 @@ function App() {
         html { scrollbar-width: thin; scrollbar-color: ${C.border} transparent; }
         @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; } html { scroll-behavior: auto; } }
       `}</style>
+
+      {role && user && (
+        <a
+          href="#eum-main"
+          className="eum-skip"
+          onClick={(e) => {
+            e.preventDefault();
+            const el = document.getElementById('eum-main');
+            if (el) { el.focus(); el.scrollIntoView({ block: 'start' }); }
+          }}
+        >
+          본문 바로가기
+        </a>
+      )}
 
       {!role || !user ? (
         <>

@@ -23,6 +23,11 @@
     <meta name="twitter:description" content="청년·어르신·아동 세 세대를 잇는 광주 광산구형 3세대 상생 품앗이 플랫폼" />
     <meta name="twitter:image" content="/ieum_icon_1024.png" />
     <meta name="twitter:image:alt" content="이음 로고 — 세대를 잇다" />
+
+    <!-- iOS 홈화면 추가(어르신 접근성) -->
+    <link rel="apple-touch-icon" href="/ieum_icon_1024.png" />
+    <meta name="apple-mobile-web-app-title" content="이음" />
+
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
     <link
       rel="stylesheet"
@@ -31,6 +36,15 @@
   </head>
   <body>
     <div id="root"></div>
+    <noscript>
+      <div style="max-width:520px;margin:14vh auto;padding:32px;text-align:center;font-family:Pretendard,system-ui,sans-serif;color:#241D17;background:#fff;border:1px solid #E8DFD5;border-radius:16px;">
+        <h1 style="font-size:20px;font-weight:800;margin:0 0 10px;">이음 · 세대를 잇다</h1>
+        <p style="font-size:14px;line-height:1.7;color:#6B6259;margin:0;">
+          이 서비스를 이용하려면 브라우저의 자바스크립트를 켜주세요.<br />
+          문의는 광주 광산구 이음 코디네이터에게 연락해 주세요.
+        </p>
+      </div>
+    </noscript>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
