@@ -7,10 +7,10 @@
 
 export const C = {
   // 토스·카카오 계열 상용 팔레트 — 밝고 깨끗한 배경 + 선명한 테라코타 포인트
-  brand: '#E15A33',
-  brandDark: '#C2431F',
-  brandSoft: '#FCE7DE',
-  brandBg: '#FEF3EE',
+  brand: '#FC5028',
+  brandDark: '#D63C18',
+  brandSoft: '#FFE4DC',
+  brandBg: '#FFF2EE',
   ink: '#1A1A1E',
   inkSoft: '#46464E',
   mute: '#71717A',
