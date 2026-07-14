@@ -5646,22 +5646,22 @@ JSON 형식으로만 응답해주세요 (다른 텍스트 없이):
                   </div>
                 ))}
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 18 }}>
-                <div style={{ padding: 12, background: C.bg, borderRadius: 8 }}>
-                  <div style={{ fontSize: 11, color: C.mute, fontWeight: 600 }}>적합도</div>
-                  <div style={{ fontSize: 20, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK }}>{selectedMatch.score}</div>
-                </div>
-                <div style={{ padding: 12, background: C.bg, borderRadius: 8 }}>
-                  <div style={{ fontSize: 11, color: C.mute, fontWeight: 600 }}>누적 활동</div>
-                  <div style={{ fontSize: 20, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK }}>{hours}h</div>
-                </div>
-                <div style={{ padding: 12, background: C.bg, borderRadius: 8 }}>
-                  <div style={{ fontSize: 11, color: C.mute, fontWeight: 600 }}>활동 횟수</div>
-                  <div style={{ fontSize: 20, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK }}>{logs.length}회</div>
-                </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 18 }}>
+                {[
+                  ['누적 활동시간', `${hours}시간`],
+                  ['활동 횟수', `${logs.length}회`],
+                  ['시작일', fmtDate(selectedMatch.started_at)],
+                ].map(([lab, val]) => (
+                  <div key={lab} style={{ padding: '12px 14px', background: C.lineSoft, borderRadius: 10 }}>
+                    <div style={{ fontSize: 11.5, color: C.navMute, fontWeight: 600 }}>{lab}</div>
+                    <div style={{ fontSize: 19, fontWeight: 800, color: C.headline, letterSpacing: '-0.03em', marginTop: 4, fontVariantNumeric: 'tabular-nums' }}>{val}</div>
+                  </div>
+                ))}
               </div>
-              <div style={{ fontSize: 12, fontWeight: 700, color: C.mute, letterSpacing: '0.06em', marginBottom: 8 }}>코디 메모</div>
-              <div style={{ padding: 12, background: C.bg, borderRadius: 8, fontSize: 13, color: C.inkSoft, lineHeight: 1.6 }}>{selectedMatch.coordinator_note || '메모 없음'}</div>
+              <div style={{ fontSize: 12, fontWeight: 700, color: C.navMute, marginBottom: 8 }}>매칭 사유</div>
+              <div style={{ padding: '12px 14px', background: C.lineSoft, borderRadius: 10, fontSize: 13, color: C.inkSoft, lineHeight: 1.65, marginBottom: 16 }}>{selectedMatch.match_notes || '기록 없음'}</div>
+              <div style={{ fontSize: 12, fontWeight: 700, color: C.navMute, marginBottom: 8 }}>코디 메모</div>
+              <div style={{ padding: '12px 14px', background: C.lineSoft, borderRadius: 10, fontSize: 13, color: C.inkSoft, lineHeight: 1.65 }}>{selectedMatch.coordinator_note || '메모 없음'}</div>
             </>
           );
         })()}
@@ -5679,7 +5679,9 @@ function MatchCard({ match, state, onClick, accent }) {
   const hours = logs.reduce((sum, l) => sum + l.hours, 0);
 
   const trio = [{ p: y, color: C.sage }, { p: s, color: C.lavender }, { p: c, color: C.peach }].filter(t => t.p);
-  const score = Number(match.score) || 0;
+  // 적합도(score)는 시드 데이터에 존재하지 않는 필드였다 — 없는 지표를 0으로 그리는 대신,
+  // 실제로 존재하는 '매칭 사유(match_notes)'를 보여준다. 코디네이터가 판단에 쓰는 정보다.
+  const note = (match.match_notes || '').trim();
 
   return (
     <Card padding={0} hoverable onClick={onClick} style={{ overflow: 'hidden' }}>
@@ -5708,16 +5710,17 @@ function MatchCard({ match, state, onClick, accent }) {
           </div>
         </div>
 
-        {/* 적합도 — 숫자 + 게이지. 상대 비교가 가능해진다. */}
-        <div style={{ marginBottom: 14 }}>
-          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 5 }}>
-            <span style={{ fontSize: 11.5, color: C.navMute, fontWeight: 600 }}>적합도</span>
-            <span style={{ fontSize: 15, fontWeight: 800, color: C.headline, letterSpacing: '-0.03em', fontVariantNumeric: 'tabular-nums' }}>{score}</span>
+        {/* 매칭 사유 — 2줄 클램프. 카드 높이를 고르게 유지한다. */}
+        {note && (
+          <div style={{
+            marginBottom: 14, padding: '10px 12px',
+            background: C.lineSoft, borderRadius: 10,
+            fontSize: 12.5, color: C.navMute, lineHeight: 1.55, fontWeight: 500,
+            display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
+          }}>
+            {note}
           </div>
-          <div style={{ height: 5, background: C.lineSoft, borderRadius: 999, overflow: 'hidden' }}>
-            <div style={{ height: '100%', width: `${Math.max(0, Math.min(100, score))}%`, background: accent, borderRadius: 999, transition: 'width 0.6s cubic-bezier(0.22,1,0.36,1)' }} />
-          </div>
-        </div>
+        )}
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 14, paddingTop: 13, borderTop: `1px solid ${C.lineSoft}`, fontSize: 12, color: C.inkSoft, fontWeight: 600 }}>
           <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><Clock size={13} style={{ color: C.muteLight }} /> {hours}시간</span>
