@@ -242,103 +242,35 @@ const SKIN_TONES = ['#F3D6BC', '#EBC6A4', '#E0B188', '#CE9A6E'];
 const HAIR_TONES = ['#2C2420', '#3E3026', '#52402F', '#6B4F39', '#1F1B17'];
 
 // 세대·성별을 반영한 생성형 얼굴 아이콘 (이름 해시로 결정 → 같은 사람은 항상 같은 얼굴)
+// ── 아바타 (2차 개편) ────────────────────────────────────────────────────
+// 카툰 얼굴(눈·코·입 SVG)을 걷어내고 모노그램 체계로 교체한다.
+// 이유: ① 얼굴 일러스트는 크기가 작아질수록 뭉개져 '싸구려'로 읽힌다
+//       ② 실제 인물 사진이 들어갈 자리에 가짜 얼굴을 두면 신뢰가 깎인다
+//       ③ Linear·Notion·Slack·Stripe 등 상용 콘솔의 표준 문법이 모노그램이다
+// 세대는 얼굴이 아니라 '색 + 링'으로 구분한다.
 function Avatar({ name, color = C.brand, size = 40, ring = false, type, gender }) {
-  const h = hashStr(name);
-  const isSenior = type === 'senior';
-  const isChild = type === 'child';
-  const isTeen = type === 'teen';
-  const female = gender === 'F' ? true : gender === 'M' ? false : (h % 2 === 0);
-  const skin = SKIN_TONES[h % SKIN_TONES.length];
-  const hair = isSenior ? (h % 2 === 0 ? '#C9C3B8' : '#D8D3C9') : HAIR_TONES[h % HAIR_TONES.length];
-  const glasses = isSenior || (!isChild && !isTeen && h % 4 === 0);
-  const shirt = [color, color, '#8A847A'][h % 3];
-
-  // 좌표 기준 viewBox 0 0 100 100
-  const faceCy = isChild ? 47 : 46;
-  const faceR = isChild ? 19 : 21;
-  const eyeY = faceCy + (isChild ? 1 : 2);
-  const eyeR = isChild ? 3.0 : 2.4;
-  const mouthY = faceCy + (isChild ? 11 : 13);
+  const label = String(name || '').trim();
+  const initial = label ? label.slice(-2) : '?'; // 한글 이름은 끝 두 글자가 식별력이 높다
+  const fs = size <= 28 ? size * 0.36 : size <= 40 ? size * 0.34 : size * 0.32;
 
   return (
     <div
-      aria-label={name}
+      aria-label={label}
+      title={label}
       style={{
-        width: size, height: size, borderRadius: '50%', overflow: 'hidden', flexShrink: 0,
-        boxShadow: ring ? `0 0 0 3px ${C.card}, 0 0 0 5px ${color}40` : 'none',
-        background: color,
+        width: size, height: size, borderRadius: '50%', flexShrink: 0,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        background: `${color}16`,
+        color,
+        // 안쪽 1px 링 — 흰 배경 위에서 형태가 흐려지지 않게 잡아준다
+        boxShadow: ring
+          ? `inset 0 0 0 1px ${color}2e, 0 0 0 3px ${C.panel}, 0 0 0 5px ${color}33`
+          : `inset 0 0 0 1px ${color}2e`,
+        fontSize: fs, fontWeight: 700, letterSpacing: '-0.03em',
+        fontFamily: FONT_STACK, userSelect: 'none', lineHeight: 1,
       }}
     >
-      <svg viewBox="0 0 100 100" width="100%" height="100%" role="img" aria-hidden="true">
-        {/* 배경 (위쪽이 살짝 밝은 그라데이션) */}
-        <defs>
-          <linearGradient id={`bg-${h}`} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#ffffff" stopOpacity="0.18" />
-            <stop offset="100%" stopColor="#000000" stopOpacity="0.06" />
-          </linearGradient>
-        </defs>
-        <rect width="100" height="100" fill={color} />
-        <rect width="100" height="100" fill={`url(#bg-${h})`} />
-
-        {/* 어깨/옷 */}
-        <path d="M50 72 C32 72 20 84 20 102 L80 102 C80 84 68 72 50 72 Z" fill={shirt} opacity="0.92" />
-        <path d="M50 72 C32 72 20 84 20 102 L80 102 C80 84 68 72 50 72 Z" fill="#ffffff" opacity="0.14" />
-        {/* 목 */}
-        <rect x="43.5" y="60" width="13" height="14" rx="5" fill={skin} />
-
-        {/* 여성 옆머리 (얼굴 뒤) */}
-        {female && !isChild && (
-          <>
-            <ellipse cx={50 - faceR + 2} cy={faceCy + 6} rx="9" ry="20" fill={hair} />
-            <ellipse cx={50 + faceR - 2} cy={faceCy + 6} rx="9" ry="20" fill={hair} />
-          </>
-        )}
-
-        {/* 얼굴 */}
-        <ellipse cx="50" cy={faceCy} rx={faceR} ry={faceR + 2} fill={skin} />
-        {/* 귀 */}
-        <circle cx={50 - faceR} cy={faceCy + 2} r="3.6" fill={skin} />
-        <circle cx={50 + faceR} cy={faceCy + 2} r="3.6" fill={skin} />
-
-        {/* 윗머리 */}
-        {isSenior ? (
-          // 어르신: 짧고 옅은 머리
-          <path d={`M${50 - faceR - 1} ${faceCy - 4} C${50 - faceR - 1} ${faceCy - 24} ${50 + faceR + 1} ${faceCy - 24} ${50 + faceR + 1} ${faceCy - 4} C${50 + faceR + 1} ${faceCy - 14} ${50 + faceR - 8} ${faceCy - 15} 50 ${faceCy - 15} C${50 - faceR + 8} ${faceCy - 15} ${50 - faceR - 1} ${faceCy - 14} ${50 - faceR - 1} ${faceCy - 4} Z`} fill={hair} />
-        ) : female ? (
-          // 여성: 풍성한 윗머리
-          <path d={`M${50 - faceR - 3} ${faceCy + 6} C${50 - faceR - 5} ${faceCy - 28} ${50 + faceR + 5} ${faceCy - 28} ${50 + faceR + 3} ${faceCy + 6} C${50 + faceR + 3} ${faceCy - 10} ${50 + faceR - 7} ${faceCy - 11} 50 ${faceCy - 11} C${50 - faceR + 7} ${faceCy - 11} ${50 - faceR - 3} ${faceCy - 10} ${50 - faceR - 3} ${faceCy + 6} Z`} fill={hair} />
-        ) : (
-          // 남성: 짧은 머리
-          <path d={`M${50 - faceR - 1} ${faceCy - 2} C${50 - faceR - 1} ${faceCy - 26} ${50 + faceR + 1} ${faceCy - 26} ${50 + faceR + 1} ${faceCy - 2} C${50 + faceR + 1} ${faceCy - 13} ${50 + faceR - 7} ${faceCy - 12} 50 ${faceCy - 12} C${50 - faceR + 7} ${faceCy - 12} ${50 - faceR - 1} ${faceCy - 13} ${50 - faceR - 1} ${faceCy - 2} Z`} fill={hair} />
-        )}
-
-        {/* 어르신 여성: 쪽머리 */}
-        {isSenior && female && <circle cx="50" cy={faceCy - 20} r="7" fill={hair} />}
-
-        {/* 눈 */}
-        <ellipse cx="42" cy={eyeY} rx={eyeR} ry={eyeR + 0.8} fill="#3A2E26" />
-        <ellipse cx="58" cy={eyeY} rx={eyeR} ry={eyeR + 0.8} fill="#3A2E26" />
-
-        {/* 안경 (어르신/일부) */}
-        {glasses && (
-          <g stroke="#544C42" strokeWidth="1.6" fill="none">
-            <circle cx="42" cy={eyeY} r="6.5" />
-            <circle cx="58" cy={eyeY} r="6.5" />
-            <line x1="48.5" y1={eyeY} x2="51.5" y2={eyeY} />
-          </g>
-        )}
-
-        {/* 볼터치 (아동) */}
-        {isChild && (
-          <>
-            <circle cx="35" cy={eyeY + 7} r="3.6" fill="#E89486" opacity="0.45" />
-            <circle cx="65" cy={eyeY + 7} r="3.6" fill="#E89486" opacity="0.45" />
-          </>
-        )}
-
-        {/* 미소 */}
-        <path d={`M44 ${mouthY} Q50 ${mouthY + 6} 56 ${mouthY}`} stroke="#9A5B45" strokeWidth="2.3" fill="none" strokeLinecap="round" />
-      </svg>
+      {initial}
     </div>
   );
 }
@@ -5101,16 +5033,30 @@ function CoordOverview({ state, setView, dispatch }) {
         </Panel>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16, minWidth: 0 }}>
+          {/* 세대 구성 — 개별 막대 4개는 값이 비슷하면 전부 꽉 차 보여서 의미가 없다.
+              전체 대비 '몫'을 보여주는 스택 바 하나 + 값 목록이 정직하다. */}
           <Panel title="세대 구성" sub={`전체 ${kpis.totalParticipants}명`}>
-            {[['청년', kpis.youthCount, C.sage], ['어르신', kpis.seniorCount, C.lavender], ['양육가정', kpis.parentCount, C.peach], ['아동', kpis.childCount, C.gold]].map(([lab, val, col], i) => (
-              <div key={lab} style={{ marginBottom: i < 3 ? 12 : 0 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', fontSize: 12.5, marginBottom: 5 }}>
-                  <span style={{ color: C.inkSoft, fontWeight: 600 }}>{lab}</span>
-                  <span style={{ color: C.headline, fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>{val}<span style={{ color: C.muteLight, fontWeight: 500 }}>명</span></span>
-                </div>
-                <AnimatedBar value={val} max={Math.max(kpis.youthCount, kpis.seniorCount, kpis.parentCount, kpis.childCount, 1)} color={col} height={6} track={C.lineSoft} delay={i * 90} />
-              </div>
-            ))}
+            {(() => {
+              const rows = [['청년', kpis.youthCount, C.sage], ['어르신', kpis.seniorCount, C.lavender], ['양육가정', kpis.parentCount, C.peach], ['아동', kpis.childCount, C.gold]];
+              const sum = rows.reduce((s, r) => s + r[1], 0) || 1;
+              return (
+                <>
+                  <div style={{ display: 'flex', height: 10, borderRadius: 999, overflow: 'hidden', background: C.lineSoft, marginBottom: 16 }}>
+                    {rows.map(([lab, val, col]) => val > 0 && (
+                      <div key={lab} title={`${lab} ${val}명`} style={{ width: `${(val / sum) * 100}%`, background: col, transition: 'width 0.7s cubic-bezier(0.22,1,0.36,1)' }} />
+                    ))}
+                  </div>
+                  {rows.map(([lab, val, col], i) => (
+                    <div key={lab} style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '6px 0', borderTop: i === 0 ? 'none' : `1px solid ${C.lineSoft}` }}>
+                      <span style={{ width: 8, height: 8, borderRadius: 3, background: col, flexShrink: 0 }} />
+                      <span style={{ flex: 1, fontSize: 12.5, color: C.inkSoft, fontWeight: 500 }}>{lab}</span>
+                      <span style={{ fontSize: 12, color: C.muteLight, fontWeight: 600, fontVariantNumeric: 'tabular-nums', minWidth: 34, textAlign: 'right' }}>{Math.round((val / sum) * 100)}%</span>
+                      <span style={{ fontSize: 13, color: C.headline, fontWeight: 700, fontVariantNumeric: 'tabular-nums', minWidth: 30, textAlign: 'right' }}>{val}</span>
+                    </div>
+                  ))}
+                </>
+              );
+            })()}
           </Panel>
 
           <Panel title="프로그램 만족도" sub={`설문 ${kpis.surveyCount}건 기준`}>
@@ -6759,8 +6705,12 @@ function App() {
         </>
       )}
 
-      {role && user && <WelfareFab role={role} />}
-      <AccessibilityFab />
+      {/* 복지 찾기 FAB — 콘솔에는 사이드바 '복지 어드바이저'가 이미 있어 중복이고,
+          본문 우하단을 가린다. 사용자 앱에서만 띄운다. */}
+      {role && user && role !== 'coordinator' && <WelfareFab role={role} />}
+      {/* 큰 글씨 토글은 어르신·양육가정 등 사용자 앱과 랜딩에서만.
+          관리자 콘솔에서는 사이드바 계정 영역과 겹치고, 운영자에게 필요한 기능도 아니다. */}
+      {role !== 'coordinator' && <AccessibilityFab />}
 
       {/* Toast 컨테이너 */}
       <div role="region" aria-live="polite" aria-atomic="false" aria-label="알림" style={{ position: 'fixed', top: 20, right: 20, zIndex: 9999, display: 'flex', flexDirection: 'column', gap: 10, pointerEvents: 'none' }}>
