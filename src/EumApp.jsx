@@ -18,7 +18,7 @@ import {
 // 1. DESIGN TOKENS · STORAGE · UTILS — src/eum/* 모듈로 분리 (단일파일 분해 1단계)
 //   값·로직은 100% 동일. 이 파일은 이제 화면(컴포넌트)에 집중한다.
 // ============================================================================
-import { C, PERSONA, FONT_STACK, SERIF_STACK } from './eum/theme.js';
+import { C, PERSONA, FONT_STACK, SERIF_STACK, SHADOW } from './eum/theme.js';
 import { normalizeState, loadState, saveState } from './eum/storage.js';
 import { TODAY, krw, fmtDate, fmtRelativeDate, uid } from './eum/utils.js';
 
@@ -344,14 +344,15 @@ function Avatar({ name, color = C.brand, size = 40, ring = false, type, gender }
 }
 
 function Badge({ children, color = C.mute, soft = C.muteSoft, size = 'sm' }) {
-  const pad = size === 'sm' ? '4px 9px' : '6px 12px';
-  const fs = size === 'sm' ? 11 : 12;
+  // 상태 칩 — 알약(999) 대신 소프트 사각(7~8px). 콘솔 데이터 라벨의 표준 문법.
+  const pad = size === 'sm' ? '3px 8px' : '5px 11px';
+  const fs = size === 'sm' ? 11.5 : 12.5;
   return (
     <span style={{
       display: 'inline-flex', alignItems: 'center', gap: 5,
-      background: soft, color, padding: pad, borderRadius: 999,
-      border: `1px solid ${color}1f`,
-      fontSize: fs, fontWeight: 600, letterSpacing: '-0.005em',
+      background: soft, color, padding: pad, borderRadius: size === 'sm' ? 7 : 8,
+      border: 'none',
+      fontSize: fs, fontWeight: 700, letterSpacing: '-0.01em', lineHeight: 1.45,
       whiteSpace: 'nowrap', flexShrink: 0, maxWidth: '100%',
     }}>{children}</span>
   );
@@ -393,17 +394,17 @@ function InsuranceBadge({ size = 'sm', style = {} }) {
 
 function Button({ children, onClick, variant = 'primary', size = 'md', disabled, icon, iconRight, fullWidth, type = 'button', style = {} }) {
   const variants = {
-    primary: { bg: C.ink, fg: '#fff', border: C.ink, hoverBg: '#000' },
+    primary: { bg: C.headline, fg: '#fff', border: C.headline, hoverBg: '#000' },
     brand: { bg: C.brand, fg: '#fff', border: C.brand, hoverBg: C.brandDark },
-    secondary: { bg: C.card, fg: C.ink, border: C.border, hoverBg: C.bg },
-    ghost: { bg: 'transparent', fg: C.ink, border: 'transparent', hoverBg: C.bg },
+    secondary: { bg: C.panel, fg: C.ink, border: C.line, hoverBg: C.hover },
+    ghost: { bg: 'transparent', fg: C.inkSoft, border: 'transparent', hoverBg: C.hover },
     danger: { bg: C.red, fg: '#fff', border: C.red, hoverBg: '#A03838' },
     success: { bg: C.sage, fg: '#fff', border: C.sage, hoverBg: '#4D6B45' },
   };
   const v = variants[variant];
   const sizes = {
-    sm: { pad: '7px 13px', fs: 13, h: 34 },
-    md: { pad: '10px 18px', fs: 14, h: 40 },
+    sm: { pad: '6px 12px', fs: 12.5, h: 32 },
+    md: { pad: '9px 16px', fs: 13.5, h: 38 },
     lg: { pad: '13px 24px', fs: 15.5, h: 48 },
   };
   const s = sizes[size];
@@ -426,14 +427,12 @@ function Button({ children, onClick, variant = 'primary', size = 'md', disabled,
         background: hover && !disabled ? v.hoverBg : v.bg,
         color: v.fg, border: `1px solid ${v.border}`,
         padding: s.pad, fontSize: s.fs, fontWeight: 700,
-        borderRadius: 13, cursor: disabled ? 'not-allowed' : 'pointer',
-        boxShadow: !disabled && isSolid
-          ? (press ? `0 2px 6px -4px ${v.bg}80` : hover ? `0 8px 20px -8px ${v.bg}99` : `0 4px 12px -6px ${v.bg}80`)
-          : 'none',
+        borderRadius: 10, cursor: disabled ? 'not-allowed' : 'pointer',
+        // 컬러 글로우(광원 없는 색번짐)는 아마추어 신호 — 얕고 중성적인 그림자만 쓴다
+        boxShadow: !disabled && isSolid ? (press ? 'none' : SHADOW.xs) : 'none',
         opacity: disabled ? 0.5 : 1,
-        transition: 'background 0.18s ease, box-shadow 0.24s ease, transform 0.14s cubic-bezier(0.22,1,0.36,1)',
-        // 누름(press) 피드백 — 토스/애플식 촉감. hover:살짝 뜸 → press:눌림
-        transform: disabled ? 'none' : press ? 'translateY(0) scale(0.97)' : hover ? 'translateY(-1px)' : 'none',
+        transition: 'background 0.16s ease, box-shadow 0.18s ease, transform 0.12s cubic-bezier(0.22,1,0.36,1)',
+        transform: disabled ? 'none' : press ? 'scale(0.975)' : 'none',
         height: s.h, width: fullWidth ? '100%' : 'auto',
         fontFamily: FONT_STACK, letterSpacing: '-0.01em',
         ...style
@@ -458,14 +457,14 @@ function Card({ children, padding = 20, style = {}, onClick, hoverable }) {
       onMouseEnter={() => hoverable && setHover(true)}
       onMouseLeave={() => hoverable && setHover(false)}
       style={{
-        background: C.card,
-        border: `1px solid ${C.border}`,
-        borderRadius: 18,
+        background: C.panel,
+        border: `1px solid ${hover ? '#DCDFE5' : C.line}`,
+        borderRadius: 16,
         padding,
         cursor: onClick ? 'pointer' : 'default',
-        transition: 'transform 0.24s cubic-bezier(0.22,1,0.36,1), box-shadow 0.24s ease',
-        boxShadow: hover ? '0 16px 40px -16px rgba(26,26,30,0.18)' : '0 2px 8px -4px rgba(26,26,30,0.08)',
-        transform: hover ? 'translateY(-4px)' : 'none',
+        transition: 'transform 0.2s cubic-bezier(0.22,1,0.36,1), box-shadow 0.2s ease, border-color 0.2s ease',
+        boxShadow: hover ? SHADOW.md : SHADOW.xs,
+        transform: hover ? 'translateY(-2px)' : 'none',
         ...style
       }}
     >
@@ -486,15 +485,15 @@ function Input({ value, onChange, placeholder, type = 'text', icon, style = {}, 
         aria-label={placeholder}
         disabled={disabled}
         style={{
-          width: '100%', padding: icon ? '11px 14px 11px 40px' : '11px 14px',
-          border: `1px solid ${C.border}`, borderRadius: 12,
-          fontSize: 14, fontFamily: FONT_STACK, color: C.ink,
-          background: disabled ? C.bg : C.card, outline: 'none',
+          width: '100%', padding: icon ? '10px 14px 10px 38px' : '10px 14px',
+          border: `1px solid ${C.line}`, borderRadius: 10,
+          fontSize: 13.5, fontFamily: FONT_STACK, color: C.ink,
+          background: disabled ? C.lineSoft : C.panel, outline: 'none',
           transition: 'border-color 0.15s ease, box-shadow 0.15s ease',
           ...style,
         }}
-        onFocus={(e) => { e.target.style.borderColor = C.brand; e.target.style.boxShadow = `0 0 0 3px ${C.brand}22`; }}
-        onBlur={(e) => { e.target.style.borderColor = C.border; e.target.style.boxShadow = 'none'; }}
+        onFocus={(e) => { e.target.style.borderColor = C.brand; e.target.style.boxShadow = `0 0 0 3px ${C.brand}1f`; }}
+        onBlur={(e) => { e.target.style.borderColor = C.line; e.target.style.boxShadow = 'none'; }}
       />
     </div>
   );
@@ -528,13 +527,13 @@ function Select({ value, onChange, options, placeholder, style = {} }) {
       value={value || ''}
       aria-label={placeholder}
       onChange={(e) => onChange && onChange(e.target.value)}
-      onFocus={(e) => { e.target.style.borderColor = C.brand; e.target.style.boxShadow = `0 0 0 3px ${C.brand}22`; }}
-      onBlur={(e) => { e.target.style.borderColor = C.border; e.target.style.boxShadow = 'none'; }}
+      onFocus={(e) => { e.target.style.borderColor = C.brand; e.target.style.boxShadow = `0 0 0 3px ${C.brand}1f`; }}
+      onBlur={(e) => { e.target.style.borderColor = C.line; e.target.style.boxShadow = 'none'; }}
       style={{
-        width: '100%', padding: '11px 14px',
-        border: `1px solid ${C.border}`, borderRadius: 12,
-        fontSize: 14, fontFamily: FONT_STACK, color: C.ink,
-        background: C.card, outline: 'none', cursor: 'pointer',
+        width: '100%', padding: '9px 14px',
+        border: `1px solid ${C.line}`, borderRadius: 10,
+        fontSize: 13.5, fontFamily: FONT_STACK, color: C.ink, fontWeight: 600,
+        background: C.panel, outline: 'none', cursor: 'pointer',
         appearance: 'none',
         transition: 'border-color 0.15s ease, box-shadow 0.15s ease',
         backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238B8B93' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
@@ -720,22 +719,30 @@ function Toast({ toast, onClose }) {
 }
 
 function StatCard({ label, value, sub, color = C.ink, icon, trend }) {
+  // 콘솔 KPI — 컬러 상단선 제거. 라벨·수치·보조설명의 3단 리듬 + 톤다운 아이콘 칩.
   return (
-    <Card padding={18} style={{ borderTop: `3px solid ${color}` }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-        <div style={{ fontSize: 12, color: C.mute, fontWeight: 700, letterSpacing: '0.01em' }}>{label}</div>
-        {icon && <div style={{ background: color + '14', color, padding: 7, borderRadius: 10, display: 'flex' }}>{icon}</div>}
+    <div style={{
+      background: C.panel, border: `1px solid ${C.line}`, borderRadius: 16,
+      padding: '18px 20px 16px', boxShadow: SHADOW.xs, position: 'relative', overflow: 'hidden',
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 14 }}>
+        {icon && (
+          <span style={{ width: 28, height: 28, borderRadius: 9, background: color + '14', color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            {icon}
+          </span>
+        )}
+        <span style={{ fontSize: 12.5, color: C.navMute, fontWeight: 600, letterSpacing: '-0.01em' }}>{label}</span>
       </div>
-      <div style={{ fontSize: 28, fontWeight: 800, color, letterSpacing: '-0.03em', lineHeight: 1.05, fontVariantNumeric: 'tabular-nums' }}>
+      <div style={{ fontSize: 30, fontWeight: 800, color: C.headline, letterSpacing: '-0.035em', lineHeight: 1.04, fontVariantNumeric: 'tabular-nums' }}>
         {typeof value === 'number' ? <CountUp value={value} /> : value}
       </div>
       {sub && (
-        <div style={{ fontSize: 12, color: trend === 'up' ? C.sage : trend === 'down' ? C.red : C.mute, marginTop: 7, display: 'flex', alignItems: 'center', gap: 4, fontWeight: 600 }}>
+        <div style={{ fontSize: 12, color: trend === 'up' ? C.sage : trend === 'down' ? C.red : C.mute, marginTop: 9, display: 'flex', alignItems: 'center', gap: 4, fontWeight: 500, lineHeight: 1.45 }}>
           {trend === 'up' && <TrendingUp size={12} />}
           {sub}
         </div>
       )}
-    </Card>
+    </div>
   );
 }
 
@@ -882,9 +889,9 @@ function SearchBar({ value, onChange, placeholder = '검색…', style = {} }) {
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         aria-label={placeholder}
-        onFocus={(e) => { e.target.style.borderColor = C.brand; e.target.style.boxShadow = `0 0 0 3px ${C.brand}22`; }}
-        onBlur={(e) => { e.target.style.borderColor = C.border; e.target.style.boxShadow = 'none'; }}
-        style={{ width: '100%', padding: '9px 12px 9px 34px', borderRadius: 12, border: `1px solid ${C.border}`, background: C.card, fontSize: 13.5, color: C.ink, fontFamily: FONT_STACK, outline: 'none', boxSizing: 'border-box', transition: 'border-color 0.15s ease, box-shadow 0.15s ease' }}
+        onFocus={(e) => { e.target.style.borderColor = C.brand; e.target.style.boxShadow = `0 0 0 3px ${C.brand}1f`; }}
+        onBlur={(e) => { e.target.style.borderColor = C.line; e.target.style.boxShadow = 'none'; }}
+        style={{ width: '100%', padding: '9px 12px 9px 34px', borderRadius: 10, border: `1px solid ${C.line}`, background: C.panel, fontSize: 13.5, color: C.ink, fontFamily: FONT_STACK, outline: 'none', boxSizing: 'border-box', transition: 'border-color 0.15s ease, box-shadow 0.15s ease' }}
       />
       {value && (
         <button onClick={() => onChange('')} aria-label="지우기" style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: C.mute, display: 'flex', padding: 2 }}>
@@ -1063,7 +1070,12 @@ function CheckInOutCard({ activity, user, dispatch, showToast, color = C.sage })
 function Tabs({ tabs, active, onChange, style = {} }) {
   const [hoverId, setHoverId] = useState(null);
   return (
-    <div role="tablist" style={{ display: 'flex', gap: 4, borderBottom: `1px solid ${C.border}`, ...style }}>
+    // 세그먼티드 컨트롤 — 밑줄 탭 대신 트랙 위 화이트 필. 상태가 한눈에 잡히고 밀도가 높다.
+    <div role="tablist" style={{
+      display: 'inline-flex', gap: 2, padding: 4,
+      background: C.lineSoft, borderRadius: 12, border: `1px solid ${C.line}`,
+      maxWidth: '100%', overflowX: 'auto', ...style,
+    }}>
       {tabs.map((t) => {
         const isActive = active === t.id;
         const isHover = hoverId === t.id && !isActive;
@@ -1077,14 +1089,14 @@ function Tabs({ tabs, active, onChange, style = {} }) {
           onMouseEnter={() => setHoverId(t.id)}
           onMouseLeave={() => setHoverId((p) => (p === t.id ? null : p))}
           style={{
-            padding: '10px 15px', background: 'transparent',
-            border: 'none',
-            // 비활성 탭도 hover 시 밑줄이 옅게 예고 → 클릭 가능함이 분명해짐
-            borderBottom: `2.5px solid ${isActive ? C.brand : isHover ? `${C.brand}4D` : 'transparent'}`,
-            color: isActive ? C.brand : isHover ? C.inkSoft : C.mute,
+            padding: '8px 14px',
+            background: isActive ? C.panel : isHover ? 'rgba(255,255,255,0.6)' : 'transparent',
+            border: 'none', borderRadius: 9,
+            boxShadow: isActive ? SHADOW.sm : 'none',
+            color: isActive ? C.headline : C.navMute,
             fontWeight: isActive ? 700 : 600,
-            fontSize: 14, cursor: 'pointer', marginBottom: -1,
-            fontFamily: FONT_STACK, transition: 'color 0.18s ease, border-color 0.18s ease',
+            fontSize: 13.5, cursor: 'pointer', whiteSpace: 'nowrap',
+            fontFamily: FONT_STACK, transition: 'color 0.16s ease, background 0.16s ease, box-shadow 0.16s ease',
             display: 'flex', alignItems: 'center', gap: 6,
           }}
         >
@@ -1092,11 +1104,11 @@ function Tabs({ tabs, active, onChange, style = {} }) {
           {t.count !== undefined && (
             <span style={{
               fontSize: 11, fontWeight: 700,
-              background: isActive ? C.brand : C.muteSoft,
-              color: isActive ? '#fff' : C.mute,
-              padding: '1px 7px', borderRadius: 999,
+              background: isActive ? C.brandSoft : 'rgba(0,0,0,0.05)',
+              color: isActive ? C.brand : C.navMute,
+              padding: '1px 6px', borderRadius: 6,
               fontVariantNumeric: 'tabular-nums',
-              transition: 'background 0.18s ease, color 0.18s ease',
+              transition: 'background 0.16s ease, color 0.16s ease',
             }}>{t.count}</span>
           )}
         </button>
@@ -1111,15 +1123,15 @@ function Empty({ icon, title, sub, action }) {
     <div style={{ textAlign: 'center', padding: '60px 24px', color: C.mute }}>
       {icon && (
         <div aria-hidden="true" style={{
-          width: 72, height: 72, borderRadius: 22,
-          background: `linear-gradient(155deg, ${C.brandBg}, ${C.card})`,
-          color: C.brand, display: 'flex', alignItems: 'center', justifyContent: 'center',
-          margin: '0 auto 18px',
-          boxShadow: `inset 0 0 0 1px ${C.brandSoft}, 0 8px 22px -14px ${C.brand}55`,
+          width: 64, height: 64, borderRadius: 18,
+          background: C.lineSoft,
+          color: C.muteLight, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          margin: '0 auto 16px',
+          border: `1px solid ${C.line}`,
         }}>{icon}</div>
       )}
-      <div style={{ fontSize: 16.5, fontWeight: 700, color: C.ink, marginBottom: 7, letterSpacing: '-0.01em' }}>{title}</div>
-      {sub && <div style={{ fontSize: 14, marginBottom: 20, lineHeight: 1.65, maxWidth: 340, marginLeft: 'auto', marginRight: 'auto', color: C.mute }}>{sub}</div>}
+      <div style={{ fontSize: 15.5, fontWeight: 700, color: C.headline, marginBottom: 6, letterSpacing: '-0.02em' }}>{title}</div>
+      {sub && <div style={{ fontSize: 13.5, marginBottom: 20, lineHeight: 1.65, maxWidth: 340, marginLeft: 'auto', marginRight: 'auto', color: C.navMute }}>{sub}</div>}
       {action && <div style={{ marginTop: 4 }}>{action}</div>}
     </div>
   );
@@ -1157,20 +1169,20 @@ function EumLogo({ size = 32, variant = 'badge' }) {
 function Sidebar({ role, currentView, onNavigate, onLogout, userName, dataCount }) {
   const navByRole = {
     coordinator: [
-      { id: 'overview', label: '대시보드', icon: <Home size={18} /> },
-      { id: 'applicants', label: '신청자 관리', icon: <UserPlus size={18} />, count: dataCount?.applicants },
-      { id: 'matching', label: '매칭 보드', icon: <Heart size={18} />, count: dataCount?.matches },
-      { id: 'activities', label: '활동 승인', icon: <ClipboardCheck size={18} />, count: dataCount?.pendingLogs },
-      { id: 'settlements', label: '정산', icon: <Wallet size={18} /> },
-      { id: 'safety', label: '안전 이슈', icon: <ShieldAlert size={18} />, count: dataCount?.openIncidents, danger: dataCount?.openIncidents > 0 },
-      { id: 'reports', label: '리포트', icon: <FileText size={18} /> },
-      { id: 'b2g', label: '공공 성과·납품', icon: <TrendingUp size={18} /> },
-      { id: 'b2b', label: '기업·기관 복지', icon: <Award size={18} /> },
-      { id: 'ai-advisor', label: '복지 어드바이저', icon: <Sparkles size={18} /> },
-      { id: 'ai-match', label: 'AI 자동·선택 매칭', icon: <Users size={18} /> },
-      { id: 'ai-copilot', label: 'AI 코파일럿', icon: <ClipboardCheck size={18} /> },
-      { id: 'ai-chaperone', label: 'AI 안전 채퍼론', icon: <ShieldCheck size={18} /> },
-      { id: 'roadmap', label: '서비스 로드맵', icon: <Sparkles size={18} /> },
+      { id: 'overview', label: '대시보드', icon: <Home size={17} />, group: '운영' },
+      { id: 'applicants', label: '신청자 관리', icon: <UserPlus size={17} />, count: dataCount?.applicants, group: '운영' },
+      { id: 'matching', label: '매칭 보드', icon: <Heart size={17} />, count: dataCount?.matches, group: '운영' },
+      { id: 'activities', label: '활동 승인', icon: <ClipboardCheck size={17} />, count: dataCount?.pendingLogs, group: '운영' },
+      { id: 'settlements', label: '정산', icon: <Wallet size={17} />, group: '운영' },
+      { id: 'safety', label: '안전 이슈', icon: <ShieldAlert size={17} />, count: dataCount?.openIncidents, danger: dataCount?.openIncidents > 0, group: '운영' },
+      { id: 'reports', label: '리포트', icon: <FileText size={17} />, group: '성과·납품' },
+      { id: 'b2g', label: '공공 성과·납품', icon: <TrendingUp size={17} />, group: '성과·납품' },
+      { id: 'b2b', label: '기업·기관 복지', icon: <Award size={17} />, group: '성과·납품' },
+      { id: 'ai-advisor', label: '복지 어드바이저', icon: <Sparkles size={17} />, group: 'AI 어시스트' },
+      { id: 'ai-match', label: 'AI 자동·선택 매칭', icon: <Users size={17} />, group: 'AI 어시스트' },
+      { id: 'ai-copilot', label: 'AI 코파일럿', icon: <ClipboardCheck size={17} />, group: 'AI 어시스트' },
+      { id: 'ai-chaperone', label: 'AI 안전 채퍼론', icon: <ShieldCheck size={17} />, group: 'AI 어시스트' },
+      { id: 'roadmap', label: '서비스 로드맵', icon: <Sparkles size={17} />, group: 'AI 어시스트' },
     ],
     youth: [
       { id: 'dashboard', label: '홈', icon: <Home size={18} /> },
@@ -1198,88 +1210,102 @@ function Sidebar({ role, currentView, onNavigate, onLogout, userName, dataCount 
   const persona = PERSONA[role];
   const isSenior = role === 'senior';
 
+  // 그룹 라벨이 있는 항목만 섹션으로 묶는다(코디네이터). 그 외 역할은 단일 목록.
+  const groups = [];
+  items.forEach((it) => {
+    const g = it.group || '';
+    const last = groups[groups.length - 1];
+    if (last && last.name === g) last.items.push(it);
+    else groups.push({ name: g, items: [it] });
+  });
+
   return (
     <div style={{
-      width: isSenior ? 240 : 232, height: '100vh', background: C.card,
-      borderRight: `1px solid ${C.border}`,
+      width: isSenior ? 244 : 248, height: '100vh', background: C.panel,
+      borderRight: `1px solid ${C.line}`,
       display: 'flex', flexDirection: 'column', flexShrink: 0,
       position: 'sticky', top: 0,
     }}>
-      <div style={{ padding: '22px 20px 18px', borderBottom: `1px solid ${C.borderSoft}` }}>
+      {/* 브랜드 */}
+      <div style={{ height: 64, padding: '0 18px', display: 'flex', alignItems: 'center', borderBottom: `1px solid ${C.lineSoft}`, flexShrink: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 9, cursor: 'pointer' }} onClick={() => onNavigate('overview')} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onNavigate('overview'); } }} role="button" tabIndex={0} aria-label="대시보드로">
-          <div style={{ borderRadius: 9, boxShadow: `0 2px 8px ${C.brand}40`, display: 'flex' }}>
-            <EumLogo size={32} />
-          </div>
-          <div>
-            <div style={{ fontSize: 17, fontWeight: 800, color: C.ink, letterSpacing: '-0.03em', fontFamily: SERIF_STACK, lineHeight: 1 }}>이음</div>
-            <div style={{ fontSize: 10, color: C.mute, letterSpacing: '0.08em', fontWeight: 600, marginTop: 2 }}>EUM · 세대를 잇다</div>
+          <EumLogo size={28} />
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 7 }}>
+            <span style={{ fontSize: 17, fontWeight: 800, color: C.headline, letterSpacing: '-0.04em', lineHeight: 1 }}>이음</span>
+            <span style={{ fontSize: 11, color: C.navMute, fontWeight: 600, letterSpacing: '-0.01em' }}>{persona.label}</span>
           </div>
         </div>
       </div>
 
-      <div style={{ flex: 1, padding: '14px 12px', overflowY: 'auto' }}>
-        <div style={{ fontSize: 10, color: C.mute, fontWeight: 700, letterSpacing: '0.1em', padding: '4px 10px 8px' }}>
-          {persona.label.toUpperCase()}
-        </div>
-        {items.map((item) => {
-          const active = currentView === item.id;
-          return (
-            <button
-              key={item.id}
-              onClick={() => onNavigate(item.id)}
-              style={{
-                width: '100%', display: 'flex', alignItems: 'center', gap: 11,
-                padding: isSenior ? '13px 13px' : '10px 13px', marginBottom: 3,
-                background: active ? persona.soft : 'transparent', color: active ? persona.color : C.inkSoft,
-                border: 'none', borderRadius: 11, cursor: 'pointer',
-                fontWeight: active ? 700 : 500,
-                fontSize: isSenior ? 16 : 14, textAlign: 'left',
-                fontFamily: FONT_STACK,
-                transition: 'background 0.15s ease, color 0.15s ease', position: 'relative',
-                boxShadow: active ? `inset 3px 0 0 ${persona.color}` : 'none',
-              }}
-              onMouseEnter={(e) => !active && (e.currentTarget.style.background = C.cream)}
-              onMouseLeave={(e) => !active && (e.currentTarget.style.background = 'transparent')}
-            >
-              <span style={{ color: active ? persona.color : C.mute, display: 'flex' }}>{item.icon}</span>
-              <span style={{ flex: 1 }}>{item.label}</span>
-              {item.count !== undefined && item.count > 0 && (
-                <span style={{
-                  fontSize: 11, fontWeight: 700,
-                  background: item.danger ? C.red : (active ? persona.color : C.muteSoft),
-                  color: item.danger || active ? '#fff' : C.mute,
-                  padding: '1px 7px', borderRadius: 9,
-                  minWidth: 18, textAlign: 'center',
-                }}>{item.count}</span>
-              )}
-            </button>
-          );
-        })}
+      {/* 내비게이션 */}
+      <div className="eum-scroll" style={{ flex: 1, padding: '12px 10px 8px', overflowY: 'auto' }}>
+        {groups.map((g, gi) => (
+          <div key={g.name || gi} style={{ marginBottom: 6 }}>
+            {g.name && (
+              <div style={{ fontSize: 10.5, color: C.muteLight, fontWeight: 700, letterSpacing: '0.09em', padding: gi === 0 ? '2px 12px 7px' : '14px 12px 7px', textTransform: 'uppercase' }}>
+                {g.name}
+              </div>
+            )}
+            {g.items.map((item) => {
+              const active = currentView === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => onNavigate(item.id)}
+                  style={{
+                    width: '100%', display: 'flex', alignItems: 'center', gap: 10,
+                    padding: isSenior ? '13px 12px' : '9px 12px', marginBottom: 1,
+                    background: active ? C.brandSoft : 'transparent',
+                    color: active ? C.brand : C.inkSoft,
+                    border: 'none', borderRadius: 10, cursor: 'pointer',
+                    fontWeight: active ? 700 : 500,
+                    fontSize: isSenior ? 16 : 13.5, textAlign: 'left',
+                    letterSpacing: '-0.015em',
+                    fontFamily: FONT_STACK,
+                    transition: 'background 0.14s ease, color 0.14s ease',
+                  }}
+                  onMouseEnter={(e) => { if (!active) e.currentTarget.style.background = C.hover; }}
+                  onMouseLeave={(e) => { if (!active) e.currentTarget.style.background = 'transparent'; }}
+                >
+                  <span style={{ color: active ? C.brand : C.muteLight, display: 'flex', flexShrink: 0 }}>{item.icon}</span>
+                  <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.label}</span>
+                  {item.count !== undefined && item.count > 0 && (
+                    <span style={{
+                      fontSize: 11, fontWeight: 700,
+                      background: item.danger ? C.red : 'transparent',
+                      color: item.danger ? '#fff' : (active ? C.brand : C.muteLight),
+                      padding: item.danger ? '1px 6px' : '1px 2px', borderRadius: 6,
+                      minWidth: 16, textAlign: 'center', fontVariantNumeric: 'tabular-nums',
+                    }}>{item.count}</span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        ))}
       </div>
 
-      <div style={{ padding: 12, borderTop: `1px solid ${C.borderSoft}` }}>
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: 10,
-          padding: 10, borderRadius: 9,
-        }}>
-          <Avatar type={role} name={userName} color={persona.color} size={36} />
+      {/* 계정 */}
+      <div style={{ padding: 10, borderTop: `1px solid ${C.lineSoft}`, flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 8px', borderRadius: 10 }}>
+          <Avatar type={role} name={userName} color={persona.color} size={32} />
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: C.ink }}>{userName}</div>
-            <div style={{ fontSize: 11, color: C.mute }}>{persona.label}</div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: C.headline, letterSpacing: '-0.02em' }}>{userName}</div>
+            <div style={{ fontSize: 11, color: C.muteLight, fontWeight: 500 }}>{persona.label}</div>
           </div>
           <button
             onClick={onLogout}
-            style={{ background: 'transparent', border: 'none', color: C.mute, padding: 6, borderRadius: 6, cursor: 'pointer', display: 'flex' }}
+            style={{ background: 'transparent', border: 'none', color: C.muteLight, padding: 6, borderRadius: 8, cursor: 'pointer', display: 'flex' }}
             title="로그아웃"
-            onMouseEnter={(e) => e.currentTarget.style.background = C.bg}
-            onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+            onMouseEnter={(e) => { e.currentTarget.style.background = C.hover; e.currentTarget.style.color = C.inkSoft; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = C.muteLight; }}
           >
             <LogOut size={16} />
           </button>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, marginTop: 10 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, marginTop: 8, paddingTop: 8, borderTop: `1px solid ${C.lineSoft}` }}>
           <span style={{ fontSize: 9.5, color: C.muteLight, fontWeight: 600 }}>운영</span>
-          <img src="/logos/gowon.png" alt="고원 GOWON" loading="lazy" decoding="async" style={{ height: 15, objectFit: 'contain', opacity: 0.92 }} onError={(e) => { e.currentTarget.style.display = 'none'; const n = e.currentTarget.nextElementSibling; if (n) n.style.display = 'inline'; }} />
+          <img src="/logos/gowon.png" alt="고원 GOWON" loading="lazy" decoding="async" style={{ height: 14, objectFit: 'contain', opacity: 0.7 }} onError={(e) => { e.currentTarget.style.display = 'none'; const n = e.currentTarget.nextElementSibling; if (n) n.style.display = 'inline'; }} />
           <span style={{ display: 'none', fontSize: 9.5, color: C.muteLight, fontWeight: 700 }}>고원(GOWON)</span>
         </div>
       </div>
@@ -1288,16 +1314,32 @@ function Sidebar({ role, currentView, onNavigate, onLogout, userName, dataCount 
 }
 
 function PageHeader({ title, subtitle, right }) {
+  // 컬러 바 제거 — 타이포 위계(28/800 + 13.5 뮤트)와 여백만으로 헤더를 세운다.
   return (
-    <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 22, gap: 16, flexWrap: 'wrap', paddingBottom: 14, borderBottom: `1px solid ${C.borderSoft}` }}>
-      <div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <span style={{ width: 4, height: 22, borderRadius: 3, background: C.brand, flexShrink: 0 }} />
-          <h1 style={{ fontSize: 26, fontWeight: 800, color: C.ink, letterSpacing: '-0.03em', margin: 0, lineHeight: 1.2 }}>{title}</h1>
-        </div>
-        {subtitle && <div style={{ fontSize: 13.5, color: C.mute, marginTop: 6, marginLeft: 14, lineHeight: 1.55 }}>{subtitle}</div>}
+    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 24, gap: 16, flexWrap: 'wrap' }}>
+      <div style={{ minWidth: 0 }}>
+        <h1 style={{ fontSize: 28, fontWeight: 800, color: C.headline, letterSpacing: '-0.04em', margin: 0, lineHeight: 1.2 }}>{title}</h1>
+        {subtitle && <div style={{ fontSize: 13.5, color: C.navMute, marginTop: 7, lineHeight: 1.55, fontWeight: 500 }}>{subtitle}</div>}
       </div>
-      {right}
+      {right && <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>{right}</div>}
+    </div>
+  );
+}
+
+// 섹션 패널 — 콘솔 화면의 기본 구획 단위(헤더 + 본문). 카드 남용을 줄이고 위계를 만든다.
+function Panel({ title, sub, right, children, padding = 20, style = {} }) {
+  return (
+    <div style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 16, boxShadow: SHADOW.xs, overflow: 'hidden', ...style }}>
+      {(title || right) && (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '15px 20px', borderBottom: `1px solid ${C.lineSoft}` }}>
+          <div style={{ minWidth: 0 }}>
+            {title && <div style={{ fontSize: 15, fontWeight: 700, color: C.headline, letterSpacing: '-0.02em' }}>{title}</div>}
+            {sub && <div style={{ fontSize: 12.5, color: C.navMute, marginTop: 3, fontWeight: 500 }}>{sub}</div>}
+          </div>
+          {right && <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>{right}</div>}
+        </div>
+      )}
+      <div style={{ padding }}>{children}</div>
     </div>
   );
 }
@@ -2191,10 +2233,10 @@ function SeniorApp({ state, user, dispatch, showToast }) {
       {view === 'dashboard' && (
         <>
           <div style={{ marginBottom: 24 }}>
-            <div style={{ fontSize: 32, fontWeight: 700, color: C.ink, letterSpacing: '-0.03em', fontFamily: SERIF_STACK, lineHeight: 1.2 }}>
+            <div style={{ fontSize: 34, fontWeight: 800, color: C.headline, letterSpacing: '-0.04em', lineHeight: 1.22 }}>
               안녕하세요,<br />{user.name} 님
             </div>
-            <div style={{ fontSize: 18, color: C.mute, marginTop: 8 }}>오늘은 {fmtDate(TODAY)} 입니다</div>
+            <div style={{ fontSize: 18, color: C.navMute, marginTop: 9, fontWeight: 500 }}>오늘은 {fmtDate(TODAY)} 입니다</div>
             <div style={{ marginTop: 14 }}>
               <OfficialSenderBadge size="lg" />
               <div style={{ fontSize: 14, color: C.mute, marginTop: 8, lineHeight: 1.5 }}>
@@ -2205,42 +2247,64 @@ function SeniorApp({ state, user, dispatch, showToast }) {
 
           <HomeHub setView={setView} items={[{ id: 'schedule', label: '다음 만남', icon: Calendar, c: C.lavender }, { id: 'settlement', label: '받은 상품권', icon: Wallet, c: C.gold }]} />
 
-          {/* 다음 만남 — 크게 강조 */}
+          {/* 다음 만남 — 이 화면에서 가장 중요한 한 가지. 파스텔 위 파스텔을 걷어내고
+              흰 패널 + 진한 헤더 스트립으로 대비를 확보한다(어르신 가독성). */}
           {nextActivity && youth && (
-            <Card padding={28} style={{ marginBottom: 20, background: `linear-gradient(135deg, ${C.lavenderSoft} 0%, ${C.cream} 100%)`, border: `2px solid ${C.lavender}40` }}>
-              <div style={{ fontSize: 15, fontWeight: 700, color: C.lavender, letterSpacing: '0.05em', marginBottom: 14 }}>다음 만남</div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 22, flexWrap: 'wrap' }}>
-                <Avatar type="youth" name={youth.name} color={C.sage} size={86} />
-                <div>
-                  <div style={{ fontSize: 28, fontWeight: 700, color: C.ink, letterSpacing: '-0.02em', fontFamily: SERIF_STACK, lineHeight: 1.1 }}>
-                    {youth.name} 청년
-                  </div>
-                  {child && <div style={{ fontSize: 20, color: C.inkSoft, marginTop: 6 }}>그리고 <strong style={{ color: C.peach }}>{child.name}</strong> 아이</div>}
-                </div>
+            <div style={{ marginBottom: 20, background: C.panel, border: `1px solid ${C.line}`, borderRadius: 20, boxShadow: SHADOW.sm, overflow: 'hidden' }}>
+              <div style={{ background: C.lavender, padding: '13px 22px', display: 'flex', alignItems: 'center', gap: 9 }}>
+                <Calendar size={19} color="#fff" />
+                <span style={{ fontSize: 16, fontWeight: 800, color: '#fff', letterSpacing: '-0.01em' }}>다음 만남</span>
               </div>
-              <div style={{ marginTop: 22, padding: 20, background: C.card, borderRadius: 12, border: `1px solid ${C.border}` }}>
-                <div style={{ fontSize: 24, fontWeight: 700, color: C.ink, fontFamily: SERIF_STACK, letterSpacing: '-0.02em' }}>
-                  {fmtRelativeDate(nextActivity.scheduled_at)} · {nextActivity.scheduled_at.split(' ')[1]}
+              <div style={{ padding: '24px 22px' }}>
+                {/* 언제 — 가장 큰 활자 */}
+                <div style={{ fontSize: 34, fontWeight: 800, color: C.headline, letterSpacing: '-0.035em', lineHeight: 1.15 }}>
+                  {fmtRelativeDate(nextActivity.scheduled_at)}
                 </div>
-                <div style={{ fontSize: 17, color: C.inkSoft, marginTop: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <MapPin size={18} /> {nextActivity.location}
+                <div style={{ fontSize: 26, fontWeight: 700, color: C.lavender, marginTop: 2, letterSpacing: '-0.02em', fontVariantNumeric: 'tabular-nums' }}>
+                  {nextActivity.scheduled_at.split(' ')[1]}
                 </div>
-                <div style={{ fontSize: 17, color: C.inkSoft, marginTop: 6 }}>{nextActivity.type} · {nextActivity.duration_hours}시간</div>
-                <div style={{ marginTop: 14, paddingTop: 14, borderTop: `1px dashed ${C.border}` }}>
+
+                {/* 어디서 · 무엇을 */}
+                <div style={{ marginTop: 18, display: 'flex', flexDirection: 'column', gap: 11 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 11, fontSize: 19, color: C.ink, fontWeight: 600 }}>
+                    <span style={{ width: 36, height: 36, borderRadius: 10, background: C.lineSoft, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><MapPin size={19} style={{ color: C.inkSoft }} /></span>
+                    {nextActivity.location}
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 11, fontSize: 19, color: C.ink, fontWeight: 600 }}>
+                    <span style={{ width: 36, height: 36, borderRadius: 10, background: C.lineSoft, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><Clock size={19} style={{ color: C.inkSoft }} /></span>
+                    {nextActivity.type} · {nextActivity.duration_hours}시간
+                  </div>
+                </div>
+
+                {/* 누구와 */}
+                <div style={{ marginTop: 20, paddingTop: 18, borderTop: `1px solid ${C.lineSoft}`, display: 'flex', alignItems: 'center', gap: 16 }}>
+                  <Avatar type="youth" name={youth.name} color={C.sage} size={64} />
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontSize: 22, fontWeight: 800, color: C.headline, letterSpacing: '-0.025em', lineHeight: 1.2 }}>{youth.name} 청년</div>
+                    {child && <div style={{ fontSize: 17, color: C.inkSoft, marginTop: 4, fontWeight: 500 }}>그리고 <strong style={{ color: C.peach, fontWeight: 700 }}>{child.name}</strong> 아이</div>}
+                  </div>
+                </div>
+
+                <div style={{ marginTop: 18 }}>
                   <InsuranceBadge size="md" />
                 </div>
               </div>
-            </Card>
+            </div>
           )}
 
-          {/* 이번 달 받은 상품권 */}
-          <Card padding={24} style={{ marginBottom: 20, background: C.goldSoft, border: `2px solid ${C.gold}40` }}>
-            <div style={{ fontSize: 15, fontWeight: 700, color: C.gold, letterSpacing: '0.05em', marginBottom: 8 }}>지금까지 받은 상품권</div>
-            <div style={{ fontSize: 42, fontWeight: 700, color: C.ink, letterSpacing: '-0.03em', fontFamily: SERIF_STACK, lineHeight: 1 }}>
-              {krw(totalEarned)}
+          {/* 지금까지 받은 상품권 — 금액 하나만 크게. 나머지는 조용히. */}
+          <div style={{ marginBottom: 20, background: C.panel, border: `1px solid ${C.line}`, borderRadius: 20, boxShadow: SHADOW.sm, padding: '24px 22px', display: 'flex', alignItems: 'center', gap: 18 }}>
+            <span style={{ width: 52, height: 52, borderRadius: 15, background: C.goldSoft, color: C.gold, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <Wallet size={26} />
+            </span>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontSize: 16, fontWeight: 700, color: C.navMute, marginBottom: 5 }}>지금까지 받은 상품권</div>
+              <div style={{ fontSize: 38, fontWeight: 800, color: C.headline, letterSpacing: '-0.04em', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
+                {krw(totalEarned)}
+              </div>
+              <div style={{ fontSize: 15, color: C.mute, marginTop: 8, fontWeight: 500 }}>{mySettlements.length}회 정산 완료</div>
             </div>
-            <div style={{ fontSize: 16, color: C.inkSoft, marginTop: 10 }}>{mySettlements.length}회 정산 완료</div>
-          </Card>
+          </div>
 
           {/* SOS 버튼 */}
           <SeniorSosCard user={user} dispatch={dispatch} showToast={showToast} match={match} />
@@ -2370,44 +2434,86 @@ function ConsumerLayout({ role, view, setView, user, dispatch, state, children }
   const isSenior = role === 'senior';
   const items = PARTICIPANT_NAV[role] || [];
   const handleLogout = () => dispatch({ type: 'LOGOUT' });
+  const isNarrow = useIsMobile(760);
+  const surface = isNarrow ? {} : {
+    border: `1px solid ${C.line}`, borderRadius: 24,
+    boxShadow: '0 32px 80px -40px rgba(16,24,40,0.28), 0 4px 16px -8px rgba(16,24,40,0.08)',
+    overflow: 'hidden', margin: '28px 0 36px', minHeight: 'calc(100vh - 64px)',
+  };
   return (
-    <div style={{ minHeight: '100vh', background: `linear-gradient(180deg, ${persona.soft} 0%, ${C.bg} 240px)`, fontFamily: FONT_STACK, color: C.ink, display: 'flex', justifyContent: 'center' }}>
-      <div style={{ width: '100%', maxWidth: isSenior ? 840 : 700, minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'transparent', position: 'relative' }}>
-        {/* 상단 앱바 */}
-        <div style={{ position: 'sticky', top: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: isSenior ? '15px 22px' : '12px 18px', background: 'rgba(250,247,242,0.82)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderBottom: `1px solid ${C.borderSoft}` }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 9, cursor: 'pointer' }} onClick={() => setView(items[0]?.id || 'dashboard')} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setView(items[0]?.id || 'dashboard'); } }} role="button" tabIndex={0} aria-label="홈으로">
-            <div style={{ display: 'flex', borderRadius: 8, boxShadow: `0 2px 8px ${C.brand}33` }}><EumLogo size={isSenior ? 34 : 28} /></div>
+    <div style={{
+      minHeight: '100vh', fontFamily: FONT_STACK, color: C.ink,
+      display: 'flex', justifyContent: 'center',
+      background: C.appBg,
+      backgroundImage: `radial-gradient(1100px 420px at 50% -8%, ${persona.soft} 0%, rgba(0,0,0,0) 70%)`,
+      backgroundRepeat: 'no-repeat',
+    }}>
+      <div style={{
+        width: '100%', maxWidth: isSenior ? 860 : 720,
+        display: 'flex', flexDirection: 'column',
+        background: C.panel, position: 'relative',
+        ...surface,
+        ...(isNarrow ? { minHeight: '100vh' } : {}),
+      }}>
+        {/* 상단 앱바 — 정체(누구로 접속했는지)와 이탈(나가기)만 남긴다 */}
+        <div style={{
+          position: 'sticky', top: 0, zIndex: 50,
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: isSenior ? '14px 22px' : '12px 18px',
+          background: 'rgba(255,255,255,0.88)', backdropFilter: 'saturate(180%) blur(14px)', WebkitBackdropFilter: 'saturate(180%) blur(14px)',
+          borderBottom: `1px solid ${C.lineSoft}`,
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }} onClick={() => setView(items[0]?.id || 'dashboard')} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setView(items[0]?.id || 'dashboard'); } }} role="button" tabIndex={0} aria-label="홈으로">
+            <EumLogo size={isSenior ? 32 : 27} />
             <div>
-              <div style={{ fontSize: isSenior ? 17 : 15, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK, letterSpacing: '-0.02em', lineHeight: 1.1 }}>이음</div>
-              <div style={{ fontSize: isSenior ? 12.5 : 10.5, color: persona.color, fontWeight: 700, letterSpacing: '0.01em', marginTop: 1 }}>{persona.label} · {user?.name}님</div>
+              <div style={{ fontSize: isSenior ? 17 : 15, fontWeight: 800, color: C.headline, letterSpacing: '-0.04em', lineHeight: 1.15 }}>이음</div>
+              <div style={{ fontSize: isSenior ? 13 : 11, color: C.navMute, fontWeight: 600, marginTop: 1 }}>
+                <span style={{ color: persona.color, fontWeight: 700 }}>{persona.label}</span> · {user?.name}님
+              </div>
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <NotificationBell state={state} role={role} user={user} onNavigate={setView} />
-            <button onClick={handleLogout} aria-label="로그아웃" style={{ display: 'flex', alignItems: 'center', gap: 6, border: `1px solid ${C.border}`, background: C.card, color: C.inkSoft, borderRadius: 11, padding: isSenior ? '9px 15px' : '7px 11px', fontSize: isSenior ? 14 : 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: FONT_STACK }}>
+            <button onClick={handleLogout} aria-label="로그아웃" style={{ display: 'flex', alignItems: 'center', gap: 6, border: `1px solid ${C.line}`, background: C.panel, color: C.inkSoft, borderRadius: 10, padding: isSenior ? '9px 14px' : '7px 10px', fontSize: isSenior ? 14 : 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: FONT_STACK }}>
               <LogOut size={isSenior ? 18 : 15} />{isSenior && ' 나가기'}
             </button>
           </div>
         </div>
+
         {/* 본문 (탭 전환 시 부드러운 진입) */}
-        <div key={view} id="eum-main" role="main" tabIndex={-1} style={{ flex: 1, padding: isSenior ? '22px 22px 100px' : '20px 18px 92px', overflowX: 'hidden', outline: 'none', animation: 'fadeUp 0.42s cubic-bezier(0.22,1,0.36,1)' }}>
+        <div key={view} id="eum-main" role="main" tabIndex={-1} style={{ flex: 1, padding: isSenior ? '24px 22px 116px' : '20px 18px 104px', overflowX: 'hidden', outline: 'none', animation: 'fadeUp 0.42s cubic-bezier(0.22,1,0.36,1)', background: C.appBg }}>
           {children}
         </div>
-        {/* 하단 탭 네비 */}
-        <div style={{ position: 'sticky', bottom: 0, zIndex: 50, display: 'flex', background: 'rgba(255,255,255,0.93)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderTop: `1px solid ${C.border}`, padding: isSenior ? '8px 6px' : '6px 4px' }}>
-          {items.map((it) => {
-            const active = view === it.id;
-            const Icon = it.icon;
-            return (
-              <button key={it.id} onClick={() => setView(it.id)} style={{ position: 'relative', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: isSenior ? 5 : 3, padding: isSenior ? '9px 2px' : '7px 2px', border: 'none', background: 'none', cursor: 'pointer', color: active ? persona.color : C.mute, fontFamily: FONT_STACK, transition: 'color 0.15s' }}>
-                <div style={{ display: 'flex', transform: active ? 'translateY(-1px) scale(1.06)' : 'none', transition: 'transform 0.25s cubic-bezier(0.34,1.56,0.64,1)' }}>
-                  <Icon size={isSenior ? 26 : 21} strokeWidth={active ? 2.5 : 1.9} />
-                </div>
-                <span style={{ fontSize: isSenior ? 12.5 : 10.5, fontWeight: active ? 700 : 600, whiteSpace: 'nowrap' }}>{it.label}</span>
-                <div style={{ width: active ? (isSenior ? 18 : 15) : 0, height: 3, borderRadius: 3, background: persona.color, transition: 'width 0.28s cubic-bezier(0.22,1,0.36,1)' }} />
-              </button>
-            );
-          })}
+
+        {/* 하단 탭 — 플로팅 아일랜드 + 활성 필. 손가락이 닿는 곳을 명확히 한다. */}
+        <div style={{ position: 'sticky', bottom: 0, zIndex: 50, padding: isSenior ? '10px 16px 16px' : '8px 14px 14px', background: `linear-gradient(180deg, rgba(244,245,247,0) 0%, ${C.appBg} 55%)` }}>
+          <div style={{
+            display: 'flex', gap: 4, padding: 6,
+            background: 'rgba(255,255,255,0.96)', backdropFilter: 'saturate(180%) blur(14px)', WebkitBackdropFilter: 'saturate(180%) blur(14px)',
+            border: `1px solid ${C.line}`, borderRadius: 18,
+            boxShadow: '0 12px 32px -14px rgba(16,24,40,0.22)',
+          }}>
+            {items.map((it) => {
+              const active = view === it.id;
+              const Icon = it.icon;
+              return (
+                <button key={it.id} onClick={() => setView(it.id)} style={{
+                  position: 'relative', flex: 1,
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                  gap: isSenior ? 5 : 4,
+                  padding: isSenior ? '11px 2px' : '8px 2px',
+                  minHeight: isSenior ? 62 : 52,
+                  border: 'none', borderRadius: 13,
+                  background: active ? persona.soft : 'transparent',
+                  cursor: 'pointer', color: active ? persona.color : C.navMute,
+                  fontFamily: FONT_STACK, transition: 'color 0.16s ease, background 0.16s ease',
+                }}>
+                  <Icon size={isSenior ? 25 : 20} strokeWidth={active ? 2.4 : 1.9} />
+                  <span style={{ fontSize: isSenior ? 12.5 : 10.5, fontWeight: active ? 700 : 600, whiteSpace: 'nowrap', letterSpacing: '-0.01em' }}>{it.label}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
     </div>
@@ -2472,17 +2578,30 @@ function Layout({ role, view, setView, user, dispatch, children, state }) {
     );
   }
 
+  const crumb = COORD_VIEW_LABEL[view] || '';
+
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: C.bg, fontFamily: FONT_STACK, color: C.ink }}>
+    <div style={{ display: 'flex', minHeight: '100vh', background: C.appBg, fontFamily: FONT_STACK, color: C.ink }}>
       <Sidebar role={role} currentView={view} onNavigate={setView} onLogout={handleLogout} userName={user?.name} dataCount={dataCount} />
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', overflowX: 'hidden' }}>
-        {/* 데스크톱 상단바 (알림) */}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', padding: '16px 36px 0' }}>
+        {/* 상단바 — 브레드크럼 + 알림. 사이드바와 같은 64px 높이로 시각적 기준선을 맞춘다. */}
+        <div style={{
+          position: 'sticky', top: 0, zIndex: 40,
+          height: 64, flexShrink: 0,
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          padding: '0 32px',
+          background: 'rgba(255,255,255,0.86)', backdropFilter: 'saturate(180%) blur(12px)',
+          borderBottom: `1px solid ${C.line}`,
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, minWidth: 0 }}>
+            <span style={{ color: C.muteLight, fontWeight: 500 }}>코디네이터 콘솔</span>
+            {crumb && <><span style={{ color: '#D4D7DD' }}>/</span><span style={{ color: C.headline, fontWeight: 700, letterSpacing: '-0.02em' }}>{crumb}</span></>}
+          </div>
           <NotificationBell state={state} role="coordinator" user={user} onNavigate={setView} />
         </div>
-        <div style={{ flex: 1, padding: '16px 36px 36px' }}>
+        <div style={{ flex: 1, padding: '28px 32px 56px' }}>
           {/* 화면 전환 시 부드러운 진입 — 관리자 콘솔도 동일 모션 언어 */}
-          <div key={view} id="eum-main" role="main" tabIndex={-1} style={{ maxWidth: 1320, margin: '0 auto', outline: 'none', animation: 'fadeUp 0.42s cubic-bezier(0.22,1,0.36,1)' }}>
+          <div key={view} id="eum-main" role="main" tabIndex={-1} style={{ maxWidth: 1280, margin: '0 auto', outline: 'none', animation: 'fadeUp 0.42s cubic-bezier(0.22,1,0.36,1)' }}>
             {children}
           </div>
         </div>
@@ -2490,6 +2609,13 @@ function Layout({ role, view, setView, user, dispatch, children, state }) {
     </div>
   );
 }
+
+const COORD_VIEW_LABEL = {
+  overview: '대시보드', applicants: '신청자 관리', matching: '매칭 보드', activities: '활동 승인',
+  settlements: '정산', safety: '안전 이슈', reports: '리포트', b2g: '공공 성과·납품', b2b: '기업·기관 복지',
+  'ai-advisor': '복지 어드바이저', 'ai-match': 'AI 자동·선택 매칭', 'ai-copilot': 'AI 코파일럿',
+  'ai-chaperone': 'AI 안전 채퍼론', roadmap: '서비스 로드맵',
+};
 
 // ============================================================================
 // 9. PARENT (양육가정) APP
@@ -3288,27 +3414,57 @@ function QuickAccessStrip({ setView }) {
     { id: 'ai-match', t: 'AI 매칭', d: '자동+선택형', c: C.peach, ic: <Users size={18} /> },
   ];
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: 12, marginBottom: 22 }}>
+    // 바로가기 — 카드 4개가 KPI와 경쟁하지 않도록 톤을 낮추고, 아이콘·라벨만 남긴다.
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: 10, marginBottom: 20 }}>
       {items.map(it => (
-        <button key={it.id} onClick={() => setView(it.id)} style={{ textAlign: 'left', cursor: 'pointer', fontFamily: FONT_STACK, background: C.card, border: `1px solid ${C.borderSoft}`, borderRadius: 16, padding: '14px 16px', boxShadow: '0 2px 8px -4px rgba(26,26,30,0.08)', display: 'flex', alignItems: 'center', gap: 12, transition: 'transform .18s cubic-bezier(.22,1,.36,1), box-shadow .18s' }}
-          onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 12px 28px -12px rgba(26,26,30,.18)'; e.currentTarget.style.transform = 'translateY(-3px)'; }}
-          onMouseLeave={e => { e.currentTarget.style.boxShadow = '0 2px 8px -4px rgba(26,26,30,0.08)'; e.currentTarget.style.transform = 'none'; }}>
-          <span style={{ display: 'inline-flex', padding: 10, borderRadius: 12, background: it.c + '18', color: it.c, flexShrink: 0 }}>{it.ic}</span>
+        <button key={it.id} onClick={() => setView(it.id)} style={{ textAlign: 'left', cursor: 'pointer', fontFamily: FONT_STACK, background: C.panel, border: `1px solid ${C.line}`, borderRadius: 12, padding: '12px 14px', boxShadow: SHADOW.xs, display: 'flex', alignItems: 'center', gap: 11, transition: 'border-color .16s ease, background .16s ease' }}
+          onMouseEnter={e => { e.currentTarget.style.borderColor = '#D7DAE0'; e.currentTarget.style.background = C.hover; }}
+          onMouseLeave={e => { e.currentTarget.style.borderColor = C.line; e.currentTarget.style.background = C.panel; }}>
+          <span style={{ display: 'inline-flex', width: 32, height: 32, alignItems: 'center', justifyContent: 'center', borderRadius: 9, background: it.c + '14', color: it.c, flexShrink: 0 }}>{it.ic}</span>
           <span style={{ flex: 1, minWidth: 0 }}>
-            <span style={{ display: 'block', color: C.ink, fontWeight: 800, fontSize: 13.5 }}>{it.t}</span>
-            <span style={{ display: 'block', fontSize: 11, color: C.mute, marginTop: 3 }}>{it.d}</span>
+            <span style={{ display: 'block', color: C.headline, fontWeight: 700, fontSize: 13, letterSpacing: '-0.02em' }}>{it.t}</span>
+            <span style={{ display: 'block', fontSize: 11, color: C.muteLight, marginTop: 2, fontWeight: 500 }}>{it.d}</span>
           </span>
-          <ChevronRight size={16} color={C.muteLight} style={{ flexShrink: 0 }} />
+          <ChevronRight size={15} color="#C8CCD3" style={{ flexShrink: 0 }} />
         </button>
       ))}
     </div>
   );
 }
 
+// 처리 대기 칩 — 숫자를 앞세워 '무엇이 몇 건'인지 한 호흡에 읽히게 한다.
+function QueueChip({ label, n, danger, onClick }) {
+  const col = danger ? C.red : C.inkSoft;
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      style={{
+        display: 'inline-flex', alignItems: 'center', gap: 7,
+        padding: '6px 10px 6px 8px', borderRadius: 9,
+        border: `1px solid ${C.line}`, background: C.panel,
+        cursor: 'pointer', fontFamily: FONT_STACK,
+        transition: 'background .14s ease, border-color .14s ease',
+      }}
+      onMouseEnter={(e) => { e.currentTarget.style.background = C.hover; e.currentTarget.style.borderColor = '#D7DAE0'; }}
+      onMouseLeave={(e) => { e.currentTarget.style.background = C.panel; e.currentTarget.style.borderColor = C.line; }}
+    >
+      <span style={{
+        minWidth: 20, height: 20, padding: '0 5px', borderRadius: 6,
+        background: danger ? C.red : C.headline, color: '#fff',
+        fontSize: 11.5, fontWeight: 800, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+        fontVariantNumeric: 'tabular-nums',
+      }}>{n}</span>
+      <span style={{ fontSize: 12.5, fontWeight: 600, color: col, letterSpacing: '-0.01em' }}>{label}</span>
+      <ChevronRight size={13} color="#C8CCD3" />
+    </button>
+  );
+}
+
 // 공통: 큰 KPI 카드
 function BigStat({ label, value, sub, color }) {
   return (
-    <Card padding={18} style={{ borderTop: `3px solid ${color}` }}>
+    <Card padding={18} style={{ borderLeft: `3px solid ${color}` }}>
       <div style={{ fontSize: 11.5, color: C.mute, fontWeight: 700 }}>{label}</div>
       <div style={{ fontSize: 24, fontWeight: 800, color: C.ink, marginTop: 5, letterSpacing: '-0.02em', fontVariantNumeric: 'tabular-nums' }}>{value}</div>
       {sub && <div style={{ fontSize: 11, color: C.inkSoft, marginTop: 4, lineHeight: 1.45 }}>{sub}</div>}
@@ -4858,171 +5014,208 @@ function CoordOverview({ state, setView, dispatch }) {
 
       {/* 알림 영역 */}
       {(kpis.openIncidents > 0 || kpis.pendingApps > 0 || kpis.pendingLogs > 5) && (
-        <Card padding={16} style={{ marginBottom: 18, background: C.amberSoft, border: `1px solid ${C.amber}50` }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <AlertTriangle size={18} style={{ color: C.amber }} />
-            <div style={{ fontSize: 13, fontWeight: 700, color: C.amber }}>처리가 필요한 항목이 있습니다</div>
-            <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
-              {kpis.openIncidents > 0 && <Button variant="ghost" size="sm" onClick={() => setView('safety')}>안전 이슈 {kpis.openIncidents}건</Button>}
-              {kpis.pendingApps > 0 && <Button variant="ghost" size="sm" onClick={() => setView('applicants')}>검토 대기 {kpis.pendingApps}건</Button>}
-              {kpis.pendingLogs > 0 && <Button variant="ghost" size="sm" onClick={() => setView('activities')}>승인 대기 {kpis.pendingLogs}건</Button>}
-            </div>
+        <div style={{
+          marginBottom: 20, padding: '13px 16px 13px 14px',
+          background: C.panel, border: `1px solid ${C.line}`, borderLeft: `3px solid ${C.amber}`,
+          borderRadius: 12, boxShadow: SHADOW.xs,
+          display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap',
+        }}>
+          <span style={{ width: 26, height: 26, borderRadius: 8, background: C.amberSoft, color: C.amber, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <AlertTriangle size={15} />
+          </span>
+          <div style={{ fontSize: 13.5, fontWeight: 700, color: C.headline, letterSpacing: '-0.02em' }}>오늘 처리해야 할 일</div>
+          <div style={{ marginLeft: 'auto', display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            {kpis.openIncidents > 0 && <QueueChip label="안전 이슈" n={kpis.openIncidents} danger onClick={() => setView('safety')} />}
+            {kpis.pendingApps > 0 && <QueueChip label="검토 대기" n={kpis.pendingApps} onClick={() => setView('applicants')} />}
+            {kpis.pendingLogs > 0 && <QueueChip label="승인 대기" n={kpis.pendingLogs} onClick={() => setView('activities')} />}
           </div>
-        </Card>
+        </div>
       )}
 
-      {/* KPI 그리드 */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 14, marginBottom: 18 }}>
-        <StatCard label="참여자" value={kpis.totalParticipants} sub={`청년 ${kpis.youthCount} / 어르신 ${kpis.seniorCount} / 양육 ${kpis.parentCount}`} color={C.brand} icon={<Users size={18} />} />
-        <StatCard label="활성 매칭" value={kpis.activeMatches} sub={`목표 8건 중 ${kpis.activeMatches}건 진행`} color={C.sage} icon={<Heart size={18} />} trend={kpis.activeMatches >= 3 ? `+${kpis.activeMatches - 0}` : null} />
-        <StatCard label="누적 활동시간" value={`${kpis.totalHours}h`} sub={`목표 1,440시간 중 ${Math.round(kpis.totalHours / 1440 * 100)}%`} color={C.lavender} icon={<Clock size={18} />} />
-        <StatCard label="지급 정산" value={krw(kpis.totalSettled)} sub={`${state.settlements.filter(s => s.status === 'issued' || s.status === 'paid').length}건 발급 완료`} color={C.gold} icon={<Wallet size={18} />} />
+      {/* KPI 바 — 카드 4개를 흩뿌리지 않고 하나의 패널에 구획선으로 나눈다.
+          수치가 같은 기준선(베이스라인)에 놓여야 서로 비교된다. */}
+      <div style={{
+        display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
+        background: C.panel, border: `1px solid ${C.line}`, borderRadius: 16,
+        boxShadow: SHADOW.xs, overflow: 'hidden', marginBottom: 16,
+      }}>
+        {[
+          { label: '참여자', value: kpis.totalParticipants, unit: '명', sub: `청년 ${kpis.youthCount} · 어르신 ${kpis.seniorCount} · 양육 ${kpis.parentCount}`, icon: <Users size={15} />, color: C.brand },
+          { label: '활성 매칭', value: kpis.activeMatches, unit: '건', sub: `연 목표 8건 대비 ${Math.round(kpis.activeMatches / 8 * 100)}%`, icon: <Heart size={15} />, color: C.sage, pct: kpis.activeMatches / 8 * 100 },
+          { label: '누적 활동시간', value: kpis.totalHours, unit: '시간', sub: `연 목표 1,440시간 대비 ${Math.round(kpis.totalHours / 1440 * 100)}%`, icon: <Clock size={15} />, color: C.lavender, pct: kpis.totalHours / 1440 * 100 },
+          { label: '지급 정산', value: kpis.totalSettled, unit: '', money: true, sub: `${state.settlements.filter(s => s.status === 'issued' || s.status === 'paid').length}건 발급 완료`, icon: <Wallet size={15} />, color: C.gold },
+        ].map((k, i) => (
+          <div key={k.label} style={{ padding: '18px 22px 20px', borderLeft: i === 0 ? 'none' : `1px solid ${C.lineSoft}` }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 12 }}>
+              <span style={{ width: 24, height: 24, borderRadius: 7, background: k.color + '14', color: k.color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{k.icon}</span>
+              <span style={{ fontSize: 12.5, color: C.navMute, fontWeight: 600 }}>{k.label}</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 3 }}>
+              <span style={{ fontSize: 30, fontWeight: 800, color: C.headline, letterSpacing: '-0.04em', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
+                {k.money ? krw(k.value) : <CountUp value={k.value} />}
+              </span>
+              {k.unit && <span style={{ fontSize: 14, fontWeight: 700, color: C.muteLight }}>{k.unit}</span>}
+            </div>
+            {k.pct !== undefined && (
+              <div style={{ height: 3, background: C.lineSoft, borderRadius: 999, overflow: 'hidden', marginTop: 12 }}>
+                <div style={{ height: '100%', width: `${Math.min(100, k.pct)}%`, background: k.color, borderRadius: 999, transition: 'width 0.8s cubic-bezier(0.22,1,0.36,1)' }} />
+              </div>
+            )}
+            <div style={{ fontSize: 12, color: C.muteLight, marginTop: k.pct !== undefined ? 8 : 12, fontWeight: 500, lineHeight: 1.45 }}>{k.sub}</div>
+          </div>
+        ))}
       </div>
 
-      {/* 움직이는 인포그래픽 밴드 */}
-      <Reveal>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 14, marginBottom: 18 }}>
-          <Card padding={20} style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
-            <Ring value={kpis.activeMatches} max={8} size={92} stroke={10} color={C.sage} label={kpis.activeMatches} sublabel="/ 8쌍" />
-            <div>
-              <div style={{ fontSize: 12, fontWeight: 700, color: C.sage, letterSpacing: '0.06em', marginBottom: 4 }}>매칭 목표</div>
-              <div style={{ fontSize: 19, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK, letterSpacing: '-0.02em' }}><CountUp value={Math.round(kpis.activeMatches / 8 * 100)} suffix="%" /> 달성</div>
-              <div style={{ fontSize: 12, color: C.mute, marginTop: 4 }}>활성 트리오 {kpis.activeMatches}쌍 운영 중</div>
-            </div>
-          </Card>
-          <Card padding={20} style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
-            <Ring value={kpis.totalHours} max={1440} size={92} stroke={10} color={C.brand} label={`${Math.round(kpis.totalHours / 1440 * 100)}%`} sublabel="연 목표" />
-            <div>
-              <div style={{ fontSize: 12, fontWeight: 700, color: C.brand, letterSpacing: '0.06em', marginBottom: 4 }}>누적 활동시간</div>
-              <div style={{ fontSize: 19, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK, letterSpacing: '-0.02em' }}><CountUp value={kpis.totalHours} suffix="시간" /></div>
-              <div style={{ fontSize: 12, color: C.mute, marginTop: 4 }}>연 목표 1,440시간</div>
-            </div>
-          </Card>
-          <Card padding={20}>
-            <div style={{ fontSize: 12, fontWeight: 700, color: C.lavender, letterSpacing: '0.06em', marginBottom: 12 }}>세대 구성</div>
-            {[['청년', kpis.youthCount, C.sage], ['어르신', kpis.seniorCount, C.lavender], ['양육가정', kpis.parentCount, C.peach], ['아동', kpis.childCount, C.gold]].map(([lab, val, col], i) => (
-              <div key={lab} style={{ marginBottom: i < 3 ? 9 : 0 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 4 }}>
-                  <span style={{ color: C.inkSoft, fontWeight: 600 }}>{lab}</span>
-                  <span style={{ color: col, fontWeight: 800 }}><CountUp value={val} />명</span>
-                </div>
-                <AnimatedBar value={val} max={Math.max(kpis.youthCount, kpis.seniorCount, kpis.parentCount, kpis.childCount, 1)} color={col} height={7} delay={i * 110} />
-              </div>
-            ))}
-          </Card>
-          <Card padding={20} style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
-            <Ring value={kpis.avgSatisfaction} max={5} size={92} stroke={10} color={C.gold} label={kpis.avgSatisfaction.toFixed(1)} sublabel="/ 5.0" />
-            <div>
-              <div style={{ fontSize: 12, fontWeight: 700, color: C.gold, letterSpacing: '0.06em', marginBottom: 4 }}>프로그램 만족도</div>
-              <div style={{ fontSize: 19, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK, letterSpacing: '-0.02em' }}>지속의향 <CountUp value={kpis.continueRate} suffix="%" /></div>
-              <div style={{ fontSize: 12, color: C.mute, marginTop: 4 }}>설문 {kpis.surveyCount}건 기준</div>
-            </div>
-          </Card>
-        </div>
-      </Reveal>
-
-      {/* 멘토 피드백 반영 — 신뢰·안전 관제 */}
-      <Card padding={20} style={{ marginBottom: 18 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
-          <ShieldCheck size={18} style={{ color: C.brand }} />
-          <div style={{ fontSize: 14, fontWeight: 700, color: C.ink }}>신뢰·안전 관제</div>
-          <Badge color={C.amber} soft={C.amberSoft} size="md">멘토 제안 반영 · 도입 예정</Badge>
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 12 }}>
-          <div style={{ padding: 14, borderRadius: 10, background: C.blueSoft, border: `1px solid ${C.blue}25` }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12.5, fontWeight: 700, color: C.blue, marginBottom: 6 }}><ShieldCheck size={14} /> 공인 인증 발신 시스템 · 도입 예정</div>
-            <div style={{ fontSize: 12, color: C.inkSoft, lineHeight: 1.5 }}>광주광역시 공식 알림톡 채널 연동. 모든 발신에 지자체 인증 표시가 적용되어 어르신 대상 보이스피싱·사칭을 차단합니다.</div>
-          </div>
-          <div style={{ padding: 14, borderRadius: 10, background: C.successSoft, border: `1px solid ${C.success}25` }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12.5, fontWeight: 700, color: C.success, marginBottom: 6 }}><ShieldCheck size={14} /> 돌봄 책임보험 연동 · 도입 예정</div>
-            <div style={{ fontSize: 12, color: C.inkSoft, lineHeight: 1.5 }}>1365 자원봉사 보험 + 지자체 돌봄 특약 자동 가입. 활성 매칭 {kpis.activeMatches}건 전건 보장, 미가입 0건.</div>
-          </div>
-        </div>
-      </Card>
-
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 18, marginBottom: 18 }}>
-        <Card padding={22}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: C.ink, marginBottom: 4 }}>누적 활동시간 추이</div>
-          <div style={{ fontSize: 12, color: C.mute, marginBottom: 14 }}>승인된 활동 누적 기준 · 꾸준히 우상향</div>
+      {/* 본문 2단 — 왼쪽은 추세(시간축), 오른쪽은 상태(구성·만족도).
+          콘솔은 '무엇이 변하고 있나'와 '지금 어떤 상태인가'를 분리해서 보여줘야 한다. */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.85fr) minmax(280px, 1fr)', gap: 16, marginBottom: 16 }} className="eum-dash-grid">
+        <Panel
+          title="누적 활동시간 추이"
+          sub="승인된 활동 로그 누적 기준"
+          right={<span style={{ fontSize: 11.5, color: C.muteLight, fontWeight: 600 }}>연 목표 1,440시간</span>}
+        >
           {monthlyChart.length === 0 ? <Empty icon={<TrendingUp size={28} />} title="활동 기록 없음" /> : (
-            <ResponsiveContainer width="100%" height={240}>
-              <AreaChart data={monthlyChart} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
+            <ResponsiveContainer width="100%" height={258}>
+              <AreaChart data={monthlyChart} margin={{ top: 8, right: 6, left: -18, bottom: 0 }}>
                 <defs>
                   <linearGradient id="hours" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor={C.brand} stopOpacity={0.4} />
-                    <stop offset="100%" stopColor={C.brand} stopOpacity={0.02} />
+                    <stop offset="0%" stopColor={C.brand} stopOpacity={0.22} />
+                    <stop offset="100%" stopColor={C.brand} stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke={C.borderSoft} />
-                <XAxis dataKey="month" stroke={C.mute} fontSize={11} fontFamily={FONT_STACK} />
-                <YAxis stroke={C.mute} fontSize={11} fontFamily={FONT_STACK} />
-                <Tooltip contentStyle={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 8, fontFamily: FONT_STACK, fontSize: 12 }} />
-                <Area type="monotone" dataKey="cumulative" stroke={C.brand} strokeWidth={2.5} fill="url(#hours)" name="누적 활동시간" isAnimationActive={false} />
+                {/* 격자는 가로선만 — 세로 격자는 데이터를 읽는 데 방해가 된다 */}
+                <CartesianGrid vertical={false} stroke={C.lineSoft} />
+                <XAxis dataKey="month" stroke={C.muteLight} fontSize={11.5} fontFamily={FONT_STACK} tickLine={false} axisLine={false} dy={6} />
+                <YAxis stroke={C.muteLight} fontSize={11.5} fontFamily={FONT_STACK} tickLine={false} axisLine={false} width={44} />
+                <Tooltip
+                  cursor={{ stroke: C.line, strokeWidth: 1 }}
+                  contentStyle={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 10, boxShadow: SHADOW.md, fontFamily: FONT_STACK, fontSize: 12.5, padding: '8px 12px' }}
+                  labelStyle={{ color: C.navMute, fontWeight: 600, marginBottom: 2 }}
+                  itemStyle={{ color: C.headline, fontWeight: 700 }}
+                />
+                <Area type="monotone" dataKey="cumulative" stroke={C.brand} strokeWidth={2.25} fill="url(#hours)" name="누적 활동시간" isAnimationActive={false}
+                  dot={{ r: 3, fill: C.panel, stroke: C.brand, strokeWidth: 2 }} activeDot={{ r: 5, fill: C.brand, stroke: C.panel, strokeWidth: 2 }} />
               </AreaChart>
             </ResponsiveContainer>
           )}
-        </Card>
-        <Card padding={22}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: C.ink, marginBottom: 4 }}>활동 유형 분포</div>
-          <div style={{ fontSize: 12, color: C.mute, marginBottom: 14 }}>전체 활동 기준</div>
-          {typeChart.length === 0 ? <Empty icon={<Activity size={28} />} title="활동 없음" /> : (
-            <ResponsiveContainer width="100%" height={240}>
-              <PieChart>
-                <Pie data={typeChart} dataKey="value" cx="50%" cy="50%" innerRadius={50} outerRadius={85} paddingAngle={3} isAnimationActive={false}>
-                  {typeChart.map((entry, idx) => <Cell key={idx} fill={entry.color} />)}
-                </Pie>
-                <Tooltip contentStyle={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 8, fontFamily: FONT_STACK, fontSize: 12 }} />
-                <Legend iconType="circle" wrapperStyle={{ fontFamily: FONT_STACK, fontSize: 11 }} />
-              </PieChart>
-            </ResponsiveContainer>
-          )}
-        </Card>
+        </Panel>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, minWidth: 0 }}>
+          <Panel title="세대 구성" sub={`전체 ${kpis.totalParticipants}명`}>
+            {[['청년', kpis.youthCount, C.sage], ['어르신', kpis.seniorCount, C.lavender], ['양육가정', kpis.parentCount, C.peach], ['아동', kpis.childCount, C.gold]].map(([lab, val, col], i) => (
+              <div key={lab} style={{ marginBottom: i < 3 ? 12 : 0 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', fontSize: 12.5, marginBottom: 5 }}>
+                  <span style={{ color: C.inkSoft, fontWeight: 600 }}>{lab}</span>
+                  <span style={{ color: C.headline, fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>{val}<span style={{ color: C.muteLight, fontWeight: 500 }}>명</span></span>
+                </div>
+                <AnimatedBar value={val} max={Math.max(kpis.youthCount, kpis.seniorCount, kpis.parentCount, kpis.childCount, 1)} color={col} height={6} track={C.lineSoft} delay={i * 90} />
+              </div>
+            ))}
+          </Panel>
+
+          <Panel title="프로그램 만족도" sub={`설문 ${kpis.surveyCount}건 기준`}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
+              <Ring value={kpis.avgSatisfaction} max={5} size={84} stroke={9} color={C.gold} track={C.lineSoft} label={kpis.avgSatisfaction.toFixed(1)} sublabel="/ 5.0" />
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontSize: 12.5, color: C.navMute, fontWeight: 600, marginBottom: 4 }}>지속 참여 의향</div>
+                <div style={{ fontSize: 26, fontWeight: 800, color: C.headline, letterSpacing: '-0.035em', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
+                  <CountUp value={kpis.continueRate} suffix="%" />
+                </div>
+                <div style={{ fontSize: 12, color: C.muteLight, marginTop: 7, fontWeight: 500 }}>“다음에도 참여하겠다”</div>
+              </div>
+            </div>
+          </Panel>
+        </div>
       </div>
 
-      {/* 최근 활동 + 미처리 항목 */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 18 }}>
-        <Card padding={22}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-            <div style={{ fontSize: 14, fontWeight: 700, color: C.ink }}>최근 활동 기록</div>
-            <Button variant="ghost" size="sm" onClick={() => setView('activities')} iconRight={<ArrowRight size={12} />}>전체보기</Button>
-          </div>
-          {state.activity_logs.slice(-5).reverse().map(log => {
-            const author = state.participants.find(p => p.id === log.participant_id);
-            const act = state.activities.find(a => a.id === log.activity_id);
-            return (
-              <div key={log.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 0', borderBottom: `1px solid ${C.borderSoft}` }}>
-                <Avatar type={author?.type} gender={author?.gender} name={author?.name} size={32} color={PERSONA[author?.type]?.color || C.brand} />
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: C.ink, textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>{author?.name} · {act?.title}</div>
-                  <div style={{ fontSize: 11, color: C.mute }}>{fmtDate(log.date)} · {log.hours}시간</div>
-                </div>
-                {log.approved ? <Badge color={C.success} soft={C.successSoft} size="sm">승인</Badge> : <Badge color={C.amber} soft={C.amberSoft} size="sm">대기</Badge>}
+      {/* 활동 유형 · 오늘 일정 */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 16, marginBottom: 16 }}>
+        <Panel title="활동 유형 분포" sub="전체 활동 기준">
+          {typeChart.length === 0 ? <Empty icon={<Activity size={28} />} title="활동 없음" /> : (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap' }}>
+              <div style={{ width: 168, height: 168, flexShrink: 0 }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie data={typeChart} dataKey="value" cx="50%" cy="50%" innerRadius={54} outerRadius={80} paddingAngle={2} stroke="none" isAnimationActive={false}>
+                      {typeChart.map((entry, idx) => <Cell key={idx} fill={entry.color} />)}
+                    </Pie>
+                    <Tooltip contentStyle={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 10, boxShadow: SHADOW.md, fontFamily: FONT_STACK, fontSize: 12.5, padding: '8px 12px' }} />
+                  </PieChart>
+                </ResponsiveContainer>
               </div>
-            );
-          })}
-        </Card>
-        <Card padding={22}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-            <div style={{ fontSize: 14, fontWeight: 700, color: C.ink }}>오늘의 활동 일정</div>
-            <Badge color={C.brand} soft={C.brandSoft}>{state.activities.filter(a => a.date === TODAY).length}건</Badge>
-          </div>
+              {/* 범례를 차트 밖 목록으로 — 값을 함께 읽을 수 있게 한다 */}
+              <div style={{ flex: 1, minWidth: 150 }}>
+                {typeChart.map((t) => (
+                  <div key={t.name} style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '5px 0' }}>
+                    <span style={{ width: 8, height: 8, borderRadius: 3, background: t.color, flexShrink: 0 }} />
+                    <span style={{ flex: 1, fontSize: 12.5, color: C.inkSoft, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.name}</span>
+                    <span style={{ fontSize: 12.5, color: C.headline, fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>{t.value}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </Panel>
+
+        <Panel title="오늘의 활동 일정" sub={fmtDate(TODAY)} right={<Badge color={C.brand} soft={C.brandSoft}>{state.activities.filter(a => a.date === TODAY).length}건</Badge>} padding={state.activities.filter(a => a.date === TODAY).length === 0 ? 8 : 0}>
           {state.activities.filter(a => a.date === TODAY).length === 0 ? (
             <Empty icon={<Calendar size={24} />} title="오늘은 예정된 활동이 없습니다" />
-          ) : state.activities.filter(a => a.date === TODAY).map(act => {
+          ) : state.activities.filter(a => a.date === TODAY).map((act, i) => {
             const m = state.matches.find(mm => mm.id === act.match_id);
             const y = state.participants.find(p => p.id === m?.youth_id);
             return (
-              <div key={act.id} style={{ display: 'flex', gap: 12, padding: '10px 0', borderBottom: `1px solid ${C.borderSoft}` }}>
-                <div style={{ minWidth: 50, fontSize: 13, fontWeight: 700, color: C.brand, fontFamily: SERIF_STACK }}>{(act.time || '').slice(0, 5)}</div>
+              <div key={act.id} style={{ display: 'flex', gap: 14, padding: '13px 20px', borderTop: i === 0 ? 'none' : `1px solid ${C.lineSoft}` }}>
+                <div style={{ minWidth: 46, fontSize: 13.5, fontWeight: 800, color: C.brand, fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.02em' }}>{(act.time || '').slice(0, 5)}</div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: C.ink, marginBottom: 2 }}>{act.title}</div>
-                  <div style={{ fontSize: 11, color: C.mute }}>{act.location} · {y?.name}</div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: C.headline, marginBottom: 3, letterSpacing: '-0.02em' }}>{act.title}</div>
+                  <div style={{ fontSize: 11.5, color: C.muteLight, fontWeight: 500 }}>{act.location} · {y?.name}</div>
                 </div>
               </div>
             );
           })}
-        </Card>
+        </Panel>
       </div>
+
+      {/* 최근 활동 기록 */}
+      <Panel
+        title="최근 활동 기록"
+        sub="최근 5건"
+        padding={0}
+        right={<Button variant="ghost" size="sm" onClick={() => setView('activities')} iconRight={<ArrowRight size={12} />}>전체보기</Button>}
+        style={{ marginBottom: 16 }}
+      >
+        {state.activity_logs.slice(-5).reverse().map((log, i) => {
+          const author = state.participants.find(p => p.id === log.participant_id);
+          const act = state.activities.find(a => a.id === log.activity_id);
+          return (
+            <div key={log.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '13px 20px', borderTop: i === 0 ? 'none' : `1px solid ${C.lineSoft}` }}>
+              <Avatar type={author?.type} gender={author?.gender} name={author?.name} size={32} color={PERSONA[author?.type]?.color || C.brand} />
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: C.headline, letterSpacing: '-0.02em', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>{author?.name} · {act?.title}</div>
+                <div style={{ fontSize: 11.5, color: C.muteLight, marginTop: 2, fontWeight: 500, fontVariantNumeric: 'tabular-nums' }}>{fmtDate(log.date)} · {log.hours}시간</div>
+              </div>
+              {log.approved ? <Badge color={C.success} soft={C.successSoft} size="sm">승인</Badge> : <Badge color={C.amber} soft={C.amberSoft} size="sm">대기</Badge>}
+            </div>
+          );
+        })}
+      </Panel>
+
+      {/* 신뢰·안전 관제 */}
+      <Panel title="신뢰·안전 관제" right={<Badge color={C.amber} soft={C.amberSoft}>도입 예정</Badge>}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 12 }}>
+          {[
+            { c: C.blue, t: '공인 인증 발신 시스템', d: '광주광역시 공식 알림톡 채널 연동. 모든 발신에 지자체 인증 표시가 적용되어 어르신 대상 보이스피싱·사칭을 차단합니다.' },
+            { c: C.success, t: '돌봄 책임보험 연동', d: `1365 자원봉사 보험 + 지자체 돌봄 특약 자동 가입. 활성 매칭 ${kpis.activeMatches}건 전건 보장, 미가입 0건.` },
+          ].map((x) => (
+            <div key={x.t} style={{ padding: '14px 16px', borderRadius: 12, background: C.panel, border: `1px solid ${C.line}`, borderLeft: `3px solid ${x.c}` }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: 13, fontWeight: 700, color: C.headline, marginBottom: 7, letterSpacing: '-0.02em' }}>
+                <ShieldCheck size={14} style={{ color: x.c }} /> {x.t}
+              </div>
+              <div style={{ fontSize: 12.5, color: C.navMute, lineHeight: 1.6, fontWeight: 500 }}>{x.d}</div>
+            </div>
+          ))}
+        </div>
+      </Panel>
     </>
   );
 }
@@ -5089,45 +5282,82 @@ function CoordApplicants({ state, dispatch, showToast, user }) {
         style={{ marginBottom: 14 }}
       />
 
-      <div style={{ display: 'flex', gap: 10, marginBottom: 18, flexWrap: 'wrap', alignItems: 'center' }}>
-        <SearchBar value={query} onChange={setQuery} placeholder="이름·연락처·동·강점 검색" style={{ flex: 1, minWidth: 220 }} />
-        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-          {[['all', '전체'], ['teen', '청소년'], ['youth', '청년'], ['adult', '중년'], ['senior', '어르신'], ['parent', '양육가정']].map(([id, lab]) => (
-            <button key={id} onClick={() => setTypeFilter(id)} style={{ padding: '7px 13px', borderRadius: 999, border: `1.5px solid ${typeFilter === id ? (PERSONA[id]?.color || C.ink) : C.border}`, background: typeFilter === id ? (PERSONA[id]?.soft || C.bg) : C.card, color: typeFilter === id ? (PERSONA[id]?.color || C.ink) : C.inkSoft, fontSize: 12.5, fontWeight: typeFilter === id ? 700 : 500, cursor: 'pointer', fontFamily: FONT_STACK }}>{lab}</button>
-          ))}
+      {/* 필터 바 — 검색 + 대상 구분. 좁은 폭에서 칩이 밀려나지 않도록 줄바꿈을 보장한다. */}
+      <div style={{ display: 'flex', gap: 10, margin: '16px 0 14px', flexWrap: 'wrap', alignItems: 'center' }}>
+        <SearchBar value={query} onChange={setQuery} placeholder="이름·연락처·동·강점 검색" style={{ flex: '1 1 260px', minWidth: 220 }} />
+        <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
+          {[['all', '전체'], ['teen', '청소년'], ['youth', '청년'], ['adult', '중년'], ['senior', '어르신'], ['parent', '양육가정']].map(([id, lab]) => {
+            const on = typeFilter === id;
+            return (
+              <button key={id} onClick={() => setTypeFilter(id)} style={{
+                padding: '7px 12px', borderRadius: 9,
+                border: `1px solid ${on ? 'transparent' : C.line}`,
+                background: on ? C.headline : C.panel,
+                color: on ? '#fff' : C.inkSoft,
+                fontSize: 12.5, fontWeight: on ? 700 : 500, cursor: 'pointer', fontFamily: FONT_STACK,
+                transition: 'background 0.14s ease, color 0.14s ease, border-color 0.14s ease',
+              }}>{lab}</button>
+            );
+          })}
         </div>
       </div>
 
       {filtered.length === 0 ? <Empty icon={<UserPlus size={32} />} title={query || typeFilter !== 'all' ? '조건에 맞는 신청자가 없습니다' : `${activeTab === 'screening' ? '검토 대기' : activeTab === 'verified' ? '검증 중인' : activeTab === 'completed' ? '활동 중인' : '반려된'} 신청자가 없습니다`} /> : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: 14 }}>
-          {filtered.map(app => {
+        <div style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 16, boxShadow: SHADOW.xs, overflow: 'hidden' }}>
+          {/* 리스트 헤더 */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '11px 20px', background: C.lineSoft, borderBottom: `1px solid ${C.line}`, fontSize: 11.5, fontWeight: 700, color: C.navMute, letterSpacing: '0.02em' }}>
+            <div style={{ flex: '1 1 260px', minWidth: 200 }}>신청자</div>
+            <div style={{ width: 120, flexShrink: 0 }} className="eum-col-md">연락처</div>
+            <div style={{ width: 96, flexShrink: 0 }} className="eum-col-md">신청일</div>
+            <div style={{ width: 168, flexShrink: 0 }}>검증 진행</div>
+            <div style={{ width: 20, flexShrink: 0 }} />
+          </div>
+          {filtered.map((app, i) => {
             const p = state.participants.find(pp => pp.id === app.participant_id);
             const verifs = state.verifications.filter(v => v.application_id === app.id);
             const passedCount = verifs.filter(v => v.status === 'passed').length;
             const totalSteps = verifs.length;
+            const done = totalSteps > 0 && passedCount === totalSteps;
+            const pct = totalSteps ? (passedCount / totalSteps) * 100 : 0;
             return (
-              <Card key={app.id} padding={18} hoverable onClick={() => setSelectedApp(app)}>
-                <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
-                  <Avatar type={p?.type} gender={p?.gender} name={p?.name} size={48} color={PERSONA[p?.type]?.color || C.brand} />
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
-                      <span style={{ fontSize: 15, fontWeight: 700, color: C.ink }}>{p?.name}</span>
-                      <Badge color={PERSONA[p?.type]?.color || C.mute} soft={C.muteSoft} size="sm">{PERSONA[p?.type]?.label || p?.type}</Badge>
+              <div
+                key={app.id}
+                role="button"
+                tabIndex={0}
+                onClick={() => setSelectedApp(app)}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedApp(app); } }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = C.hover)}
+                onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 14,
+                  padding: '14px 20px', cursor: 'pointer',
+                  borderTop: i === 0 ? 'none' : `1px solid ${C.lineSoft}`,
+                  transition: 'background 0.13s ease',
+                }}
+              >
+                <div style={{ flex: '1 1 260px', minWidth: 200, display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <Avatar type={p?.type} gender={p?.gender} name={p?.name} size={38} color={PERSONA[p?.type]?.color || C.brand} />
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                      <span style={{ fontSize: 14, fontWeight: 700, color: C.headline, letterSpacing: '-0.02em' }}>{p?.name}</span>
+                      <Badge color={PERSONA[p?.type]?.color || C.mute} soft={(PERSONA[p?.type]?.soft) || C.muteSoft} size="sm">{PERSONA[p?.type]?.label || p?.type}</Badge>
                     </div>
-                    <div style={{ fontSize: 12, color: C.inkSoft }}>{p?.age}세 · {p?.phone}</div>
-                    <div style={{ fontSize: 11, color: C.mute, marginTop: 2 }}>신청 {fmtDate(app.applied_at)}</div>
+                    <div style={{ fontSize: 12, color: C.navMute, marginTop: 2, fontWeight: 500 }}>{p?.age}세 · {p?.address || '주소 미등록'}</div>
                   </div>
                 </div>
-                <div style={{ marginTop: 12, paddingTop: 12, borderTop: `1px solid ${C.borderSoft}` }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, marginBottom: 6 }}>
-                    <span style={{ color: C.mute, fontWeight: 600 }}>검증 진행률</span>
-                    <span style={{ color: C.ink, fontWeight: 700 }}>{passedCount}/{totalSteps}</span>
+                <div style={{ width: 120, flexShrink: 0, fontSize: 12.5, color: C.inkSoft, fontVariantNumeric: 'tabular-nums' }} className="eum-col-md">{p?.phone}</div>
+                <div style={{ width: 96, flexShrink: 0, fontSize: 12.5, color: C.navMute, fontVariantNumeric: 'tabular-nums' }} className="eum-col-md">{fmtDate(app.applied_at)}</div>
+                <div style={{ width: 168, flexShrink: 0 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 5 }}>
+                    <span style={{ fontSize: 11.5, color: done ? C.success : C.navMute, fontWeight: 700 }}>{done ? '검증 완료' : `${passedCount}/${totalSteps} 단계`}</span>
+                    <span style={{ fontSize: 11, color: C.muteLight, fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>{Math.round(pct)}%</span>
                   </div>
-                  <div style={{ height: 6, background: C.bg, borderRadius: 999, overflow: 'hidden' }}>
-                    <div style={{ height: '100%', width: `${totalSteps ? (passedCount / totalSteps) * 100 : 0}%`, background: passedCount === totalSteps ? C.success : C.brand, transition: 'width 0.4s' }} />
+                  <div style={{ height: 5, background: C.lineSoft, borderRadius: 999, overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: `${pct}%`, background: done ? C.success : C.brand, borderRadius: 999, transition: 'width 0.5s cubic-bezier(0.22,1,0.36,1)' }} />
                   </div>
                 </div>
-              </Card>
+                <ChevronRight size={16} style={{ color: C.muteLight, flexShrink: 0 }} />
+              </div>
             );
           })}
         </div>
@@ -5502,27 +5732,52 @@ function MatchCard({ match, state, onClick, accent }) {
   const logs = state.activity_logs.filter(l => acts.some(a => a.id === l.activity_id) && l.approved);
   const hours = logs.reduce((sum, l) => sum + l.hours, 0);
 
+  const trio = [{ p: y, color: C.sage }, { p: s, color: C.lavender }, { p: c, color: C.peach }].filter(t => t.p);
+  const score = Number(match.score) || 0;
+
   return (
-    <Card padding={18} hoverable onClick={onClick}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{ width: 8, height: 8, borderRadius: 999, background: accent }} />
-          <div style={{ fontSize: 11, fontWeight: 700, color: accent, letterSpacing: '0.06em' }}>{match.id.toUpperCase()}</div>
+    <Card padding={0} hoverable onClick={onClick} style={{ overflow: 'hidden' }}>
+      {/* 상태 액센트 — 카드 상단 2px 라인. 보드에서 상태별 열을 눈으로 스캔할 수 있다. */}
+      <div style={{ height: 2, background: accent }} />
+      <div style={{ padding: 18 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+          <span style={{ fontSize: 11.5, fontWeight: 700, color: C.muteLight, letterSpacing: '0.06em', fontVariantNumeric: 'tabular-nums' }}>{match.id.toUpperCase()}</span>
+          <span style={{ fontSize: 11.5, color: C.navMute, fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>{fmtDate(match.started_at)}</span>
         </div>
-        <Badge color={accent} soft={`${accent}15`}>적합도 {match.score}</Badge>
-      </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, marginBottom: 14 }}>
-        {[{ p: y, color: C.sage }, { p: s, color: C.lavender }, { p: c, color: C.peach }].map(({ p, color }) => p && (
-          <div key={p.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <Avatar type={p?.type} gender={p?.gender} name={p.name} size={36} color={color} />
-            <div style={{ fontSize: 11, fontWeight: 700, color: C.ink, marginTop: 4, textAlign: 'center', textOverflow: 'ellipsis', maxWidth: '100%', overflow: 'hidden' }}>{p.name}</div>
+
+        {/* 트리오 — 겹친 아바타로 '한 팀'임을 형태로 보여준다 */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+          <div style={{ display: 'flex', flexShrink: 0 }}>
+            {trio.map(({ p, color }, i) => (
+              <span key={p.id} style={{ marginLeft: i === 0 ? 0 : -10, borderRadius: '50%', border: `2px solid ${C.panel}`, display: 'flex', position: 'relative', zIndex: 3 - i }}>
+                <Avatar type={p?.type} gender={p?.gender} name={p.name} size={38} color={color} />
+              </span>
+            ))}
           </div>
-        ))}
-      </div>
-      <div style={{ display: 'flex', gap: 12, paddingTop: 12, borderTop: `1px solid ${C.borderSoft}`, fontSize: 11, color: C.inkSoft }}>
-        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Clock size={11} /> {hours}h</span>
-        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Activity size={11} /> {logs.length}회</span>
-        <span style={{ marginLeft: 'auto' }}>{fmtDate(match.started_at)}</span>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: C.headline, letterSpacing: '-0.02em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {trio.map(t => t.p.name).join(' · ')}
+            </div>
+            <div style={{ fontSize: 11.5, color: C.muteLight, marginTop: 2, fontWeight: 500 }}>청년 · 어르신 · 아동</div>
+          </div>
+        </div>
+
+        {/* 적합도 — 숫자 + 게이지. 상대 비교가 가능해진다. */}
+        <div style={{ marginBottom: 14 }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 5 }}>
+            <span style={{ fontSize: 11.5, color: C.navMute, fontWeight: 600 }}>적합도</span>
+            <span style={{ fontSize: 15, fontWeight: 800, color: C.headline, letterSpacing: '-0.03em', fontVariantNumeric: 'tabular-nums' }}>{score}</span>
+          </div>
+          <div style={{ height: 5, background: C.lineSoft, borderRadius: 999, overflow: 'hidden' }}>
+            <div style={{ height: '100%', width: `${Math.max(0, Math.min(100, score))}%`, background: accent, borderRadius: 999, transition: 'width 0.6s cubic-bezier(0.22,1,0.36,1)' }} />
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14, paddingTop: 13, borderTop: `1px solid ${C.lineSoft}`, fontSize: 12, color: C.inkSoft, fontWeight: 600 }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><Clock size={13} style={{ color: C.muteLight }} /> {hours}시간</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><Activity size={13} style={{ color: C.muteLight }} /> {logs.length}회 활동</span>
+          <ChevronRight size={15} style={{ color: C.muteLight, marginLeft: 'auto' }} />
+        </div>
       </div>
     </Card>
   );
@@ -5730,39 +5985,45 @@ function CoordSettlements({ state, dispatch, showToast, user }) {
         <StatCard label="누적 지급" value={krw(state.settlements.filter(s => s.status === 'issued' || s.status === 'paid').reduce((sum, s) => sum + (s.amount||0), 0))} sub={`${state.settlements.filter(s => s.status === 'issued' || s.status === 'paid').length}건`} color={C.gold} icon={<Award size={18} />} />
       </div>
 
-      <Card padding={20} style={{ marginBottom: 16 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <span style={{ fontSize: 12, color: C.mute, fontWeight: 700 }}>정산 월</span>
+      {/* 정산 명세 — 월 선택을 패널 헤더로 끌어올려 별도 카드를 없앤다(스크롤 1회 절약). */}
+      <Panel
+        title="정산 명세"
+        sub={`${monthFilter.replace('-', '년 ')}월 · 승인된 활동 로그 기준 자동 산정`}
+        padding={0}
+        right={
           <Select value={monthFilter} onChange={setMonthFilter}
-            options={['2027-05', '2027-06', '2027-07'].map(m => ({ value: m, label: m + '월' }))}
-            style={{ width: 160 }} />
+            options={['2027-05', '2027-06', '2027-07'].map(m => ({ value: m, label: m.replace('-', '년 ') + '월' }))}
+            style={{ width: 150 }} />
+        }
+      >
+        <div style={{ padding: '11px 20px', borderBottom: `1px solid ${C.line}`, display: 'grid', gridTemplateColumns: '1fr 84px 84px 130px 120px 92px', gap: 12, fontSize: 11.5, color: C.navMute, fontWeight: 700, background: C.lineSoft }}>
+          <div>참여자</div><div>활동</div><div>시간</div><div style={{ textAlign: 'right' }}>금액</div><div>지급 방법</div><div style={{ textAlign: 'right' }}>상태</div>
         </div>
-      </Card>
-
-      <Card padding={0}>
-        <div style={{ padding: '14px 18px', borderBottom: `1px solid ${C.borderSoft}`, display: 'grid', gridTemplateColumns: '1fr 100px 100px 120px 130px 100px', gap: 12, fontSize: 11, color: C.mute, fontWeight: 700, letterSpacing: '0.06em', background: C.bg }}>
-          <div>참여자</div><div>활동</div><div>시간</div><div>금액</div><div>방법</div><div style={{ textAlign: 'right' }}>상태</div>
-        </div>
-        {calculatedSettlements.length === 0 ? <Empty icon={<Wallet size={28} />} title="이번 달 산정 대상이 없습니다" /> : calculatedSettlements.map((calc) => (
-          <div key={calc.participant.id} style={{ padding: '14px 18px', borderBottom: `1px solid ${C.borderSoft}`, display: 'grid', gridTemplateColumns: '1fr 100px 100px 120px 130px 100px', gap: 12, alignItems: 'center' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        {calculatedSettlements.length === 0 ? <Empty icon={<Wallet size={28} />} title="이번 달 산정 대상이 없습니다" /> : calculatedSettlements.map((calc, i) => (
+          <div
+            key={calc.participant.id}
+            onMouseEnter={(e) => (e.currentTarget.style.background = C.hover)}
+            onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+            style={{ padding: '13px 20px', borderTop: i === 0 ? 'none' : `1px solid ${C.lineSoft}`, display: 'grid', gridTemplateColumns: '1fr 84px 84px 130px 120px 92px', gap: 12, alignItems: 'center', transition: 'background .13s ease' }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
               <Avatar type={calc.participant?.type} gender={calc.participant?.gender} name={calc.participant.name} size={32} color={PERSONA[calc.participant.type]?.color || C.brand} />
-              <div>
-                <div style={{ fontSize: 13, fontWeight: 700, color: C.ink }}>{calc.participant.name}</div>
-                <div style={{ fontSize: 11, color: C.mute }}>{PERSONA[calc.participant.type]?.label}</div>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontSize: 13.5, fontWeight: 700, color: C.headline, letterSpacing: '-0.02em' }}>{calc.participant.name}</div>
+                <div style={{ fontSize: 11.5, color: C.muteLight, fontWeight: 500 }}>{PERSONA[calc.participant.type]?.label}</div>
               </div>
             </div>
-            <div style={{ fontSize: 13, color: C.inkSoft }}>{calc.count}회</div>
-            <div style={{ fontSize: 13, fontWeight: 700, color: C.ink, fontFamily: SERIF_STACK }}>{calc.hours}h</div>
-            <div style={{ fontSize: 13, fontWeight: 800, color: C.gold, fontFamily: SERIF_STACK }}>{krw(calc.amount)}</div>
-            <div style={{ fontSize: 12, color: C.inkSoft }}>{calc.participant.type === 'youth' ? '계좌이체' : '온누리상품권'}</div>
+            <div style={{ fontSize: 13, color: C.inkSoft, fontVariantNumeric: 'tabular-nums' }}>{calc.count}회</div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: C.ink, fontVariantNumeric: 'tabular-nums' }}>{calc.hours}시간</div>
+            <div style={{ fontSize: 14, fontWeight: 800, color: C.headline, textAlign: 'right', letterSpacing: '-0.02em', fontVariantNumeric: 'tabular-nums' }}>{krw(calc.amount)}</div>
+            <div style={{ fontSize: 12.5, color: C.navMute, fontWeight: 500 }}>{calc.participant.type === 'youth' ? '계좌이체' : '온누리상품권'}</div>
             <div style={{ textAlign: 'right' }}>
-              {(calc.existing?.status === 'issued' || calc.existing?.status === 'paid') ? <Badge color={C.success} soft={C.successSoft} size="sm">발급</Badge> :
+              {(calc.existing?.status === 'issued' || calc.existing?.status === 'paid') ? <Badge color={C.success} soft={C.successSoft} size="sm">발급 완료</Badge> :
                 <Button variant="brand" size="sm" onClick={() => { issueOne(calc); showToast({ type: 'success', message: `${calc.participant.name}님께 발급되었습니다.` }); }}>발급</Button>}
             </div>
           </div>
         ))}
-      </Card>
+      </Panel>
     </>
   );
 }
@@ -6392,6 +6653,15 @@ function App() {
         @keyframes eumPop { from { transform: scale(0.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         @keyframes eumHeroIn { from { opacity: 0; transform: translateY(26px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes eumShimmer { 100% { transform: translateX(100%); } }
+        /* 콘솔 리스트 — 좁은 폭에서 보조 컬럼을 접어 핵심 정보만 남긴다 */
+        @media (max-width: 1180px) { .eum-col-md { display: none !important; } }
+        /* 대시보드 2단 그리드 — 좁아지면 세로로 쌓는다 */
+        @media (max-width: 1080px) { .eum-dash-grid { grid-template-columns: 1fr !important; } }
+        /* 사이드바 스크롤바 — 얇고 조용하게 */
+        .eum-scroll { scrollbar-width: thin; scrollbar-color: #DFE2E7 transparent; }
+        .eum-scroll::-webkit-scrollbar { width: 6px; }
+        .eum-scroll::-webkit-scrollbar-thumb { background: #DFE2E7; border-radius: 999px; }
+        .eum-scroll::-webkit-scrollbar-track { background: transparent; }
         .eum-skeleton { position: relative; overflow: hidden; background: ${C.borderSoft}; }
         .eum-skeleton::after { content: ''; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, rgba(255,255,255,0.65), transparent); animation: eumShimmer 1.4s ease-in-out infinite; }
         @media (prefers-reduced-motion: reduce) { .eum-skeleton::after { animation: none; } }

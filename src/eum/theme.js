@@ -38,6 +38,24 @@ export const C = {
   success: '#5C7C4F',
   successSoft: '#E7EEE0',
   muteSoft: '#EDE9DF',
+
+  // ── 콘솔·앱 내부 화면 전용 뉴트럴 (2차 개편) ──────────────────────────
+  // 랜딩(웜 크림 톤)과 분리해, 내부 화면은 차갑고 정밀한 프로덕트 뉴트럴을 쓴다.
+  appBg: '#F4F5F7',
+  panel: '#FFFFFF',
+  line: '#E7E9ED',
+  lineSoft: '#F0F1F4',
+  hover: '#F5F6F8',
+  navMute: '#7C828C',
+  headline: '#12141A',
+};
+
+// 내부 화면 공통 그림자 — 얕고 정밀하게(프로덕트 콘솔 문법)
+export const SHADOW = {
+  xs: '0 1px 2px rgba(16,24,40,0.04)',
+  sm: '0 1px 3px rgba(16,24,40,0.06), 0 1px 2px rgba(16,24,40,0.04)',
+  md: '0 8px 24px -12px rgba(16,24,40,0.16)',
+  lg: '0 20px 48px -24px rgba(16,24,40,0.24)',
 };
 
 export const PERSONA = {
