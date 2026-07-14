@@ -678,6 +678,36 @@ function StatCard({ label, value, sub, color = C.ink, icon, trend }) {
   );
 }
 
+// KPI 스트립 — 지표 카드를 흩뿌리지 않고 한 패널에 구획선으로 나눈다.
+// 수치가 같은 베이스라인에 놓여야 서로 비교된다(대시보드·정산·안전이슈 공통).
+function KpiStrip({ items, style = {} }) {
+  return (
+    <div style={{
+      display: 'grid', gridTemplateColumns: `repeat(auto-fit, minmax(180px, 1fr))`,
+      background: C.panel, border: `1px solid ${C.line}`, borderRadius: 16,
+      boxShadow: SHADOW.xs, overflow: 'hidden', ...style,
+    }}>
+      {items.map((k, i) => (
+        <div key={k.label} style={{ padding: '16px 20px 18px', borderLeft: i === 0 ? 'none' : `1px solid ${C.lineSoft}` }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 11 }}>
+            {k.icon && (
+              <span style={{ width: 24, height: 24, borderRadius: 7, background: (k.color || C.ink) + '14', color: k.color || C.ink, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{k.icon}</span>
+            )}
+            <span style={{ fontSize: 12.5, color: C.navMute, fontWeight: 600 }}>{k.label}</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 3 }}>
+            <span style={{ fontSize: 27, fontWeight: 800, color: C.headline, letterSpacing: '-0.04em', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
+              {typeof k.value === 'number' ? <CountUp value={k.value} /> : k.value}
+            </span>
+            {k.unit && <span style={{ fontSize: 13.5, fontWeight: 700, color: C.muteLight }}>{k.unit}</span>}
+          </div>
+          {k.sub && <div style={{ fontSize: 12, color: C.muteLight, marginTop: 10, fontWeight: 500, lineHeight: 1.45 }}>{k.sub}</div>}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // ── 모션 · 인포그래픽 툴킷 ────────────────────────────────────────────────
 function useCountUp(target, duration = 950) {
   const [val, setVal] = useState(0);
@@ -5927,12 +5957,17 @@ function CoordSettlements({ state, dispatch, showToast, user }) {
         subtitle={`청년 활동급여 · 어르신 상품권 자동 산정 (시급 12,500원)`}
         right={<Button variant="brand" icon={<Wallet size={16} />} onClick={issueAll} disabled={generating || pending.length === 0}>{generating ? '발급 중…' : `${pending.length}건 일괄 발급`}</Button>} />
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 18 }}>
-        <StatCard label="이번 달 산정액" value={krw(totalAmount)} sub={`${calculatedSettlements.length}명`} color={C.brand} icon={<Wallet size={18} />} />
-        <StatCard label="발급 완료" value={krw(issuedAmount)} sub={`${issued.length}건`} color={C.success} icon={<CheckCircle2 size={18} />} />
-        <StatCard label="발급 대기" value={krw(totalAmount - issuedAmount)} sub={`${pending.length}건`} color={C.amber} icon={<Clock size={18} />} />
-        <StatCard label="누적 지급" value={krw(state.settlements.filter(s => s.status === 'issued' || s.status === 'paid').reduce((sum, s) => sum + (s.amount||0), 0))} sub={`${state.settlements.filter(s => s.status === 'issued' || s.status === 'paid').length}건`} color={C.gold} icon={<Award size={18} />} />
-      </div>
+      <KpiStrip
+        style={{ marginBottom: 16 }}
+        items={[
+          { label: '이번 달 산정액', value: krw(totalAmount), sub: `대상 ${calculatedSettlements.length}명`, color: C.brand, icon: <Wallet size={15} /> },
+          { label: '발급 완료', value: krw(issuedAmount), sub: `${issued.length}건 발급`, color: C.success, icon: <CheckCircle2 size={15} /> },
+          { label: '발급 대기', value: krw(totalAmount - issuedAmount), sub: `${pending.length}건 대기`, color: C.amber, icon: <Clock size={15} /> },
+          { label: '누적 지급', value: krw(state.settlements.filter(s => s.status === 'issued' || s.status === 'paid').reduce((sum, s) => sum + (s.amount || 0), 0)), sub: `${state.settlements.filter(s => s.status === 'issued' || s.status === 'paid').length}건 누적`, color: C.gold, icon: <Award size={15} /> },
+        ]}
+      />
+
+      {/* 정산 월 선택 */}
 
       {/* 정산 명세 — 월 선택을 패널 헤더로 끌어올려 별도 카드를 없앤다(스크롤 1회 절약). */}
       <Panel
@@ -6007,12 +6042,15 @@ function CoordSafety({ state, dispatch, showToast, user }) {
     <>
       <PageHeader title="안전 이슈" subtitle="신고된 안전 이슈를 신속히 처리하세요" />
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 18 }}>
-        <StatCard label="전체" value={state.safety_incidents.length} color={C.ink} icon={<ShieldAlert size={18} />} />
-        <StatCard label="처리 중" value={state.safety_incidents.filter(i => i.status === 'open' || i.status === 'in_progress').length} color={C.amber} icon={<AlertTriangle size={18} />} />
-        <StatCard label="해결됨" value={state.safety_incidents.filter(i => i.status === 'resolved').length} color={C.success} icon={<CheckCircle2 size={18} />} />
-        <StatCard label="높음 등급" value={state.safety_incidents.filter(i => i.severity === 'high').length} color={C.red} icon={<AlertCircle size={18} />} />
-      </div>
+      <KpiStrip
+        style={{ marginBottom: 16 }}
+        items={[
+          { label: '전체 신고', value: state.safety_incidents.length, unit: '건', color: C.ink, icon: <ShieldAlert size={15} /> },
+          { label: '처리 중', value: state.safety_incidents.filter(i => i.status === 'open' || i.status === 'in_progress').length, unit: '건', color: C.amber, icon: <AlertTriangle size={15} /> },
+          { label: '해결 완료', value: state.safety_incidents.filter(i => i.status === 'resolved').length, unit: '건', color: C.success, icon: <CheckCircle2 size={15} /> },
+          { label: '심각도 높음', value: state.safety_incidents.filter(i => i.severity === 'high').length, unit: '건', color: C.red, icon: <AlertCircle size={15} /> },
+        ]}
+      />
 
       <Tabs
         tabs={[
@@ -6026,27 +6064,48 @@ function CoordSafety({ state, dispatch, showToast, user }) {
       />
 
       {filtered.length === 0 ? <Empty icon={<ShieldCheck size={32} />} title="안전 이슈가 없습니다" sub="모든 활동이 안전하게 진행 중입니다" /> : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {filtered.map(inc => {
+        // 이슈 목록 — 심각도는 좌측 색 레일로, 상태는 우측 칩으로 분리한다.
+        // 안전 화면은 '무엇이 급한가'가 스캔 한 번에 잡혀야 한다.
+        <div style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 16, boxShadow: SHADOW.xs, overflow: 'hidden' }}>
+          {filtered.map((inc, i) => {
             const reporter = state.participants.find(p => p.id === inc.reported_by);
+            const sev = inc.severity === 'high' ? { c: C.red, s: C.redSoft, t: '높음' }
+              : inc.severity === 'medium' ? { c: C.amber, s: C.amberSoft, t: '중간' }
+                : { c: C.success, s: C.successSoft, t: '낮음' };
+            const st = inc.status === 'resolved' ? { c: C.success, s: C.successSoft, t: '해결됨' }
+              : inc.status === 'in_progress' ? { c: C.amber, s: C.amberSoft, t: '처리 중' }
+                : { c: C.red, s: C.redSoft, t: '접수' };
             return (
-              <Card key={inc.id} padding={16} hoverable onClick={() => setSelected(inc)}
-                style={{ borderLeft: `3px solid ${inc.severity === 'high' ? C.red : inc.severity === 'medium' ? C.amber : C.success}` }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-                  <Badge color={inc.severity === 'high' ? C.red : inc.severity === 'medium' ? C.amber : C.success}
-                    soft={inc.severity === 'high' ? C.redSoft : inc.severity === 'medium' ? C.amberSoft : C.successSoft}>
-                    {inc.severity === 'high' ? '높음' : inc.severity === 'medium' ? '중간' : '낮음'}
-                  </Badge>
-                  <span style={{ fontSize: 14, fontWeight: 700, color: C.ink }}>{inc.category}</span>
-                  <Badge color={inc.status === 'resolved' ? C.success : inc.status === 'in_progress' ? C.amber : C.red}
-                    soft={inc.status === 'resolved' ? C.successSoft : inc.status === 'in_progress' ? C.amberSoft : C.redSoft}>
-                    {inc.status === 'resolved' ? '해결됨' : inc.status === 'in_progress' ? '처리 중' : '접수'}
-                  </Badge>
-                  <span style={{ marginLeft: 'auto', fontSize: 11, color: C.mute }}>{inc.reported_at}</span>
+              <div
+                key={inc.id}
+                role="button"
+                tabIndex={0}
+                onClick={() => setSelected(inc)}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelected(inc); } }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = C.hover)}
+                onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                style={{
+                  display: 'flex', gap: 14, padding: '15px 20px 15px 17px', cursor: 'pointer',
+                  borderTop: i === 0 ? 'none' : `1px solid ${C.lineSoft}`,
+                  borderLeft: `3px solid ${sev.c}`, transition: 'background .13s ease',
+                }}
+              >
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6, flexWrap: 'wrap' }}>
+                    <Badge color={sev.c} soft={sev.s} size="sm">{sev.t}</Badge>
+                    <span style={{ fontSize: 14, fontWeight: 700, color: C.headline, letterSpacing: '-0.02em' }}>{inc.category}</span>
+                    <Badge color={st.c} soft={st.s} size="sm">{st.t}</Badge>
+                  </div>
+                  <div style={{ fontSize: 13, color: C.inkSoft, lineHeight: 1.6, marginBottom: 6, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{inc.description}</div>
+                  <div style={{ fontSize: 11.5, color: C.muteLight, fontWeight: 500 }}>
+                    신고자 {reporter?.name || '익명'} · 매칭 {inc.match_id?.toUpperCase() || '-'}
+                  </div>
                 </div>
-                <div style={{ fontSize: 13, color: C.inkSoft, marginBottom: 6, lineHeight: 1.5 }}>{inc.description}</div>
-                <div style={{ fontSize: 11, color: C.mute }}>신고자: {reporter?.name || '익명'} · 매칭: {inc.match_id?.toUpperCase() || '-'}</div>
-              </Card>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'space-between', flexShrink: 0 }}>
+                  <span style={{ fontSize: 11.5, color: C.muteLight, fontWeight: 600, fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>{inc.reported_at}</span>
+                  <ChevronRight size={16} style={{ color: C.muteLight }} />
+                </div>
+              </div>
             );
           })}
         </div>
