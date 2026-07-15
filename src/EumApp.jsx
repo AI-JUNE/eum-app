@@ -540,8 +540,11 @@ function Select({ value, onChange, options, placeholder, style = {} }) {
 }
 
 function Checkbox({ checked, onChange, label, sublabel, required }) {
+  // 키보드 접근성: 체크박스 input을 display:none 대신 화면에서만 숨기고(포커스 가능 유지)
+  // Tab 이동·Space 토글이 동작하도록 함. 포커스 시 시각적 박스에 포커스 링 표시.
+  const [focused, setFocused] = useState(false);
   return (
-    <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, cursor: 'pointer', padding: 10, borderRadius: 8, border: `1px solid ${C.borderSoft}`, background: checked ? C.brandBg : C.card, transition: 'all 0.15s' }}>
+    <label style={{ position: 'relative', display: 'flex', alignItems: 'flex-start', gap: 10, cursor: 'pointer', padding: 10, borderRadius: 8, border: `1px solid ${focused ? C.brand : C.borderSoft}`, background: checked ? C.brandBg : C.card, transition: 'all 0.15s' }}>
       <div
         style={{
           flexShrink: 0, marginTop: 1,
@@ -549,12 +552,20 @@ function Checkbox({ checked, onChange, label, sublabel, required }) {
           border: `1px solid ${checked ? C.brand : '#CBD0D8'}`,
           background: checked ? C.brand : C.panel,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          transition: 'background 0.14s ease, border-color 0.14s ease',
+          transition: 'background 0.14s ease, border-color 0.14s ease, box-shadow 0.14s ease',
+          boxShadow: focused ? `0 0 0 3px ${C.brand}33` : 'none',
         }}
       >
         {checked && <Check size={12} color="#fff" strokeWidth={3.2} />}
       </div>
-      <input type="checkbox" checked={!!checked} onChange={(e) => onChange && onChange(e.target.checked)} style={{ display: 'none' }} />
+      <input
+        type="checkbox"
+        checked={!!checked}
+        onChange={(e) => onChange && onChange(e.target.checked)}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
+        style={{ position: 'absolute', width: 1, height: 1, opacity: 0, margin: 0, pointerEvents: 'none' }}
+      />
       <div style={{ flex: 1 }}>
         <div style={{ fontSize: 14, fontWeight: 600, color: C.ink, lineHeight: 1.4 }}>
           {label}
@@ -1623,7 +1634,7 @@ function ApplicationForm({ onClose, onSubmit }) {
               <Input value={form.age} onChange={(v) => set('age', v)} placeholder="27" type="number" />
             </Field>
             <Field label="연락처" required>
-              <Input value={form.phone} onChange={(v) => set('phone', v)} placeholder="010-1234-5678" />
+              <Input value={form.phone} onChange={(v) => set('phone', v)} placeholder="010-1234-5678" type="tel" />
             </Field>
           </div>
           <Field label="거주지" required>
