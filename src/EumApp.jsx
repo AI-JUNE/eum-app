@@ -1045,15 +1045,15 @@ function CheckInOutCard({ activity, user, dispatch, showToast, color = C.sage })
 
   return (
     <>
-      <Card padding={18} style={{ border: `1.5px solid ${activity.status === 'in_progress' ? color : C.border}`, background: activity.status === 'in_progress' ? color + '0C' : C.card }}>
+      <Card padding={18} style={{ borderColor: activity.status === 'in_progress' ? color + '66' : C.line, background: activity.status === 'in_progress' ? color + '0A' : C.panel }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
           <div style={{ minWidth: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-              <Badge color={color} soft={color + '1A'}>{activity.type || '활동'}</Badge>
-              <span style={{ fontSize: 12, color: C.mute }}>{fmtRelativeDate(activity.scheduled_at)} {activity.time || ''}</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 5 }}>
+              <Badge color={color} soft={color + '18'} size="sm">{activity.type || '활동'}</Badge>
+              <span style={{ fontSize: 12, color: C.muteLight, fontWeight: 500 }}>{fmtRelativeDate(activity.scheduled_at)} {activity.time || ''}</span>
             </div>
-            <div style={{ fontSize: 14.5, fontWeight: 700, color: C.ink }}>{activity.title || activity.type || '오늘의 활동'}</div>
-            <div style={{ fontSize: 12, color: C.inkSoft, marginTop: 2, display: 'flex', alignItems: 'center', gap: 4 }}><MapPin size={11} /> {activity.location || '장소 미정'}</div>
+            <div style={{ fontSize: 14.5, fontWeight: 700, color: C.headline, letterSpacing: '-0.02em' }}>{activity.title || activity.type || '오늘의 활동'}</div>
+            <div style={{ fontSize: 12.5, color: C.navMute, marginTop: 3, display: 'flex', alignItems: 'center', gap: 4, fontWeight: 500 }}><MapPin size={12} /> {activity.location || '장소 미정'}</div>
           </div>
           <div style={{ flexShrink: 0 }}>
             {activity.status === 'scheduled' && (
@@ -1587,23 +1587,27 @@ function ApplicationForm({ onClose, onSubmit }) {
       {/* Step 1: Type */}
       {step === 1 && (
         <div>
-          <div style={{ fontSize: 18, fontWeight: 700, color: C.ink, marginBottom: 6, letterSpacing: '-0.02em', fontFamily: SERIF_STACK }}>어떤 자격으로 참여하시나요?</div>
-          <div style={{ fontSize: 13, color: C.mute, marginBottom: 18 }}>광산구에 거주하시면 <strong style={{ color: C.inkSoft }}>청소년부터 어르신까지 누구나</strong> 신청할 수 있어요. 연령 구간은 안내용 가이드이며, 유형에 따라 절차가 조금씩 다릅니다.</div>
+          <div style={{ fontSize: 18, fontWeight: 800, color: C.headline, marginBottom: 6, letterSpacing: '-0.03em' }}>어떤 자격으로 참여하시나요?</div>
+          <div style={{ fontSize: 13, color: C.navMute, marginBottom: 18, lineHeight: 1.55 }}>광산구에 거주하시면 <strong style={{ color: C.inkSoft }}>청소년부터 어르신까지 누구나</strong> 신청할 수 있어요. 연령 구간은 안내용 가이드이며, 유형에 따라 절차가 조금씩 다릅니다.</div>
           <div style={{ display: 'grid', gap: 10 }}>
-            {TYPES.map((t) => (
-              <Card key={t.id} padding={16} onClick={() => set('type', t.id)} hoverable style={{ border: `2px solid ${form.type === t.id ? t.color : C.border}`, background: form.type === t.id ? t.soft : C.card }}>
+            {TYPES.map((t) => {
+              const on = form.type === t.id;
+              return (
+              <div key={t.id} role="button" tabIndex={0} onClick={() => set('type', t.id)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); set('type', t.id); } }}
+                style={{ cursor: 'pointer', borderRadius: 14, padding: 16, border: `1.5px solid ${on ? t.color : C.line}`, background: on ? t.soft : C.panel, transition: 'border-color .15s ease, background .15s ease' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                  <div style={{ width: 44, height: 44, borderRadius: 11, background: t.color, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <div style={{ width: 44, height: 44, borderRadius: 12, background: on ? t.color : t.color + '16', color: on ? '#fff' : t.color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'background .15s ease, color .15s ease' }}>
                     {React.createElement(t.icon, { size: 22 })}
                   </div>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 15, fontWeight: 700, color: C.ink }}>{t.label} <span style={{ fontSize: 12, color: C.mute, fontWeight: 500 }}>({t.age})</span></div>
-                    <div style={{ fontSize: 13, color: C.inkSoft, marginTop: 2 }}>{t.desc}</div>
+                    <div style={{ fontSize: 15, fontWeight: 700, color: C.headline, letterSpacing: '-0.02em' }}>{t.label} <span style={{ fontSize: 12, color: C.muteLight, fontWeight: 500 }}>({t.age})</span></div>
+                    <div style={{ fontSize: 13, color: C.navMute, marginTop: 3 }}>{t.desc}</div>
                   </div>
-                  {form.type === t.id && <Check size={20} color={t.color} strokeWidth={3} />}
+                  {on && <Check size={20} color={t.color} strokeWidth={3} />}
                 </div>
-              </Card>
-            ))}
+              </div>
+              );
+            })}
           </div>
         </div>
       )}
@@ -1849,12 +1853,15 @@ function YouthApp({ state, user, dispatch, showToast }) {
           </Reveal>
 
           {/* Stats Row */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12, marginBottom: 20 }}>
-            <StatCard label="이번 달 활동시간" value={`${monthHours}h`} sub={`목표 24h 중 ${Math.round(monthHours/24*100)}%`} icon={<Clock size={16} color={C.sage} />} color={C.ink} />
-            <StatCard label="누적 활동시간" value={`${totalHours}h`} sub={`${myLogs.filter(l => l.approved).length}건 승인`} icon={<Activity size={16} color={C.brand} />} />
-            <StatCard label="누적 정산액" value={krw(totalEarned)} sub="광주상생카드" icon={<Wallet size={16} color={C.gold} />} color={C.gold} />
-            <StatCard label="다음 활동" value={nextActivity ? fmtRelativeDate(nextActivity.scheduled_at) : '—'} sub={nextActivity ? nextActivity.type : '예정 없음'} icon={<Calendar size={16} color={C.lavender} />} />
-          </div>
+          <KpiStrip
+            style={{ marginBottom: 20 }}
+            items={[
+              { label: '이번 달 활동시간', value: monthHours, unit: 'h', sub: `목표 24h 중 ${Math.round(monthHours/24*100)}%`, color: C.sage, icon: <Clock size={15} /> },
+              { label: '누적 활동시간', value: totalHours, unit: 'h', sub: `${myLogs.filter(l => l.approved).length}건 승인`, color: C.brand, icon: <Activity size={15} /> },
+              { label: '누적 정산액', value: krw(totalEarned), sub: '광주상생카드', color: C.gold, icon: <Wallet size={15} /> },
+              { label: '다음 활동', value: nextActivity ? fmtRelativeDate(nextActivity.scheduled_at) : '—', sub: nextActivity ? nextActivity.type : '예정 없음', color: C.lavender, icon: <Calendar size={15} /> },
+            ]}
+          />
 
           {/* Activity Cards 4종 */}
           <div style={{ marginBottom: 20 }}>
@@ -3244,33 +3251,33 @@ function CoordAdvisor({ state, showToast }){
       <PageHeader title="복지 어드바이저" subtitle="참여자가 받을 수 있는 복지서비스를 AI가 찾아 추천하고 신청처를 안내합니다 — ‘몰라서 못 받는’ 사각지대를 먼저 발굴합니다." right={<Badge color={C.lavender} soft={C.lavenderSoft}>AI · 사각지대 발굴</Badge>} />
       <div style={{ display:'grid', gridTemplateColumns:'320px 1fr', gap:16 }}>
         <Card>
-          <div style={{ fontSize:13, fontWeight:700, marginBottom:10 }}>참여자 선택</div>
-          <select value={pid} onChange={e=>{ setPid(e.target.value); setRun(false); }} style={{ width:'100%', padding:'9px 11px', borderRadius:8, border:'1px solid '+C.border, fontFamily:FONT_STACK, fontSize:13 }}>
+          <div style={{ fontSize:13, fontWeight:700, color:C.headline, marginBottom:10, letterSpacing:'-0.02em' }}>참여자 선택</div>
+          <select value={pid} onChange={e=>{ setPid(e.target.value); setRun(false); }} style={{ width:'100%', padding:'9px 12px', borderRadius:10, border:'1px solid '+C.line, background:C.panel, fontFamily:FONT_STACK, fontSize:13, fontWeight:600, color:C.ink, cursor:'pointer' }}>
             {people.map(p=><option key={p.id} value={p.id}>{p.name} · {PERSONA[p.type]?.label} · {p.age}세</option>)}
           </select>
-          <div style={{ marginTop:14, display:'flex', flexDirection:'column', gap:9 }}>
+          <div style={{ marginTop:16, display:'flex', flexDirection:'column', gap:11 }}>
             {cks.map(([k,t])=>(
-              <label key={k} style={{ fontSize:12.5, display:'flex', gap:8, alignItems:'center', cursor:'pointer', color:C.inkSoft }}>
-                <input type="checkbox" checked={flags[k]} onChange={e=>{ setFlags({ ...flags, [k]:e.target.checked }); setRun(false); }} />{t}
+              <label key={k} style={{ fontSize:12.5, display:'flex', gap:9, alignItems:'center', cursor:'pointer', color:C.inkSoft, fontWeight:500 }}>
+                <input type="checkbox" checked={flags[k]} onChange={e=>{ setFlags({ ...flags, [k]:e.target.checked }); setRun(false); }} style={{ accentColor:C.brand, width:15, height:15 }} />{t}
               </label>
             ))}
           </div>
           <Button variant="brand" fullWidth style={{ marginTop:16 }} disabled={busy} onClick={go}>{busy ? '분석 중…' : '복지 추천 받기'}</Button>
         </Card>
         <div>
-          {!run && !busy && <Card style={{ textAlign:'center', color:C.mute, padding:30 }}>참여자와 상황을 선택하고 ‘복지 추천 받기’를 누르세요.</Card>}
+          {!run && !busy && <Card style={{ textAlign:'center', color:C.muteLight, padding:'40px 30px', fontSize:13 }}>참여자와 상황을 선택하고 ‘복지 추천 받기’를 누르세요.</Card>}
           {run && (
-            <AIWrap label="AI 복지 어드바이저">
-              <div style={{ fontSize:13, color:C.inkSoft, marginBottom:12 }}><b>{person.name}</b>님이 받을 수 있는 복지서비스 <b style={{ color:C.lavender }}>{res.length}건</b>을 찾았습니다.</div>
+            <AIWrap label="AI 복지 어드바이저" color={C.lavender}>
+              <div style={{ fontSize:13, color:C.inkSoft, marginBottom:14 }}><b style={{ color:C.headline }}>{person.name}</b>님이 받을 수 있는 복지서비스 <b style={{ color:C.lavender }}>{res.length}건</b>을 찾았습니다.</div>
               <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
                 {res.map((x,i)=>(
-                  <div key={i} style={{ border:'1px solid '+(x.gap?'#E0B9A6':C.border), borderRadius:11, padding:'12px 14px', background:C.card }}>
+                  <div key={i} style={{ border:`1px solid ${C.line}`, borderLeft:`3px solid ${x.gap?C.brand:C.sage}`, borderRadius:11, padding:'13px 15px', background:C.panel }}>
                     <div style={{ display:'flex', alignItems:'center', gap:8, flexWrap:'wrap' }}>
-                      <span style={{ fontSize:14, fontWeight:700 }}>{x.name}</span>
-                      {x.gap ? <Badge color={C.brand} soft={C.brandSoft}>사각지대 발굴</Badge> : <Badge color={C.sage} soft={C.sageSoft}>수급 중</Badge>}
+                      <span style={{ fontSize:14, fontWeight:700, color:C.headline, letterSpacing:'-0.02em' }}>{x.name}</span>
+                      {x.gap ? <Badge color={C.brand} soft={C.brandSoft} size="sm">사각지대 발굴</Badge> : <Badge color={C.sage} soft={C.sageSoft} size="sm">수급 중</Badge>}
                     </div>
-                    <div style={{ fontSize:12, color:C.inkSoft, marginTop:5, lineHeight:1.5 }}>{x.why}</div>
-                    <div style={{ display:'flex', gap:14, marginTop:7, flexWrap:'wrap', fontSize:11.5, color:C.inkSoft }}><span><b style={{ color:C.gold }}>혜택</b> {x.benefit}</span><span><b style={{ color:C.blue }}>신청</b> {x.where}</span></div>
+                    <div style={{ fontSize:12.5, color:C.navMute, marginTop:6, lineHeight:1.55 }}>{x.why}</div>
+                    <div style={{ display:'flex', gap:14, marginTop:9, flexWrap:'wrap', fontSize:11.5, color:C.inkSoft }}><span><b style={{ color:C.gold }}>혜택</b> {x.benefit}</span><span><b style={{ color:C.blue }}>신청</b> {x.where}</span></div>
                   </div>
                 ))}
               </div>
@@ -3720,25 +3727,25 @@ function VolunteerHub({ user, totalHours, setView, showToast }) {
   const hrs = totalHours || 0;
   const miles = Math.round(hrs * 100); // 봉사 마일리지(가정)
   return (
-    <Card padding={0} style={{ marginBottom: 18, overflow: 'hidden', border: `1px solid ${C.border}` }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 18px', background: '#FF6B35', color: '#fff' }}>
-        <Award size={18} />
-        <div style={{ fontSize: 13.5, fontWeight: 800 }}>1365 자원봉사 실적 연계</div>
-        <span style={{ marginLeft: 'auto', fontSize: 10.5, fontWeight: 700, background: 'rgba(255,255,255,.22)', padding: '3px 9px', borderRadius: 999 }}>공식 인정</span>
+    <div style={{ marginBottom: 18, overflow: 'hidden', border: `1px solid ${C.line}`, borderRadius: 16, background: C.panel, boxShadow: SHADOW.sm }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 18px', background: C.brand, color: '#fff' }}>
+        <Award size={17} />
+        <div style={{ fontSize: 13.5, fontWeight: 700, letterSpacing: '-0.01em' }}>1365 자원봉사 실적 연계</div>
+        <span style={{ marginLeft: 'auto', fontSize: 10.5, fontWeight: 700, background: 'rgba(255,255,255,.22)', padding: '3px 9px', borderRadius: 7 }}>공식 인정</span>
       </div>
       <div style={{ padding: 18 }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(120px,1fr))', gap: 10, marginBottom: 14 }}>
-          <div><div style={{ fontSize: 11, color: C.mute, fontWeight: 700 }}>인정 봉사시간</div><div style={{ fontSize: 22, fontWeight: 800, color: C.ink }}>{hrs}<span style={{ fontSize: 12, color: C.mute }}>시간</span></div></div>
-          <div><div style={{ fontSize: 11, color: C.mute, fontWeight: 700 }}>봉사 마일리지</div><div style={{ fontSize: 22, fontWeight: 800, color: '#FF6B35' }}>{miles.toLocaleString('ko-KR')}<span style={{ fontSize: 12, color: C.mute }}>P</span></div></div>
-          <div><div style={{ fontSize: 11, color: C.mute, fontWeight: 700 }}>나이스(학생부) 연계</div><div style={{ fontSize: 14, fontWeight: 800, color: C.sage, marginTop: 4 }}><CheckCircle2 size={14} style={{ verticalAlign: 'middle' }} /> 연계 가능</div></div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(120px,1fr))', gap: 14, marginBottom: 16 }}>
+          <div><div style={{ fontSize: 11.5, color: C.navMute, fontWeight: 600 }}>인정 봉사시간</div><div style={{ fontSize: 24, fontWeight: 800, color: C.headline, letterSpacing: '-0.03em', marginTop: 3, fontVariantNumeric: 'tabular-nums' }}>{hrs}<span style={{ fontSize: 12.5, color: C.muteLight, fontWeight: 600 }}>시간</span></div></div>
+          <div><div style={{ fontSize: 11.5, color: C.navMute, fontWeight: 600 }}>봉사 마일리지</div><div style={{ fontSize: 24, fontWeight: 800, color: C.brand, letterSpacing: '-0.03em', marginTop: 3, fontVariantNumeric: 'tabular-nums' }}>{miles.toLocaleString('ko-KR')}<span style={{ fontSize: 12.5, color: C.muteLight, fontWeight: 600 }}>P</span></div></div>
+          <div><div style={{ fontSize: 11.5, color: C.navMute, fontWeight: 600 }}>나이스(학생부) 연계</div><div style={{ fontSize: 14, fontWeight: 700, color: C.sage, marginTop: 6, display: 'flex', alignItems: 'center', gap: 4 }}><CheckCircle2 size={14} /> 연계 가능</div></div>
         </div>
-        <div style={{ fontSize: 11.5, color: C.inkSoft, lineHeight: 1.55, marginBottom: 12 }}>이음 활동은 <b>1365 자원봉사 실적</b>으로 인정됩니다. 실적확인서를 발급해 대학·취업·학교생활기록부(나이스)에 활용하세요.</div>
+        <div style={{ fontSize: 12, color: C.navMute, lineHeight: 1.6, marginBottom: 14 }}>이음 활동은 <b style={{ color: C.inkSoft }}>1365 자원봉사 실적</b>으로 인정됩니다. 실적확인서를 발급해 대학·취업·학교생활기록부(나이스)에 활용하세요.</div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           <Button variant="brand" size="sm" icon={<Download size={14} />} onClick={async()=>{ const r=await EUM_API.v1365.issueCertificate(user.id); showToast ? showToast('실적확인서 발급 완료 · '+r.certNo,'success') : setView('settlement'); }}>실적확인서 발급</Button>
           <Button variant="secondary" size="sm" icon={<Search size={14} />} onClick={() => setView('discover')}>활동 찾기</Button>
         </div>
       </div>
-    </Card>
+    </div>
   );
 }
 
@@ -3760,21 +3767,30 @@ function YouthDiscover({ user, totalHours, showToast, setView }) {
       <PageHeader title="활동 찾기" subtitle="우리 동네 세대 돌봄 활동을 직접 찾아 신청하세요. 참여하면 보상과 함께 1365 봉사시간이 쌓입니다." right={<Badge color={'#FF6B35'} soft={'#FFE9DF'}>1365 봉사실적 인정</Badge>} />
 
       {/* 임팩트 통계 */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(130px,1fr))', gap: 10, marginBottom: 16 }}>
-        {[['내 누적 봉사시간', `${totalHours || 0}시간`, C.brand], ['이번 달 모집', `${DISCOVER_LIST.length}건`, C.sage], ['우리동네 활동가', '128명', C.lavender], ['상품권 환원', '지역경제 100%', C.gold]].map(([l, v, c]) => (
-          <Card key={l} padding={14} style={{ borderTop: `3px solid ${c}` }}><div style={{ fontSize: 11, color: C.mute, fontWeight: 700 }}>{l}</div><div style={{ fontSize: 17, fontWeight: 800, marginTop: 3 }}>{v}</div></Card>
-        ))}
-      </div>
+      <KpiStrip
+        style={{ marginBottom: 16 }}
+        items={[
+          { label: '내 누적 봉사시간', value: `${totalHours || 0}시간`, color: C.brand, icon: <Clock size={15} /> },
+          { label: '이번 달 모집', value: `${DISCOVER_LIST.length}건`, color: C.sage, icon: <Search size={15} /> },
+          { label: '우리동네 활동가', value: '128명', color: C.lavender, icon: <Users size={15} /> },
+          { label: '상품권 환원', value: '지역경제 100%', color: C.gold, icon: <Award size={15} /> },
+        ]}
+      />
 
       {/* 검색 + 카테고리 칩 */}
       <div style={{ position: 'relative', marginBottom: 12 }}>
-        <Search size={16} style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: C.mute }} />
-        <input type="search" value={q} onChange={e => setQ(e.target.value)} placeholder="활동·기관 검색" aria-label="활동·기관 검색" style={{ width: '100%', padding: '11px 13px 11px 38px', borderRadius: 11, border: `1px solid ${C.border}`, fontFamily: FONT_STACK, fontSize: 14 }} />
+        <Search size={16} style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: C.muteLight }} />
+        <input type="search" value={q} onChange={e => setQ(e.target.value)} placeholder="활동·기관 검색" aria-label="활동·기관 검색" style={{ width: '100%', padding: '10px 13px 10px 38px', borderRadius: 10, border: `1px solid ${C.line}`, background: C.panel, fontFamily: FONT_STACK, fontSize: 14, color: C.ink, outline: 'none' }}
+          onFocus={e => { e.target.style.borderColor = C.brand; e.target.style.boxShadow = `0 0 0 3px ${C.brand}1f`; }}
+          onBlur={e => { e.target.style.borderColor = C.line; e.target.style.boxShadow = 'none'; }} />
       </div>
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
-        {DISCOVER_CATS.map(c => (
-          <button key={c} onClick={() => setCat(c)} style={{ cursor: 'pointer', fontFamily: FONT_STACK, fontSize: 12.5, fontWeight: 700, padding: '7px 14px', borderRadius: 999, border: `1px solid ${cat === c ? C.brand : C.border}`, background: cat === c ? C.brand : C.card, color: cat === c ? '#fff' : C.inkSoft }}>{c}</button>
-        ))}
+      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 16 }}>
+        {DISCOVER_CATS.map(c => {
+          const on = cat === c;
+          return (
+            <button key={c} onClick={() => setCat(c)} style={{ cursor: 'pointer', fontFamily: FONT_STACK, fontSize: 12.5, fontWeight: on ? 700 : 500, padding: '7px 13px', borderRadius: 9, border: `1px solid ${on ? 'transparent' : C.line}`, background: on ? C.headline : C.panel, color: on ? '#fff' : C.inkSoft, transition: 'background .14s ease, color .14s ease' }}>{c}</button>
+          );
+        })}
       </div>
 
       {/* 모집공고 카드 */}
