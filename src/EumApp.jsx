@@ -488,14 +488,14 @@ function Checkbox({ checked, onChange, label, sublabel, required }) {
       <div
         style={{
           flexShrink: 0, marginTop: 1,
-          width: 20, height: 20, borderRadius: 5,
-          border: `1.5px solid ${checked ? C.brand : C.border}`,
-          background: checked ? C.brand : C.card,
+          width: 18, height: 18, borderRadius: 5,
+          border: `1px solid ${checked ? C.brand : '#CBD0D8'}`,
+          background: checked ? C.brand : C.panel,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          transition: 'all 0.15s',
+          transition: 'background 0.14s ease, border-color 0.14s ease',
         }}
       >
-        {checked && <Check size={14} color="#fff" strokeWidth={3} />}
+        {checked && <Check size={12} color="#fff" strokeWidth={3.2} />}
       </div>
       <input type="checkbox" checked={!!checked} onChange={(e) => onChange && onChange(e.target.checked)} style={{ display: 'none' }} />
       <div style={{ flex: 1 }}>
@@ -579,10 +579,10 @@ function Modal({ open, onClose, title, children, size = 'md', footer }) {
     <div
       onClick={onClose}
       style={{
-        position: 'fixed', inset: 0, background: 'rgba(26,24,20,0.5)',
+        position: 'fixed', inset: 0, background: 'rgba(16,24,40,0.45)',
         zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center',
         padding: 20, animation: 'fadeIn 0.15s ease',
-        backdropFilter: 'blur(4px)',
+        backdropFilter: 'blur(3px)',
       }}
     >
       <div
@@ -593,26 +593,29 @@ function Modal({ open, onClose, title, children, size = 'md', footer }) {
         aria-label={typeof title === 'string' ? title : undefined}
         onClick={(e) => e.stopPropagation()}
         style={{
-          background: C.card, borderRadius: 16, maxWidth: widths[size], width: '100%',
+          background: C.panel, borderRadius: 18, maxWidth: widths[size], width: '100%',
           maxHeight: '90vh', display: 'flex', flexDirection: 'column',
-          boxShadow: '0 20px 60px rgba(0,0,0,0.2)',
+          border: `1px solid ${C.line}`,
+          boxShadow: SHADOW.lg,
           animation: 'slideUp 0.2s ease',
-          outline: 'none',
+          outline: 'none', overflow: 'hidden',
         }}
       >
         {title && (
-          <div style={{ padding: '18px 24px', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ fontSize: 16, fontWeight: 700, color: C.ink, letterSpacing: '-0.02em' }}>{title}</div>
-            <button onClick={onClose} aria-label="닫기" style={{ background: 'none', border: 'none', cursor: 'pointer', color: C.mute, padding: 4, display: 'flex' }}>
-              <X size={20} />
+          <div style={{ padding: '16px 22px', borderBottom: `1px solid ${C.lineSoft}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+            <div style={{ fontSize: 16, fontWeight: 700, color: C.headline, letterSpacing: '-0.025em' }}>{title}</div>
+            <button onClick={onClose} aria-label="닫기" style={{ background: 'none', border: 'none', cursor: 'pointer', color: C.muteLight, padding: 5, borderRadius: 8, display: 'flex' }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = C.hover; e.currentTarget.style.color = C.inkSoft; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = C.muteLight; }}>
+              <X size={18} />
             </button>
           </div>
         )}
-        <div style={{ padding: '20px 24px', overflowY: 'auto', flex: 1 }}>
+        <div style={{ padding: '20px 22px', overflowY: 'auto', flex: 1 }}>
           {children}
         </div>
         {footer && (
-          <div style={{ padding: '14px 24px', borderTop: `1px solid ${C.border}`, display: 'flex', justifyContent: 'flex-end', gap: 8, background: C.cream, borderRadius: '0 0 16px 16px' }}>
+          <div style={{ padding: '13px 22px', borderTop: `1px solid ${C.lineSoft}`, display: 'flex', justifyContent: 'flex-end', gap: 8, background: C.appBg, flexShrink: 0 }}>
             {footer}
           </div>
         )}
@@ -5816,33 +5819,45 @@ function CoordActivities({ state, dispatch, showToast, user }) {
       />
 
       {list.length === 0 ? <Empty icon={<ClipboardCheck size={32} />} title={activeTab === 'pending' ? '승인 대기 중인 기록이 없습니다' : '승인된 기록이 없습니다'} /> : (
-        <Card padding={0}>
+        <div style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 16, boxShadow: SHADOW.xs, overflow: 'hidden' }}>
+          {/* 선택 바 — 선택 건수와 총 시간을 함께 보여준다. 승인은 곧 정산 금액이므로 '몇 시간'이 중요하다. */}
           {activeTab === 'pending' && (
-            <div style={{ padding: '12px 18px', borderBottom: `1px solid ${C.borderSoft}`, display: 'flex', alignItems: 'center', gap: 10, background: C.bg }}>
+            <div style={{ padding: '11px 20px', borderBottom: `1px solid ${C.line}`, display: 'flex', alignItems: 'center', gap: 12, background: C.lineSoft }}>
               <Checkbox checked={selected.size === list.length && list.length > 0} onChange={toggleAll} />
-              <span style={{ fontSize: 12, color: C.inkSoft, fontWeight: 600 }}>전체 선택 ({list.length}건)</span>
+              <span style={{ fontSize: 12.5, color: C.inkSoft, fontWeight: 600 }}>
+                {selected.size > 0
+                  ? `${selected.size}건 선택 · ${list.filter(l => selected.has(l.id)).reduce((s, l) => s + (l.hours || 0), 0)}시간`
+                  : `전체 선택 (${list.length}건)`}
+              </span>
             </div>
           )}
-          {list.map(log => {
+          {list.map((log, i) => {
             const author = state.participants.find(p => p.id === log.participant_id);
             const act = state.activities.find(a => a.id === log.activity_id);
             const match = act && state.matches.find(m => m.id === act.match_id);
+            const on = selected.has(log.id);
             return (
-              <div key={log.id} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 18px', borderBottom: `1px solid ${C.borderSoft}` }}>
-                {activeTab === 'pending' && <Checkbox checked={selected.has(log.id)} onChange={() => toggleSelect(log.id)} />}
-                <Avatar type={author?.type} gender={author?.gender} name={author?.name} size={40} color={PERSONA[author?.type]?.color || C.brand} />
+              <div key={log.id} style={{
+                display: 'flex', alignItems: 'center', gap: 14, padding: '14px 20px',
+                borderTop: i === 0 ? 'none' : `1px solid ${C.lineSoft}`,
+                background: on ? C.brandBg : 'transparent', transition: 'background .13s ease',
+              }}>
+                {activeTab === 'pending' && <Checkbox checked={on} onChange={() => toggleSelect(log.id)} />}
+                <Avatar type={author?.type} gender={author?.gender} name={author?.name} size={36} color={PERSONA[author?.type]?.color || C.brand} />
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                    <span style={{ fontSize: 13, fontWeight: 700, color: C.ink }}>{author?.name}</span>
-                    <span style={{ fontSize: 11, color: C.mute }}>· {fmtDate(log.date)} · {act?.title}</span>
-                    {log.has_photo && <Camera size={12} style={{ color: C.sage }} />}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 4, flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: 13.5, fontWeight: 700, color: C.headline, letterSpacing: '-0.02em' }}>{author?.name}</span>
+                    <span style={{ fontSize: 11.5, color: C.muteLight, fontWeight: 500, fontVariantNumeric: 'tabular-nums' }}>{fmtDate(log.date)}</span>
+                    <span style={{ color: '#D4D7DD' }}>·</span>
+                    <span style={{ fontSize: 11.5, color: C.navMute, fontWeight: 500 }}>{act?.title}</span>
+                    {log.has_photo && <Camera size={12} style={{ color: C.muteLight }} />}
                     {log.mood && <span style={{ fontSize: 12 }}>{moodEmoji(log.mood)}</span>}
                   </div>
-                  <div style={{ fontSize: 12, color: C.inkSoft, lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{log.summary}</div>
-                  <div style={{ fontSize: 11, color: C.mute, marginTop: 4 }}>{log.hours}시간 · 매칭 {match?.id?.toUpperCase()}</div>
+                  <div style={{ fontSize: 12.5, color: C.inkSoft, lineHeight: 1.55, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{log.summary}</div>
+                  <div style={{ fontSize: 11.5, color: C.muteLight, marginTop: 5, fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>{log.hours}시간 · 매칭 {match?.id?.toUpperCase()}</div>
                 </div>
-                <div style={{ display: 'flex', gap: 6 }}>
-                  <Button variant="ghost" size="sm" onClick={() => setDetailLog(log)}>상세</Button>
+                <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                  <Button variant="secondary" size="sm" onClick={() => setDetailLog(log)}>상세</Button>
                   {activeTab === 'pending' && (
                     <Button variant="success" size="sm" icon={<Check size={14} />}
                       onClick={() => { dispatch({ type: 'APPROVE_LOG', payload: { id: log.id, approved_by: user.id } }); showToast({ type: 'success', message: '승인되었습니다.' }); }}>승인</Button>
@@ -5851,7 +5866,7 @@ function CoordActivities({ state, dispatch, showToast, user }) {
               </div>
             );
           })}
-        </Card>
+        </div>
       )}
 
       <Modal open={!!detailLog} onClose={() => setDetailLog(null)} title="활동 기록 상세" size="md">
@@ -6296,15 +6311,18 @@ JSON 형식으로만 답변:
           <Button variant="brand" icon={<Sparkles size={16} />} onClick={generateAiSummary} disabled={aiLoading}>{aiLoading ? '생성 중…' : 'AI 요약 생성'}</Button>
         </>} />
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 18 }}>
-        <StatCard label="활동시간" value={`${stats.totalHours}h`} sub={`${stats.approvedLogs.length}회 승인`} color={C.brand} icon={<Clock size={18} />} />
-        <StatCard label="정산 지급" value={krw(stats.settlementAmount)} sub={`${stats.settlements.length}건`} color={C.gold} icon={<Wallet size={18} />} />
-        <StatCard label="안전 이슈" value={stats.incidents.length} sub={`해결 ${stats.incidents.filter(i => i.status === 'resolved').length}건`} color={stats.incidents.length > 0 ? C.amber : C.success} icon={<ShieldCheck size={18} />} />
-        <StatCard label="만족도" value={stats.avgScore} sub={`${stats.surveys.length}건 응답`} color={C.lavender} icon={<Smile size={18} />} />
-      </div>
+      <KpiStrip
+        style={{ marginBottom: 16 }}
+        items={[
+          { label: '활동시간', value: stats.totalHours, unit: '시간', sub: `${stats.approvedLogs.length}회 승인`, color: C.brand, icon: <Clock size={15} /> },
+          { label: '정산 지급', value: krw(stats.settlementAmount), sub: `${stats.settlements.length}건 지급`, color: C.gold, icon: <Wallet size={15} /> },
+          { label: '안전 이슈', value: stats.incidents.length, unit: '건', sub: `해결 ${stats.incidents.filter(i => i.status === 'resolved').length}건`, color: stats.incidents.length > 0 ? C.amber : C.success, icon: <ShieldCheck size={15} /> },
+          { label: '만족도', value: stats.avgScore, sub: `설문 ${stats.surveys.length}건 응답`, color: C.lavender, icon: <Smile size={15} /> },
+        ]}
+      />
 
       {aiLoading && (
-        <Card padding={28} style={{ marginBottom: 18, background: `linear-gradient(135deg, ${C.brand}06 0%, ${C.peach}06 100%)`, border: `1px solid ${C.brand}30` }}>
+        <Card padding={24} style={{ marginBottom: 16, borderLeft: `3px solid ${C.brand}` }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
             <Loader2 size={16} style={{ color: C.brand, animation: 'spin 1s linear infinite' }} />
             <div style={{ fontSize: 12, fontWeight: 700, color: C.brand, letterSpacing: '0.08em' }}>월간 리포트 작성 중 · {period}</div>
@@ -6323,7 +6341,7 @@ JSON 형식으로만 답변:
       )}
 
       {aiSummary && (
-        <Card padding={28} style={{ marginBottom: 18, background: `linear-gradient(135deg, ${C.brand}06 0%, ${C.peach}06 100%)`, border: `1px solid ${C.brand}30` }}>
+        <Card padding={24} style={{ marginBottom: 16, borderLeft: `3px solid ${C.brand}` }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
             <Sparkles size={16} style={{ color: C.brand }} />
             <div style={{ fontSize: 12, fontWeight: 700, color: C.brand, letterSpacing: '0.08em' }}>AI 월간 리포트 · {period}</div>
