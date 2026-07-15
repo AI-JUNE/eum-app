@@ -2761,7 +2761,7 @@ function ParentDashboard({ user, myChildren, myMatches, todayActivities, upcomin
                 const m = state.matches.find(mm => mm.id === act.match_id);
                 const y = state.participants.find(p => p.id === m?.youth_id);
                 return (
-                  <div key={act.id} style={{ padding: 14, background: C.bg, borderRadius: 10, border: `1px solid ${C.borderSoft}` }}>
+                  <div key={act.id} style={{ padding: 14, background: C.lineSoft, borderRadius: 10, border: `1px solid ${C.borderSoft}` }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
                       <div style={{ fontWeight: 700, fontSize: 14, color: C.ink }}>{act.title}</div>
                       <Badge color={C.sage} soft={C.sageSoft}>{act.type}</Badge>
@@ -4835,7 +4835,10 @@ function RLLanding({ state, onSelectRole, onShowApplication }) {
             <div key={p.role} onClick={() => onSelectRole(p.role, p.id)} className="eum-rolecard" style={{ cursor: 'pointer', borderRadius: 20, border: `1px solid ${C.borderSoft}`, background: C.card, boxShadow: '0 2px 8px -4px rgba(26,26,30,0.08)', overflow: 'hidden' }}>
               <div style={{ height: 64, background: p.gradient, position: 'relative', display: 'flex', alignItems: 'flex-end', padding: '0 18px' }}>
                 <div style={{ position: 'absolute', top: 12, right: 14, fontSize: 10, fontWeight: 700, color: '#fff', letterSpacing: '0.06em', background: 'rgba(255,255,255,0.2)', padding: '4px 9px', borderRadius: 999 }}>{PERSONA[p.role].label}</div>
-                <div style={{ transform: 'translateY(50%)' }}><Avatar type={p.role} gender={p.gender} name={p.name} color="#fff" size={52} ring /></div>
+                {/* 세대 글리프가 또렷하게 보이도록 흰 원 위에 페르소나 색으로 표시 */}
+                <div style={{ transform: 'translateY(50%)', width: 54, height: 54, borderRadius: '50%', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 14px -6px rgba(0,0,0,0.25)' }}>
+                  <Avatar type={p.role} gender={p.gender} name={p.name} color={p.color} size={48} />
+                </div>
               </div>
               <div style={{ padding: '34px 20px 20px' }}>
                 <div className="eum-serif" style={{ fontSize: 19, fontWeight: 800, color: C.ink }}>{p.name}</div>
@@ -5438,7 +5441,7 @@ function CoordApplicants({ state, dispatch, showToast, user }) {
           const verifs = state.verifications.filter(v => v.application_id === selectedApp.id);
           return (
             <>
-              <div style={{ display: 'flex', gap: 16, padding: 16, background: C.bg, borderRadius: 10, marginBottom: 20 }}>
+              <div style={{ display: 'flex', gap: 16, padding: 16, background: C.lineSoft, borderRadius: 10, marginBottom: 20 }}>
                 <Avatar type={p?.type} gender={p?.gender} name={p?.name} size={64} color={PERSONA[p?.type]?.color || C.brand} />
                 <div style={{ flex: 1 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
@@ -5451,7 +5454,7 @@ function CoordApplicants({ state, dispatch, showToast, user }) {
               </div>
 
               <div style={{ fontSize: 12, fontWeight: 700, color: C.mute, letterSpacing: '0.08em', marginBottom: 10 }}>지원 동기 · 소개</div>
-              <div style={{ padding: 14, background: C.bg, borderRadius: 8, fontSize: 13, color: C.inkSoft, lineHeight: 1.6, marginBottom: 16 }}>
+              <div style={{ padding: 14, background: C.lineSoft, borderRadius: 8, fontSize: 13, color: C.inkSoft, lineHeight: 1.6, marginBottom: 16 }}>
                 {p?.bio || '특별한 소개글이 없습니다.'}
               </div>
 
@@ -5645,7 +5648,7 @@ JSON 형식으로만 응답해주세요 (다른 텍스트 없이):
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                     {arr.length === 0 ? <div style={{ fontSize: 12, color: C.mute, padding: '8px 4px' }}>대기 없음</div> :
                       arr.map(p => (
-                        <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '8px 10px', background: C.bg, borderRadius: 9 }}>
+                        <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '8px 10px', background: C.lineSoft, borderRadius: 9 }}>
                           <Avatar type={p.type} gender={p.gender} name={p.name} size={30} color={col} />
                           <div style={{ minWidth: 0, flex: 1 }}>
                             <div style={{ fontSize: 12.5, fontWeight: 700, color: C.ink }}>{p.name}</div>
@@ -5750,7 +5753,7 @@ JSON 형식으로만 응답해주세요 (다른 텍스트 없이):
             <>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 18 }}>
                 {[{ p: y, label: '청년', color: C.sage }, { p: s, label: '어르신', color: C.lavender }, { p: c, label: '아동', color: C.peach }].map(({ p, label, color }) => p && (
-                  <div key={p.id} style={{ padding: 14, background: C.bg, borderRadius: 10, textAlign: 'center' }}>
+                  <div key={p.id} style={{ padding: 14, background: C.lineSoft, borderRadius: 10, textAlign: 'center' }}>
                     <Avatar type={p?.type} gender={p?.gender} name={p.name} size={56} color={color} />
                     <div style={{ fontSize: 15, fontWeight: 800, color: C.ink, marginTop: 8, fontFamily: SERIF_STACK }}>{p.name}</div>
                     <div style={{ fontSize: 11, color: color, fontWeight: 700, marginTop: 3 }}>{label}</div>
@@ -5961,13 +5964,13 @@ function CoordActivities({ state, dispatch, showToast, user }) {
                 </div>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 14 }}>
-                <div style={{ padding: 10, background: C.bg, borderRadius: 6 }}><div style={{ fontSize: 11, color: C.mute }}>활동</div><div style={{ fontSize: 13, fontWeight: 700, color: C.ink, marginTop: 2 }}>{act?.title}</div></div>
-                <div style={{ padding: 10, background: C.bg, borderRadius: 6 }}><div style={{ fontSize: 11, color: C.mute }}>날짜·시간</div><div style={{ fontSize: 13, fontWeight: 700, color: C.ink, marginTop: 2 }}>{fmtDate(detailLog.date)} · {detailLog.hours}h</div></div>
+                <div style={{ padding: 10, background: C.lineSoft, borderRadius: 6 }}><div style={{ fontSize: 11, color: C.mute }}>활동</div><div style={{ fontSize: 13, fontWeight: 700, color: C.ink, marginTop: 2 }}>{act?.title}</div></div>
+                <div style={{ padding: 10, background: C.lineSoft, borderRadius: 6 }}><div style={{ fontSize: 11, color: C.mute }}>날짜·시간</div><div style={{ fontSize: 13, fontWeight: 700, color: C.ink, marginTop: 2 }}>{fmtDate(detailLog.date)} · {detailLog.hours}h</div></div>
               </div>
               <div style={{ fontSize: 12, color: C.mute, fontWeight: 700, marginBottom: 6 }}>활동 내용</div>
-              <div style={{ padding: 14, background: C.bg, borderRadius: 8, fontSize: 13, color: C.inkSoft, lineHeight: 1.7, marginBottom: 14 }}>{detailLog.summary}</div>
+              <div style={{ padding: 14, background: C.lineSoft, borderRadius: 8, fontSize: 13, color: C.inkSoft, lineHeight: 1.7, marginBottom: 14 }}>{detailLog.summary}</div>
               {detailLog.mood && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: 10, background: C.bg, borderRadius: 6 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: 10, background: C.lineSoft, borderRadius: 6 }}>
                   <span style={{ fontSize: 11, color: C.mute, fontWeight: 600 }}>오늘 기분</span>
                   <span style={{ fontSize: 18 }}>{moodEmoji(detailLog.mood)}</span>
                   <span style={{ fontSize: 12, color: C.inkSoft }}>{detailLog.mood}/5</span>
@@ -6219,7 +6222,7 @@ function CoordSafety({ state, dispatch, showToast, user }) {
               </Badge>
             </div>
             <div style={{ fontSize: 16, fontWeight: 800, color: C.ink, marginBottom: 8, fontFamily: SERIF_STACK }}>{selected.category}</div>
-            <div style={{ padding: 14, background: C.bg, borderRadius: 8, fontSize: 13, color: C.inkSoft, lineHeight: 1.6, marginBottom: 14 }}>{selected.description}</div>
+            <div style={{ padding: 14, background: C.lineSoft, borderRadius: 8, fontSize: 13, color: C.inkSoft, lineHeight: 1.6, marginBottom: 14 }}>{selected.description}</div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 14, fontSize: 12, color: C.inkSoft }}>
               <div><strong style={{ color: C.mute }}>신고자:</strong> {state.participants.find(p => p.id === selected.reported_by)?.name}</div>
               <div><strong style={{ color: C.mute }}>매칭:</strong> {selected.match_id?.toUpperCase()}</div>
@@ -6474,7 +6477,7 @@ JSON 형식으로만 답변:
             {stats.surveys.slice(0, 6).map(sv => {
               const p = state.participants.find(pp => pp.id === sv.participant_id);
               return (
-                <div key={sv.id} style={{ padding: 14, background: C.bg, borderRadius: 10 }}>
+                <div key={sv.id} style={{ padding: 14, background: C.lineSoft, borderRadius: 10 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
                     <Avatar type={p?.type} gender={p?.gender} name={p?.name} size={28} color={PERSONA[p?.type]?.color || C.brand} />
                     <span style={{ fontSize: 12, fontWeight: 700, color: C.ink }}>{p?.name}</span>
