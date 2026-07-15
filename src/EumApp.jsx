@@ -3191,11 +3191,17 @@ function aiWelfare(pf){
   return r;
 }
 function AIWrap({ label, children, color }){
-  const c = color || C.lavender;
+  // AI 생성 결과 블록 — 컬러 보더+파스텔 배경을 걷어내고, 흰 패널 + 상단 라벨 스트립으로.
+  // 'AI가 만든 영역'임은 Sparkles 아이콘과 라벨로 알리고, 색은 절제한다.
+  const c = color || C.brand;
   return (
-    <div style={{ position:'relative', border:'1.5px solid '+c, borderRadius:14, background:C.lavenderSoft, padding:'18px 18px 15px', marginTop:14 }}>
-      <span style={{ position:'absolute', top:-10, left:14, background:c, color:'#fff', fontSize:10, fontWeight:800, padding:'3px 10px', borderRadius:999 }}>{label}</span>
-      {children}
+    <div style={{ border:`1px solid ${C.line}`, borderRadius:14, background:C.panel, boxShadow:SHADOW.xs, marginTop:14, overflow:'hidden' }}>
+      <div style={{ display:'flex', alignItems:'center', gap:7, padding:'10px 16px', borderBottom:`1px solid ${C.lineSoft}`, background:C.lineSoft }}>
+        <Sparkles size={13} style={{ color:c }} />
+        <span style={{ fontSize:12, fontWeight:700, color:C.headline, letterSpacing:'-0.01em' }}>{label}</span>
+        <span style={{ marginLeft:'auto', fontSize:10.5, fontWeight:700, color:c, background:c+'14', padding:'2px 7px', borderRadius:6 }}>AI 생성</span>
+      </div>
+      <div style={{ padding:'16px 18px' }}>{children}</div>
     </div>
   );
 }
