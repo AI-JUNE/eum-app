@@ -967,25 +967,29 @@ function NotificationBell({ state, role, user, onNavigate, dark }) {
   const urgent = items.some(i => i.urgent);
   return (
     <div ref={ref} style={{ position: 'relative' }}>
-      <button onClick={() => setOpen(o => !o)} aria-label="알림" style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', width: 38, height: 38, borderRadius: 10, border: `1px solid ${dark ? 'rgba(255,255,255,0.15)' : C.border}`, background: dark ? 'rgba(255,255,255,0.06)' : C.card, color: dark ? '#fff' : C.inkSoft, cursor: 'pointer' }}>
+      <button onClick={() => setOpen(o => !o)} aria-label="알림" style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', width: 38, height: 38, borderRadius: 10, border: `1px solid ${dark ? 'rgba(255,255,255,0.15)' : C.line}`, background: dark ? 'rgba(255,255,255,0.06)' : C.panel, color: dark ? '#fff' : C.inkSoft, cursor: 'pointer', transition: 'background .14s ease' }}
+        onMouseEnter={(e) => { if (!dark) e.currentTarget.style.background = C.hover; }}
+        onMouseLeave={(e) => { if (!dark) e.currentTarget.style.background = C.panel; }}>
         <Bell size={18} />
         {items.length > 0 && (
-          <span style={{ position: 'absolute', top: -4, right: -4, minWidth: 17, height: 17, padding: '0 4px', borderRadius: 9, background: urgent ? C.red : C.brand, color: '#fff', fontSize: 10, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', border: `2px solid ${dark ? '#1A1814' : C.card}` }}>{items.length}</span>
+          <span style={{ position: 'absolute', top: -4, right: -4, minWidth: 17, height: 17, padding: '0 4px', borderRadius: 9, background: urgent ? C.red : C.brand, color: '#fff', fontSize: 10, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', border: `2px solid ${dark ? '#1A1814' : C.panel}`, fontVariantNumeric: 'tabular-nums' }}>{items.length}</span>
         )}
       </button>
       {open && (
-        <div style={{ position: 'absolute', top: 46, right: 0, width: 320, maxWidth: '86vw', background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, boxShadow: '0 16px 48px rgba(26,24,20,0.18)', zIndex: 200, overflow: 'hidden', animation: 'slideUp 0.18s ease', textAlign: 'left' }}>
-          <div style={{ padding: '13px 16px', borderBottom: `1px solid ${C.borderSoft}`, fontSize: 13, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK }}>알림 {items.length > 0 && `(${items.length})`}</div>
+        <div style={{ position: 'absolute', top: 46, right: 0, width: 330, maxWidth: '86vw', background: C.panel, border: `1px solid ${C.line}`, borderRadius: 14, boxShadow: SHADOW.lg, zIndex: 200, overflow: 'hidden', animation: 'slideUp 0.18s ease', textAlign: 'left' }}>
+          <div style={{ padding: '13px 16px', borderBottom: `1px solid ${C.lineSoft}`, fontSize: 13.5, fontWeight: 700, color: C.headline, letterSpacing: '-0.02em' }}>알림 {items.length > 0 && <span style={{ color: C.muteLight, fontWeight: 600 }}>{items.length}</span>}</div>
           {items.length === 0 ? (
-            <div style={{ padding: '28px 16px', textAlign: 'center', color: C.mute, fontSize: 13 }}>새로운 알림이 없습니다</div>
+            <div style={{ padding: '32px 16px', textAlign: 'center', color: C.muteLight, fontSize: 13 }}>새로운 알림이 없습니다</div>
           ) : items.map(it => {
             const Icon = it.icon;
             return (
-              <button key={it.id} onClick={() => { setOpen(false); onNavigate && onNavigate(it.view); }} style={{ width: '100%', display: 'flex', alignItems: 'flex-start', gap: 11, padding: '12px 16px', border: 'none', borderBottom: `1px solid ${C.borderSoft}`, background: 'none', cursor: 'pointer', textAlign: 'left', fontFamily: FONT_STACK }}>
-                <div style={{ width: 32, height: 32, borderRadius: 9, background: it.color + '18', color: it.color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><Icon size={16} /></div>
+              <button key={it.id} onClick={() => { setOpen(false); onNavigate && onNavigate(it.view); }} style={{ width: '100%', display: 'flex', alignItems: 'flex-start', gap: 11, padding: '12px 16px', border: 'none', borderBottom: `1px solid ${C.lineSoft}`, background: 'none', cursor: 'pointer', textAlign: 'left', fontFamily: FONT_STACK, transition: 'background .13s ease' }}
+                onMouseEnter={(e) => e.currentTarget.style.background = C.hover}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'none'}>
+                <div style={{ width: 32, height: 32, borderRadius: 9, background: it.color + '14', color: it.color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><Icon size={16} /></div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: C.ink }}>{it.title}</div>
-                  <div style={{ fontSize: 12, color: C.mute, marginTop: 1 }}>{it.desc}</div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: C.headline, letterSpacing: '-0.02em' }}>{it.title}</div>
+                  <div style={{ fontSize: 12, color: C.navMute, marginTop: 2, lineHeight: 1.4 }}>{it.desc}</div>
                 </div>
               </button>
             );
@@ -1794,54 +1798,54 @@ function YouthApp({ state, user, dispatch, showToast }) {
           <HomeHub setView={setView} />
           <TrustRow />
 
-          {/* Hero — 매칭 트리오 */}
+          {/* Hero — 매칭 트리오. 흐린 그라데이션을 걷고 흰 카드 + 세대 컬러 도트 헤더로. */}
           {match && (
-            <Card padding={0} style={{ marginBottom: 20, overflow: 'hidden', background: `linear-gradient(135deg, ${C.cream} 0%, ${C.brandBg} 100%)`, border: `1px solid ${C.border}` }}>
+            <div style={{ marginBottom: 20, overflow: 'hidden', background: C.panel, border: `1px solid ${C.line}`, borderRadius: 16, boxShadow: SHADOW.sm }}>
               <div style={{ padding: 22 }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18, flexWrap: 'wrap', gap: 10 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, flexWrap: 'wrap', gap: 10 }}>
                   <div>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: C.brand, letterSpacing: '0.1em', marginBottom: 4 }}>NOW MATCHED</div>
-                    <div style={{ fontSize: 19, fontWeight: 700, color: C.ink, letterSpacing: '-0.02em', fontFamily: SERIF_STACK }}>우리 매칭 트리오</div>
-                    <div style={{ fontSize: 12, color: C.mute, marginTop: 3 }}>매칭 시작: {fmtDate(match.started_at)} · {myActivities.filter(a => a.status === 'completed').length}회차 진행</div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: C.brand, letterSpacing: '0.08em', marginBottom: 5 }}>우리 매칭 트리오</div>
+                    <div style={{ fontSize: 19, fontWeight: 800, color: C.headline, letterSpacing: '-0.03em' }}>세 세대가 함께하고 있어요</div>
+                    <div style={{ fontSize: 12.5, color: C.muteLight, marginTop: 4, fontWeight: 500 }}>매칭 시작 {fmtDate(match.started_at)} · {myActivities.filter(a => a.status === 'completed').length}회차 진행</div>
                   </div>
                   <Badge color={C.sage} soft={C.sageSoft} size="md">활동 중</Badge>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 18, flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14, flexWrap: 'wrap' }}>
                   <TrioMember person={senior} sub="멘토" color={C.lavender} trust={trustStatus(state, senior?.id)} />
-                  <div style={{ display: 'flex', alignItems: 'center', color: C.brand, fontSize: 20 }}>↔</div>
+                  <ArrowRight size={17} style={{ color: '#CBD0D8' }} />
                   <TrioMember person={user} sub="나" color={C.sage} highlight />
-                  <div style={{ display: 'flex', alignItems: 'center', color: C.brand, fontSize: 20 }}>↔</div>
+                  <ArrowRight size={17} style={{ color: '#CBD0D8' }} />
                   <TrioMember person={child} sub="멘티" color={C.peach} trust={trustStatus(state, child?.id)} />
                 </div>
 
                 {match.match_notes && (
-                  <div style={{ marginTop: 18, padding: 12, background: 'rgba(255,255,255,0.6)', borderRadius: 9, fontSize: 13, color: C.inkSoft, lineHeight: 1.6 }}>
-                    <span style={{ fontSize: 11, fontWeight: 700, color: C.brand, letterSpacing: '0.05em', marginRight: 6 }}>코디 메모</span>
+                  <div style={{ marginTop: 20, padding: '12px 14px', background: C.lineSoft, borderRadius: 10, fontSize: 13, color: C.inkSoft, lineHeight: 1.6 }}>
+                    <span style={{ fontSize: 11.5, fontWeight: 700, color: C.navMute, marginRight: 7 }}>코디 메모</span>
                     {match.match_notes}
                   </div>
                 )}
               </div>
-            </Card>
+            </div>
           )}
 
-          {/* 이번 달 목표 — 움직이는 도넛 인포그래픽 */}
+          {/* 이번 달 목표 — 흰 카드 + 링. 파스텔 그라데이션 제거. */}
           <Reveal>
-            <Card padding={20} style={{ marginBottom: 20, display: 'flex', alignItems: 'center', gap: 22, background: `linear-gradient(135deg, ${C.cream} 0%, ${C.sageSoft} 140%)`, flexWrap: 'wrap' }}>
-              <Ring value={monthHours} max={24} size={104} stroke={11} color={C.sage} label={`${Math.round(monthHours / 24 * 100)}%`} sublabel="달성" />
+            <div style={{ marginBottom: 20, display: 'flex', alignItems: 'center', gap: 22, flexWrap: 'wrap', background: C.panel, border: `1px solid ${C.line}`, borderRadius: 16, boxShadow: SHADOW.xs, padding: 22 }}>
+              <Ring value={monthHours} max={24} size={100} stroke={10} color={C.sage} track={C.lineSoft} label={`${Math.round(monthHours / 24 * 100)}%`} sublabel="달성" />
               <div style={{ flex: 1, minWidth: 180 }}>
-                <div style={{ fontSize: 12, fontWeight: 700, color: C.sage, letterSpacing: '0.08em', marginBottom: 6 }}>이번 달 활동 목표</div>
-                <div style={{ fontSize: 22, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK, letterSpacing: '-0.02em', lineHeight: 1.2 }}>
-                  <CountUp value={monthHours} suffix="시간" /> <span style={{ fontSize: 15, color: C.mute, fontWeight: 600 }}>/ 24시간</span>
+                <div style={{ fontSize: 12.5, fontWeight: 600, color: C.navMute, marginBottom: 6 }}>이번 달 활동 목표</div>
+                <div style={{ fontSize: 23, fontWeight: 800, color: C.headline, letterSpacing: '-0.03em', lineHeight: 1.2, fontVariantNumeric: 'tabular-nums' }}>
+                  <CountUp value={monthHours} suffix="시간" /> <span style={{ fontSize: 15, color: C.muteLight, fontWeight: 600 }}>/ 24시간</span>
                 </div>
-                <div style={{ fontSize: 13, color: C.inkSoft, marginTop: 6, lineHeight: 1.5 }}>
-                  {monthHours >= 24 ? '이번 달 목표를 달성했어요! 🎉' : `목표까지 ${24 - monthHours}시간 남았어요. 꾸준히 잇고 있어요.`}
+                <div style={{ fontSize: 13, color: C.inkSoft, marginTop: 7, lineHeight: 1.5 }}>
+                  {monthHours >= 24 ? '이번 달 목표를 달성했어요!' : `목표까지 ${24 - monthHours}시간 남았어요. 꾸준히 잇고 있어요.`}
                 </div>
-                <div style={{ marginTop: 12 }}>
-                  <AnimatedBar value={monthHours} max={24} color={C.sage} height={8} />
+                <div style={{ marginTop: 13 }}>
+                  <AnimatedBar value={monthHours} max={24} color={C.sage} height={7} track={C.lineSoft} />
                 </div>
               </div>
-            </Card>
+            </div>
           </Reveal>
 
           {/* Stats Row */}
@@ -1923,8 +1927,8 @@ function TrioMember({ person, sub, color, highlight, trust }) {
           <ShieldCheck size={11} strokeWidth={3} />
         </div>}
       </div>
-      <div style={{ fontSize: 14, fontWeight: 700, color: C.ink, letterSpacing: '-0.01em' }}>{person.name}</div>
-      <div style={{ fontSize: 11, color: C.mute, marginTop: 1 }}>{sub} · {person.age}세</div>
+      <div style={{ fontSize: 14, fontWeight: 700, color: C.headline, letterSpacing: '-0.02em' }}>{person.name}</div>
+      <div style={{ fontSize: 11.5, color: C.muteLight, marginTop: 2, fontWeight: 500 }}>{sub} · {person.age}세</div>
     </div>
   );
 }
@@ -2118,17 +2122,17 @@ function YouthMentor({ senior, myLogs, state }) {
     <>
       <PageHeader title="진로 멘토" subtitle="어르신께 받은 인생·진로 조언" />
       {senior && (
-        <Card padding={20} style={{ marginBottom: 20, background: `linear-gradient(135deg, ${C.lavenderSoft} 0%, ${C.cream} 100%)`, border: `1px solid ${C.lavender}30` }}>
+        <div style={{ marginBottom: 20, background: C.panel, border: `1px solid ${C.line}`, borderRadius: 16, boxShadow: SHADOW.sm, padding: 20 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            <Avatar type="senior" name={senior.name} color={C.lavender} size={68} />
+            <Avatar type="senior" name={senior.name} color={C.lavender} size={64} ring />
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 11, color: C.lavender, fontWeight: 700, letterSpacing: '0.08em', marginBottom: 4 }}>나의 멘토</div>
-              <div style={{ fontSize: 20, fontWeight: 700, color: C.ink, fontFamily: SERIF_STACK, letterSpacing: '-0.02em' }}>{senior.name} 어르신</div>
-              <div style={{ fontSize: 13, color: C.inkSoft, marginTop: 4 }}>{senior.occupation} · {senior.age}세</div>
-              <div style={{ fontSize: 12, color: C.mute, marginTop: 6, lineHeight: 1.5, fontStyle: 'italic' }}>"{senior.bio}"</div>
+              <div style={{ fontSize: 11.5, color: C.lavender, fontWeight: 700, marginBottom: 4 }}>나의 멘토</div>
+              <div style={{ fontSize: 20, fontWeight: 800, color: C.headline, letterSpacing: '-0.03em' }}>{senior.name} 어르신</div>
+              <div style={{ fontSize: 13, color: C.inkSoft, marginTop: 4, fontWeight: 500 }}>{senior.occupation} · {senior.age}세</div>
+              <div style={{ fontSize: 12.5, color: C.navMute, marginTop: 7, lineHeight: 1.55 }}>“{senior.bio}”</div>
             </div>
           </div>
-        </Card>
+        </div>
       )}
       <div style={{ fontSize: 13, fontWeight: 700, color: C.mute, letterSpacing: '0.05em', marginBottom: 12 }}>받은 조언 기록</div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -2160,17 +2164,17 @@ function ArchiveView({ state }) {
   return (
     <>
       <PageHeader title="동네 기억 아카이브" subtitle="광주 우산동의 옛이야기를 어르신께 듣고 기록합니다" />
-      <Card padding={22} style={{ marginBottom: 20, background: `linear-gradient(135deg, ${C.goldSoft} 0%, ${C.cream} 100%)`, border: `1px solid ${C.gold}40` }}>
+      <div style={{ marginBottom: 20, background: C.panel, border: `1px solid ${C.line}`, borderRadius: 16, boxShadow: SHADOW.xs, padding: 22 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          <div style={{ padding: 12, background: C.gold + '30', borderRadius: 12 }}>
-            <BookOpen size={28} color={C.gold} />
+          <div style={{ width: 52, height: 52, display: 'flex', alignItems: 'center', justifyContent: 'center', background: C.goldSoft, borderRadius: 14, flexShrink: 0 }}>
+            <BookOpen size={26} color={C.gold} />
           </div>
           <div>
-            <div style={{ fontSize: 18, fontWeight: 700, color: C.ink, fontFamily: SERIF_STACK, letterSpacing: '-0.02em' }}>이 동네에도 이야기가 있습니다</div>
-            <div style={{ fontSize: 13, color: C.inkSoft, marginTop: 4, lineHeight: 1.6, maxWidth: 480 }}>어르신의 기억은 동네의 역사입니다. 청년이 듣고 기록하면, 다음 세대에 전해집니다.</div>
+            <div style={{ fontSize: 18, fontWeight: 800, color: C.headline, letterSpacing: '-0.03em' }}>이 동네에도 이야기가 있습니다</div>
+            <div style={{ fontSize: 13, color: C.navMute, marginTop: 5, lineHeight: 1.6, maxWidth: 480 }}>어르신의 기억은 동네의 역사입니다. 청년이 듣고 기록하면, 다음 세대에 전해집니다.</div>
           </div>
         </div>
-      </Card>
+      </div>
 
       <div style={{ fontSize: 13, fontWeight: 700, color: C.mute, letterSpacing: '0.05em', marginBottom: 12 }}>수집된 이야기 {archiveLogs.length}편</div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -2203,37 +2207,39 @@ function SettlementView({ settlements, totalHours, totalEarned, user }) {
     <>
       <PageHeader title="정산 내역" subtitle="광주상생카드 (월 1회 일괄 발급)" />
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12, marginBottom: 20 }}>
-        <StatCard label="누적 정산액" value={krw(totalEarned)} color={C.gold} icon={<Wallet size={16} color={C.gold} />} />
-        <StatCard label="누적 활동시간" value={`${totalHours}h`} icon={<Clock size={16} color={C.brand} />} />
-        <StatCard label="발급 횟수" value={`${settlements.filter(s => s.status === 'paid').length}회`} icon={<Award size={16} color={C.sage} />} />
-      </div>
+      <KpiStrip
+        style={{ marginBottom: 16 }}
+        items={[
+          { label: '누적 정산액', value: krw(totalEarned), sub: '광주상생카드', color: C.gold, icon: <Wallet size={15} /> },
+          { label: '누적 활동시간', value: totalHours, unit: '시간', color: C.brand, icon: <Clock size={15} /> },
+          { label: '발급 횟수', value: settlements.filter(s => s.status === 'paid').length, unit: '회', color: C.sage, icon: <Award size={15} /> },
+        ]}
+      />
 
-      <Card padding={0}>
-        <div style={{ padding: '14px 18px', borderBottom: `1px solid ${C.border}`, fontSize: 14, fontWeight: 700, color: C.ink }}>발급 내역</div>
+      <Panel title="발급 내역" padding={0}>
         {settlements.length === 0 ? (
           <Empty icon={<Wallet size={42} />} title="정산 내역이 없습니다" sub="월 1일에 자동 발급됩니다" />
-        ) : settlements.map((s) => (
-          <div key={s.id} style={{ padding: '14px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: `1px solid ${C.borderSoft}` }}>
-            <div>
-              <div style={{ fontSize: 14, fontWeight: 700, color: C.ink, marginBottom: 3 }}>{s.month.replace('-', '년 ')}월 활동분</div>
-              <div style={{ fontSize: 11, color: C.mute, display: 'flex', gap: 10 }}>
-                <span>{s.total_hours}시간</span>
+        ) : settlements.map((s, i) => (
+          <div key={s.id} style={{ padding: '14px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, borderTop: i === 0 ? 'none' : `1px solid ${C.lineSoft}` }}>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontSize: 14, fontWeight: 700, color: C.headline, marginBottom: 4, letterSpacing: '-0.02em' }}>{s.month.replace('-', '년 ')}월 활동분</div>
+              <div style={{ fontSize: 11.5, color: C.muteLight, display: 'flex', gap: 8, flexWrap: 'wrap', fontWeight: 500 }}>
+                <span style={{ fontVariantNumeric: 'tabular-nums' }}>{s.total_hours}시간</span>
                 <span>·</span>
-                <span>{fmtDate(s.issued_at)} 발급</span>
+                <span style={{ fontVariantNumeric: 'tabular-nums' }}>{fmtDate(s.issued_at)} 발급</span>
                 <span>·</span>
                 <span style={{ fontFamily: 'monospace' }}>{s.voucher_code}</span>
               </div>
             </div>
-            <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: 18, fontWeight: 700, color: C.gold, fontFamily: SERIF_STACK, letterSpacing: '-0.02em' }}>{krw(s.amount_krw)}</div>
-              <Badge color={s.status === 'paid' ? C.sage : C.amber} soft={s.status === 'paid' ? C.sageSoft : C.amberSoft}>
-                {s.status === 'paid' ? '발급완료' : '발급예정'}
+            <div style={{ textAlign: 'right', flexShrink: 0 }}>
+              <div style={{ fontSize: 18, fontWeight: 800, color: C.headline, letterSpacing: '-0.03em', fontVariantNumeric: 'tabular-nums' }}>{krw(s.amount_krw)}</div>
+              <Badge color={s.status === 'paid' ? C.sage : C.amber} soft={s.status === 'paid' ? C.sageSoft : C.amberSoft} size="sm">
+                {s.status === 'paid' ? '발급 완료' : '발급 예정'}
               </Badge>
             </div>
           </div>
         ))}
-      </Card>
+      </Panel>
     </>
   );
 }
@@ -2364,12 +2370,15 @@ function SeniorApp({ state, user, dispatch, showToast }) {
 
       {view === 'settlement' && (
         <>
-          <div style={{ fontSize: 32, fontWeight: 700, color: C.ink, marginBottom: 8, fontFamily: SERIF_STACK, letterSpacing: '-0.03em' }}>받은 상품권</div>
-          <div style={{ fontSize: 17, color: C.mute, marginBottom: 24 }}>광주상생카드은 동네 가맹점에서 사용하실 수 있습니다</div>
-          <Card padding={28} style={{ marginBottom: 20, background: C.goldSoft, border: `2px solid ${C.gold}40` }}>
-            <div style={{ fontSize: 16, color: C.gold, fontWeight: 700, marginBottom: 8 }}>누적 합계</div>
-            <div style={{ fontSize: 48, fontWeight: 700, color: C.ink, fontFamily: SERIF_STACK, letterSpacing: '-0.03em', lineHeight: 1 }}>{krw(totalEarned)}</div>
-          </Card>
+          <div style={{ fontSize: 32, fontWeight: 800, color: C.headline, marginBottom: 8, letterSpacing: '-0.04em' }}>받은 상품권</div>
+          <div style={{ fontSize: 17, color: C.navMute, marginBottom: 24, fontWeight: 500 }}>광주상생카드는 동네 가맹점에서 사용하실 수 있습니다</div>
+          <div style={{ marginBottom: 20, background: C.panel, border: `1px solid ${C.line}`, borderRadius: 18, boxShadow: SHADOW.sm, padding: 28, display: 'flex', alignItems: 'center', gap: 20 }}>
+            <span style={{ width: 56, height: 56, borderRadius: 16, background: C.goldSoft, color: C.gold, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><Wallet size={28} /></span>
+            <div>
+              <div style={{ fontSize: 16, color: C.navMute, fontWeight: 600, marginBottom: 6 }}>누적 합계</div>
+              <div style={{ fontSize: 46, fontWeight: 800, color: C.headline, letterSpacing: '-0.04em', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>{krw(totalEarned)}</div>
+            </div>
+          </div>
           {mySettlements.map(s => (
             <Card key={s.id} padding={20} style={{ marginBottom: 10 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -2711,27 +2720,27 @@ function ParentDashboard({ user, myChildren, myMatches, todayActivities, upcomin
 
       {/* 트리오 카드 */}
       {match && (
-        <Card padding={24} style={{ marginBottom: 20, background: `linear-gradient(135deg, ${C.peach}15 0%, ${C.brand}10 100%)`, border: `1px solid ${C.peach}50` }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 18 }}>
-            <Heart size={18} style={{ color: C.brand }} />
-            <div style={{ fontSize: 13, fontWeight: 700, color: C.brand, letterSpacing: '0.08em' }}>우리 아이의 트리오</div>
+        <div style={{ marginBottom: 20, background: C.panel, border: `1px solid ${C.line}`, borderRadius: 16, boxShadow: SHADOW.sm, padding: 24 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 18 }}>
+            <Heart size={16} style={{ color: C.brand }} />
+            <div style={{ fontSize: 13, fontWeight: 700, color: C.headline, letterSpacing: '-0.02em' }}>우리 아이의 트리오</div>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
             <TrioMember person={child} sub="자녀" color={C.peach} trust={trustStatus(state, child?.id)} />
             <TrioMember person={youth} sub={`청년 멘토 · ${youth?.skills?.[0] || '활동'}`} color={C.sage} trust={trustStatus(state, youth?.id)} />
             <TrioMember person={senior} sub={`동네 어르신 · ${senior?.skills?.[0] || ''}`} color={C.lavender} trust={trustStatus(state, senior?.id)} />
           </div>
-          <div style={{ display: 'flex', gap: 12, marginTop: 20, paddingTop: 18, borderTop: `1px solid ${C.borderSoft}` }}>
+          <div style={{ display: 'flex', gap: 12, marginTop: 20, paddingTop: 18, borderTop: `1px solid ${C.lineSoft}` }}>
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 11, color: C.mute, fontWeight: 600, letterSpacing: '0.06em', marginBottom: 4 }}>이번 달 활동시간</div>
-              <div style={{ fontSize: 22, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK }}>{totalHoursThisMonth}시간</div>
+              <div style={{ fontSize: 11.5, color: C.navMute, fontWeight: 600, marginBottom: 5 }}>이번 달 활동시간</div>
+              <div style={{ fontSize: 22, fontWeight: 800, color: C.headline, letterSpacing: '-0.03em', fontVariantNumeric: 'tabular-nums' }}>{totalHoursThisMonth}시간</div>
             </div>
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 11, color: C.mute, fontWeight: 600, letterSpacing: '0.06em', marginBottom: 4 }}>매칭 시작</div>
-              <div style={{ fontSize: 22, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK }}>{fmtDate(match.started_at)}</div>
+              <div style={{ fontSize: 11.5, color: C.navMute, fontWeight: 600, marginBottom: 5 }}>매칭 시작</div>
+              <div style={{ fontSize: 22, fontWeight: 800, color: C.headline, letterSpacing: '-0.03em', fontVariantNumeric: 'tabular-nums' }}>{fmtDate(match.started_at)}</div>
             </div>
           </div>
-        </Card>
+        </div>
       )}
 
       {/* 오늘 활동 */}
