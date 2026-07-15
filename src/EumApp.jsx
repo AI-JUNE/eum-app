@@ -689,23 +689,29 @@ function Toast({ toast, onClose }) {
     }
   }, [toast, onClose]);
   if (!toast) return null;
+  // 토스트 — 어두운 알약을 걷어내고 화이트 서피스 + 좌측 상태 아이콘 칩으로.
+  // 콘솔 전반의 화이트 카드 언어와 일관되게, 상태는 아이콘 색으로만 전달한다.
   const colors = {
-    success: { bg: '#1F2A1B', icon: <CheckCircle2 size={18} color={C.sage} /> },
-    error: { bg: '#2A1B1B', icon: <AlertCircle size={18} color={C.red} /> },
-    info: { bg: C.ink, icon: <Info size={18} color="#fff" /> },
+    success: { c: C.sage, soft: C.sageSoft, icon: <CheckCircle2 size={16} /> },
+    error: { c: C.red, soft: C.redSoft, icon: <AlertCircle size={16} /> },
+    info: { c: C.brand, soft: C.brandSoft, icon: <Info size={16} /> },
   };
   const c = colors[toast.type || 'info'];
   return (
     <div role="status" aria-live={toast.type === 'error' ? 'assertive' : 'polite'} style={{
       position: 'fixed', bottom: 24, right: 24, zIndex: 2000,
-      background: c.bg, color: '#fff', padding: '13px 18px',
-      borderRadius: 12, display: 'flex', alignItems: 'center', gap: 10,
-      boxShadow: '0 10px 30px rgba(0,0,0,0.32)', maxWidth: 380,
-      fontSize: 14, fontWeight: 600, animation: 'slideInRight 0.2s ease',
+      background: C.panel, color: C.headline, padding: '12px 16px 12px 12px',
+      border: `1px solid ${C.line}`, borderRadius: 12,
+      display: 'flex', alignItems: 'center', gap: 11,
+      boxShadow: SHADOW.lg, maxWidth: 400,
+      fontSize: 13.5, fontWeight: 600, letterSpacing: '-0.01em',
+      animation: 'slideInRight 0.2s cubic-bezier(0.22,1,0.36,1)',
       fontFamily: FONT_STACK,
     }}>
-      {c.icon}
-      {toast.message}
+      <span style={{ width: 28, height: 28, borderRadius: 8, background: c.soft, color: c.c, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        {c.icon}
+      </span>
+      <span style={{ lineHeight: 1.45 }}>{toast.message}</span>
     </div>
   );
 }
