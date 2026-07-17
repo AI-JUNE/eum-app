@@ -27,5 +27,11 @@ dist-ssr
 .eumcheck_tmp.js
 .mountprobe.txt
 mp.js
-.mountprobe.txt
 .mountsync_probe
+
+# scratch/verify snapshots & mount-write probes (do not commit)
+src/_verify.jsx
+_verify.jsx
+_wtest_*
+.wtest_*
+_mountcheck*.txt

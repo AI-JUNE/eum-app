@@ -7,7 +7,8 @@ import {
   Filter, Download, ArrowRight, ArrowUpRight, Star, TrendingUp, Loader2,
   CheckCircle2, AlertCircle, Eye, EyeOff, Menu, Smile, ThumbsUp, Activity,
   ClipboardCheck, FileSignature, Wallet, ShieldAlert, Megaphone, Info,
-  ChevronUp, UserPlus, PenLine, Upload, Hash, Mail, MapPinned, Cake, ArrowDown
+  ChevronUp, UserPlus, PenLine, Upload, Hash, Mail, MapPinned, Cake, ArrowDown,
+  BellOff
 } from 'lucide-react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -21,6 +22,7 @@ import {
 import { C, PERSONA, FONT_STACK, SERIF_STACK, SHADOW } from './eum/theme.js';
 import { normalizeState, loadState, saveState } from './eum/storage.js';
 import { TODAY, krw, fmtDate, fmtRelativeDate, uid } from './eum/utils.js';
+import { callClaude } from './eum/api.js';
 
 // ============================================================================
 // 2. SEED DATA
@@ -462,7 +464,7 @@ function Card({ children, padding = 20, style = {}, onClick, hoverable }) {
   );
 }
 
-function Input({ value, onChange, placeholder, type = 'text', icon, style = {}, disabled }) {
+function Input({ value, onChange, placeholder, type = 'text', icon, style = {}, disabled, autoComplete, inputMode }) {
   return (
     <div style={{ position: 'relative', width: '100%' }}>
       {icon && <div style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: C.mute, display: 'flex' }}>{icon}</div>}
@@ -472,6 +474,8 @@ function Input({ value, onChange, placeholder, type = 'text', icon, style = {}, 
         onChange={(e) => onChange && onChange(e.target.value)}
         placeholder={placeholder}
         aria-label={placeholder}
+        autoComplete={autoComplete}
+        inputMode={inputMode}
         disabled={disabled}
         style={{
           width: '100%', padding: icon ? '10px 14px 10px 38px' : '10px 14px',
@@ -498,14 +502,14 @@ function Textarea({ value, onChange, placeholder, rows = 4, style = {} }) {
       rows={rows}
       style={{
         width: '100%', padding: '11px 14px',
-        border: `1px solid ${C.border}`, borderRadius: 12,
-        fontSize: 14, fontFamily: FONT_STACK, color: C.ink,
-        background: C.card, outline: 'none', resize: 'vertical',
+        border: `1px solid ${C.line}`, borderRadius: 10,
+        fontSize: 13.5, fontFamily: FONT_STACK, color: C.ink,
+        background: C.panel, outline: 'none', resize: 'vertical',
         lineHeight: 1.6, transition: 'border-color 0.15s ease, box-shadow 0.15s ease',
         ...style
       }}
-      onFocus={(e) => { e.target.style.borderColor = C.brand; e.target.style.boxShadow = `0 0 0 3px ${C.brand}22`; }}
-      onBlur={(e) => { e.target.style.borderColor = C.border; e.target.style.boxShadow = 'none'; }}
+      onFocus={(e) => { e.target.style.borderColor = C.brand; e.target.style.boxShadow = `0 0 0 3px ${C.brand}1f`; }}
+      onBlur={(e) => { e.target.style.borderColor = C.line; e.target.style.boxShadow = 'none'; }}
     />
   );
 }
@@ -990,7 +994,10 @@ function NotificationBell({ state, role, user, onNavigate, dark }) {
         <div style={{ position: 'absolute', top: 46, right: 0, width: 330, maxWidth: '86vw', background: C.panel, border: `1px solid ${C.line}`, borderRadius: 14, boxShadow: SHADOW.lg, zIndex: 200, overflow: 'hidden', animation: 'slideUp 0.18s ease', textAlign: 'left' }}>
           <div style={{ padding: '13px 16px', borderBottom: `1px solid ${C.lineSoft}`, fontSize: 13.5, fontWeight: 700, color: C.headline, letterSpacing: '-0.02em' }}>알림 {items.length > 0 && <span style={{ color: C.muteLight, fontWeight: 600 }}>{items.length}</span>}</div>
           {items.length === 0 ? (
-            <div style={{ padding: '32px 16px', textAlign: 'center', color: C.muteLight, fontSize: 13 }}>새로운 알림이 없습니다</div>
+            <div style={{ padding: '32px 16px', textAlign: 'center', color: C.mute }}>
+              <div aria-hidden="true" style={{ width: 44, height: 44, borderRadius: 13, background: C.lineSoft, border: `1px solid ${C.line}`, color: C.muteLight, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 10px' }}><BellOff size={20} /></div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: C.navMute }}>새로운 알림이 없습니다</div>
+            </div>
           ) : items.map(it => {
             const Icon = it.icon;
             return (
@@ -1203,7 +1210,7 @@ function EumLogo({ size = 32, variant = 'badge' }) {
   return (
     <svg width={size} height={size} viewBox="0 0 105 105" style={{ display: 'block', flexShrink: 0 }} role="img" aria-label="이음 로고">
       <g transform="translate(0,19.5)">
-        <path fill="#FC5028" d={EUM_MARK_D} />
+        <path fill="#BE5535" d={EUM_MARK_D} />
       </g>
     </svg>
   );
@@ -1627,21 +1634,21 @@ function ApplicationForm({ onClose, onSubmit }) {
       {step === 2 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           <Field label="성함" required>
-            <Input value={form.name} onChange={(v) => set('name', v)} placeholder="홍길동" />
+            <Input value={form.name} onChange={(v) => set('name', v)} placeholder="홍길동" autoComplete="name" />
           </Field>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 12 }}>
             <Field label="나이" required>
-              <Input value={form.age} onChange={(v) => set('age', v)} placeholder="27" type="number" />
+              <Input value={form.age} onChange={(v) => set('age', v)} placeholder="27" type="number" inputMode="numeric" />
             </Field>
             <Field label="연락처" required>
-              <Input value={form.phone} onChange={(v) => set('phone', v)} placeholder="010-1234-5678" type="tel" />
+              <Input value={form.phone} onChange={(v) => set('phone', v)} placeholder="010-1234-5678" type="tel" autoComplete="tel" />
             </Field>
           </div>
           <Field label="거주지" required>
-            <Input value={form.address} onChange={(v) => set('address', v)} placeholder="광주광역시 광산구 우산동 ..." icon={<MapPin size={15} />} />
+            <Input value={form.address} onChange={(v) => set('address', v)} placeholder="광주광역시 광산구 우산동 ..." icon={<MapPin size={15} />} autoComplete="street-address" />
           </Field>
           <Field label="비상연락처" required sub="가족/지인 연락처와 관계 (예: 010-1234-5678 (모친))">
-            <Input value={form.emergency_contact} onChange={(v) => set('emergency_contact', v)} placeholder="010-0000-0000 (관계)" icon={<Phone size={15} />} />
+            <Input value={form.emergency_contact} onChange={(v) => set('emergency_contact', v)} placeholder="010-0000-0000 (관계)" icon={<Phone size={15} />} autoComplete="off" />
           </Field>
           {form.type !== 'parent' && (
             <Field label="직업/소속" sub="청년: 회사·학교 / 어르신: 前 직업">
@@ -1754,8 +1761,8 @@ function ChipSelect({ options, selected, onToggle, max, color = C.ink }) {
             disabled={disabled}
             style={{
               padding: '6px 12px', borderRadius: 16,
-              border: `1.5px solid ${isSel ? color : C.border}`,
-              background: isSel ? color : C.card,
+              border: `1.5px solid ${isSel ? color : C.line}`,
+              background: isSel ? color : C.panel,
               color: isSel ? '#fff' : C.ink,
               fontSize: 12.5, fontWeight: isSel ? 600 : 500,
               cursor: disabled ? 'not-allowed' : 'pointer',
@@ -2769,10 +2776,7 @@ function ParentDashboard({ user, myChildren, myMatches, todayActivities, upcomin
             <Badge color={C.brand} soft={C.brandSoft}>{todayActivities.length}건</Badge>
           </div>
           {todayActivities.length === 0 ? (
-            <div style={{ padding: '32px 16px', textAlign: 'center', color: C.mute }}>
-              <Coffee size={32} style={{ color: C.muteSoft, marginBottom: 10 }} />
-              <div style={{ fontSize: 14 }}>오늘은 예정된 활동이 없습니다.</div>
-            </div>
+            <Empty icon={<Coffee size={28} />} title="오늘은 예정된 활동이 없습니다" sub="여유로운 하루예요. 다음 일정을 확인해보세요" />
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {todayActivities.map(act => {
@@ -3101,30 +3105,9 @@ function ParentSafety({ user, myMatches, myIncidents, dispatch, showToast }) {
 }
 
 // ============================================================================
-// 10. CLAUDE API HELPER (AI 매칭 추천 & 월간 리포트 요약)
+// 10. CLAUDE API HELPER — src/eum/api.js 로 이동 (상단 import { callClaude })
+//   AI 매칭 추천 & 월간 리포트 요약용 외부 API 헬퍼. 동작·값 100% 동일.
 // ============================================================================
-
-async function callClaude({ system, user, maxTokens = 1024 }) {
-  try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: maxTokens,
-        system,
-        messages: [{ role: 'user', content: user }],
-      }),
-    });
-    if (!res.ok) throw new Error(`API ${res.status}`);
-    const data = await res.json();
-    const text = (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('\n');
-    return text;
-  } catch (e) {
-    console.error('Claude API error:', e);
-    throw e;
-  }
-}
 
 // ============================================================================
 // 11. COORDINATOR (코디네이터 관제실) APP
@@ -3825,7 +3808,7 @@ function YouthDiscover({ user, totalHours, showToast, setView }) {
           </Card>
         ))}
       </div>
-      {list.length === 0 && <Card style={{ textAlign: 'center', color: C.mute, padding: 30 }}>조건에 맞는 활동이 없어요. 다른 검색어/카테고리를 시도해 보세요.</Card>}
+      {list.length === 0 && <Card><Empty icon={<Search size={28} />} title="조건에 맞는 활동이 없어요" sub="다른 검색어나 카테고리를 시도해 보세요" /></Card>}
 
       <Card style={{ marginTop: 16, background: '#FFF4EE', border: '1px solid #FFD9C7' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}><Award size={16} style={{ color: '#FF6B35' }} /><div style={{ fontSize: 13, fontWeight: 800, color: '#D9531E' }}>참여하면 1365 봉사실적으로 인정</div></div>
@@ -4499,7 +4482,7 @@ const KAKAO_PHONE_HTML = `<div class="scr kk">
   </div>
   <div class="kInput"><span class="plus">＋</span><div class="kbox">메시지 입력</div><span class="ksnd">↑</span></div>
 </div>`;
-const TOBE_CSS = `.eum-tobe{--ink:#241d17;--paper:#fff;--cream:#fbf7f2;--cream2:#f4ede4;--coral:#FC5028;--coral-d:#D63C18;--coral-soft:#FFE4DC;--green:#4b7a52;--green-soft:#e9f1e7;--purple:#6a5aa0;--purple-soft:#efeaf6;--clay:#9a6a52;--sub:#5f564d;--mut:#9b9186;--line:#eee6dc;word-break:keep-all;-webkit-font-smoothing:antialiased;}
+const TOBE_CSS = `.eum-tobe{--ink:#241d17;--paper:#fff;--cream:#fbf7f2;--cream2:#f4ede4;--coral:#BE5535;--coral-d:#9E4329;--coral-soft:#F4E7E0;--green:#4b7a52;--green-soft:#e9f1e7;--purple:#6a5aa0;--purple-soft:#efeaf6;--clay:#9a6a52;--sub:#5f564d;--mut:#9b9186;--line:#eee6dc;word-break:keep-all;-webkit-font-smoothing:antialiased;}
 .eum-tobe *{box-sizing:border-box;}
 .eum-tobe .kick{font-size:13px;font-weight:700;color:var(--coral);letter-spacing:1.4px;text-transform:uppercase;margin-bottom:16px;}
 .eum-tobe h2{font-size:clamp(31px,3.9vw,48px);line-height:1.14;font-weight:800;letter-spacing:-1.1px;margin:0;color:var(--ink);}
@@ -4927,8 +4910,8 @@ function RLLanding({ state, onSelectRole, onShowApplication }) {
             <div>
               <div style={{ fontSize: 12, fontWeight: 800, color: C.ink, letterSpacing: '0.02em', marginBottom: 14 }}>서비스</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                <span onClick={() => { const el = document.getElementById('eum-demo'); if (el) el.scrollIntoView({ behavior: 'smooth' }); }} style={{ fontSize: 13.5, color: C.inkSoft, fontWeight: 500, cursor: 'pointer' }}>둘러보기 · 데모 체험</span>
-                <span onClick={onShowApplication} style={{ fontSize: 13.5, color: C.inkSoft, fontWeight: 500, cursor: 'pointer' }}>5분 참여 신청</span>
+                <span role="button" tabIndex={0} onClick={() => { const el = document.getElementById('eum-demo'); if (el) el.scrollIntoView({ behavior: 'smooth' }); }} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); const el = document.getElementById('eum-demo'); if (el) el.scrollIntoView({ behavior: 'smooth' }); } }} style={{ fontSize: 13.5, color: C.inkSoft, fontWeight: 500, cursor: 'pointer' }}>둘러보기 · 데모 체험</span>
+                <span role="button" tabIndex={0} onClick={onShowApplication} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onShowApplication(); } }} style={{ fontSize: 13.5, color: C.inkSoft, fontWeight: 500, cursor: 'pointer' }}>5분 참여 신청</span>
                 <span style={{ fontSize: 13.5, color: C.inkSoft, fontWeight: 500 }}>자주 묻는 질문</span>
               </div>
             </div>
@@ -6919,12 +6902,12 @@ class EumErrorBoundary extends React.Component {
   render() {
     if (this.state.error) {
       return (
-        <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: C.bg, fontFamily: FONT_STACK, padding: 24 }}>
+        <div role="alert" aria-live="assertive" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: C.bg, fontFamily: FONT_STACK, padding: 24 }}>
           <div style={{ maxWidth: 420, textAlign: 'center', background: C.card, border: `1px solid ${C.border}`, borderRadius: 16, padding: 32 }}>
             <div style={{ width: 52, height: 52, borderRadius: 14, margin: '0 auto 16px', display: 'flex' }}><EumLogo size={52} /></div>
             <div style={{ fontSize: 18, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK, marginBottom: 8 }}>일시적인 오류가 발생했어요</div>
             <div style={{ fontSize: 13, color: C.inkSoft, lineHeight: 1.6, marginBottom: 20 }}>화면을 불러오는 중 문제가 생겼습니다. 다시 시도해 주세요.</div>
-            <button onClick={() => { this.setState({ error: null }); window.location.reload(); }} style={{ background: C.brand, color: '#fff', border: 'none', borderRadius: 10, padding: '11px 20px', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: FONT_STACK }}>처음으로 돌아가기</button>
+            <button type="button" onClick={() => { this.setState({ error: null }); window.location.reload(); }} style={{ background: C.brand, color: '#fff', border: 'none', borderRadius: 10, padding: '11px 20px', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: FONT_STACK }}>처음으로 돌아가기</button>
           </div>
         </div>
       );
