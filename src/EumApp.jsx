@@ -6571,7 +6571,7 @@ function App() {
         .eum-serif { font-family: ${FONT_STACK}; letter-spacing: -0.035em; }
         h1, h2, h3 { text-wrap: balance; }
         p { text-wrap: pretty; }
-        .eum-kicker { display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 700; letter-spacing: -0.01em; padding: 5px 12px; border-radius: 999px; background: ${C.brandSoft}; color: ${C.brand}; }
+        .eum-kicker { display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 700; letter-spacing: 0.04em; padding: 5px 12px; border-radius: 999px; background: ${C.brandSoft}; color: ${C.brand}; }
         .eum-lift { transition: transform 0.24s cubic-bezier(0.22,1,0.36,1), box-shadow 0.24s cubic-bezier(0.22,1,0.36,1); }
         .eum-lift:hover { transform: translateY(-4px); box-shadow: 0 16px 40px -16px rgba(26,26,30,0.18); }
         .eum-rolecard { transition: transform 0.24s cubic-bezier(0.22,1,0.36,1), box-shadow 0.24s ease, border-color 0.24s ease; }
