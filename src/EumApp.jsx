@@ -729,10 +729,12 @@ function useIsMobile(bp = 880) {
 }
 
 function SearchBar({ value, onChange, placeholder = '검색…', style = {} }) {
+  const inputRef = useRef();
   return (
     <div style={{ position: 'relative', ...style }}>
       <Search size={15} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: C.mute, pointerEvents: 'none' }} />
       <input
+        ref={inputRef}
         type="search"
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -743,7 +745,7 @@ function SearchBar({ value, onChange, placeholder = '검색…', style = {} }) {
         style={{ width: '100%', padding: '9px 12px 9px 34px', borderRadius: 10, border: `1px solid ${C.line}`, background: C.panel, fontSize: 13.5, color: C.ink, fontFamily: FONT_STACK, outline: 'none', boxSizing: 'border-box', transition: 'border-color 0.15s ease, box-shadow 0.15s ease' }}
       />
       {value && (
-        <button onClick={() => onChange('')} aria-label="지우기" style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: C.mute, display: 'flex', padding: 2 }}>
+        <button onClick={() => { onChange(''); if (inputRef.current) inputRef.current.focus(); }} aria-label="지우기" style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: C.mute, display: 'flex', padding: 2 }}>
           <X size={14} />
         </button>
       )}
@@ -780,15 +782,23 @@ function NotificationBell({ state, role, user, onNavigate, dark }) {
   const [open, setOpen] = useState(false);
   const items = useMemo(() => buildNotifications(state, role, user), [state, role, user]);
   const ref = useRef();
+  const btnRef = useRef();
   useEffect(() => {
     const onDoc = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
     document.addEventListener('mousedown', onDoc);
     return () => document.removeEventListener('mousedown', onDoc);
   }, []);
+  // Esc로 알림 목록을 닫고 포커스를 벨 버튼으로 되돌린다(키보드·스크린리더).
+  useEffect(() => {
+    if (!open) return undefined;
+    const onKey = (e) => { if (e.key === 'Escape') { setOpen(false); if (btnRef.current) btnRef.current.focus(); } };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [open]);
   const urgent = items.some(i => i.urgent);
   return (
     <div ref={ref} style={{ position: 'relative' }}>
-      <button onClick={() => setOpen(o => !o)} aria-label="알림" style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', width: 38, height: 38, borderRadius: 10, border: `1px solid ${dark ? 'rgba(255,255,255,0.15)' : C.line}`, background: dark ? 'rgba(255,255,255,0.06)' : C.panel, color: dark ? '#fff' : C.inkSoft, cursor: 'pointer', transition: 'background .14s ease' }}
+      <button ref={btnRef} onClick={() => setOpen(o => !o)} aria-haspopup="true" aria-expanded={open} aria-label={items.length > 0 ? `알림, 읽지 않은 알림 ${items.length}건` : '알림, 새 알림 없음'} style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', width: 38, height: 38, borderRadius: 10, border: `1px solid ${dark ? 'rgba(255,255,255,0.15)' : C.line}`, background: dark ? 'rgba(255,255,255,0.06)' : C.panel, color: dark ? '#fff' : C.inkSoft, cursor: 'pointer', transition: 'background .14s ease' }}
         onMouseEnter={(e) => { if (!dark) e.currentTarget.style.background = C.hover; }}
         onMouseLeave={(e) => { if (!dark) e.currentTarget.style.background = C.panel; }}>
         <Bell size={18} />
