@@ -291,7 +291,7 @@ function Checkbox({ checked, onChange, label, sublabel, required }) {
       <div style={{ flex: 1 }}>
         <div style={{ fontSize: 14, fontWeight: 600, color: C.ink, lineHeight: 1.4 }}>
           {label}
-          {required && <span style={{ color: C.red, marginLeft: 4 }}>*</span>}
+          {required && <><span aria-hidden="true" style={{ color: C.red, marginLeft: 4 }}>*</span><span style={{ position: 'absolute', width: 1, height: 1, padding: 0, margin: -1, overflow: 'hidden', clip: 'rect(0,0,0,0)', whiteSpace: 'nowrap', border: 0 }}> (필수)</span></>}
         </div>
         {sublabel && <div style={{ fontSize: 12, color: C.mute, marginTop: 3, lineHeight: 1.5 }}>{sublabel}</div>}
       </div>
@@ -854,7 +854,7 @@ function Tabs({ tabs, active, onChange, style = {} }) {
       background: C.lineSoft, borderRadius: 12, border: `1px solid ${C.line}`,
       maxWidth: '100%', overflowX: 'auto', ...style,
     }}>
-      {tabs.map((t) => {
+      {tabs.map((t, i) => {
         const isActive = active === t.id;
         const isHover = hoverId === t.id && !isActive;
         return (
@@ -863,7 +863,21 @@ function Tabs({ tabs, active, onChange, style = {} }) {
           type="button"
           role="tab"
           aria-selected={isActive}
+          tabIndex={isActive ? 0 : -1}
           onClick={() => onChange(t.id)}
+          onKeyDown={(e) => {
+            // WAI-ARIA 탭 패턴 — 좌우 화살표로 탭 이동, Home/End로 처음·끝
+            let ni = null;
+            if (e.key === 'ArrowRight' || e.key === 'ArrowDown') ni = (i + 1) % tabs.length;
+            else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') ni = (i - 1 + tabs.length) % tabs.length;
+            else if (e.key === 'Home') ni = 0;
+            else if (e.key === 'End') ni = tabs.length - 1;
+            if (ni === null) return;
+            e.preventDefault();
+            onChange(tabs[ni].id);
+            const btns = e.currentTarget.parentElement?.querySelectorAll('[role="tab"]');
+            if (btns && btns[ni]) btns[ni].focus();
+          }}
           onMouseEnter={() => setHoverId(t.id)}
           onMouseLeave={() => setHoverId((p) => (p === t.id ? null : p))}
           style={{
@@ -1468,7 +1482,7 @@ function Field({ label, required, sub, children }) {
   return (
     <div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 6 }}>
-        <label style={{ fontSize: 13, fontWeight: 700, color: C.ink }}>{label}{required && <span style={{ color: C.red, marginLeft: 3 }}>*</span>}</label>
+        <label style={{ fontSize: 13, fontWeight: 700, color: C.ink }}>{label}{required && <><span aria-hidden="true" style={{ color: C.red, marginLeft: 3 }}>*</span><span style={{ position: 'absolute', width: 1, height: 1, padding: 0, margin: -1, overflow: 'hidden', clip: 'rect(0,0,0,0)', whiteSpace: 'nowrap', border: 0 }}> (필수)</span></>}</label>
       </div>
       {sub && <div style={{ fontSize: 12, color: C.mute, marginBottom: 7, lineHeight: 1.5 }}>{sub}</div>}
       {children}
@@ -1486,6 +1500,7 @@ function ChipSelect({ options, selected, onToggle, max, color = C.ink }) {
           <button
             key={o}
             type="button"
+            aria-pressed={isSel}
             onClick={() => !disabled && onToggle(o)}
             disabled={disabled}
             style={{
