@@ -2288,7 +2288,7 @@ function ConsumerLayout({ role, view, setView, user, dispatch, state, children }
               const active = view === it.id;
               const Icon = it.icon;
               return (
-                <button key={it.id} onClick={() => setView(it.id)} style={{
+                <button key={it.id} onClick={() => setView(it.id)} aria-current={active ? 'page' : undefined} style={{
                   position: 'relative', flex: 1,
                   display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                   gap: isSenior ? 5 : 4,
@@ -3136,9 +3136,9 @@ function QuickAccessStrip({ setView }) {
     // 바로가기 — 카드 4개가 KPI와 경쟁하지 않도록 톤을 낮추고, 아이콘·라벨만 남긴다.
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: 10, marginBottom: 20 }}>
       {items.map(it => (
-        <button key={it.id} onClick={() => setView(it.id)} style={{ textAlign: 'left', cursor: 'pointer', fontFamily: FONT_STACK, background: C.panel, border: `1px solid ${C.line}`, borderRadius: 12, padding: '12px 14px', boxShadow: SHADOW.xs, display: 'flex', alignItems: 'center', gap: 11, transition: 'border-color .16s ease, background .16s ease' }}
-          onMouseEnter={e => { e.currentTarget.style.borderColor = '#D7DAE0'; e.currentTarget.style.background = C.hover; }}
-          onMouseLeave={e => { e.currentTarget.style.borderColor = C.line; e.currentTarget.style.background = C.panel; }}>
+        <button key={it.id} onClick={() => setView(it.id)} style={{ textAlign: 'left', cursor: 'pointer', fontFamily: FONT_STACK, background: C.panel, border: `1px solid ${C.line}`, borderRadius: 12, padding: '12px 14px', boxShadow: SHADOW.xs, display: 'flex', alignItems: 'center', gap: 11, transition: 'border-color .16s ease, background .16s ease, transform .2s cubic-bezier(0.22,1,0.36,1), box-shadow .2s ease' }}
+          onMouseEnter={e => { e.currentTarget.style.borderColor = '#D7DAE0'; e.currentTarget.style.background = C.hover; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = SHADOW.md; }}
+          onMouseLeave={e => { e.currentTarget.style.borderColor = C.line; e.currentTarget.style.background = C.panel; e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = SHADOW.xs; }}>
           <span style={{ display: 'inline-flex', width: 32, height: 32, alignItems: 'center', justifyContent: 'center', borderRadius: 9, background: it.c + '14', color: it.c, flexShrink: 0 }}>{it.ic}</span>
           <span style={{ flex: 1, minWidth: 0 }}>
             <span style={{ display: 'block', color: C.headline, fontWeight: 700, fontSize: 13, letterSpacing: '-0.02em' }}>{it.t}</span>
@@ -3457,7 +3457,7 @@ function YouthDiscover({ user, totalHours, showToast, setView }) {
         {DISCOVER_CATS.map(c => {
           const on = cat === c;
           return (
-            <button key={c} onClick={() => setCat(c)} style={{ cursor: 'pointer', fontFamily: FONT_STACK, fontSize: 12.5, fontWeight: on ? 700 : 500, padding: '7px 13px', borderRadius: 9, border: `1px solid ${on ? 'transparent' : C.line}`, background: on ? C.headline : C.panel, color: on ? '#fff' : C.inkSoft, transition: 'background .14s ease, color .14s ease' }}>{c}</button>
+            <button key={c} onClick={() => setCat(c)} aria-pressed={on} style={{ cursor: 'pointer', fontFamily: FONT_STACK, fontSize: 12.5, fontWeight: on ? 700 : 500, padding: '7px 13px', borderRadius: 9, border: `1px solid ${on ? 'transparent' : C.line}`, background: on ? C.headline : C.panel, color: on ? '#fff' : C.inkSoft, transition: 'background .14s ease, color .14s ease' }}>{c}</button>
           );
         })}
       </div>
