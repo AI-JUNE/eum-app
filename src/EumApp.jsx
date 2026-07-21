@@ -1482,9 +1482,9 @@ function Field({ label, required, sub, children }) {
   return (
     <div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 6 }}>
-        <label style={{ fontSize: 13, fontWeight: 700, color: C.ink }}>{label}{required && <><span aria-hidden="true" style={{ color: C.red, marginLeft: 3 }}>*</span><span style={{ position: 'absolute', width: 1, height: 1, padding: 0, margin: -1, overflow: 'hidden', clip: 'rect(0,0,0,0)', whiteSpace: 'nowrap', border: 0 }}> (필수)</span></>}</label>
+        <label style={{ fontSize: 13, fontWeight: 700, color: C.headline, letterSpacing: '-0.02em' }}>{label}{required && <><span aria-hidden="true" style={{ color: C.red, marginLeft: 3 }}>*</span><span style={{ position: 'absolute', width: 1, height: 1, padding: 0, margin: -1, overflow: 'hidden', clip: 'rect(0,0,0,0)', whiteSpace: 'nowrap', border: 0 }}> (필수)</span></>}</label>
       </div>
-      {sub && <div style={{ fontSize: 12, color: C.mute, marginBottom: 7, lineHeight: 1.5 }}>{sub}</div>}
+      {sub && <div style={{ fontSize: 12, color: C.navMute, marginBottom: 7, lineHeight: 1.5 }}>{sub}</div>}
       {children}
     </div>
   );
@@ -5915,17 +5915,17 @@ function CoordSafety({ state, dispatch, showToast, user }) {
                 {selected.status === 'resolved' ? '해결됨' : selected.status === 'in_progress' ? '처리 중' : '접수'}
               </Badge>
             </div>
-            <div style={{ fontSize: 16, fontWeight: 800, color: C.ink, marginBottom: 8, fontFamily: SERIF_STACK }}>{selected.category}</div>
-            <div style={{ padding: 14, background: C.lineSoft, borderRadius: 8, fontSize: 13, color: C.inkSoft, lineHeight: 1.6, marginBottom: 14 }}>{selected.description}</div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 14, fontSize: 12, color: C.inkSoft }}>
-              <div><strong style={{ color: C.mute }}>신고자:</strong> {state.participants.find(p => p.id === selected.reported_by)?.name}</div>
-              <div><strong style={{ color: C.mute }}>매칭:</strong> {selected.match_id?.toUpperCase()}</div>
-              <div><strong style={{ color: C.mute }}>접수:</strong> {selected.reported_at}</div>
-              {selected.resolved_at && <div><strong style={{ color: C.mute }}>해결:</strong> {selected.resolved_at}</div>}
+            <div style={{ fontSize: 16, fontWeight: 800, color: C.headline, marginBottom: 10, letterSpacing: '-0.02em' }}>{selected.category}</div>
+            <div style={{ padding: '13px 14px', background: C.lineSoft, borderRadius: 10, fontSize: 13, color: C.inkSoft, lineHeight: 1.6, marginBottom: 14 }}>{selected.description}</div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 14, fontSize: 12.5, color: C.inkSoft }}>
+              <div><strong style={{ color: C.navMute, fontWeight: 600 }}>신고자</strong> {state.participants.find(p => p.id === selected.reported_by)?.name}</div>
+              <div><strong style={{ color: C.navMute, fontWeight: 600 }}>매칭</strong> {selected.match_id?.toUpperCase()}</div>
+              <div style={{ fontVariantNumeric: 'tabular-nums' }}><strong style={{ color: C.navMute, fontWeight: 600 }}>접수</strong> {selected.reported_at}</div>
+              {selected.resolved_at && <div style={{ fontVariantNumeric: 'tabular-nums' }}><strong style={{ color: C.navMute, fontWeight: 600 }}>해결</strong> {selected.resolved_at}</div>}
             </div>
             {selected.status === 'resolved' && selected.resolution ? (
-              <div style={{ padding: 14, background: C.successSoft, borderRadius: 8 }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: C.success, marginBottom: 6, letterSpacing: '0.06em' }}>처리 내용</div>
+              <div style={{ padding: '13px 14px', background: C.successSoft, borderRadius: 10 }}>
+                <div style={{ fontSize: 11.5, fontWeight: 700, color: C.success, marginBottom: 6 }}>처리 내용</div>
                 <div style={{ fontSize: 13, color: C.inkSoft, lineHeight: 1.6 }}>{selected.resolution}</div>
               </div>
             ) : (
