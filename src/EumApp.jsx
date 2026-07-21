@@ -4330,7 +4330,7 @@ function RLSafetyBand({ isMobile }) {
   return (
     <div style={{ margin: 0, display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '0.9fr 1.1fr', gap: isMobile ? 32 : 56, alignItems: 'center' }}>
       <div style={{ borderRadius: 24, overflow: 'hidden', boxShadow: '0 24px 50px -22px rgba(26,26,30,0.26)', order: isMobile ? 2 : 1 }}>
-        <img src="/safety-3gen.png" alt="세대가 함께하는 따뜻한 순간" style={{ width: '100%', display: 'block', aspectRatio: '4 / 4.5', objectFit: 'cover', objectPosition: 'center 22%' }} loading="lazy" decoding="async" />
+        <img src="/safety-3gen.jpg" alt="어르신이 공식 알림톡을 안심하고 확인하는 모습" style={{ width: '100%', display: 'block', aspectRatio: '4 / 4.5', objectFit: 'cover', objectPosition: 'center 28%' }} loading="lazy" decoding="async" />
       </div>
       <div style={{ order: isMobile ? 1 : 2, textAlign: isMobile ? 'center' : 'left' }}>
         <div className="eum-kicker" style={{ marginBottom: 14, color: C.blue }}>Safety First</div>
@@ -4465,7 +4465,7 @@ function RLLanding({ state, onSelectRole, onShowApplication }) {
           <div style={{ display: 'flex', justifyContent: 'center' }}>
             <div style={{ position: 'relative', width: '100%', maxWidth: 560, animation: 'eumHeroIn 0.9s cubic-bezier(0.22,1,0.36,1) both, eumHeroFloat 7s ease-in-out 0.9s infinite' }}>
               <div style={{ borderRadius: 28, overflow: 'hidden', boxShadow: '0 30px 60px -24px rgba(26,26,30,0.28)' }}>
-                <img className="eum-hero-img" src="/hero-3gen.png" alt="청년·어르신·아동 3세대가 함께하는 모습" style={{ width: '100%', display: 'block', aspectRatio: '4 / 3.4', objectFit: 'cover', objectPosition: 'center 30%' }} loading="eager" decoding="async" fetchPriority="high" />
+                <img className="eum-hero-img" src="/hero-3gen.jpg" alt="청년·어르신·아동 3세대가 우리 동네에서 함께 걷는 모습" style={{ width: '100%', display: 'block', aspectRatio: '4 / 3.4', objectFit: 'cover', objectPosition: 'center 42%' }} loading="eager" decoding="async" fetchPriority="high" />
               </div>
               <div style={{ position: 'absolute', left: isMobile ? 10 : -16, bottom: 24, background: '#fff', borderRadius: 16, padding: '12px 16px', boxShadow: '0 18px 40px -14px rgba(26,26,30,0.3)', display: 'flex', alignItems: 'center', gap: 11, border: `1px solid ${C.borderSoft}` }}>
                 <div style={{ display: 'flex' }}>
