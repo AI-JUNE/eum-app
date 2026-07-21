@@ -251,7 +251,7 @@ function Select({ value, onChange, options, placeholder, style = {} }) {
         background: C.panel, outline: 'none', cursor: 'pointer',
         appearance: 'none',
         transition: 'border-color 0.15s ease, box-shadow 0.15s ease',
-        backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238B8B93' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
+        backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237C828C' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
         backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center',
         paddingRight: 32,
         ...style
@@ -419,13 +419,27 @@ function Modal({ open, onClose, title, children, size = 'md', footer }) {
 }
 
 function Toast({ toast, onClose }) {
+  // 자동 사라짐 타이머 — 남은 시간을 추적해 마우스 오버/포커스 시 일시정지, 벗어나면 재개.
+  // (긴 안내문을 읽는 도중 사라지는 문제 방지 · 접근성)
+  const timerRef = useRef(null);
+  const endRef = useRef(0);
+  const remainRef = useRef(0);
   useEffect(() => {
-    if (toast) {
-      const t = setTimeout(onClose, toast.duration || 3000);
-      return () => clearTimeout(t);
-    }
+    if (!toast) return undefined;
+    remainRef.current = toast.duration || 3000;
+    endRef.current = Date.now() + remainRef.current;
+    timerRef.current = setTimeout(onClose, remainRef.current);
+    return () => clearTimeout(timerRef.current);
   }, [toast, onClose]);
   if (!toast) return null;
+  const pause = () => {
+    clearTimeout(timerRef.current);
+    remainRef.current = Math.max(0, endRef.current - Date.now());
+  };
+  const resume = () => {
+    endRef.current = Date.now() + remainRef.current;
+    timerRef.current = setTimeout(onClose, remainRef.current);
+  };
   // 토스트 — 어두운 알약을 걷어내고 화이트 서피스 + 좌측 상태 아이콘 칩으로.
   // 콘솔 전반의 화이트 카드 언어와 일관되게, 상태는 아이콘 색으로만 전달한다.
   const colors = {
@@ -435,9 +449,11 @@ function Toast({ toast, onClose }) {
   };
   const c = colors[toast.type || 'info'];
   return (
-    <div role="status" aria-live={toast.type === 'error' ? 'assertive' : 'polite'} style={{
+    <div role="status" aria-live={toast.type === 'error' ? 'assertive' : 'polite'}
+      onMouseEnter={pause} onMouseLeave={resume} onFocus={pause} onBlur={resume}
+      style={{
       position: 'fixed', bottom: 24, right: 24, zIndex: 2000,
-      background: C.panel, color: C.headline, padding: '12px 16px 12px 12px',
+      background: C.panel, color: C.headline, padding: '12px 10px 12px 12px',
       border: `1px solid ${C.line}`, borderRadius: 12,
       display: 'flex', alignItems: 'center', gap: 11,
       boxShadow: SHADOW.lg, maxWidth: 400,
@@ -449,6 +465,11 @@ function Toast({ toast, onClose }) {
         {c.icon}
       </span>
       <span style={{ lineHeight: 1.45 }}>{toast.message}</span>
+      <button onClick={onClose} aria-label="알림 닫기" style={{ flexShrink: 0, marginLeft: 2, background: 'none', border: 'none', cursor: 'pointer', color: C.muteLight, padding: 5, borderRadius: 8, display: 'flex', alignSelf: 'flex-start', transition: 'background 0.15s ease, color 0.15s ease' }}
+        onMouseEnter={(e) => { e.currentTarget.style.background = C.hover; e.currentTarget.style.color = C.inkSoft; }}
+        onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = C.muteLight; }}>
+        <X size={15} />
+      </button>
     </div>
   );
 }
