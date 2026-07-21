@@ -2996,11 +2996,11 @@ function CoordAIMatch({ state, showToast }){
             <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(290px,1fr))', gap:13, marginTop:14 }}>
               {autoRes.map((t,i)=>(
                 <Card key={i}>
-                  <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}><Badge color={C.blue} soft={C.blueSoft}>추천 #{i+1}</Badge><span style={{ fontSize:22, fontWeight:800, color:C.blue }}>{t.total}<span style={{ fontSize:12, color:C.mute }}>점</span></span></div>
-                  <div style={{ display:'flex', gap:6, margin:'11px 0', flexWrap:'wrap' }}><Badge color={C.sage} soft={C.sageSoft}>{t.y.name}</Badge><Badge color={C.lavender} soft={C.lavenderSoft}>{t.s.name}</Badge><Badge color={C.peach} soft={C.peachSoft}>{t.c.name}</Badge></div>
+                  <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}><Badge color={C.blue} soft={C.blueSoft} size="sm">추천 #{i+1}</Badge><span style={{ fontSize:22, fontWeight:800, color:C.headline, letterSpacing:'-0.03em', fontVariantNumeric:'tabular-nums' }}>{t.total}<span style={{ fontSize:12, color:C.muteLight, fontWeight:600 }}>점</span></span></div>
+                  <div style={{ display:'flex', gap:6, margin:'11px 0', flexWrap:'wrap' }}><Badge color={C.sage} soft={C.sageSoft} size="sm">{t.y.name}</Badge><Badge color={C.lavender} soft={C.lavenderSoft} size="sm">{t.s.name}</Badge><Badge color={C.peach} soft={C.peachSoft} size="sm">{t.c.name}</Badge></div>
                   <AIBars parts={t.parts} />
-                  <div style={{ marginTop:9, display:'flex', flexDirection:'column', gap:3 }}>{t.tags.slice(0,3).map((tg,j)=><div key={j} style={{ fontSize:11, color:C.inkSoft }}>· <b>{tg[0]}</b> {tg[1]}</div>)}</div>
-                  <Button variant="secondary" size="sm" fullWidth style={{ marginTop:11 }} onClick={()=>showToast && showToast('코디 확정 대기열에 담았습니다','success')}>코디 확정 검토</Button>
+                  <div style={{ marginTop:10, display:'flex', flexDirection:'column', gap:3 }}>{t.tags.slice(0,3).map((tg,j)=><div key={j} style={{ fontSize:11.5, color:C.navMute }}>· <b style={{ color:C.inkSoft }}>{tg[0]}</b> {tg[1]}</div>)}</div>
+                  <Button variant="secondary" size="sm" fullWidth style={{ marginTop:12 }} onClick={()=>showToast && showToast('코디 확정 대기열에 담았습니다','success')}>코디 확정 검토</Button>
                 </Card>
               ))}
             </div>
@@ -3013,9 +3013,9 @@ function CoordAIMatch({ state, showToast }){
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:10 }}>
             {[['청년',youths,yId,setY],['어르신',seniors,sId,setS],['아동',children,cId,setC]].map(([t,arr,val,set])=>(
               <Card key={t} padding={13}>
-                <div style={{ fontSize:11, fontWeight:800, color:C.mute, marginBottom:8 }}>{t} 선택</div>
-                <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
-                  {arr.map(o=><button key={o.id} onClick={()=>set(o.id)} style={{ textAlign:'left', cursor:'pointer', fontFamily:FONT_STACK, fontSize:12.5, padding:'7px 9px', borderRadius:8, background:val===o.id?C.brandSoft:C.card, border:'1px solid '+(val===o.id?C.brand:C.border), color:C.ink }}>{o.name} <span style={{ fontSize:10, color:C.mute }}>{o.age}·{aiDong(o.address)}</span></button>)}
+                <div style={{ fontSize:11.5, fontWeight:700, color:C.navMute, marginBottom:9 }}>{t} 선택</div>
+                <div style={{ display:'flex', flexDirection:'column', gap:5 }}>
+                  {arr.map(o=><button key={o.id} onClick={()=>set(o.id)} style={{ textAlign:'left', cursor:'pointer', fontFamily:FONT_STACK, fontSize:12.5, fontWeight:val===o.id?700:500, padding:'8px 10px', borderRadius:9, background:val===o.id?C.brandSoft:C.panel, border:'1px solid '+(val===o.id?'transparent':C.line), color:val===o.id?C.brand:C.ink, transition:'background .14s ease' }}>{o.name} <span style={{ fontSize:10.5, color:C.muteLight, fontWeight:500 }}>{o.age}·{aiDong(o.address)}</span></button>)}
                 </div>
               </Card>
             ))}
@@ -3074,13 +3074,14 @@ function CoordCopilot({ state, showToast }){
       <PageHeader title="AI 코디 코파일럿" subtitle="흩어진 활동기록을 요약하고, 정산을 자동 합산하고, 지자체 제출용 운영보고서 초안까지 한 번에 만들어 코디네이터를 보조합니다." right={<Badge color={C.lavender} soft={C.lavenderSoft}>AI · 운영 자동화</Badge>} />
       <Button variant="brand" disabled={busy} onClick={go}>{busy ? '요약·정산·보고서 생성 중…' : '코파일럿 실행'}</Button>
       {out && (
-        <div style={{ marginTop:14 }}>
-          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(150px,1fr))', gap:10 }}>
-            {[['총 활동',out.cnt+'회'],['총 시간',out.hrs+'h'],['참여 조',out.trios+'개'],['정산 예정','₩'+out.settle.toLocaleString('ko-KR')]].map(([l,v])=>(
-              <Card key={l} padding={14}><div style={{ fontSize:11, color:C.mute, fontWeight:700 }}>{l}</div><div style={{ fontSize:18, fontWeight:800, marginTop:3 }}>{v}</div></Card>
-            ))}
-          </div>
-          <AIWrap label="AI 생성 — 지자체 운영보고서 초안">
+        <div style={{ marginTop:16 }}>
+          <KpiStrip items={[
+            { label:'총 활동', value: out.cnt, unit:'회', color:C.brand, icon:<Activity size={15} /> },
+            { label:'총 시간', value: out.hrs, unit:'h', color:C.sage, icon:<Clock size={15} /> },
+            { label:'참여 조', value: out.trios, unit:'개', color:C.lavender, icon:<Users size={15} /> },
+            { label:'정산 예정', value:'₩'+out.settle.toLocaleString('ko-KR'), color:C.gold, icon:<Wallet size={15} /> },
+          ]} />
+          <AIWrap label="지자체 운영보고서 초안" color={C.lavender}>
             <pre style={{ whiteSpace:'pre-wrap', fontSize:12, color:C.inkSoft, lineHeight:1.65, fontFamily:FONT_STACK, margin:0 }}>{out.text}</pre>
             <div style={{ display:'flex', gap:8, marginTop:11 }}><Button variant="secondary" size="sm" onClick={()=>showToast && showToast('보고서 초안을 복사했습니다','success')}>복사</Button><Button variant="brand" size="sm" onClick={()=>showToast && showToast('정산 승인 — 상생카드 발급 대기','success')}>정산 승인·상품권 발급</Button></div>
           </AIWrap>
@@ -3110,20 +3111,20 @@ function CoordChaperone({ state, showToast }){
       <PageHeader title="AI 안전 채퍼론" subtitle="활동 중 대화를 음성인식(STT)·텍스트분석(TA)해 건강·경제·정서·고립 위험 신호를 자동 감지합니다. 위험이 쌓이면 코디에게 알리고, 누적 시 매칭을 자동 중단합니다." right={<Badge color={C.lavender} soft={C.lavenderSoft}>AI · STT·TA</Badge>} />
       <div style={{ display:'grid', gridTemplateColumns:'1fr 340px', gap:14 }}>
         <Card>
-          <div style={{ fontSize:13, fontWeight:700, marginBottom:10 }}>활동 대화 (STT 전사)</div>
+          <div style={{ fontSize:13, fontWeight:700, marginBottom:12, color:C.headline, letterSpacing:'-0.02em' }}>활동 대화 (STT 전사)</div>
           {AI_TRANSCRIPT.map((u,i)=>{ const hit = done && flags.some(f=>f.i===i); return (
-            <div key={i} style={{ fontSize:13, padding:'7px 0', color:C.inkSoft, background:hit?C.redSoft:'transparent', borderRadius:8, paddingLeft:hit?8:0, transition:'.3s' }}><b style={{ color:C.ink }}>{u.sp}</b> · {u.t} {hit && <Badge color={C.red} soft={C.redSoft}>위험신호</Badge>}</div>
+            <div key={i} style={{ fontSize:13, padding: hit?'8px 10px':'8px 0', color:C.inkSoft, background:hit?C.redSoft:'transparent', borderRadius:8, marginBottom:2, lineHeight:1.5, transition:'.3s', display:'flex', alignItems:'center', gap:7, flexWrap:'wrap' }}><b style={{ color:C.headline }}>{u.sp}</b> · {u.t} {hit && <Badge color={C.red} soft={C.redSoft} size="sm">위험신호</Badge>}</div>
           ); })}
           <Button variant="brand" style={{ marginTop:12 }} disabled={busy} onClick={go}>{busy ? '음성·텍스트 분석 중…' : 'AI 안전 분석 실행'}</Button>
         </Card>
         <div>
-          {!done && !busy && <Card style={{ textAlign:'center', color:C.mute, padding:28 }}>분석을 실행하면 위험신호가 표시됩니다.</Card>}
+          {!done && !busy && <Card style={{ textAlign:'center', color:C.muteLight, padding:'40px 28px', fontSize:13 }}>분석을 실행하면 위험신호가 표시됩니다.</Card>}
           {done && (
-            <AIWrap label="AI 안전 채퍼론">
-              <div style={{ textAlign:'center', margin:'2px 0 12px' }}><div style={{ fontSize:34, fontWeight:800, color:rc }}>{score}</div><div style={{ fontSize:11, color:C.mute }}>위험 점수 / 100</div></div>
-              <div style={{ display:'flex', flexDirection:'column', gap:7 }}>{flags.map((f,j)=><div key={j} style={{ display:'flex', alignItems:'center', gap:8, fontSize:12 }}><Badge color={f.sev>=2?C.red:C.gold} soft={f.sev>=2?C.redSoft:C.goldSoft}>{f.risk}</Badge><span style={{ color:C.inkSoft }}>“…{f.w}…” ({f.sp})</span></div>)}</div>
-              <div style={{ marginTop:12, padding:'11px 13px', background:C.brandSoft, border:'1px solid #E0B9A6', borderRadius:10 }}><div style={{ fontSize:12, fontWeight:800, color:C.brand, marginBottom:4 }}>권고 조치</div><div style={{ fontSize:11.5, color:C.inkSoft, lineHeight:1.55 }}>① 건강(무릎)·경제 부담 → 복지 어드바이저 연계 ② 고립·정서 신호 → 다음 방문 우선 ③ 위험 누적 시 매칭 일시중단.</div></div>
-              <Button variant="brand" size="sm" fullWidth style={{ marginTop:11 }} onClick={()=>showToast && showToast('안전 이슈 등록 + 복지 어드바이저 연계 완료','success')}>안전 이슈 등록 + 어드바이저 연계</Button>
+            <AIWrap label="AI 안전 채퍼론" color={C.lavender}>
+              <div style={{ textAlign:'center', margin:'2px 0 14px' }}><div style={{ fontSize:36, fontWeight:800, color:rc, letterSpacing:'-0.04em', fontVariantNumeric:'tabular-nums' }}>{score}</div><div style={{ fontSize:11.5, color:C.navMute, fontWeight:500 }}>위험 점수 / 100</div></div>
+              <div style={{ display:'flex', flexDirection:'column', gap:8 }}>{flags.map((f,j)=><div key={j} style={{ display:'flex', alignItems:'center', gap:8, fontSize:12.5 }}><Badge color={f.sev>=2?C.red:C.gold} soft={f.sev>=2?C.redSoft:C.goldSoft} size="sm">{f.risk}</Badge><span style={{ color:C.inkSoft }}>“…{f.w}…” ({f.sp})</span></div>)}</div>
+              <div style={{ marginTop:14, padding:'12px 14px', background:C.brandBg, borderLeft:`3px solid ${C.brand}`, borderRadius:10 }}><div style={{ fontSize:12, fontWeight:700, color:C.brand, marginBottom:5 }}>권고 조치</div><div style={{ fontSize:12, color:C.inkSoft, lineHeight:1.6 }}>① 건강(무릎)·경제 부담 → 복지 어드바이저 연계 ② 고립·정서 신호 → 다음 방문 우선 ③ 위험 누적 시 매칭 일시중단.</div></div>
+              <Button variant="brand" size="sm" fullWidth style={{ marginTop:12 }} onClick={()=>showToast && showToast('안전 이슈 등록 + 복지 어드바이저 연계 완료','success')}>안전 이슈 등록 + 어드바이저 연계</Button>
             </AIWrap>
           )}
         </div>
