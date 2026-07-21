@@ -5696,24 +5696,24 @@ function CoordActivities({ state, dispatch, showToast, user }) {
           const act = state.activities.find(a => a.id === detailLog.activity_id);
           return (
             <>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 18 }}>
                 <Avatar type={author?.type} gender={author?.gender} name={author?.name} size={44} color={PERSONA[author?.type]?.color || C.brand} />
                 <div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: C.ink }}>{author?.name}</div>
-                  <div style={{ fontSize: 11, color: C.mute }}>{PERSONA[author?.type]?.label}</div>
+                  <div style={{ fontSize: 15, fontWeight: 700, color: C.headline, letterSpacing: '-0.02em' }}>{author?.name}</div>
+                  <div style={{ fontSize: 12.5, color: C.navMute, fontWeight: 500, marginTop: 1 }}>{PERSONA[author?.type]?.label}</div>
                 </div>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 14 }}>
-                <div style={{ padding: 10, background: C.lineSoft, borderRadius: 6 }}><div style={{ fontSize: 11, color: C.mute }}>활동</div><div style={{ fontSize: 13, fontWeight: 700, color: C.ink, marginTop: 2 }}>{act?.title}</div></div>
-                <div style={{ padding: 10, background: C.lineSoft, borderRadius: 6 }}><div style={{ fontSize: 11, color: C.mute }}>날짜·시간</div><div style={{ fontSize: 13, fontWeight: 700, color: C.ink, marginTop: 2 }}>{fmtDate(detailLog.date)} · {detailLog.hours}h</div></div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 16 }}>
+                <div style={{ padding: '12px 14px', background: C.cardWarm, border: `1px solid ${C.line}`, borderRadius: 12 }}><div style={{ fontSize: 12, color: C.navMute, fontWeight: 600 }}>활동</div><div style={{ fontSize: 13.5, fontWeight: 700, color: C.headline, marginTop: 3, letterSpacing: '-0.01em' }}>{act?.title}</div></div>
+                <div style={{ padding: '12px 14px', background: C.cardWarm, border: `1px solid ${C.line}`, borderRadius: 12 }}><div style={{ fontSize: 12, color: C.navMute, fontWeight: 600 }}>날짜·시간</div><div style={{ fontSize: 13.5, fontWeight: 700, color: C.headline, marginTop: 3, letterSpacing: '-0.01em', fontVariantNumeric: 'tabular-nums' }}>{fmtDate(detailLog.date)} · {detailLog.hours}시간</div></div>
               </div>
-              <div style={{ fontSize: 12, color: C.mute, fontWeight: 700, marginBottom: 6 }}>활동 내용</div>
-              <div style={{ padding: 14, background: C.lineSoft, borderRadius: 8, fontSize: 13, color: C.inkSoft, lineHeight: 1.7, marginBottom: 14 }}>{detailLog.summary}</div>
+              <div style={{ fontSize: 12, color: C.navMute, fontWeight: 700, marginBottom: 7, letterSpacing: '0.01em' }}>활동 내용</div>
+              <div style={{ padding: 16, background: C.cardWarm, border: `1px solid ${C.line}`, borderRadius: 12, fontSize: 13.5, color: C.inkSoft, lineHeight: 1.75, marginBottom: detailLog.mood ? 14 : 0 }}>{detailLog.summary}</div>
               {detailLog.mood && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: 10, background: C.lineSoft, borderRadius: 6 }}>
-                  <span style={{ fontSize: 11, color: C.mute, fontWeight: 600 }}>오늘 기분</span>
-                  <span style={{ fontSize: 18 }}>{moodEmoji(detailLog.mood)}</span>
-                  <span style={{ fontSize: 12, color: C.inkSoft }}>{detailLog.mood}/5</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 14px', background: C.cardWarm, border: `1px solid ${C.line}`, borderRadius: 12 }}>
+                  <span style={{ fontSize: 12, color: C.navMute, fontWeight: 600 }}>오늘 기분</span>
+                  <span style={{ fontSize: 20 }}>{moodEmoji(detailLog.mood)}</span>
+                  <span style={{ fontSize: 12.5, color: C.inkSoft, fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>{detailLog.mood}/5</span>
                 </div>
               )}
             </>
