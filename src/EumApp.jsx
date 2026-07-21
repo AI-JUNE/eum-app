@@ -183,7 +183,7 @@ function Card({ children, padding = 20, style = {}, onClick, hoverable }) {
   );
 }
 
-function Input({ value, onChange, placeholder, type = 'text', icon, style = {}, disabled, autoComplete, inputMode }) {
+function Input({ value, onChange, placeholder, type = 'text', icon, style = {}, disabled, autoComplete, inputMode, min, max, maxLength }) {
   return (
     <div style={{ position: 'relative', width: '100%' }}>
       {icon && <div style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: C.mute, display: 'flex' }}>{icon}</div>}
@@ -195,6 +195,9 @@ function Input({ value, onChange, placeholder, type = 'text', icon, style = {}, 
         aria-label={placeholder}
         autoComplete={autoComplete}
         inputMode={inputMode}
+        min={min}
+        max={max}
+        maxLength={maxLength}
         disabled={disabled}
         style={{
           width: '100%', padding: icon ? '10px 14px 10px 38px' : '10px 14px',
@@ -1240,6 +1243,15 @@ function RoleSelect({ state, onSelectRole, onShowApplication }) {
 // 8. PUBLIC APPLICATION FORM
 // ============================================================================
 
+// 휴대폰 번호 입력 자동 하이픈(010-1234-5678). 숫자만 남겨 최대 11자리로 포맷 —
+// placeholder 형식과 일치시켜 검증(/^010-?\d{4}-?\d{4}$/) 통과를 돕는다.
+function formatKoPhone(v) {
+  const d = String(v || '').replace(/\D/g, '').slice(0, 11);
+  if (d.length < 4) return d;
+  if (d.length < 8) return d.slice(0, 3) + '-' + d.slice(3);
+  return d.slice(0, 3) + '-' + d.slice(3, 7) + '-' + d.slice(7);
+}
+
 function ApplicationForm({ onClose, onSubmit }) {
   const [step, setStep] = useState(1);
   const [form, setForm] = useState({
@@ -1320,14 +1332,14 @@ function ApplicationForm({ onClose, onSubmit }) {
             <button onClick={onClose} aria-label="닫기" style={{ background: 'none', border: 'none', cursor: 'pointer', color: C.mute, padding: 4, display: 'flex', borderRadius: 8 }}><X size={20} /></button>
           </div>
           {/* Stepper */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '0 2px' }}>
+          <div role="group" aria-label={`신청 단계 ${step}/4`} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '0 2px' }}>
         {['신청유형', '기본정보', form.type === 'parent' ? '자녀정보' : '경험·가능시간', '동의·제출'].map((label, i) => {
           const sNum = i + 1;
           const active = step === sNum;
           const done = step > sNum;
           return (
             <React.Fragment key={i}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, flex: 1 }}>
+              <div aria-current={active ? 'step' : undefined} style={{ display: 'flex', alignItems: 'center', gap: 6, flex: 1 }}>
                 <div style={{
                   width: 24, height: 24, borderRadius: '50%',
                   background: done ? C.sage : active ? C.ink : C.muteSoft,
@@ -1382,10 +1394,10 @@ function ApplicationForm({ onClose, onSubmit }) {
           </Field>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 12 }}>
             <Field label="나이" required>
-              <Input value={form.age} onChange={(v) => set('age', v)} placeholder="27" type="number" inputMode="numeric" />
+              <Input value={form.age} onChange={(v) => set('age', v)} placeholder="27" type="number" inputMode="numeric" min={14} max={100} />
             </Field>
             <Field label="연락처" required>
-              <Input value={form.phone} onChange={(v) => set('phone', v)} placeholder="010-1234-5678" type="tel" autoComplete="tel" />
+              <Input value={form.phone} onChange={(v) => set('phone', formatKoPhone(v))} placeholder="010-1234-5678" type="tel" autoComplete="tel" inputMode="numeric" maxLength={13} />
             </Field>
           </div>
           <Field label="거주지" required>
@@ -1430,7 +1442,7 @@ function ApplicationForm({ onClose, onSubmit }) {
               <Input value={form.child_name} onChange={(v) => set('child_name', v)} placeholder="자녀 이름" />
             </Field>
             <Field label="만 나이" required>
-              <Input value={form.child_age} onChange={(v) => set('child_age', v)} placeholder="8" type="number" inputMode="numeric" />
+              <Input value={form.child_age} onChange={(v) => set('child_age', v)} placeholder="8" type="number" inputMode="numeric" min={1} max={18} />
             </Field>
           </div>
           <Field label="자녀 관심사" sub="아이가 좋아하는 것 (책·그림·로봇·동물 등)">
