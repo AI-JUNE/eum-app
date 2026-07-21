@@ -1723,13 +1723,13 @@ function YouthSchedule({ match, activities, state, user, dispatch, showToast }) 
   return (
     <>
       <PageHeader title="활동 일정" subtitle="매칭 트리오와의 격주 활동 일정입니다" />
-      <Card padding={14} style={{ marginBottom: 18, background: C.successSoft, border: `1px solid ${C.success}33`, display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+      <div style={{ marginBottom: 18, background: C.panel, border: `1px solid ${C.line}`, borderLeft: `3px solid ${C.success}`, borderRadius: 12, boxShadow: SHADOW.xs, padding: '13px 16px', display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
         <InsuranceBadge size="md" />
-        <span style={{ fontSize: 12.5, color: C.inkSoft }}>모든 대면 활동은 1365 자원봉사 보험 및 지자체 돌봄 특약 책임보험으로 자동 보장됩니다.</span>
-      </Card>
+        <span style={{ fontSize: 12.5, color: C.navMute, fontWeight: 500, lineHeight: 1.5 }}>모든 대면 활동은 1365 자원봉사 보험 및 지자체 돌봄 특약 책임보험으로 자동 보장됩니다.</span>
+      </div>
       {actionable.length > 0 && (
         <div style={{ marginBottom: 22 }}>
-          <div style={{ fontSize: 13, fontWeight: 700, color: C.brand, letterSpacing: '0.04em', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}><Clock size={15} /> 오늘 활동 — 체크인하세요</div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: C.brand, marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}><Clock size={15} /> 오늘 활동 — 체크인하세요</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {actionable.map(act => (
               <CheckInOutCard key={act.id} activity={act} user={user} dispatch={dispatch} showToast={showToast} color={C.sage} />
@@ -1741,32 +1741,32 @@ function YouthSchedule({ match, activities, state, user, dispatch, showToast }) 
         {activities.map((act) => {
           const isPast = act.status === 'completed';
           return (
-            <Card key={act.id} padding={16}>
+            <div key={act.id} style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 12, boxShadow: SHADOW.xs, padding: 15 }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                   <div style={{
-                    width: 54, textAlign: 'center', padding: '8px 0',
-                    background: isPast ? C.muteSoft : C.brandBg, borderRadius: 10,
-                    border: `1px solid ${isPast ? C.border : C.brand + '40'}`,
+                    width: 52, textAlign: 'center', padding: '7px 0',
+                    background: isPast ? C.lineSoft : C.brandBg, borderRadius: 10,
+                    border: `1px solid ${isPast ? C.line : C.brand + '33'}`,
                   }}>
-                    <div style={{ fontSize: 10, fontWeight: 700, color: isPast ? C.mute : C.brand, letterSpacing: '0.05em' }}>{act.scheduled_at.split('-')[1]}월</div>
-                    <div style={{ fontSize: 20, fontWeight: 700, color: isPast ? C.inkSoft : C.ink, fontFamily: SERIF_STACK, lineHeight: 1 }}>{act.scheduled_at.split(' ')[0].split('-')[2]}</div>
+                    <div style={{ fontSize: 10, fontWeight: 700, color: isPast ? C.muteLight : C.brand, letterSpacing: '0.03em' }}>{act.scheduled_at.split('-')[1]}월</div>
+                    <div style={{ fontSize: 20, fontWeight: 800, color: isPast ? C.navMute : C.headline, letterSpacing: '-0.02em', lineHeight: 1.1, fontVariantNumeric: 'tabular-nums' }}>{act.scheduled_at.split(' ')[0].split('-')[2]}</div>
                   </div>
                   <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                      <Badge color={C.brand} soft={C.brandSoft}>{act.type}</Badge>
-                      {isPast ? <Badge color={C.sage} soft={C.sageSoft}>완료</Badge> : <Badge color={C.amber} soft={C.amberSoft}>예정</Badge>}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 5 }}>
+                      <Badge color={C.brand} soft={C.brandSoft} size="sm">{act.type}</Badge>
+                      {isPast ? <Badge color={C.sage} soft={C.sageSoft} size="sm">완료</Badge> : <Badge color={C.amber} soft={C.amberSoft} size="sm">예정</Badge>}
                     </div>
-                    <div style={{ fontSize: 14, fontWeight: 600, color: C.ink, marginBottom: 2 }}>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: C.headline, marginBottom: 3, letterSpacing: '-0.02em', fontVariantNumeric: 'tabular-nums' }}>
                       {act.scheduled_at.split(' ')[1]} · {act.duration_hours}시간
                     </div>
-                    <div style={{ fontSize: 12, color: C.mute, display: 'flex', alignItems: 'center', gap: 4 }}>
-                      <MapPin size={11} /> {act.location}
+                    <div style={{ fontSize: 12, color: C.navMute, display: 'flex', alignItems: 'center', gap: 4, fontWeight: 500 }}>
+                      <MapPin size={12} style={{ color: C.muteLight }} /> {act.location}
                     </div>
                   </div>
                 </div>
               </div>
-            </Card>
+            </div>
           );
         })}
       </div>
@@ -1776,7 +1776,9 @@ function YouthSchedule({ match, activities, state, user, dispatch, showToast }) 
 
 function YouthLogs({ state, user, match, myLogs, myActivities, dispatch, showToast }) {
   const [open, setOpen] = useState(false);
+  const [tab, setTab] = useState('all');
   const [form, setForm] = useState({ activity_id: '', summary: '', mood: 5, has_photo: false });
+  const shownLogs = tab === 'approved' ? myLogs.filter(l => l.approved) : tab === 'pending' ? myLogs.filter(l => !l.approved) : myLogs;
 
   const writableActs = myActivities.filter(a => a.status === 'completed' || a.status === 'scheduled');
   const writableOptions = writableActs.map((a) => {
@@ -1814,38 +1816,38 @@ function YouthLogs({ state, user, match, myLogs, myActivities, dispatch, showToa
         right={<Button variant="brand" icon={<Plus size={16} />} onClick={() => setOpen(true)}>새 기록 작성</Button>}
       />
 
-      <Card padding={0}>
+      <div style={{ marginBottom: 14 }}>
         <Tabs tabs={[
           { id: 'all', label: '전체', count: myLogs.length },
           { id: 'approved', label: '승인', count: myLogs.filter(l => l.approved).length },
           { id: 'pending', label: '대기', count: myLogs.filter(l => !l.approved).length },
-        ]} active="all" onChange={() => {}} style={{ padding: '0 16px' }} />
-        <div style={{ padding: 12 }}>
-          {myLogs.length === 0 ? (
-            <Empty icon={<PenLine size={42} />} title="아직 기록이 없습니다" sub="활동 후 그날의 인상적이었던 순간을 적어주세요" />
-          ) : myLogs.map((log) => {
-            const act = state.activities.find(a => a.id === log.activity_id);
-            return (
-              <div key={log.id} style={{ padding: 16, borderBottom: `1px solid ${C.borderSoft}` }}>
-                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                    <Badge color={C.brand} soft={C.brandSoft}>{act?.type}</Badge>
-                    <span style={{ fontSize: 12, color: C.mute }}>{act ? fmtDate(act.scheduled_at) : ''}</span>
-                    <span style={{ fontSize: 12, color: C.mute }}>· {log.hours}시간</span>
-                    {log.has_photo && <span style={{ fontSize: 11, color: C.mute, display: 'inline-flex', alignItems: 'center', gap: 3 }}><Camera size={11} /> 사진</span>}
-                  </div>
-                  {log.approved ? (
-                    <Badge color={C.sage} soft={C.sageSoft}><Check size={11} /> 승인됨</Badge>
-                  ) : (
-                    <Badge color={C.amber} soft={C.amberSoft}><Clock size={11} /> 승인 대기</Badge>
-                  )}
+        ]} active={tab} onChange={setTab} />
+      </div>
+      <Panel padding={shownLogs.length === 0 ? 8 : 0}>
+        {shownLogs.length === 0 ? (
+          <Empty icon={<PenLine size={42} />} title={tab === 'all' ? '아직 기록이 없습니다' : tab === 'approved' ? '승인된 기록이 없습니다' : '대기 중인 기록이 없습니다'} sub={tab === 'all' ? '활동 후 그날의 인상적이었던 순간을 적어주세요' : undefined} />
+        ) : shownLogs.map((log, i) => {
+          const act = state.activities.find(a => a.id === log.activity_id);
+          return (
+            <div key={log.id} style={{ padding: '15px 20px', borderTop: i === 0 ? 'none' : `1px solid ${C.lineSoft}` }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                  <Badge color={C.brand} soft={C.brandSoft} size="sm">{act?.type}</Badge>
+                  <span style={{ fontSize: 12, color: C.muteLight, fontWeight: 500, fontVariantNumeric: 'tabular-nums' }}>{act ? fmtDate(act.scheduled_at) : ''}</span>
+                  <span style={{ fontSize: 12, color: C.muteLight, fontWeight: 500 }}>· {log.hours}시간</span>
+                  {log.has_photo && <span style={{ fontSize: 11, color: C.muteLight, display: 'inline-flex', alignItems: 'center', gap: 3 }}><Camera size={11} /> 사진</span>}
                 </div>
-                <div style={{ fontSize: 14, color: C.inkSoft, lineHeight: 1.65 }}>{log.summary}</div>
+                {log.approved ? (
+                  <Badge color={C.sage} soft={C.sageSoft} size="sm"><Check size={11} /> 승인됨</Badge>
+                ) : (
+                  <Badge color={C.amber} soft={C.amberSoft} size="sm"><Clock size={11} /> 승인 대기</Badge>
+                )}
               </div>
-            );
-          })}
-        </div>
-      </Card>
+              <div style={{ fontSize: 14, color: C.inkSoft, lineHeight: 1.65 }}>{log.summary}</div>
+            </div>
+          );
+        })}
+      </Panel>
 
       <Modal open={open} onClose={() => setOpen(false)} title="새 활동 기록 작성"
         footer={<>
