@@ -1627,7 +1627,7 @@ function YouthApp({ state, user, dispatch, showToast }) {
 
           {/* Activity Cards 4종 */}
           <div style={{ marginBottom: 20 }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: C.mute, letterSpacing: '0.05em', marginBottom: 12 }}>활동 4종</div>
+            <div style={{ fontSize: 13.5, fontWeight: 700, color: C.headline, letterSpacing: '-0.02em', marginBottom: 12 }}>활동 4종</div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
               <ActivityTypeCard type="디지털코칭" icon={<Smile size={20} />} desc="어르신께 스마트폰·앱 알려드리기" color={C.lavender} count={myLogs.filter(l => l.approved && state.activities.find(a => a.id === l.activity_id)?.type === '디지털코칭').length} />
               <ActivityTypeCard type="학습멘토" icon={<BookOpen size={20} />} desc="아동 학습·독서 멘토" color={C.peach} count={myLogs.filter(l => l.approved && state.activities.find(a => a.id === l.activity_id)?.type === '학습멘토').length} />
@@ -1905,7 +1905,7 @@ function YouthMentor({ senior, myLogs, state }) {
           </div>
         </div>
       )}
-      <div style={{ fontSize: 13, fontWeight: 700, color: C.mute, letterSpacing: '0.05em', marginBottom: 12 }}>받은 조언 기록</div>
+      <div style={{ fontSize: 13.5, fontWeight: 700, color: C.headline, letterSpacing: '-0.02em', marginBottom: 12 }}>받은 조언 기록</div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {mentorLogs.length === 0 ? (
           <Empty icon={<GraduationCap size={42} />} title="아직 멘토링 기록이 없습니다" sub="어르신의 인생 조언을 메모해두세요" />
@@ -1947,7 +1947,7 @@ function ArchiveView({ state }) {
         </div>
       </div>
 
-      <div style={{ fontSize: 13, fontWeight: 700, color: C.mute, letterSpacing: '0.05em', marginBottom: 12 }}>수집된 이야기 {archiveLogs.length}편</div>
+      <div style={{ fontSize: 13.5, fontWeight: 700, color: C.headline, letterSpacing: '-0.02em', marginBottom: 12 }}>수집된 이야기 {archiveLogs.length}편</div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {archiveLogs.map((log) => {
           const act = state.activities.find(a => a.id === log.activity_id);
@@ -5147,21 +5147,21 @@ function CoordApplicants({ state, dispatch, showToast, user }) {
                 </div>
               </div>
 
-              <div style={{ fontSize: 12, fontWeight: 700, color: C.mute, letterSpacing: '0.08em', marginBottom: 10 }}>지원 동기 · 소개</div>
+              <div style={{ fontSize: 12, fontWeight: 700, color: C.navMute, letterSpacing: '-0.01em', marginBottom: 10 }}>지원 동기 · 소개</div>
               <div style={{ padding: 14, background: C.lineSoft, borderRadius: 8, fontSize: 13, color: C.inkSoft, lineHeight: 1.6, marginBottom: 16 }}>
                 {p?.bio || '특별한 소개글이 없습니다.'}
               </div>
 
               {p?.skills?.length > 0 && (
                 <>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: C.mute, letterSpacing: '0.08em', marginBottom: 10 }}>잘하는 것</div>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: C.navMute, letterSpacing: '-0.01em', marginBottom: 10 }}>잘하는 것</div>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 16 }}>
                     {p.skills.map((s, i) => <span key={i} style={{ fontSize: 12, padding: '5px 12px', borderRadius: 999, background: C.brandSoft, color: C.brand, fontWeight: 600 }}>{s}</span>)}
                   </div>
                 </>
               )}
 
-              <div style={{ fontSize: 12, fontWeight: 700, color: C.mute, letterSpacing: '0.08em', marginBottom: 10 }}>검증 단계</div>
+              <div style={{ fontSize: 12, fontWeight: 700, color: C.navMute, letterSpacing: '-0.01em', marginBottom: 10 }}>검증 단계</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
                 {verifs.map(v => (
                   <div key={v.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 12, borderRadius: 8, border: `1px solid ${C.borderSoft}`, background: C.card }}>
@@ -5314,14 +5314,14 @@ JSON 형식으로만 응답해주세요 (다른 텍스트 없이):
 
       {proposedMatches.length > 0 && (
         <>
-          <div style={{ fontSize: 12, fontWeight: 700, color: C.amber, letterSpacing: '0.08em', marginBottom: 10 }}>제안된 매칭 · 동의 대기 중</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 12 }}><span style={{ width: 7, height: 7, borderRadius: 3, background: C.amber }} /><span style={{ fontSize: 13, fontWeight: 700, color: C.headline, letterSpacing: '-0.02em' }}>제안된 매칭</span><span style={{ fontSize: 12, color: C.muteLight, fontWeight: 500 }}>동의 대기 중</span></div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(380px, 1fr))', gap: 14, marginBottom: 24 }}>
             {proposedMatches.map(match => <MatchCard key={match.id} match={match} state={state} onClick={() => setSelectedMatch(match)} accent={C.amber} />)}
           </div>
         </>
       )}
 
-      <div style={{ fontSize: 12, fontWeight: 700, color: C.success, letterSpacing: '0.08em', marginBottom: 10 }}>활동 중 매칭</div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 12 }}><span style={{ width: 7, height: 7, borderRadius: 3, background: C.success }} /><span style={{ fontSize: 13, fontWeight: 700, color: C.headline, letterSpacing: '-0.02em' }}>활동 중 매칭</span></div>
       {activeMatches.length === 0 ? <Empty icon={<Heart size={32} />} title="활성 매칭이 없습니다" sub="AI 추천을 받아 새 매칭을 시작해보세요" /> : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(380px, 1fr))', gap: 14 }}>
           {activeMatches.map(match => <MatchCard key={match.id} match={match} state={state} onClick={() => setSelectedMatch(match)} accent={C.success} />)}
@@ -5331,7 +5331,7 @@ JSON 형식으로만 응답해주세요 (다른 텍스트 없이):
       {(availableYouth.length + availableSenior.length + availableChild.length) > 0 && (
         <div style={{ marginTop: 26 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-            <div style={{ fontSize: 12, fontWeight: 700, color: C.amber, letterSpacing: '0.08em' }}>매칭 대기 · 미배정 {availableYouth.length + availableSenior.length + availableChild.length}명</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}><span style={{ width: 7, height: 7, borderRadius: 3, background: C.amber }} /><span style={{ fontSize: 13, fontWeight: 700, color: C.headline, letterSpacing: '-0.02em' }}>매칭 대기</span><span style={{ fontSize: 12, color: C.muteLight, fontWeight: 500 }}>미배정 {availableYouth.length + availableSenior.length + availableChild.length}명</span></div>
             <Button variant="ghost" size="sm" icon={<Sparkles size={14} />} onClick={runAiMatching}>AI로 트리오 만들기</Button>
           </div>
           <Card padding={16}>
