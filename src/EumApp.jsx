@@ -2990,7 +2990,7 @@ function CoordAIMatch({ state, showToast }){
   return (
     <div>
       <PageHeader title="AI 자동 · 선택형 하이브리드 매칭" subtitle="AI가 청년·어르신·아동 세 명을 한 조로 묶어 최적 조합을 자동 추천하고, 직접 골라 구성할 수도 있습니다. 두 방식 모두 같은 점수 엔진·안전 가드레일 위에서 작동합니다."
-        right={<div style={{ display:'flex', gap:6, background:C.bg, padding:4, borderRadius:9 }}>{[['auto','AI 자동추천'],['self','직접 선택']].map(([m,t])=><button key={m} onClick={()=>setMode(m)} style={{ border:'none', cursor:'pointer', fontFamily:FONT_STACK, fontWeight:700, fontSize:12.5, padding:'6px 12px', borderRadius:7, background:mode===m?C.card:'transparent', color:mode===m?C.ink:C.mute, boxShadow:mode===m?'0 1px 3px rgba(0,0,0,.1)':'none' }}>{t}</button>)}</div>} />
+        right={<div style={{ display:'inline-flex', gap:2, background:C.lineSoft, padding:4, borderRadius:12, border:`1px solid ${C.line}` }}>{[['auto','AI 자동추천'],['self','직접 선택']].map(([m,t])=><button key={m} onClick={()=>setMode(m)} style={{ border:'none', cursor:'pointer', fontFamily:FONT_STACK, fontWeight:mode===m?700:600, fontSize:13, padding:'7px 13px', borderRadius:9, background:mode===m?C.panel:'transparent', color:mode===m?C.headline:C.navMute, boxShadow:mode===m?SHADOW.sm:'none', transition:'background .16s ease, color .16s ease' }}>{t}</button>)}</div>} />
       {mode==='auto' && (
         <div>
           <Button variant="brand" disabled={busy} onClick={runAuto}>{busy ? '조합 계산 중…' : 'AI 자동매칭 실행'}</Button>
@@ -4163,7 +4163,7 @@ const KAKAO_PHONE_HTML = `<div class="scr kk">
     <div class="kmsg">
       <img class="kav" src="/tobe/ieum_icon_1024.png" alt="">
       <div class="krich">
-        <div class="krimg"><img src="/tobe/hero_illust.png" alt="이웃 돌봄"></div>
+        <div class="krimg"><img src="/tobe/hero_illust.jpg" alt="이웃 돌봄"></div>
         <div class="krb"><div class="krt">이웃과 함께하는 돌봄</div><div class="krd">필요한 돌봄을 신청하고, 나눈 시간을 적립받으세요.</div></div>
         <div class="krbtns"><a>💛 돌봄 신청하기</a><a>⏱ 내 적립 시간</a><a>❓ 자주 묻는 질문</a></div>
       </div>
