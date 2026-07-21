@@ -3197,11 +3197,11 @@ function QueueChip({ label, n, danger, onClick }) {
 // 공통: 큰 KPI 카드
 function BigStat({ label, value, sub, color }) {
   return (
-    <Card padding={18} style={{ borderLeft: `3px solid ${color}` }}>
-      <div style={{ fontSize: 11.5, color: C.mute, fontWeight: 700 }}>{label}</div>
-      <div style={{ fontSize: 24, fontWeight: 800, color: C.ink, marginTop: 5, letterSpacing: '-0.02em', fontVariantNumeric: 'tabular-nums' }}>{value}</div>
-      {sub && <div style={{ fontSize: 11, color: C.inkSoft, marginTop: 4, lineHeight: 1.45 }}>{sub}</div>}
-    </Card>
+    <div style={{ background: C.panel, border: `1px solid ${C.line}`, borderLeft: `3px solid ${color}`, borderRadius: 12, boxShadow: SHADOW.xs, padding: '16px 18px' }}>
+      <div style={{ fontSize: 12, color: C.navMute, fontWeight: 600 }}>{label}</div>
+      <div style={{ fontSize: 24, fontWeight: 800, color: C.headline, marginTop: 6, letterSpacing: '-0.03em', fontVariantNumeric: 'tabular-nums' }}>{value}</div>
+      {sub && <div style={{ fontSize: 11.5, color: C.muteLight, marginTop: 5, lineHeight: 1.45, fontWeight: 500 }}>{sub}</div>}
+    </div>
   );
 }
 
@@ -3235,35 +3235,31 @@ function CoordB2G({ state, showToast }) {
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 1fr', gap: 14, marginTop: 16 }} className="b2ggrid">
-        <Card>
-          <div style={{ fontSize: 14, fontWeight: 800, marginBottom: 4 }}>기존 복지 플랫폼 연계 현황</div>
-          <div style={{ fontSize: 11.5, color: C.mute, marginBottom: 12 }}>새 시스템 강요 없이, 지자체가 쓰는 시스템 위에 얹힙니다.</div>
+        <Panel title="기존 복지 플랫폼 연계 현황" sub="새 시스템 강요 없이, 지자체가 쓰는 시스템 위에 얹힙니다.">
           {link.map((l, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 0', borderBottom: i < link.length - 1 ? `1px solid ${C.borderSoft}` : 'none' }}>
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '11px 0', borderTop: i === 0 ? 'none' : `1px solid ${C.lineSoft}` }}>
               <ShieldCheck size={15} style={{ color: C.blue, flex: '0 0 auto' }} />
-              <div style={{ flex: 1 }}><div style={{ fontSize: 12.5, fontWeight: 700, color: C.ink }}>{l[0]}</div><div style={{ fontSize: 11, color: C.mute }}>{l[1]}</div></div>
+              <div style={{ flex: 1, minWidth: 0 }}><div style={{ fontSize: 12.5, fontWeight: 700, color: C.headline, letterSpacing: '-0.02em' }}>{l[0]}</div><div style={{ fontSize: 11.5, color: C.navMute, marginTop: 1 }}>{l[1]}</div></div>
               <Badge color={C.sage} soft={C.sageSoft} size="sm">{l[2]}</Badge>
             </div>
           ))}
-        </Card>
-        <Card>
-          <div style={{ fontSize: 14, fontWeight: 800, marginBottom: 4 }}>사각지대 발굴 리스트</div>
-          <div style={{ fontSize: 11.5, color: C.mute, marginBottom: 12 }}>받을 수 있는데 못 받는 어르신을 먼저 찾습니다.</div>
+        </Panel>
+        <Panel title="사각지대 발굴 리스트" sub="받을 수 있는데 못 받는 어르신을 먼저 찾습니다.">
           {gapList.map((g, i) => (
-            <div key={g.p.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 0', borderBottom: i < gapList.length - 1 ? `1px solid ${C.borderSoft}` : 'none' }}>
-              <div style={{ width: 30, height: 30, borderRadius: 9, background: C.lavenderSoft, color: C.lavender, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 12 }}>{g.p.name[0]}</div>
-              <div style={{ flex: 1, minWidth: 0 }}><div style={{ fontSize: 12.5, fontWeight: 700 }}>{g.p.name} · {g.p.age}세</div><div style={{ fontSize: 11, color: C.mute, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>미신청 {g.gaps.length}건 · {g.names.join(' · ')}</div></div>
+            <div key={g.p.id} style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '10px 0', borderTop: i === 0 ? 'none' : `1px solid ${C.lineSoft}` }}>
+              <Avatar type="senior" name={g.p.name} size={30} color={C.lavender} />
+              <div style={{ flex: 1, minWidth: 0 }}><div style={{ fontSize: 12.5, fontWeight: 700, color: C.headline }}>{g.p.name} · {g.p.age}세</div><div style={{ fontSize: 11.5, color: C.navMute, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>미신청 {g.gaps.length}건 · {g.names.join(' · ')}</div></div>
               <Badge color={C.brand} soft={C.brandSoft} size="sm">발굴</Badge>
             </div>
           ))}
-          <Button variant="brand" size="sm" fullWidth style={{ marginTop: 12 }} onClick={() => showToast && showToast('지자체 제출용 운영보고서를 생성했습니다', 'success')}>지자체 운영보고서 자동 생성</Button>
-        </Card>
+          <Button variant="brand" size="sm" fullWidth style={{ marginTop: 14 }} onClick={() => showToast && showToast('지자체 제출용 운영보고서를 생성했습니다', 'success')}>지자체 운영보고서 자동 생성</Button>
+        </Panel>
       </div>
 
-      <Card style={{ marginTop: 14, background: C.blueSoft, border: `1px solid ${C.blue}33` }}>
-        <div style={{ fontSize: 13, fontWeight: 800, color: C.blue, marginBottom: 6 }}>도입 효과 한 줄</div>
-        <div style={{ fontSize: 12.5, color: C.inkSoft, lineHeight: 1.6 }}>인력 채용·전산 구축보다 <b>저렴한 사용료</b>로, 이미 잡힌 돌봄 예산으로 <b>바로 시작</b>합니다. ‘세대를 잇는 마을 돌봄’이 주민에게 보여줄 <b>성과</b>가 됩니다. 진입은 ① 사회서비스 바우처 → ② 플랫폼 사용료 → ③ 민간위탁 순.</div>
-      </Card>
+      <div style={{ marginTop: 14, background: C.panel, border: `1px solid ${C.line}`, borderLeft: `3px solid ${C.blue}`, borderRadius: 12, boxShadow: SHADOW.xs, padding: '16px 18px' }}>
+        <div style={{ fontSize: 13, fontWeight: 700, color: C.blue, marginBottom: 7 }}>도입 효과 한 줄</div>
+        <div style={{ fontSize: 12.5, color: C.inkSoft, lineHeight: 1.65 }}>인력 채용·전산 구축보다 <b>저렴한 사용료</b>로, 이미 잡힌 돌봄 예산으로 <b>바로 시작</b>합니다. ‘세대를 잇는 마을 돌봄’이 주민에게 보여줄 <b>성과</b>가 됩니다. 진입은 ① 사회서비스 바우처 → ② 플랫폼 사용료 → ③ 민간위탁 순.</div>
+      </div>
     </div>
   );
 }
@@ -3287,21 +3283,20 @@ function CoordB2B({ state, showToast }) {
         <BigStat label="활성 트리오" value={`${trios}조`} sub="임직원 가족 연결" color={C.peach} />
         <BigStat label="ESG 사회가치" value="정량 리포트" sub="활동·세대·환원 지표" color={C.gold} />
       </div>
-      <Card style={{ marginTop: 16 }}>
-        <div style={{ fontSize: 14, fontWeight: 800, marginBottom: 12 }}>ESG 성과 리포트 (요약)</div>
+      <Panel title="ESG 성과 리포트 (요약)" style={{ marginTop: 16 }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: 10 }}>
           {esg.map((e, i) => (
-            <div key={i} style={{ border: `1px solid ${C.border}`, borderRadius: 11, padding: '13px 14px', borderLeft: `4px solid ${e[2]}` }}>
-              <div style={{ fontSize: 11, color: C.mute, fontWeight: 700 }}>{e[0]}</div>
-              <div style={{ fontSize: 15, fontWeight: 800, color: C.ink, marginTop: 3 }}>{e[1]}</div>
+            <div key={i} style={{ border: `1px solid ${C.line}`, borderRadius: 11, padding: '13px 15px', borderLeft: `3px solid ${e[2]}`, background: C.panel }}>
+              <div style={{ fontSize: 11.5, color: C.navMute, fontWeight: 600 }}>{e[0]}</div>
+              <div style={{ fontSize: 15.5, fontWeight: 800, color: C.headline, marginTop: 4, letterSpacing: '-0.02em' }}>{e[1]}</div>
             </div>
           ))}
         </div>
         <Button variant="success" size="sm" style={{ marginTop: 14 }} onClick={() => showToast && showToast('기업 ESG 성과 리포트(PDF 초안)를 생성했습니다', 'success')}>ESG 리포트 생성</Button>
-      </Card>
-      <Card style={{ marginTop: 14, background: C.sageSoft, border: `1px solid ${C.sage}33` }}>
-        <div style={{ fontSize: 12.5, color: C.inkSoft, lineHeight: 1.6 }}><b>B2B 패키지</b> — 회사는 신청만, 모집·매칭·운영·정산은 이음이 턴키로. 직원이 가족 걱정을 덜어 <b>이직이 줄고</b> 만족도가 오릅니다. 복지관·어린이집은 ‘기존 사업 강화’로 도입.</div>
-      </Card>
+      </Panel>
+      <div style={{ marginTop: 14, background: C.panel, border: `1px solid ${C.line}`, borderLeft: `3px solid ${C.sage}`, borderRadius: 12, boxShadow: SHADOW.xs, padding: '16px 18px' }}>
+        <div style={{ fontSize: 12.5, color: C.inkSoft, lineHeight: 1.65 }}><b>B2B 패키지</b> — 회사는 신청만, 모집·매칭·운영·정산은 이음이 턴키로. 직원이 가족 걱정을 덜어 <b>이직이 줄고</b> 만족도가 오릅니다. 복지관·어린이집은 ‘기존 사업 강화’로 도입.</div>
+      </div>
     </div>
   );
 }
@@ -5964,30 +5959,30 @@ function CoordRoadmap() {
   return (
     <>
       <PageHeader title="서비스 로드맵" subtitle="멘토 피드백을 반영한 향후 도입 예정 기능입니다" />
-      <Card padding={18} style={{ marginBottom: 18, background: C.brandBg, border: '1px solid ' + C.brand + '30' }}>
-        <div style={{ fontSize: 13, color: C.inkSoft, lineHeight: 1.6 }}>
+      <div style={{ marginBottom: 18, background: C.panel, border: `1px solid ${C.line}`, borderLeft: `3px solid ${C.brand}`, borderRadius: 12, boxShadow: SHADOW.xs, padding: '15px 18px' }}>
+        <div style={{ fontSize: 13, color: C.inkSoft, lineHeight: 1.65 }}>
           광주창조경제혁신센터 <strong>이복은 멘토</strong>님이 제안한 <strong>공인 인증 발신</strong>과 <strong>돌봄 책임보험</strong>을 핵심 로드맵에 반영했습니다. 아래 항목은 광주광역시 통합돌봄 인프라와 연계해 단계적으로 도입할 예정입니다.
         </div>
-      </Card>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {items.map((it, i) => {
           const Icon = it.icon;
           return (
-            <Card key={i} padding={18}>
+            <div key={i} style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 12, boxShadow: SHADOW.xs, padding: 18 }}>
               <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
-                <div style={{ width: 42, height: 42, borderRadius: 11, background: it.soft, color: it.color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <Icon size={20} />
+                <div style={{ width: 40, height: 40, borderRadius: 11, background: it.soft, color: it.color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Icon size={19} />
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 6 }}>
-                    <span style={{ fontSize: 15, fontWeight: 800, color: C.ink }}>{it.title}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 7, flexWrap: 'wrap', marginBottom: 6 }}>
+                    <span style={{ fontSize: 15, fontWeight: 800, color: C.headline, letterSpacing: '-0.02em' }}>{it.title}</span>
                     {it.mentor && <Badge color={C.brand} soft={C.brandSoft} size="sm">멘토 제안</Badge>}
                     <Badge color={it.color} soft={it.soft} size="sm">{it.status}</Badge>
                   </div>
-                  <div style={{ fontSize: 12.5, color: C.inkSoft, lineHeight: 1.55 }}>{it.desc}</div>
+                  <div style={{ fontSize: 12.5, color: C.navMute, lineHeight: 1.6 }}>{it.desc}</div>
                 </div>
               </div>
-            </Card>
+            </div>
           );
         })}
       </div>
