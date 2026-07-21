@@ -2189,9 +2189,9 @@ function SeniorSosCard({ user, dispatch, showToast, match }) {
   };
 
   return (
-    <Card padding={24} style={{ border: `2px solid ${C.redSoft}`, background: C.card }}>
-      <div style={{ fontSize: 15, fontWeight: 700, color: C.red, letterSpacing: '0.05em', marginBottom: 6 }}>도움이 필요하실 때</div>
-      <div style={{ fontSize: 17, color: C.inkSoft, marginBottom: 16 }}>
+    <div style={{ background: C.panel, border: `1px solid ${C.line}`, borderLeft: `3px solid ${C.red}`, borderRadius: 16, boxShadow: SHADOW.sm, padding: 24 }}>
+      <div style={{ fontSize: 15, fontWeight: 700, color: C.red, marginBottom: 8 }}>도움이 필요하실 때</div>
+      <div style={{ fontSize: 17, color: C.ink, marginBottom: 18, lineHeight: 1.55, fontWeight: 500 }}>
         활동 중 어떤 문제가 있으시면 아래 버튼을 누르세요.<br />코디네이터 한가은이 바로 연락드립니다.
       </div>
       {confirming ? (
@@ -2208,7 +2208,7 @@ function SeniorSosCard({ user, dispatch, showToast, match }) {
           코디네이터 호출
         </Button>
       )}
-    </Card>
+    </div>
   );
 }
 
@@ -2630,8 +2630,7 @@ function ParentToday({ todayActivities, upcomingActivities, myMatches, state }) 
   return (
     <>
       <PageHeader title="오늘의 활동" subtitle={fmtDate(TODAY)} />
-      <Card padding={22} style={{ marginBottom: 18 }}>
-        <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 14, color: C.ink }}>오늘 ({todayActivities.length}건)</div>
+      <Panel title="오늘" right={<Badge color={C.brand} soft={C.brandSoft}>{todayActivities.length}건</Badge>} style={{ marginBottom: 16 }}>
         {todayActivities.length === 0 ? (
           <Empty icon={<Coffee size={28} />} title="오늘은 활동이 없습니다" sub="다음 활동을 확인해보세요" />
         ) : (
@@ -2639,15 +2638,14 @@ function ParentToday({ todayActivities, upcomingActivities, myMatches, state }) 
             {todayActivities.map(act => <ActivityCard key={act.id} activity={act} state={state} />)}
           </div>
         )}
-      </Card>
-      <Card padding={22}>
-        <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 14, color: C.ink }}>다가오는 활동</div>
+      </Panel>
+      <Panel title="다가오는 활동">
         {upcomingActivities.length === 0 ? <Empty icon={<Calendar size={28} />} title="예정된 활동이 없습니다" /> : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {upcomingActivities.map(act => <ActivityCard key={act.id} activity={act} state={state} />)}
           </div>
         )}
-      </Card>
+      </Panel>
     </>
   );
 }
@@ -2658,19 +2656,19 @@ function ActivityCard({ activity, state }) {
   const s = state.participants.find(p => p.id === m?.senior_id);
   const c = state.participants.find(p => p.id === m?.child_id);
   return (
-    <div style={{ padding: 14, borderRadius: 10, border: `1px solid ${C.borderSoft}`, background: C.bg }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-        <div style={{ fontWeight: 700, fontSize: 14, color: C.ink }}>{activity.title}</div>
-        <Badge color={C.sage} soft={C.sageSoft}>{activity.type}</Badge>
+    <div style={{ padding: 15, borderRadius: 12, border: `1px solid ${C.line}`, background: C.panel }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 9, gap: 8 }}>
+        <div style={{ fontWeight: 700, fontSize: 14, color: C.headline, letterSpacing: '-0.02em' }}>{activity.title}</div>
+        <Badge color={C.sage} soft={C.sageSoft} size="sm">{activity.type}</Badge>
       </div>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14, fontSize: 12, color: C.inkSoft, marginBottom: 10 }}>
-        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Calendar size={11} /> {fmtRelativeDate(activity.date)} {(activity.time || '').slice(0, 5)}</span>
-        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><MapPin size={11} /> {activity.location}</span>
-        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Clock size={11} /> {activity.duration_hours}시간</span>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, fontSize: 12, color: C.navMute, marginBottom: 12, fontWeight: 500 }}>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Calendar size={12} style={{ color: C.muteLight }} /> {fmtRelativeDate(activity.date)} {(activity.time || '').slice(0, 5)}</span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><MapPin size={12} style={{ color: C.muteLight }} /> {activity.location}</span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Clock size={12} style={{ color: C.muteLight }} /> {activity.duration_hours}시간</span>
       </div>
-      <div style={{ display: 'flex', gap: 8 }}>
+      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
         {[y, s, c].filter(Boolean).map(p => (
-          <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 10px', background: C.card, borderRadius: 999, fontSize: 11, color: C.inkSoft }}>
+          <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 10px 4px 5px', background: C.lineSoft, borderRadius: 999, fontSize: 11.5, color: C.inkSoft, fontWeight: 600 }}>
             <Avatar type={p?.type} gender={p?.gender} name={p.name} size={18} color={PERSONA[p.type]?.color || C.brand} />
             {p.name}
           </div>
@@ -2692,38 +2690,37 @@ function ParentMatchInfo({ myMatches, myChildren, state }) {
             const senior = state.participants.find(p => p.id === match.senior_id);
             return (
               <Card key={match.id} padding={24}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18 }}>
-                  <Heart size={16} style={{ color: C.brand }} />
-                  <div style={{ fontSize: 13, fontWeight: 700, color: C.brand, letterSpacing: '0.06em' }}>매칭 #{match.id.toUpperCase()}</div>
-                  <Badge color={C.success} soft={C.successSoft}>{match.status === 'active' ? '활동 중' : match.status}</Badge>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 18 }}>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: C.muteLight, letterSpacing: '0.04em', fontVariantNumeric: 'tabular-nums' }}>매칭 #{match.id.toUpperCase()}</div>
+                  <Badge color={C.success} soft={C.successSoft} size="sm">{match.status === 'active' ? '활동 중' : match.status}</Badge>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
                   {[
                     { p: child, label: '자녀', color: C.peach },
                     { p: youth, label: '청년 멘토', color: C.sage },
                     { p: senior, label: '동네 어르신', color: C.lavender },
                   ].map(({ p, label, color }) => p && (
-                    <div key={p.id} style={{ padding: 16, borderRadius: 12, background: C.bg, border: `1px solid ${C.borderSoft}` }}>
+                    <div key={p.id} style={{ padding: 16, borderRadius: 12, background: C.lineSoft, border: `1px solid ${C.line}` }}>
                       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 12 }}>
-                        <Avatar type={p?.type} gender={p?.gender} name={p.name} size={64} color={color} />
-                        <div style={{ fontSize: 16, fontWeight: 800, color: C.ink, marginTop: 10, fontFamily: SERIF_STACK }}>{p.name}</div>
-                        <div style={{ fontSize: 11, color: color, fontWeight: 700, letterSpacing: '0.06em', marginTop: 3 }}>{label}</div>
+                        <Avatar type={p?.type} gender={p?.gender} name={p.name} size={60} color={color} ring />
+                        <div style={{ fontSize: 15.5, fontWeight: 800, color: C.headline, marginTop: 10, letterSpacing: '-0.02em' }}>{p.name}</div>
+                        <div style={{ fontSize: 11.5, color: color, fontWeight: 700, marginTop: 3 }}>{label}</div>
                       </div>
-                      <div style={{ fontSize: 11, color: C.inkSoft, lineHeight: 1.6, padding: '10px 0', borderTop: `1px dashed ${C.borderSoft}` }}>
+                      <div style={{ fontSize: 11.5, color: C.navMute, lineHeight: 1.6, padding: '10px 0 0', borderTop: `1px solid ${C.line}` }}>
                         {p.bio || (p.type === 'child' ? `${p.age}세 · ${p.school || ''}` : '')}
                       </div>
                       {p.skills?.length > 0 && (
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 8 }}>
                           {p.skills.slice(0, 3).map((s, i) => (
-                            <span key={i} style={{ fontSize: 10, padding: '2px 7px', background: C.card, borderRadius: 999, color: C.inkSoft, border: `1px solid ${C.borderSoft}` }}>{s}</span>
+                            <span key={i} style={{ fontSize: 10.5, padding: '2px 8px', background: C.panel, borderRadius: 7, color: C.navMute, border: `1px solid ${C.line}`, fontWeight: 600 }}>{s}</span>
                           ))}
                         </div>
                       )}
                     </div>
                   ))}
                 </div>
-                <div style={{ marginTop: 20, padding: 16, background: `${C.brand}08`, borderRadius: 10, border: `1px dashed ${C.brand}40` }}>
-                  <div style={{ fontSize: 11, color: C.brand, fontWeight: 700, letterSpacing: '0.06em', marginBottom: 6 }}>코디네이터 메모</div>
+                <div style={{ marginTop: 18, padding: '14px 16px', background: C.brandBg, borderRadius: 12, borderLeft: `3px solid ${C.brand}` }}>
+                  <div style={{ fontSize: 11.5, color: C.brand, fontWeight: 700, marginBottom: 6 }}>코디네이터 메모</div>
                   <div style={{ fontSize: 13, color: C.inkSoft, lineHeight: 1.6 }}>{match.coordinator_note || '활발하게 활동 중입니다. 별다른 이슈 없이 진행 중이니 안심하셔도 됩니다.'}</div>
                 </div>
               </Card>
@@ -2770,48 +2767,47 @@ function ParentSafety({ user, myMatches, myIncidents, dispatch, showToast }) {
     <>
       <PageHeader title="안전" subtitle="아이의 안전이 최우선입니다" right={<Button variant="brand" icon={<AlertTriangle size={16} />} onClick={() => setReporting(true)}>안전 신고</Button>} />
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 18 }}>
-        <Card padding={20} style={{ background: `${C.success}08`, border: `1px solid ${C.success}40` }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-            <Phone size={18} style={{ color: C.success }} />
-            <div style={{ fontSize: 14, fontWeight: 700, color: C.ink }}>코디네이터 직통</div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 16 }}>
+        <div style={{ background: C.panel, border: `1px solid ${C.line}`, borderLeft: `3px solid ${C.success}`, borderRadius: 12, boxShadow: SHADOW.xs, padding: 20 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+            <Phone size={16} style={{ color: C.success }} />
+            <div style={{ fontSize: 13.5, fontWeight: 700, color: C.headline }}>코디네이터 직통</div>
           </div>
-          <div style={{ fontSize: 22, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK }}>한가은</div>
-          <div style={{ fontSize: 13, color: C.inkSoft, marginTop: 4 }}>010-2345-6789</div>
-          <div style={{ fontSize: 11, color: C.mute, marginTop: 8 }}>평일 9시~21시 / 주말 10시~18시 응답</div>
-        </Card>
-        <Card padding={20} style={{ background: `${C.red}08`, border: `1px solid ${C.red}40` }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-            <ShieldAlert size={18} style={{ color: C.red }} />
-            <div style={{ fontSize: 14, fontWeight: 700, color: C.ink }}>긴급 시</div>
+          <div style={{ fontSize: 22, fontWeight: 800, color: C.headline, letterSpacing: '-0.03em' }}>한가은</div>
+          <div style={{ fontSize: 13.5, color: C.inkSoft, marginTop: 5, fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>010-2345-6789</div>
+          <div style={{ fontSize: 11.5, color: C.muteLight, marginTop: 8, fontWeight: 500 }}>평일 9시~21시 / 주말 10시~18시 응답</div>
+        </div>
+        <div style={{ background: C.panel, border: `1px solid ${C.line}`, borderLeft: `3px solid ${C.red}`, borderRadius: 12, boxShadow: SHADOW.xs, padding: 20 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+            <ShieldAlert size={16} style={{ color: C.red }} />
+            <div style={{ fontSize: 13.5, fontWeight: 700, color: C.headline }}>긴급 시</div>
           </div>
           <div style={{ fontSize: 13, color: C.inkSoft, lineHeight: 1.7 }}>
-            아이의 안전이 위협받는 즉시 위험 상황에서는 <strong style={{ color: C.red }}>112</strong> 또는 <strong style={{ color: C.red }}>119</strong>에 먼저 신고 후 코디네이터에게 알려주세요.
+            아이의 안전이 위협받는 위험 상황에서는 <strong style={{ color: C.red }}>112</strong> 또는 <strong style={{ color: C.red }}>119</strong>에 먼저 신고 후 코디네이터에게 알려주세요.
           </div>
-        </Card>
+        </div>
       </div>
 
-      <Card padding={22}>
-        <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 14, color: C.ink }}>안전 이슈 이력</div>
+      <Panel title="안전 이슈 이력" padding={myIncidents.length === 0 ? 8 : 16}>
         {myIncidents.length === 0 ? (
           <Empty icon={<ShieldCheck size={28} />} title="안전 이슈가 없습니다" sub="안전하게 활동 중입니다" />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {myIncidents.map(inc => (
-              <div key={inc.id} style={{ padding: 14, borderRadius: 10, border: `1px solid ${C.borderSoft}`, background: C.bg }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-                  <Badge color={inc.severity === 'high' ? C.red : C.amber} soft={inc.severity === 'high' ? C.redSoft : C.amberSoft}>{inc.severity === 'high' ? '높음' : inc.severity === 'medium' ? '중간' : '낮음'}</Badge>
-                  <span style={{ fontSize: 13, fontWeight: 700, color: C.ink }}>{inc.category}</span>
-                  <Badge color={inc.status === 'resolved' ? C.success : C.amber} soft={inc.status === 'resolved' ? C.successSoft : C.amberSoft}>{inc.status === 'resolved' ? '해결됨' : '처리 중'}</Badge>
+              <div key={inc.id} style={{ padding: 14, borderRadius: 12, border: `1px solid ${C.line}`, borderLeft: `3px solid ${inc.severity === 'high' ? C.red : C.amber}`, background: C.panel }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 7, flexWrap: 'wrap' }}>
+                  <Badge color={inc.severity === 'high' ? C.red : C.amber} soft={inc.severity === 'high' ? C.redSoft : C.amberSoft} size="sm">{inc.severity === 'high' ? '높음' : inc.severity === 'medium' ? '중간' : '낮음'}</Badge>
+                  <span style={{ fontSize: 13.5, fontWeight: 700, color: C.headline, letterSpacing: '-0.02em' }}>{inc.category}</span>
+                  <Badge color={inc.status === 'resolved' ? C.success : C.amber} soft={inc.status === 'resolved' ? C.successSoft : C.amberSoft} size="sm">{inc.status === 'resolved' ? '해결됨' : '처리 중'}</Badge>
                 </div>
-                <div style={{ fontSize: 12, color: C.inkSoft, marginBottom: 6 }}>{inc.description}</div>
-                <div style={{ fontSize: 11, color: C.mute }}>접수: {inc.reported_at}{inc.resolved_at && ` · 해결: ${inc.resolved_at}`}</div>
-                {inc.resolution && <div style={{ fontSize: 12, color: C.success, marginTop: 6, padding: 8, background: C.successSoft, borderRadius: 6 }}>처리 내용: {inc.resolution}</div>}
+                <div style={{ fontSize: 12.5, color: C.inkSoft, marginBottom: 7, lineHeight: 1.55 }}>{inc.description}</div>
+                <div style={{ fontSize: 11.5, color: C.muteLight, fontWeight: 500, fontVariantNumeric: 'tabular-nums' }}>접수 {inc.reported_at}{inc.resolved_at && ` · 해결 ${inc.resolved_at}`}</div>
+                {inc.resolution && <div style={{ fontSize: 12, color: C.success, marginTop: 8, padding: '8px 10px', background: C.successSoft, borderRadius: 8 }}>처리 내용: {inc.resolution}</div>}
               </div>
             ))}
           </div>
         )}
-      </Card>
+      </Panel>
 
       <Modal open={reporting} onClose={() => setReporting(false)} title="안전 신고" size="md"
         footer={<>
