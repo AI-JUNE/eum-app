@@ -26,6 +26,7 @@ import { callClaude } from './eum/api.js';
 import { aiDong, aiTrioScore, aiAutoTrios, aiWelfare } from './eum/matching.js';
 import { SEED_DATA } from './eum/seed.js';
 import { Avatar } from './eum/avatar.jsx';
+import { TERMS_SECTIONS, PRIVACY_SECTIONS, LEGAL_META } from './eum/legal.js';
 
 // ============================================================================
 // 2. SEED DATA — src/eum/seed.js 로 이동 (상단 import)
@@ -4391,6 +4392,33 @@ function RLStepsBand() {
   );
 }
 
+// 법적 고지 모달 — 이용약관 · 개인정보처리방침 (src/eum/legal.js 초안)
+function LegalModal({ doc, onClose }) {
+  const isTerms = doc === 'terms';
+  const isPrivacy = doc === 'privacy';
+  if (!isTerms && !isPrivacy) return null;
+  const title = isTerms ? '이용약관' : '개인정보처리방침';
+  const sections = isTerms ? TERMS_SECTIONS : PRIVACY_SECTIONS;
+  return (
+    <Modal open={!!doc} onClose={onClose} title={title} size="lg">
+      <div style={{ fontSize: 12.5, color: C.mute, marginBottom: 16, lineHeight: 1.6 }}>
+        {LEGAL_META.service} · 운영 {LEGAL_META.operator} · 시행(예정)일 {LEGAL_META.effectiveDate}
+        {LEGAL_META.status === 'draft' && (
+          <span style={{ display: 'inline-block', marginLeft: 8, padding: '2px 8px', borderRadius: 6, background: C.amberSoft, color: C.gold, fontSize: 11, fontWeight: 700 }}>초안 · 법무 검토 전</span>
+        )}
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+        {sections.map((s, i) => (
+          <div key={i}>
+            <div style={{ fontSize: 14, fontWeight: 800, color: C.ink, marginBottom: 6 }}>{s.h}</div>
+            <div style={{ fontSize: 13, color: C.inkSoft, lineHeight: 1.75, whiteSpace: 'pre-wrap' }}>{s.body}</div>
+          </div>
+        ))}
+      </div>
+    </Modal>
+  );
+}
+
 function RLLanding({ state, onSelectRole, onShowApplication }) {
   // 시드된 페르소나 fixed assignments
   const personas = [
@@ -4404,6 +4432,7 @@ function RLLanding({ state, onSelectRole, onShowApplication }) {
   const isPhone = useIsMobile(520);
   const [scrolled, setScrolled] = useState(false);
   const [showTop, setShowTop] = useState(false);
+  const [legalDoc, setLegalDoc] = useState(null); // 'terms' | 'privacy' | null
   useEffect(() => {
     const h = () => { const y = window.scrollY; setScrolled(y > 8); setShowTop(y > 700); };
     h();
@@ -4609,7 +4638,11 @@ function RLLanding({ state, onSelectRole, onShowApplication }) {
             </div>
           </div>
           <div style={{ paddingTop: 22, borderTop: `1px solid ${C.borderSoft}`, display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, fontSize: 12.5, color: C.mute, letterSpacing: '0.01em' }}>
-            <span>© 2027 이음 · 운영 주식회사 고원(GOWON)</span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+              <span>© 2027 이음 · 운영 주식회사 고원(GOWON)</span>
+              <span role="button" tabIndex={0} onClick={() => setLegalDoc('terms')} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setLegalDoc('terms'); } }} style={{ color: C.inkSoft, fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}>이용약관</span>
+              <span role="button" tabIndex={0} onClick={() => setLegalDoc('privacy')} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setLegalDoc('privacy'); } }} style={{ color: C.ink, fontWeight: 700, cursor: 'pointer', textDecoration: 'underline' }}>개인정보처리방침</span>
+            </span>
             <span>광주 광산구 우산동 3세대 상생 품앗이 파일럿 · 데모 모드</span>
           </div>
         </div>
@@ -4619,6 +4652,7 @@ function RLLanding({ state, onSelectRole, onShowApplication }) {
           <ChevronUp size={22} />
         </button>
       )}
+      <LegalModal doc={legalDoc} onClose={() => setLegalDoc(null)} />
     </div>
   );
 }
