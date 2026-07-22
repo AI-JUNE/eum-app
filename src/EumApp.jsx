@@ -3546,13 +3546,23 @@ function YouthDiscover({ user, totalHours, showToast, setView }) {
         })}
       </div>
 
+      {/* 검색·필터 활성 시 결과 수 안내 */}
+      {(query !== '' || cat !== '전체') && list.length > 0 && (
+        <div aria-live="polite" style={{ fontSize: 12.5, fontWeight: 600, color: C.mute, marginBottom: 12 }}>
+          검색 결과 <span style={{ color: C.brand, fontWeight: 800 }}>{list.length}건</span>
+        </div>
+      )}
+
       {/* 모집공고 카드 */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(280px,1fr))', gap: 13 }}>
-        {list.map((x, i) => (
+        {list.map((x, i) => {
+          const [filled, total] = String(x.cap || '').split('/').map(n => parseInt(n, 10));
+          const full = Number.isFinite(filled) && Number.isFinite(total) && filled >= total;
+          return (
           <Card key={i} hoverable>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
               <Badge color={C.sage} soft={C.sageSoft} size="sm">{x.cat}</Badge>
-              {x.hot && <Badge color={C.brand} soft={C.brandSoft} size="sm">인기</Badge>}
+              {full ? <Badge color={C.mute} soft={C.lineSoft} size="sm">모집 마감</Badge> : x.hot && <Badge color={C.brand} soft={C.brandSoft} size="sm">인기</Badge>}
             </div>
             <div style={{ fontSize: 15, fontWeight: 800, marginBottom: 8 }}>{x.t}</div>
             <div style={{ fontSize: 12, color: C.inkSoft, display: 'flex', flexDirection: 'column', gap: 5, marginBottom: 11 }}>
@@ -3563,11 +3573,12 @@ function YouthDiscover({ user, totalHours, showToast, setView }) {
               <span style={{ fontSize: 11.5, fontWeight: 700, color: C.gold, background: C.goldSoft, padding: '4px 9px', borderRadius: 7 }}>상품권 {x.reward.toLocaleString('ko-KR')}원</span>
               <span style={{ fontSize: 11.5, fontWeight: 700, color: '#FF6B35', background: '#FFE9DF', padding: '4px 9px', borderRadius: 7 }}>봉사 {x.hrs}시간 인정</span>
             </div>
-            <Button variant="brand" size="sm" fullWidth onClick={() => showToast && showToast(`'${x.t}' 참여를 신청했습니다 · 코디 확인 후 확정`, 'success')}>참여 신청</Button>
+            <Button variant="brand" size="sm" fullWidth disabled={full} onClick={() => showToast && showToast(`'${x.t}' 참여를 신청했습니다 · 코디 확인 후 확정`, 'success')}>{full ? '모집 마감' : '참여 신청'}</Button>
           </Card>
-        ))}
+          );
+        })}
       </div>
-      {list.length === 0 && <Card><Empty icon={<Search size={28} />} title="조건에 맞는 활동이 없어요" sub="다른 검색어나 카테고리를 시도해 보세요" /></Card>}
+      {list.length === 0 && <Card><Empty icon={<Search size={28} />} title="조건에 맞는 활동이 없어요" sub="다른 검색어나 카테고리를 시도해 보세요" action={<Button variant="secondary" size="sm" onClick={() => { setQ(''); setCat('전체'); }}>필터 초기화</Button>} /></Card>}
 
       <Card style={{ marginTop: 16, background: '#FFF4EE', border: '1px solid #FFD9C7' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}><Award size={16} style={{ color: '#FF6B35' }} /><div style={{ fontSize: 13, fontWeight: 800, color: '#D9531E' }}>참여하면 1365 봉사실적으로 인정</div></div>
