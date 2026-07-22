@@ -8,7 +8,7 @@
 export const LEGAL_META = {
   service: '이음',
   operator: '주식회사 고원(GOWON)',
-  contactEmail: 'privacy@eum.example', // [승인 필요] 실제 개인정보 보호책임자 연락처로 교체
+  contactEmail: 'gowonceo@gmail.com',
   effectiveDate: '2027-07-15',
   status: 'draft', // 'draft' → 법무 검토 후 'published'
 };
@@ -93,7 +93,7 @@ export const PRIVACY_SECTIONS = [
   },
   {
     h: '9. 개인정보 보호책임자',
-    body: '개인정보 보호책임자: (지정 예정) · 문의: privacy@eum.example (⚠️ [승인 필요] 실제 책임자·연락처로 교체). 이용자는 서비스 이용 중 발생하는 개인정보 관련 문의·불만을 위 연락처로 제기할 수 있습니다.',
+    body: '개인정보 보호책임자: 주식회사 고원 개인정보 보호책임자 · 문의: gowonceo@gmail.com. 이용자는 서비스 이용 중 발생하는 개인정보 관련 문의·불만을 위 연락처로 제기할 수 있습니다.',
   },
   {
     h: '10. 고지의 의무',
