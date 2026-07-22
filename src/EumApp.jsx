@@ -27,6 +27,7 @@ import { aiDong, aiTrioScore, aiAutoTrios, aiWelfare } from './eum/matching.js';
 import { SEED_DATA } from './eum/seed.js';
 import { Avatar } from './eum/avatar.jsx';
 import { TERMS_SECTIONS, PRIVACY_SECTIONS, LEGAL_META } from './eum/legal.js';
+import { PLANS, formatKRW, isPaidPlan, requestSubscription, BILLING_ENABLED } from './eum/billing.js';
 
 // ============================================================================
 // 2. SEED DATA — src/eum/seed.js 로 이동 (상단 import)
@@ -3400,12 +3401,25 @@ function WelfareFab({ role }) {
 }
 
 // ───────── 소비자 B2C 구독 (약화 · 맨 아래) ─────────
+// 요금제 정본은 src/eum/billing.js 의 PLANS. 표시색은 여기서 매핑(무료→mute·베이직→brand(hot)·프리미엄→lavender).
 function ConsumerPricing() {
-  const tiers = [
-    { name: '무료', price: '무료', sub: '동네 품앗이 기본', feats: ['트리오 매칭·활동 일지', '봉사시간·상생카드 보상'], hot: false, c: C.mute },
-    { name: '안심 베이직', price: '₩19,900', sub: '맞벌이 보호자에게', feats: ['실시간 체크인·위치 알림', '주간 활동 리포트'], hot: true, c: C.brand },
-    { name: '안심 프리미엄', price: '₩39,900', sub: '가장 깊은 안심', feats: ['우선 매칭', '월간 성장 리포트·상담'], hot: false, c: C.lavender },
-  ];
+  const STYLE = {
+    free:    { c: C.mute,     hot: false },
+    basic:   { c: C.brand,    hot: true  },
+    premium: { c: C.lavender, hot: false },
+  };
+  const [notice, setNotice] = useState(null); // 구독 CTA 결과 안내(승인 전엔 [승인 필요])
+
+  // [승인 필요] 결제는 BILLING_ENABLED=false 로 가드됨 — requestSubscription 이 실결제 호출 없이 안내만 반환.
+  const onSubscribe = useCallback(async (planId) => {
+    try {
+      const r = await requestSubscription(planId);
+      setNotice(r?.message || (r?.ok ? '결제 준비 완료' : '결제를 진행할 수 없습니다.'));
+    } catch (e) {
+      setNotice('[승인 필요] 결제 스캐폴딩 오류: ' + (e?.message || 'unknown'));
+    }
+  }, []);
+
   return (
     <Card padding={18} style={{ marginTop: 18, background: C.cream, border: `1px dashed ${C.border}` }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
@@ -3414,15 +3428,34 @@ function ConsumerPricing() {
       </div>
       <div style={{ fontSize: 11, color: C.mute, marginBottom: 12 }}>기본 활동은 누구나 무료입니다. 공공·기업 지원 시 구독도 무료로 제공돼요.</div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(150px,1fr))', gap: 9, opacity: 0.92 }}>
-        {tiers.map(t => (
-          <div key={t.name} style={{ border: `1px solid ${t.hot ? C.brand + '66' : C.border}`, borderRadius: 11, padding: '12px 13px', background: C.card }}>
-            <div style={{ fontSize: 10.5, color: C.mute, fontWeight: 700 }}>{t.sub}</div>
-            <div style={{ fontSize: 13.5, fontWeight: 800, color: t.c, marginTop: 2 }}>{t.name}</div>
-            <div style={{ fontSize: 17, fontWeight: 800, color: C.ink, margin: '4px 0 8px' }}>{t.price}<span style={{ fontSize: 11, color: C.mute, fontWeight: 600 }}>{t.price !== '무료' ? ' /월' : ''}</span></div>
-            {t.feats.map((f, i) => <div key={i} style={{ fontSize: 11, color: C.inkSoft, marginBottom: 4 }}>· {f}</div>)}
-          </div>
-        ))}
+        {PLANS.map(t => {
+          const st = STYLE[t.id] || { c: C.mute, hot: false };
+          const paid = isPaidPlan(t.id);
+          return (
+            <div key={t.id} style={{ border: `1px solid ${st.hot ? C.brand + '66' : C.border}`, borderRadius: 11, padding: '12px 13px', background: C.card }}>
+              <div style={{ fontSize: 10.5, color: C.mute, fontWeight: 700 }}>{t.sub}</div>
+              <div style={{ fontSize: 13.5, fontWeight: 800, color: st.c, marginTop: 2 }}>{t.name}</div>
+              <div style={{ fontSize: 17, fontWeight: 800, color: C.ink, margin: '4px 0 8px' }}>{formatKRW(t.amount)}<span style={{ fontSize: 11, color: C.mute, fontWeight: 600 }}>{paid ? ' /월' : ''}</span></div>
+              {t.feats.map((f, i) => <div key={i} style={{ fontSize: 11, color: C.inkSoft, marginBottom: 4 }}>· {f}</div>)}
+              {paid && (
+                <button
+                  type="button"
+                  onClick={() => onSubscribe(t.id)}
+                  title={BILLING_ENABLED ? '구독 신청' : '[승인 필요] 결제 비활성 — 승인 후 활성화'}
+                  style={{ marginTop: 8, width: '100%', padding: '7px 0', fontSize: 11.5, fontWeight: 700, cursor: 'pointer',
+                    color: st.hot ? '#fff' : st.c, background: st.hot ? C.brand : 'transparent',
+                    border: `1px solid ${st.hot ? C.brand : C.border}`, borderRadius: 8 }}
+                >
+                  {BILLING_ENABLED ? '구독하기' : '구독 신청(준비중)'}
+                </button>
+              )}
+            </div>
+          );
+        })}
       </div>
+      {notice && (
+        <div role="status" style={{ marginTop: 10, padding: '8px 10px', fontSize: 10.5, lineHeight: 1.5, color: C.inkSoft, background: C.borderSoft, border: `1px solid ${C.border}`, borderRadius: 8 }}>{notice}</div>
+      )}
       <div style={{ fontSize: 10, color: C.mute, marginTop: 10 }}>구독료는 우산동 파일럿 가정 기준 예시이며, 시장조사상 개인 구독은 장기 옵션입니다(B2G·B2B 우선).</div>
     </Card>
   );
