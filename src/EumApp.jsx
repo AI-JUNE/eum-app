@@ -3506,7 +3506,8 @@ const DISCOVER_LIST = [
 function YouthDiscover({ user, totalHours, showToast, setView }) {
   const [q, setQ] = useState('');
   const [cat, setCat] = useState('전체');
-  const list = DISCOVER_LIST.filter(x => (cat === '전체' || x.cat === cat) && (q === '' || x.t.includes(q) || x.org.includes(q)));
+  const query = q.trim().toLowerCase();
+  const list = DISCOVER_LIST.filter(x => (cat === '전체' || x.cat === cat) && (query === '' || [x.t, x.org, x.place, x.cat].some(v => String(v || '').toLowerCase().includes(query))));
   return (
     <div>
       <PageHeader title="활동 찾기" subtitle="우리 동네 세대 돌봄 활동을 직접 찾아 신청하세요. 참여하면 보상과 함께 1365 봉사시간이 쌓입니다." right={<Badge color={'#FF6B35'} soft={'#FFE9DF'}>1365 봉사실적 인정</Badge>} />
@@ -3525,9 +3526,16 @@ function YouthDiscover({ user, totalHours, showToast, setView }) {
       {/* 검색 + 카테고리 칩 */}
       <div style={{ position: 'relative', marginBottom: 12 }}>
         <Search size={16} style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: C.muteLight }} />
-        <input type="search" value={q} onChange={e => setQ(e.target.value)} placeholder="활동·기관 검색" aria-label="활동·기관 검색" style={{ width: '100%', padding: '10px 13px 10px 38px', borderRadius: 10, border: `1px solid ${C.line}`, background: C.panel, fontFamily: FONT_STACK, fontSize: 14, color: C.ink, outline: 'none' }}
+        <input type="search" value={q} onChange={e => setQ(e.target.value)} placeholder="활동·기관 검색" aria-label="활동·기관 검색" style={{ width: '100%', padding: '10px 38px 10px 38px', borderRadius: 10, border: `1px solid ${C.line}`, background: C.panel, fontFamily: FONT_STACK, fontSize: 14, color: C.ink, outline: 'none' }}
           onFocus={e => { e.target.style.borderColor = C.brand; e.target.style.boxShadow = `0 0 0 3px ${C.brand}1f`; }}
           onBlur={e => { e.target.style.borderColor = C.line; e.target.style.boxShadow = 'none'; }} />
+        {q && (
+          <button type="button" onClick={() => setQ('')} aria-label="검색어 지우기" style={{ position: 'absolute', right: 9, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: C.mute, display: 'flex', padding: 3, borderRadius: 6 }}
+            onMouseEnter={e => { e.currentTarget.style.color = C.ink; }}
+            onMouseLeave={e => { e.currentTarget.style.color = C.mute; }}>
+            <X size={15} />
+          </button>
+        )}
       </div>
       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 16 }}>
         {DISCOVER_CATS.map(c => {
