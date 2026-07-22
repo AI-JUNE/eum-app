@@ -6526,12 +6526,34 @@ function App() {
 
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: C.bg, fontFamily: FONT_STACK }}>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ width: 56, height: 56, borderRadius: 14, margin: '0 auto 16px', boxShadow: `0 8px 24px ${C.brand}40`, display: 'flex', animation: 'slideUp 0.4s ease' }}>
-            <EumLogo size={56} />
+      <div role="status" aria-live="polite" aria-label="이음을 불러오는 중" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: C.bg, fontFamily: FONT_STACK, padding: 24 }}>
+        {/* 초기 로딩 스플래시 — 전역 스타일 블록이 아직 마운트되기 전이라 키프레임을 자체 포함한다 */}
+        <style>{`
+          @keyframes eumSplashIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+          @keyframes eumSplashBreath { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.055); } }
+          @keyframes eumSplashHalo { 0%, 100% { opacity: 0.45; transform: scale(1); } 50% { opacity: 0.9; transform: scale(1.16); } }
+          @keyframes eumSplashBar { 0% { transform: translateX(-100%); } 100% { transform: translateX(330%); } }
+          .eum-splash-in { animation: eumSplashIn 0.5s cubic-bezier(0.22,1,0.36,1) both; }
+          .eum-splash-mark { animation: eumSplashBreath 2.4s ease-in-out infinite; }
+          .eum-splash-halo { animation: eumSplashHalo 2.4s ease-in-out infinite; }
+          .eum-splash-track { position: relative; width: 132px; height: 4px; margin: 22px auto 0; border-radius: 999px; background: ${C.border}; overflow: hidden; }
+          .eum-splash-track::after { content: ''; position: absolute; top: 0; left: 0; width: 38%; height: 100%; border-radius: 999px; background: ${C.brand}; animation: eumSplashBar 1.25s cubic-bezier(0.5,0,0.2,1) infinite; }
+          @media (prefers-reduced-motion: reduce) {
+            .eum-splash-in { animation: none; }
+            .eum-splash-mark, .eum-splash-halo { animation: none; }
+            .eum-splash-track::after { animation: none; width: 100%; opacity: 0.8; }
+          }
+        `}</style>
+        <div className="eum-splash-in" style={{ textAlign: 'center' }}>
+          <div style={{ position: 'relative', width: 72, height: 72, margin: '0 auto 20px' }}>
+            <div className="eum-splash-halo" aria-hidden="true" style={{ position: 'absolute', inset: 4, borderRadius: '50%', background: `radial-gradient(circle, ${C.brand}38, transparent 68%)`, filter: 'blur(7px)' }} />
+            <div className="eum-splash-mark" style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', width: 72, height: 72 }}>
+              <EumLogo size={60} />
+            </div>
           </div>
-          <div style={{ fontSize: 14, color: C.inkSoft }}>이음을 불러오고 있습니다…</div>
+          <div style={{ fontSize: 15, fontWeight: 600, color: C.headline, letterSpacing: '-0.02em' }}>이음을 불러오고 있습니다</div>
+          <div style={{ fontSize: 13, color: C.navMute, marginTop: 5 }}>세대를 잇는 준비를 하고 있어요</div>
+          <div className="eum-splash-track" aria-hidden="true" />
         </div>
       </div>
     );
