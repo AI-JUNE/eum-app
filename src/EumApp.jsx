@@ -509,12 +509,14 @@ function StatCard({ label, value, sub, color = C.ink, icon, trend }) {
 function KpiStrip({ items, style = {} }) {
   return (
     <div style={{
+      // 헤어라인 그리드 — 셀 사이 1px 간격에 배경(구분선색)이 비쳐 행·열 모두 정확히 나뉜다.
+      // borderLeft 방식은 2행으로 접힐 때(모바일) 좌측 구분선이 잘못 남고 행 사이 선이 사라졌다.
       display: 'grid', gridTemplateColumns: `repeat(auto-fit, minmax(180px, 1fr))`,
-      background: C.panel, border: `1px solid ${C.line}`, borderRadius: 16,
+      gap: 1, background: C.lineSoft, border: `1px solid ${C.line}`, borderRadius: 16,
       boxShadow: SHADOW.xs, overflow: 'hidden', ...style,
     }}>
       {items.map((k, i) => (
-        <div key={k.label} style={{ padding: '16px 20px 18px', borderLeft: i === 0 ? 'none' : `1px solid ${C.lineSoft}` }}>
+        <div key={k.label} style={{ padding: '16px 20px 18px', background: C.panel }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 11 }}>
             {k.icon && (
               <span style={{ width: 24, height: 24, borderRadius: 7, background: (k.color || C.ink) + '14', color: k.color || C.ink, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{k.icon}</span>
@@ -2035,7 +2037,7 @@ function SettlementView({ settlements, totalHours, totalEarned, user }) {
                 <span>·</span>
                 <span style={{ fontVariantNumeric: 'tabular-nums' }}>{fmtDate(s.issued_at)} 발급</span>
                 <span>·</span>
-                <span style={{ fontFamily: 'monospace' }}>{s.voucher_code}</span>
+                <span style={{ fontVariantNumeric: 'tabular-nums', letterSpacing: '0.03em' }}>{s.voucher_code}</span>
               </div>
             </div>
             <div style={{ textAlign: 'right', flexShrink: 0 }}>
