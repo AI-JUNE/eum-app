@@ -537,14 +537,13 @@ function KpiStrip({ items, style = {} }) {
 }
 
 // ── 모션 · 인포그래픽 툴킷 ────────────────────────────────────────────────
+// prefers-reduced-motion 대응은 공용 헬퍼 prefersReducedMotion() 사용(아래 RL 섹션에 정의, 호이스팅).
 function useCountUp(target, duration = 950) {
   const [val, setVal] = useState(0);
   const raf = useRef();
   useEffect(() => {
     const num = typeof target === 'number' ? target : parseFloat(String(target).replace(/[^0-9.-]/g, '')) || 0;
-    const reduce = typeof window !== 'undefined' && window.matchMedia
-      && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduce) { setVal(num); return; }
+    if (prefersReducedMotion()) { setVal(num); return; }
     let start;
     const tick = (t) => {
       if (start === undefined) start = t;
@@ -571,15 +570,20 @@ function Ring({ value, max = 100, size = 96, stroke = 9, color = C.brand, track 
   const pct = max > 0 ? Math.max(0, Math.min(1, value / max)) : 0;
   const r = (size - stroke) / 2;
   const circ = 2 * Math.PI * r;
-  const [draw, setDraw] = useState(0);
-  useEffect(() => { const id = requestAnimationFrame(() => setDraw(pct)); return () => cancelAnimationFrame(id); }, [pct]);
+  const reduce = prefersReducedMotion();
+  const [draw, setDraw] = useState(reduce ? pct : 0);
+  useEffect(() => {
+    if (reduce) { setDraw(pct); return undefined; }
+    const id = requestAnimationFrame(() => setDraw(pct));
+    return () => cancelAnimationFrame(id);
+  }, [pct, reduce]);
   return (
     <div style={{ position: 'relative', width: size, height: size, flexShrink: 0 }}>
       <svg width={size} height={size} style={{ transform: 'rotate(-90deg)', display: 'block' }}>
         <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={track} strokeWidth={stroke} />
         <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={color} strokeWidth={stroke} strokeLinecap="round"
           strokeDasharray={circ} strokeDashoffset={circ * (1 - draw)}
-          style={{ transition: `stroke-dashoffset ${duration}ms cubic-bezier(0.22,1,0.36,1)` }} />
+          style={{ transition: reduce ? 'none' : `stroke-dashoffset ${duration}ms cubic-bezier(0.22,1,0.36,1)` }} />
       </svg>
       <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
         {label != null && <div style={{ fontSize: Math.round(size * 0.27), fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK, letterSpacing: '-0.02em', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>{label}</div>}
@@ -592,11 +596,16 @@ function Ring({ value, max = 100, size = 96, stroke = 9, color = C.brand, track 
 // 애니메이션 막대
 function AnimatedBar({ value, max = 100, color = C.brand, height = 8, track = C.borderSoft, duration = 850, delay = 0 }) {
   const pct = max > 0 ? Math.max(0, Math.min(1, value / max)) : 0;
-  const [w, setW] = useState(0);
-  useEffect(() => { const id = setTimeout(() => setW(pct), delay + 30); return () => clearTimeout(id); }, [pct, delay]);
+  const reduce = prefersReducedMotion();
+  const [w, setW] = useState(reduce ? pct : 0);
+  useEffect(() => {
+    if (reduce) { setW(pct); return undefined; }
+    const id = setTimeout(() => setW(pct), delay + 30);
+    return () => clearTimeout(id);
+  }, [pct, delay, reduce]);
   return (
     <div style={{ height, background: track, borderRadius: height, overflow: 'hidden', width: '100%' }}>
-      <div style={{ width: `${w * 100}%`, height: '100%', background: color, borderRadius: height, transition: `width ${duration}ms cubic-bezier(0.22,1,0.36,1)` }} />
+      <div style={{ width: `${w * 100}%`, height: '100%', background: color, borderRadius: height, transition: reduce ? 'none' : `width ${duration}ms cubic-bezier(0.22,1,0.36,1)` }} />
     </div>
   );
 }
@@ -604,11 +613,12 @@ function AnimatedBar({ value, max = 100, color = C.brand, height = 8, track = C.
 // 진입 애니메이션 래퍼 (마운트 시 fade + slide)
 function Reveal({ children, delay = 0, y = 24, style = {} }) {
   const ref = useRef(null);
-  const [shown, setShown] = useState(false);
+  const reduce = prefersReducedMotion();
+  const [shown, setShown] = useState(reduce);
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    if (typeof IntersectionObserver === 'undefined') { setShown(true); return; }
+    if (reduce || typeof IntersectionObserver === 'undefined') { setShown(true); return; }
     let timer;
     const io = new IntersectionObserver((entries) => {
       entries.forEach((e) => {
@@ -617,9 +627,9 @@ function Reveal({ children, delay = 0, y = 24, style = {} }) {
     }, { threshold: 0.1, rootMargin: '0px 0px -7% 0px' });
     io.observe(el);
     return () => { io.disconnect(); clearTimeout(timer); };
-  }, [delay]);
+  }, [delay, reduce]);
   return (
-    <div ref={ref} style={{ opacity: shown ? 1 : 0, transform: shown ? 'none' : `translateY(${y}px)`, transition: 'opacity 0.7s ease, transform 0.85s cubic-bezier(0.22,1,0.36,1)', willChange: 'opacity, transform', ...style }}>
+    <div ref={ref} style={{ opacity: shown ? 1 : 0, transform: shown ? 'none' : `translateY(${y}px)`, transition: reduce ? 'none' : 'opacity 0.7s ease, transform 0.85s cubic-bezier(0.22,1,0.36,1)', willChange: 'opacity, transform', ...style }}>
       {children}
     </div>
   );
@@ -3645,15 +3655,20 @@ function RLRing({ value, max = 100, size = 96, stroke = 9, color = C.brand, trac
   const pct = max > 0 ? Math.max(0, Math.min(1, value / max)) : 0;
   const r = (size - stroke) / 2;
   const circ = 2 * Math.PI * r;
-  const [draw, setDraw] = useState(0);
-  useEffect(() => { const id = requestAnimationFrame(() => setDraw(pct)); return () => cancelAnimationFrame(id); }, [pct]);
+  const reduce = prefersReducedMotion();
+  const [draw, setDraw] = useState(reduce ? pct : 0);
+  useEffect(() => {
+    if (reduce) { setDraw(pct); return undefined; }
+    const id = requestAnimationFrame(() => setDraw(pct));
+    return () => cancelAnimationFrame(id);
+  }, [pct, reduce]);
   return (
     <div style={{ position: 'relative', width: size, height: size, flexShrink: 0 }}>
       <svg width={size} height={size} style={{ transform: 'rotate(-90deg)', display: 'block' }}>
         <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={track} strokeWidth={stroke} />
         <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={color} strokeWidth={stroke} strokeLinecap="round"
           strokeDasharray={circ} strokeDashoffset={circ * (1 - draw)}
-          style={{ transition: `stroke-dashoffset ${duration}ms cubic-bezier(0.22,1,0.36,1)` }} />
+          style={{ transition: reduce ? 'none' : `stroke-dashoffset ${duration}ms cubic-bezier(0.22,1,0.36,1)` }} />
       </svg>
       <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
         {label != null && <div style={{ fontSize: Math.round(size * 0.28), fontWeight: 700, color: C.ink, fontFamily: FONT_STACK, letterSpacing: '-0.04em', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>{label}</div>}
