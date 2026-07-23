@@ -3497,6 +3497,11 @@ function VolunteerHub({ user, totalHours, setView, showToast }) {
 
 // 청년 — 활동 찾기(탐색·모집공고) : 케어닥식 카드 + 1365식 모집/실적
 const DISCOVER_CATS = ['전체', '디지털코칭', '학습멘토', '정서돌봄', '동네기억'];
+// 모집 정원 도달(마감) 여부 — 카드 표시와 정렬(마감건은 뒤로)에 공통 사용
+function discoverIsFull(x) {
+  const [filled, total] = String(x.cap || '').split('/').map((n) => parseInt(n, 10));
+  return Number.isFinite(filled) && Number.isFinite(total) && filled >= total;
+}
 const DISCOVER_LIST = [
   { t: '어르신 디지털 코칭', cat: '디지털코칭', org: '우산동 행복카페', when: '토 10:00', place: '우산동', reward: 30000, hrs: 3, cap: '2/3', hot: true },
   { t: '아동 학습 멘토', cat: '학습멘토', org: '우산도서관', when: '평일 16:00', place: '우산동', reward: 30000, hrs: 3, cap: '1/2', hot: true },
@@ -3508,7 +3513,9 @@ function YouthDiscover({ user, totalHours, showToast, setView }) {
   const [q, setQ] = useState('');
   const [cat, setCat] = useState('전체');
   const query = q.trim().toLowerCase();
-  const list = DISCOVER_LIST.filter(x => (cat === '전체' || x.cat === cat) && (query === '' || [x.t, x.org, x.place, x.cat].some(v => String(v || '').toLowerCase().includes(query))));
+  const list = DISCOVER_LIST
+    .filter(x => (cat === '전체' || x.cat === cat) && (query === '' || [x.t, x.org, x.place, x.cat].some(v => String(v || '').toLowerCase().includes(query))))
+    .sort((a, b) => (discoverIsFull(a) ? 1 : 0) - (discoverIsFull(b) ? 1 : 0)); // 마감건은 목록 뒤로(안정 정렬)
   return (
     <div>
       <PageHeader title="활동 찾기" subtitle="우리 동네 세대 돌봄 활동을 직접 찾아 신청하세요. 참여하면 보상과 함께 1365 봉사시간이 쌓입니다." right={<Badge color={'#FF6B35'} soft={'#FFE9DF'}>1365 봉사실적 인정</Badge>} />
@@ -3527,7 +3534,7 @@ function YouthDiscover({ user, totalHours, showToast, setView }) {
       {/* 검색 + 카테고리 칩 */}
       <div style={{ position: 'relative', marginBottom: 12 }}>
         <Search size={16} style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: C.muteLight }} />
-        <input type="search" value={q} onChange={e => setQ(e.target.value)} placeholder="활동·기관 검색" aria-label="활동·기관 검색" style={{ width: '100%', padding: '10px 38px 10px 38px', borderRadius: 10, border: `1px solid ${C.line}`, background: C.panel, fontFamily: FONT_STACK, fontSize: 14, color: C.ink, outline: 'none' }}
+        <input type="search" value={q} onChange={e => setQ(e.target.value)} onKeyDown={e => { if (e.key === 'Escape' && q) { e.preventDefault(); setQ(''); } }} placeholder="활동·기관 검색" aria-label="활동·기관 검색" style={{ width: '100%', padding: '10px 38px 10px 38px', borderRadius: 10, border: `1px solid ${C.line}`, background: C.panel, fontFamily: FONT_STACK, fontSize: 14, color: C.ink, outline: 'none' }}
           onFocus={e => { e.target.style.borderColor = C.brand; e.target.style.boxShadow = `0 0 0 3px ${C.brand}1f`; }}
           onBlur={e => { e.target.style.borderColor = C.line; e.target.style.boxShadow = 'none'; }} />
         {q && (
@@ -3538,7 +3545,7 @@ function YouthDiscover({ user, totalHours, showToast, setView }) {
           </button>
         )}
       </div>
-      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 16 }}>
+      <div role="group" aria-label="카테고리 필터" style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 16 }}>
         {DISCOVER_CATS.map(c => {
           const on = cat === c;
           return (
@@ -3557,8 +3564,7 @@ function YouthDiscover({ user, totalHours, showToast, setView }) {
       {/* 모집공고 카드 */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(280px,1fr))', gap: 13 }}>
         {list.map((x, i) => {
-          const [filled, total] = String(x.cap || '').split('/').map(n => parseInt(n, 10));
-          const full = Number.isFinite(filled) && Number.isFinite(total) && filled >= total;
+          const full = discoverIsFull(x);
           return (
           <Card key={i} hoverable>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
