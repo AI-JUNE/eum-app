@@ -28,6 +28,7 @@ import { SEED_DATA } from './eum/seed.js';
 import { Avatar } from './eum/avatar.jsx';
 import { TERMS_SECTIONS, PRIVACY_SECTIONS, LEGAL_META } from './eum/legal.js';
 import { PLANS, formatKRW, isPaidPlan, requestSubscription, BILLING_ENABLED } from './eum/billing.js';
+import { captureError } from './eum/telemetry.js';
 
 // ============================================================================
 // 2. SEED DATA — src/eum/seed.js 로 이동 (상단 import)
@@ -6723,7 +6724,10 @@ function App() {
 class EumErrorBoundary extends React.Component {
   constructor(props) { super(props); this.state = { error: null }; }
   static getDerivedStateFromError(error) { return { error }; }
-  componentDidCatch(error, info) { console.error('이음 렌더 오류:', error, info); }
+  componentDidCatch(error, info) {
+    console.error('이음 렌더 오류:', error, info);
+    try { captureError(error, { kind: 'react.errorBoundary', componentStack: info && info.componentStack ? String(info.componentStack).slice(0, 2000) : '' }); } catch { /* noop */ }
+  }
   render() {
     if (this.state.error) {
       return (
