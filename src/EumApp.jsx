@@ -140,11 +140,12 @@ function Button({ children, onClick, variant = 'primary', size = 'md', disabled,
         color: v.fg, border: `1px solid ${v.border}`,
         padding: s.pad, fontSize: s.fs, fontWeight: 700,
         borderRadius: 10, cursor: disabled ? 'not-allowed' : 'pointer',
-        // 컬러 글로우(광원 없는 색번짐)는 아마추어 신호 — 얕고 중성적인 그림자만 쓴다
-        boxShadow: !disabled && isSolid ? (press ? 'none' : SHADOW.xs) : 'none',
+        // 컬러 글로우(광원 없는 색번짐)는 아마추어 신호 — 얕고 중성적인 그림자만 쓴다.
+        // 호버 시 1px 리프트+그림자 심화로 프리미엄 촉감(토스/에어비앤비 문법). transform이라 리플로우 없음.
+        boxShadow: !disabled && isSolid ? (press ? 'none' : (hover ? SHADOW.sm : SHADOW.xs)) : 'none',
         opacity: disabled ? 0.5 : 1,
         transition: 'background 0.16s ease, box-shadow 0.18s ease, transform 0.12s cubic-bezier(0.22,1,0.36,1)',
-        transform: disabled ? 'none' : press ? 'scale(0.975)' : 'none',
+        transform: disabled ? 'none' : press ? 'scale(0.975)' : (hover ? 'translateY(-1px)' : 'none'),
         height: s.h, width: fullWidth ? '100%' : 'auto',
         fontFamily: FONT_STACK, letterSpacing: '-0.01em',
         ...style
