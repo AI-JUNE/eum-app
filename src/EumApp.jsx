@@ -126,6 +126,7 @@ function Button({ children, onClick, variant = 'primary', size = 'md', disabled,
   return (
     <button
       type={type}
+      className="eum-btn"
       onClick={onClick}
       disabled={disabled}
       onMouseEnter={() => setHover(true)}
@@ -6696,6 +6697,9 @@ function App() {
         .eum-cta-btn { transition: transform 0.2s cubic-bezier(0.22,1,0.36,1), box-shadow 0.24s ease; }
         .eum-cta-btn:hover { transform: translateY(-2px); box-shadow: 0 16px 32px -10px rgba(0,0,0,0.34) !important; }
         .eum-cta-btn:active { transform: translateY(0) scale(0.98); }
+        /* 키보드 포커스 링 — 버튼 표준화(입력·카드와 동일한 접근성 문법). 마우스 클릭엔 나타나지 않음(:focus-visible), 레이아웃 영향 없음(outline). */
+        .eum-btn:focus-visible { outline: 2.5px solid ${C.brand}; outline-offset: 2px; }
+        .eum-btn:focus:not(:focus-visible) { outline: none; }
         * { box-sizing: border-box; }
         html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
         #root { text-align: left; }
