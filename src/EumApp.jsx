@@ -726,13 +726,20 @@ function SearchBar({ value, onChange, placeholder = '검색…', style = {} }) {
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         aria-label={placeholder}
+        enterKeyHint="search"
+        autoComplete="off"
+        autoCorrect="off"
+        autoCapitalize="off"
+        spellCheck={false}
         onFocus={(e) => { e.target.style.borderColor = C.brand; e.target.style.boxShadow = `0 0 0 3px ${C.brand}1f`; }}
         onBlur={(e) => { e.target.style.borderColor = C.line; e.target.style.boxShadow = 'none'; }}
         style={{ width: '100%', padding: '9px 12px 9px 34px', borderRadius: 10, border: `1px solid ${C.line}`, background: C.panel, fontSize: 13.5, color: C.ink, fontFamily: FONT_STACK, outline: 'none', boxSizing: 'border-box', transition: 'border-color 0.15s ease, box-shadow 0.15s ease' }}
       />
       {value && (
-        <button onClick={() => { onChange(''); if (inputRef.current) inputRef.current.focus(); }} aria-label="지우기" style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: C.mute, display: 'flex', padding: 2 }}>
-          <X size={14} />
+        <button onClick={() => { onChange(''); if (inputRef.current) inputRef.current.focus(); }} aria-label="검색어 지우기" style={{ position: 'absolute', right: 7, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: C.mute, display: 'flex', padding: 3, borderRadius: 7, transition: 'background 0.14s ease, color 0.14s ease' }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = C.hover; e.currentTarget.style.color = C.inkSoft; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = C.mute; }}>
+          <X size={14} aria-hidden="true" />
         </button>
       )}
     </div>
@@ -789,11 +796,11 @@ function NotificationBell({ state, role, user, onNavigate, dark }) {
         onMouseLeave={(e) => { if (!dark) e.currentTarget.style.background = C.panel; }}>
         <Bell size={18} />
         {items.length > 0 && (
-          <span style={{ position: 'absolute', top: -4, right: -4, minWidth: 17, height: 17, padding: '0 4px', borderRadius: 9, background: urgent ? C.red : C.brand, color: '#fff', fontSize: 10, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', border: `2px solid ${dark ? '#1A1814' : C.panel}`, fontVariantNumeric: 'tabular-nums' }}>{items.length}</span>
+          <span aria-hidden="true" style={{ position: 'absolute', top: -4, right: -4, minWidth: 17, height: 17, padding: '0 4px', borderRadius: 9, background: urgent ? C.red : C.brand, color: '#fff', fontSize: 10, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', border: `2px solid ${dark ? '#1A1814' : C.panel}`, fontVariantNumeric: 'tabular-nums' }}>{items.length}</span>
         )}
       </button>
       {open && (
-        <div style={{ position: 'absolute', top: 46, right: 0, width: 330, maxWidth: '86vw', background: C.panel, border: `1px solid ${C.line}`, borderRadius: 14, boxShadow: SHADOW.lg, zIndex: 200, overflow: 'hidden', animation: 'slideUp 0.18s ease', textAlign: 'left' }}>
+        <div role="region" aria-label="알림 목록" style={{ position: 'absolute', top: 46, right: 0, width: 330, maxWidth: '86vw', background: C.panel, border: `1px solid ${C.line}`, borderRadius: 14, boxShadow: SHADOW.lg, zIndex: 200, overflow: 'hidden', animation: 'slideUp 0.18s ease', textAlign: 'left' }}>
           <div style={{ padding: '13px 16px', borderBottom: `1px solid ${C.lineSoft}`, fontSize: 13.5, fontWeight: 700, color: C.headline, letterSpacing: '-0.02em' }}>알림 {items.length > 0 && <span style={{ color: C.muteLight, fontWeight: 600 }}>{items.length}</span>}</div>
           {items.length === 0 ? (
             <div style={{ padding: '32px 16px', textAlign: 'center', color: C.mute }}>
