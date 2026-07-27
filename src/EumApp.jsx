@@ -224,14 +224,17 @@ function Input({ value, onChange, placeholder, type = 'text', icon, style = {}, 
   );
 }
 
-function Textarea({ value, onChange, placeholder, rows = 4, style = {} }) {
-  return (
+function Textarea({ value, onChange, placeholder, rows = 4, style = {}, maxLength, showCount }) {
+  // maxLength: 입력 상한(네이티브 강제) · showCount: 하단 글자 수 카운터 표시(자유서술 입력 피드백).
+  // 둘 다 선택적 — 기존 호출부는 그대로(카운터 없이 <textarea> 단독 반환)라 하위호환.
+  const ta = (
     <textarea
       value={value || ''}
       onChange={(e) => onChange && onChange(e.target.value)}
       placeholder={placeholder}
       aria-label={placeholder}
       rows={rows}
+      maxLength={maxLength}
       style={{
         width: '100%', padding: '11px 14px',
         border: `1px solid ${C.line}`, borderRadius: 10,
@@ -243,6 +246,17 @@ function Textarea({ value, onChange, placeholder, rows = 4, style = {} }) {
       onFocus={(e) => { e.target.style.borderColor = C.brand; e.target.style.boxShadow = `0 0 0 3px ${C.brand}1f`; }}
       onBlur={(e) => { e.target.style.borderColor = C.line; e.target.style.boxShadow = 'none'; }}
     />
+  );
+  if (!showCount) return ta;
+  const len = (value || '').length;
+  const near = maxLength != null && len >= maxLength;
+  return (
+    <div style={{ width: '100%' }}>
+      {ta}
+      <div aria-hidden="true" style={{ marginTop: 5, textAlign: 'right', fontSize: 11.5, fontWeight: 600, color: near ? C.red : C.muteLight, fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.01em' }}>
+        {len.toLocaleString('ko-KR')}{maxLength != null ? ` / ${maxLength.toLocaleString('ko-KR')}` : ''}
+      </div>
+    </div>
   );
 }
 
@@ -890,7 +904,7 @@ function CheckInOutCard({ activity, user, dispatch, showToast, color = C.sage })
               ))}
             </div>
             <div style={{ fontSize: 12, fontWeight: 700, color: C.mute, marginBottom: 8 }}>활동 내용</div>
-            <Textarea value={summary} onChange={setSummary} placeholder="무엇을 함께 했는지, 기억에 남는 순간을 적어주세요." rows={3} />
+            <Textarea value={summary} onChange={setSummary} placeholder="무엇을 함께 했는지, 기억에 남는 순간을 적어주세요." rows={3} maxLength={600} showCount />
             <div style={{ display: 'flex', gap: 8, marginTop: 20 }}>
               <Button variant="secondary" onClick={() => setFeedbackOpen(false)} fullWidth>나중에</Button>
               <Button variant="brand" icon={<Send size={15} />} onClick={submitFeedback} fullWidth>후기 제출</Button>
@@ -1954,7 +1968,7 @@ function YouthLogs({ state, user, match, myLogs, myActivities, dispatch, showToa
             <Select value={form.activity_id} onChange={(v) => setForm(f => ({ ...f, activity_id: v }))} options={writableOptions} placeholder="활동을 선택하세요" />
           </Field>
           <Field label="활동 기록" required sub="인상적이었던 순간, 어르신·아동의 반응, 느낀 점을 자유롭게">
-            <Textarea value={form.summary} onChange={(v) => setForm(f => ({ ...f, summary: v }))} placeholder="오늘 박순자 어르신과 키오스크 실습을 했다..." rows={5} />
+            <Textarea value={form.summary} onChange={(v) => setForm(f => ({ ...f, summary: v }))} placeholder="오늘 박순자 어르신과 키오스크 실습을 했다..." rows={5} maxLength={1000} showCount />
           </Field>
           <Field label="오늘 활동은 어땠나요?">
             <div style={{ display: 'flex', gap: 8 }}>
