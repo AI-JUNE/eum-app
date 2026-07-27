@@ -160,6 +160,7 @@ function Button({ children, onClick, variant = 'primary', size = 'md', disabled,
 
 function Card({ children, padding = 20, style = {}, onClick, hoverable }) {
   const [hover, setHover] = useState(false);
+  const [focused, setFocused] = useState(false);
   const clickable = !!onClick;
   return (
     <div
@@ -169,6 +170,8 @@ function Card({ children, padding = 20, style = {}, onClick, hoverable }) {
       onKeyDown={clickable ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(e); } } : undefined}
       onMouseEnter={() => hoverable && setHover(true)}
       onMouseLeave={() => hoverable && setHover(false)}
+      onFocus={clickable ? () => setFocused(true) : undefined}
+      onBlur={clickable ? () => setFocused(false) : undefined}
       style={{
         background: C.panel,
         border: `1px solid ${hover ? '#DCDFE5' : C.line}`,
@@ -178,6 +181,9 @@ function Card({ children, padding = 20, style = {}, onClick, hoverable }) {
         transition: 'transform 0.2s cubic-bezier(0.22,1,0.36,1), box-shadow 0.2s ease, border-color 0.2s ease',
         boxShadow: hover ? SHADOW.md : SHADOW.xs,
         transform: hover ? 'translateY(-2px)' : 'none',
+        // 키보드 포커스 가시성(WCAG 2.4.7): 클릭 가능한 카드에 Tab으로 접근 시 브랜드 포커스 링 표시
+        outline: clickable && focused ? `2px solid ${C.brand}` : 'none',
+        outlineOffset: 2,
         ...style
       }}
     >
@@ -429,7 +435,10 @@ function Toast({ toast, onClose }) {
   const remainRef = useRef(0);
   useEffect(() => {
     if (!toast) return undefined;
-    remainRef.current = toast.duration || 3000;
+    // 자동 사라짐 시간을 메시지 길이에 맞춰 확장(3~8초). 마우스 오버가 불가한 키보드·터치
+    // 사용자도 긴 안내문을 끝까지 읽을 수 있게 함(가독성·접근성). 명시적 duration은 그대로 존중.
+    const msgLen = toast.message ? String(toast.message).length : 0;
+    remainRef.current = toast.duration || Math.min(8000, Math.max(3000, msgLen * 90));
     endRef.current = Date.now() + remainRef.current;
     timerRef.current = setTimeout(onClose, remainRef.current);
     return () => clearTimeout(timerRef.current);
