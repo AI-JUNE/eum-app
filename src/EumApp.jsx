@@ -1304,6 +1304,21 @@ function formatKoPhone(v) {
   return d.slice(0, 3) + '-' + d.slice(3, 7) + '-' + d.slice(7);
 }
 
+// 신청 유형별 허용 연령대(만 나이). parent(양육가정) 신청자는 성인 보호자로 간주한다.
+const AGE_RANGE = {
+  teen: [15, 18], youth: [19, 39], adult: [40, 64], senior: [65, 120], parent: [19, 120],
+};
+// 나이 입력 검증: 비면 null(‘필수’는 별도), 숫자 아님/범위 위반 시 안내 문구 반환.
+function ageErrorFor(type, ageRaw) {
+  const s = String(ageRaw == null ? '' : ageRaw).trim();
+  if (!s) return null;
+  if (!/^\d{1,3}$/.test(s)) return '숫자로만 입력해 주세요.';
+  const n = Number(s);
+  const [min, max] = AGE_RANGE[type] || [14, 120];
+  if (n < min || n > max) return `이 유형은 만 ${min}${max >= 120 ? '세 이상' : `~${max}세`}가 신청할 수 있어요.`;
+  return null;
+}
+
 function ApplicationForm({ onClose, onSubmit }) {
   const [step, setStep] = useState(1);
   const [form, setForm] = useState({
@@ -1336,7 +1351,7 @@ function ApplicationForm({ onClose, onSubmit }) {
 
   const canProceed = useMemo(() => {
     if (step === 1) return !!form.type;
-    if (step === 2) return !!form.name && !!form.age && /^010-?\d{4}-?\d{4}$/.test(form.phone) && !!form.address && !!form.emergency_contact;
+    if (step === 2) return !!form.name && !!form.age && !ageErrorFor(form.type, form.age) && /^010-?\d{4}-?\d{4}$/.test(form.phone) && !!form.address && !!form.emergency_contact;
     if (step === 3) {
       if (form.type === 'parent') return !!form.child_name && !!form.child_age;
       return form.skills.length > 0 && form.availability.length > 0;
@@ -1348,6 +1363,7 @@ function ApplicationForm({ onClose, onSubmit }) {
     }
     return true;
   }, [step, form]);
+  const ageErr = useMemo(() => ageErrorFor(form.type, form.age), [form.type, form.age]);
 
   const submit = () => {
     onSubmit(form);
@@ -1458,7 +1474,8 @@ function ApplicationForm({ onClose, onSubmit }) {
           </Field>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 12 }}>
             <Field label="나이" required>
-              <Input value={form.age} onChange={(v) => set('age', v)} placeholder="27" type="number" inputMode="numeric" min={14} max={100} />
+              <Input value={form.age} onChange={(v) => set('age', v)} placeholder="27" type="number" inputMode="numeric" min={14} max={120} aria-invalid={!!ageErr} />
+              {ageErr && <div role="alert" style={{ marginTop: 5, fontSize: 11.5, color: C.red, lineHeight: 1.45 }}>{ageErr}</div>}
             </Field>
             <Field label="연락처" required>
               <Input value={form.phone} onChange={(v) => set('phone', formatKoPhone(v))} placeholder="010-1234-5678" type="tel" autoComplete="tel" inputMode="numeric" maxLength={13} />
