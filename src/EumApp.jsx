@@ -193,16 +193,22 @@ function Card({ children, padding = 20, style = {}, onClick, hoverable }) {
   );
 }
 
-function Input({ value, onChange, placeholder, type = 'text', icon, style = {}, disabled, autoComplete, inputMode, min, max, maxLength }) {
+function Input({ value, onChange, placeholder, type = 'text', icon, style = {}, disabled, autoComplete, inputMode, min, max, maxLength, error, describedBy }) {
+  // error(truthy) 시 위험색 경계·아이콘 표시를 표준화(디자인 시스템: 에러=danger+아이콘).
+  // blur 후에도 오류 경계를 유지하고, aria-invalid로 스크린리더에 오류를 전달한다.
+  const hasErr = !!error;
+  const restColor = hasErr ? C.red : C.line;
   return (
     <div style={{ position: 'relative', width: '100%' }}>
-      {icon && <div style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: C.mute, display: 'flex' }}>{icon}</div>}
+      {icon && <div style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: hasErr ? C.red : C.mute, display: 'flex' }}>{icon}</div>}
       <input
         type={type}
         value={value || ''}
         onChange={(e) => onChange && onChange(e.target.value)}
         placeholder={placeholder}
         aria-label={placeholder}
+        aria-invalid={hasErr || undefined}
+        aria-describedby={describedBy}
         autoComplete={autoComplete}
         inputMode={inputMode}
         min={min}
@@ -211,40 +217,44 @@ function Input({ value, onChange, placeholder, type = 'text', icon, style = {}, 
         disabled={disabled}
         style={{
           width: '100%', padding: icon ? '10px 14px 10px 38px' : '10px 14px',
-          border: `1px solid ${C.line}`, borderRadius: 10,
+          border: `1px solid ${restColor}`, borderRadius: 10,
           fontSize: 13.5, fontFamily: FONT_STACK, color: C.ink,
           background: disabled ? C.lineSoft : C.panel, outline: 'none',
           transition: 'border-color 0.15s ease, box-shadow 0.15s ease',
           ...style,
         }}
-        onFocus={(e) => { e.target.style.borderColor = C.brand; e.target.style.boxShadow = `0 0 0 3px ${C.brand}1f`; }}
-        onBlur={(e) => { e.target.style.borderColor = C.line; e.target.style.boxShadow = 'none'; }}
+        onFocus={(e) => { e.target.style.borderColor = hasErr ? C.red : C.brand; e.target.style.boxShadow = `0 0 0 3px ${hasErr ? C.red : C.brand}1f`; }}
+        onBlur={(e) => { e.target.style.borderColor = restColor; e.target.style.boxShadow = 'none'; }}
       />
     </div>
   );
 }
 
-function Textarea({ value, onChange, placeholder, rows = 4, style = {}, maxLength, showCount }) {
+function Textarea({ value, onChange, placeholder, rows = 4, style = {}, maxLength, showCount, error, describedBy }) {
   // maxLength: 입력 상한(네이티브 강제) · showCount: 하단 글자 수 카운터 표시(자유서술 입력 피드백).
-  // 둘 다 선택적 — 기존 호출부는 그대로(카운터 없이 <textarea> 단독 반환)라 하위호환.
+  // error: 위험색 경계·aria-invalid로 오류 상태 표준화(Input과 동일 문법). 둘 다 선택적 — 하위호환.
+  const hasErr = !!error;
+  const restColor = hasErr ? C.red : C.line;
   const ta = (
     <textarea
       value={value || ''}
       onChange={(e) => onChange && onChange(e.target.value)}
       placeholder={placeholder}
       aria-label={placeholder}
+      aria-invalid={hasErr || undefined}
+      aria-describedby={describedBy}
       rows={rows}
       maxLength={maxLength}
       style={{
         width: '100%', padding: '11px 14px',
-        border: `1px solid ${C.line}`, borderRadius: 10,
+        border: `1px solid ${restColor}`, borderRadius: 10,
         fontSize: 13.5, fontFamily: FONT_STACK, color: C.ink,
         background: C.panel, outline: 'none', resize: 'vertical',
         lineHeight: 1.6, transition: 'border-color 0.15s ease, box-shadow 0.15s ease',
         ...style
       }}
-      onFocus={(e) => { e.target.style.borderColor = C.brand; e.target.style.boxShadow = `0 0 0 3px ${C.brand}1f`; }}
-      onBlur={(e) => { e.target.style.borderColor = C.line; e.target.style.boxShadow = 'none'; }}
+      onFocus={(e) => { e.target.style.borderColor = hasErr ? C.red : C.brand; e.target.style.boxShadow = `0 0 0 3px ${hasErr ? C.red : C.brand}1f`; }}
+      onBlur={(e) => { e.target.style.borderColor = restColor; e.target.style.boxShadow = 'none'; }}
     />
   );
   if (!showCount) return ta;
@@ -1379,6 +1389,12 @@ function ApplicationForm({ onClose, onSubmit }) {
     return true;
   }, [step, form]);
   const ageErr = useMemo(() => ageErrorFor(form.type, form.age), [form.type, form.age]);
+  // 연락처: 입력이 있는데 형식이 안 맞을 때만 안내(빈 값은 '필수'로 별도 처리). 표준 오류 문법 사용.
+  const phoneErr = useMemo(() => {
+    const s = String(form.phone || '').trim();
+    if (!s) return null;
+    return /^010-?\d{4}-?\d{4}$/.test(s) ? null : '010-0000-0000 형식으로 입력해 주세요.';
+  }, [form.phone]);
 
   const submit = () => {
     onSubmit(form);
@@ -1488,12 +1504,11 @@ function ApplicationForm({ onClose, onSubmit }) {
             <Input value={form.name} onChange={(v) => set('name', v)} placeholder="홍길동" autoComplete="name" />
           </Field>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 12 }}>
-            <Field label="나이" required>
-              <Input value={form.age} onChange={(v) => set('age', v)} placeholder="27" type="number" inputMode="numeric" min={14} max={120} aria-invalid={!!ageErr} />
-              {ageErr && <div role="alert" style={{ marginTop: 5, fontSize: 11.5, color: C.red, lineHeight: 1.45 }}>{ageErr}</div>}
+            <Field label="나이" required error={ageErr} errorId="app-age-error">
+              <Input value={form.age} onChange={(v) => set('age', v)} placeholder="27" type="number" inputMode="numeric" min={14} max={120} error={ageErr} describedBy={ageErr ? 'app-age-error' : undefined} />
             </Field>
-            <Field label="연락처" required>
-              <Input value={form.phone} onChange={(v) => set('phone', formatKoPhone(v))} placeholder="010-1234-5678" type="tel" autoComplete="tel" inputMode="numeric" maxLength={13} />
+            <Field label="연락처" required error={phoneErr} errorId="app-phone-error">
+              <Input value={form.phone} onChange={(v) => set('phone', formatKoPhone(v))} placeholder="010-1234-5678" type="tel" autoComplete="tel" inputMode="numeric" maxLength={13} error={phoneErr} describedBy={phoneErr ? 'app-phone-error' : undefined} />
             </Field>
           </div>
           <Field label="거주지" required>
@@ -1587,7 +1602,9 @@ function ApplicationForm({ onClose, onSubmit }) {
   );
 }
 
-function Field({ label, required, sub, children }) {
+function Field({ label, required, sub, error, errorId, children }) {
+  // error(문자열) 시 입력 아래에 위험색 안내 + 아이콘을 표준 노출(디자인 시스템: 에러=danger+아이콘, 아래 배치).
+  // errorId를 Input/Textarea의 describedBy와 연결하면 스크린리더가 오류 문구를 함께 읽는다.
   return (
     <div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 6 }}>
@@ -1595,6 +1612,12 @@ function Field({ label, required, sub, children }) {
       </div>
       {sub && <div style={{ fontSize: 12, color: C.navMute, marginBottom: 7, lineHeight: 1.5 }}>{sub}</div>}
       {children}
+      {error && (
+        <div id={errorId} role="alert" style={{ display: 'flex', alignItems: 'flex-start', gap: 5, marginTop: 6, fontSize: 12, color: C.red, lineHeight: 1.45 }}>
+          <AlertCircle size={13} style={{ flexShrink: 0, marginTop: 1.5 }} aria-hidden="true" />
+          <span>{error}</span>
+        </div>
+      )}
     </div>
   );
 }
