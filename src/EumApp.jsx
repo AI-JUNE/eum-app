@@ -270,19 +270,26 @@ function Textarea({ value, onChange, placeholder, rows = 4, style = {}, maxLengt
   );
 }
 
-function Select({ value, onChange, options, placeholder, style = {} }) {
+function Select({ value, onChange, options, placeholder, style = {}, disabled, error, describedBy }) {
+  // Input·Textarea와 일관: 오류 시 위험색 경계+aria-invalid, 비활성 시 흐림·클릭 차단. 모두 선택적이라 하위호환.
+  const baseBorder = error ? C.red : C.line;
   return (
     <select
       value={value || ''}
       aria-label={placeholder}
+      disabled={disabled}
+      aria-invalid={error ? true : undefined}
+      aria-describedby={describedBy}
       onChange={(e) => onChange && onChange(e.target.value)}
-      onFocus={(e) => { e.target.style.borderColor = C.brand; e.target.style.boxShadow = `0 0 0 3px ${C.brand}1f`; }}
-      onBlur={(e) => { e.target.style.borderColor = C.line; e.target.style.boxShadow = 'none'; }}
+      onFocus={(e) => { e.target.style.borderColor = error ? C.red : C.brand; e.target.style.boxShadow = `0 0 0 3px ${(error ? C.red : C.brand)}1f`; }}
+      onBlur={(e) => { e.target.style.borderColor = baseBorder; e.target.style.boxShadow = 'none'; }}
       style={{
         width: '100%', padding: '9px 14px',
-        border: `1px solid ${C.line}`, borderRadius: 10,
+        border: `1px solid ${baseBorder}`, borderRadius: 10,
         fontSize: 13.5, fontFamily: FONT_STACK, color: C.ink, fontWeight: 600,
-        background: C.panel, outline: 'none', cursor: 'pointer',
+        background: disabled ? C.lineSoft : C.panel, outline: 'none',
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        opacity: disabled ? 0.6 : 1,
         appearance: 'none',
         transition: 'border-color 0.15s ease, box-shadow 0.15s ease',
         backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237C828C' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
@@ -933,11 +940,11 @@ function CheckInOutCard({ activity, user, dispatch, showToast, color = C.sage })
   );
 }
 
-function Tabs({ tabs, active, onChange, style = {} }) {
+function Tabs({ tabs, active, onChange, style = {}, ariaLabel }) {
   const [hoverId, setHoverId] = useState(null);
   return (
     // 세그먼티드 컨트롤 — 밑줄 탭 대신 트랙 위 화이트 필. 상태가 한눈에 잡히고 밀도가 높다.
-    <div role="tablist" style={{
+    <div role="tablist" aria-label={ariaLabel} style={{
       display: 'inline-flex', gap: 2, padding: 4,
       background: C.lineSoft, borderRadius: 12, border: `1px solid ${C.line}`,
       maxWidth: '100%', overflowX: 'auto', ...style,
@@ -1956,7 +1963,7 @@ function YouthLogs({ state, user, match, myLogs, myActivities, dispatch, showToa
       />
 
       <div style={{ marginBottom: 14 }}>
-        <Tabs tabs={[
+        <Tabs ariaLabel="활동 기록 상태 필터" tabs={[
           { id: 'all', label: '전체', count: myLogs.length },
           { id: 'approved', label: '승인', count: myLogs.filter(l => l.approved).length },
           { id: 'pending', label: '대기', count: myLogs.filter(l => !l.approved).length },
@@ -5259,6 +5266,7 @@ function CoordApplicants({ state, dispatch, showToast, user }) {
     <>
       <PageHeader title="신청자 관리" subtitle="신청서 검토 → 검증 → 활동 시작" />
       <Tabs
+        ariaLabel="신청자 상태 필터"
         tabs={[
           { id: 'screening', label: '서류 검토', count: counts.screening },
           { id: 'verified', label: '검증 중', count: counts.verified },
@@ -5818,6 +5826,7 @@ function CoordActivities({ state, dispatch, showToast, user }) {
         )} />
 
       <Tabs
+        ariaLabel="활동 기록 승인 상태 필터"
         tabs={[
           { id: 'pending', label: '승인 대기', count: pendingLogs.length },
           { id: 'approved', label: '승인됨', count: approvedLogs.length },
@@ -6077,6 +6086,7 @@ function CoordSafety({ state, dispatch, showToast, user }) {
       />
 
       <Tabs
+        ariaLabel="안전 이슈 상태 필터"
         tabs={[
           { id: 'all', label: '전체', count: state.safety_incidents.length },
           { id: 'open', label: '처리 중', count: state.safety_incidents.filter(i => i.status !== 'resolved').length },
