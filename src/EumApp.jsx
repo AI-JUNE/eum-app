@@ -2717,7 +2717,7 @@ function ParentDashboard({ user, myChildren, myMatches, todayActivities, upcomin
       <Card padding={22} style={{ marginBottom: 20 }}>
         <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 14, color: C.ink }}>다가오는 활동</div>
         {upcomingActivities.length === 0 ? (
-          <Empty icon={<Calendar size={28} />} title="예정된 활동이 없습니다" />
+          <Empty icon={<Calendar size={28} />} title="예정된 활동이 없습니다" sub="새 일정이 잡히면 여기에서 가장 먼저 알려드려요" />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {upcomingActivities.map(act => {
@@ -2745,7 +2745,7 @@ function ParentDashboard({ user, myChildren, myMatches, todayActivities, upcomin
       <Card padding={22}>
         <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 14, color: C.ink }}>최근 활동 기록</div>
         {recentLogs.length === 0 ? (
-          <Empty icon={<PenLine size={28} />} title="아직 기록이 없습니다" />
+          <Empty icon={<PenLine size={28} />} title="아직 기록이 없습니다" sub="활동이 끝나면 코디네이터가 그날의 기록을 남겨드려요" />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {recentLogs.map(log => {
@@ -2788,7 +2788,7 @@ function ParentToday({ todayActivities, upcomingActivities, myMatches, state }) 
         )}
       </Panel>
       <Panel title="다가오는 활동">
-        {upcomingActivities.length === 0 ? <Empty icon={<Calendar size={28} />} title="예정된 활동이 없습니다" /> : (
+        {upcomingActivities.length === 0 ? <Empty icon={<Calendar size={28} />} title="예정된 활동이 없습니다" sub="새 일정이 잡히면 여기에서 가장 먼저 알려드려요" /> : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {upcomingActivities.map(act => <ActivityCard key={act.id} activity={act} state={state} />)}
           </div>
@@ -5055,7 +5055,7 @@ function CoordOverview({ state, setView, dispatch }) {
           sub="승인된 활동 로그 누적 기준"
           right={<span style={{ fontSize: 11.5, color: C.muteLight, fontWeight: 600 }}>연 목표 1,440시간</span>}
         >
-          {monthlyChart.length === 0 ? <Empty icon={<TrendingUp size={28} />} title="활동 기록 없음" /> : (
+          {monthlyChart.length === 0 ? <Empty icon={<TrendingUp size={28} />} title="아직 활동 기록이 없습니다" sub="활동이 승인되면 시간 추이가 이곳에 그려져요" /> : (
             <ResponsiveContainer width="100%" height={258}>
               <AreaChart data={monthlyChart} margin={{ top: 8, right: 6, left: -18, bottom: 0 }}>
                 <defs>
@@ -5126,7 +5126,7 @@ function CoordOverview({ state, setView, dispatch }) {
       {/* 활동 유형 · 오늘 일정 */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 16, marginBottom: 16 }}>
         <Panel title="활동 유형 분포" sub="전체 활동 기준">
-          {typeChart.length === 0 ? <Empty icon={<Activity size={28} />} title="활동 없음" /> : (
+          {typeChart.length === 0 ? <Empty icon={<Activity size={28} />} title="아직 활동이 없습니다" sub="활동을 시작하면 유형별로 모아 보여드려요" /> : (
             <div style={{ display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap' }}>
               <div style={{ width: 168, height: 168, flexShrink: 0 }}>
                 <ResponsiveContainer width="100%" height="100%">
@@ -5154,7 +5154,7 @@ function CoordOverview({ state, setView, dispatch }) {
 
         <Panel title="오늘의 활동 일정" sub={fmtDate(TODAY)} right={<Badge color={C.brand} soft={C.brandSoft}>{state.activities.filter(a => a.date === TODAY).length}건</Badge>} padding={state.activities.filter(a => a.date === TODAY).length === 0 ? 8 : 0}>
           {state.activities.filter(a => a.date === TODAY).length === 0 ? (
-            <Empty icon={<Calendar size={24} />} title="오늘은 예정된 활동이 없습니다" />
+            <Empty icon={<Calendar size={24} />} title="오늘은 예정된 활동이 없습니다" sub="여유로운 하루예요. 다음 일정을 미리 확인해보세요" />
           ) : state.activities.filter(a => a.date === TODAY).map((act, i) => {
             const m = state.matches.find(mm => mm.id === act.match_id);
             const y = state.participants.find(p => p.id === m?.youth_id);
@@ -5298,7 +5298,7 @@ function CoordApplicants({ state, dispatch, showToast, user }) {
         </div>
       </div>
 
-      {filtered.length === 0 ? <Empty icon={<UserPlus size={32} />} title={query || typeFilter !== 'all' ? '조건에 맞는 신청자가 없습니다' : `${activeTab === 'screening' ? '검토 대기' : activeTab === 'verified' ? '검증 중인' : activeTab === 'completed' ? '활동 중인' : '반려된'} 신청자가 없습니다`} /> : (
+      {filtered.length === 0 ? <Empty icon={<UserPlus size={32} />} title={query || typeFilter !== 'all' ? '조건에 맞는 신청자가 없습니다' : `${activeTab === 'screening' ? '검토 대기' : activeTab === 'verified' ? '검증 중인' : activeTab === 'completed' ? '활동 중인' : '반려된'} 신청자가 없습니다`} sub={query || typeFilter !== 'all' ? '검색어나 필터 조건을 조정해보세요' : '새 신청이 접수되면 이곳에 표시됩니다'} /> : (
         <div style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 16, boxShadow: SHADOW.xs, overflow: 'hidden' }}>
           {/* 리스트 헤더 */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '11px 20px', background: C.lineSoft, borderBottom: `1px solid ${C.line}`, fontSize: 11.5, fontWeight: 700, color: C.navMute, letterSpacing: '0.02em' }}>
@@ -5836,7 +5836,7 @@ function CoordActivities({ state, dispatch, showToast, user }) {
         style={{ marginBottom: 16 }}
       />
 
-      {list.length === 0 ? <Empty icon={<ClipboardCheck size={32} />} title={activeTab === 'pending' ? '승인 대기 중인 기록이 없습니다' : '승인된 기록이 없습니다'} /> : (
+      {list.length === 0 ? <Empty icon={<ClipboardCheck size={32} />} title={activeTab === 'pending' ? '승인 대기 중인 기록이 없습니다' : '승인된 기록이 없습니다'} sub={activeTab === 'pending' ? '활동 로그가 제출되면 여기에서 검토·승인하세요' : '승인을 마친 기록이 이곳에 모입니다'} /> : (
         <div style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 16, boxShadow: SHADOW.xs, overflow: 'hidden' }}>
           {/* 선택 바 — 선택 건수와 총 시간을 함께 보여준다. 승인은 곧 정산 금액이므로 '몇 시간'이 중요하다. */}
           {activeTab === 'pending' && (
@@ -6016,7 +6016,7 @@ function CoordSettlements({ state, dispatch, showToast, user }) {
         <div style={{ padding: '11px 20px', borderBottom: `1px solid ${C.line}`, display: 'grid', gridTemplateColumns: '1fr 84px 84px 130px 120px 92px', gap: 12, fontSize: 11.5, color: C.navMute, fontWeight: 700, background: C.lineSoft }}>
           <div>참여자</div><div>활동</div><div>시간</div><div style={{ textAlign: 'right' }}>금액</div><div>지급 방법</div><div style={{ textAlign: 'right' }}>상태</div>
         </div>
-        {calculatedSettlements.length === 0 ? <Empty icon={<Wallet size={28} />} title="이번 달 산정 대상이 없습니다" /> : calculatedSettlements.map((calc, i) => (
+        {calculatedSettlements.length === 0 ? <Empty icon={<Wallet size={28} />} title="이번 달 산정 대상이 없습니다" sub="활동이 승인되면 매월 정산 대상에 자동으로 포함됩니다" /> : calculatedSettlements.map((calc, i) => (
           <div
             key={calc.participant.id}
             onMouseEnter={(e) => (e.currentTarget.style.background = C.hover)}
@@ -6390,7 +6390,7 @@ JSON 형식으로만 답변:
 
       <Card padding={22} style={{ marginBottom: 18 }}>
         <div style={{ fontSize: 14, fontWeight: 700, color: C.ink, marginBottom: 14 }}>매칭별 활동 현황</div>
-        {Object.entries(stats.matchHours).length === 0 ? <Empty icon={<Activity size={28} />} title="이달의 활동이 없습니다" /> : (
+        {Object.entries(stats.matchHours).length === 0 ? <Empty icon={<Activity size={28} />} title="이달의 활동이 없습니다" sub="활동 로그가 쌓이면 매칭별 활동 현황이 표시됩니다" /> : (
           <ResponsiveContainer width="100%" height={280}>
             <BarChart data={Object.entries(stats.matchHours).map(([mid, h]) => {
               const m = state.matches.find(mm => mm.id === mid);
