@@ -1125,7 +1125,7 @@ function Sidebar({ role, currentView, onNavigate, onLogout, userName, dataCount 
       </div>
 
       {/* 내비게이션 */}
-      <div className="eum-scroll" style={{ flex: 1, padding: '12px 10px 8px', overflowY: 'auto' }}>
+      <nav className="eum-scroll" role="navigation" aria-label={`${persona.label} 메뉴`} style={{ flex: 1, padding: '12px 10px 8px', overflowY: 'auto' }}>
         {groups.map((g, gi) => (
           <div key={g.name || gi} style={{ marginBottom: 6 }}>
             {g.name && (
@@ -1139,6 +1139,7 @@ function Sidebar({ role, currentView, onNavigate, onLogout, userName, dataCount 
                 <button
                   key={item.id}
                   onClick={() => onNavigate(item.id)}
+                  aria-current={active ? 'page' : undefined}
                   style={{
                     width: '100%', display: 'flex', alignItems: 'center', gap: 10,
                     padding: isSenior ? '13px 12px' : '9px 12px', marginBottom: 1,
@@ -1157,7 +1158,7 @@ function Sidebar({ role, currentView, onNavigate, onLogout, userName, dataCount 
                   <span style={{ color: active ? C.brand : C.muteLight, display: 'flex', flexShrink: 0 }}>{item.icon}</span>
                   <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.label}</span>
                   {item.count !== undefined && item.count > 0 && (
-                    <span style={{
+                    <span aria-label={`${item.danger ? '미처리 ' : ''}${item.count}건`} style={{
                       fontSize: 11, fontWeight: 700,
                       background: item.danger ? C.red : 'transparent',
                       color: item.danger ? '#fff' : (active ? C.brand : C.muteLight),
@@ -1170,7 +1171,7 @@ function Sidebar({ role, currentView, onNavigate, onLogout, userName, dataCount 
             })}
           </div>
         ))}
-      </div>
+      </nav>
 
       {/* 계정 */}
       <div style={{ padding: 10, borderTop: `1px solid ${C.lineSoft}`, flexShrink: 0 }}>
@@ -2441,7 +2442,7 @@ function ConsumerLayout({ role, view, setView, user, dispatch, state, children }
 
         {/* 하단 탭 — 플로팅 아일랜드 + 활성 필. 손가락이 닿는 곳을 명확히 한다. */}
         <div style={{ position: 'sticky', bottom: 0, zIndex: 50, padding: isSenior ? '10px 16px 16px' : '8px 14px 14px', background: `linear-gradient(180deg, rgba(244,245,247,0) 0%, ${C.appBg} 55%)` }}>
-          <div style={{
+          <div role="navigation" aria-label="주요 메뉴" style={{
             display: 'flex', gap: 4, padding: 6,
             background: 'rgba(255,255,255,0.96)', backdropFilter: 'saturate(180%) blur(14px)', WebkitBackdropFilter: 'saturate(180%) blur(14px)',
             border: `1px solid ${C.line}`, borderRadius: 18,
