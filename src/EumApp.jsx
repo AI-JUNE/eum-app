@@ -498,7 +498,7 @@ function Toast({ toast, onClose }) {
   };
   const c = colors[toast.type || 'info'];
   return (
-    <div role="status" aria-live={toast.type === 'error' ? 'assertive' : 'polite'}
+    <div className="eum-noprint" role="status" aria-live={toast.type === 'error' ? 'assertive' : 'polite'}
       onMouseEnter={pause} onMouseLeave={resume} onFocus={pause} onBlur={resume}
       style={{
       position: 'fixed', bottom: 24, right: 24, zIndex: 2000,
@@ -1112,7 +1112,7 @@ function Sidebar({ role, currentView, onNavigate, onLogout, userName, dataCount 
   });
 
   return (
-    <div style={{
+    <div className="eum-noprint" style={{
       width: isSenior ? 244 : 248, height: '100vh', background: C.panel,
       borderRight: `1px solid ${C.line}`,
       display: 'flex', flexDirection: 'column', flexShrink: 0,
@@ -2395,6 +2395,12 @@ function ConsumerLayout({ role, view, setView, user, dispatch, state, children }
   const items = PARTICIPANT_NAV[role] || [];
   const handleLogout = () => dispatch({ type: 'LOGOUT' });
   const isNarrow = useIsMobile(760);
+  // 화면(탭) 전환 시 상단으로 복귀 — 코디네이터 Layout과 동일한 문법. 이전 화면의 스크롤
+  // 위치가 남아 새 화면이 "중간부터" 보이는 문제 방지(참여자 앱 3종 공통).
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }, [view]);
   const surface = isNarrow ? {} : {
     border: `1px solid ${C.line}`, borderRadius: 24,
     boxShadow: '0 32px 80px -40px rgba(16,24,40,0.28), 0 4px 16px -8px rgba(16,24,40,0.08)',
@@ -2416,7 +2422,7 @@ function ConsumerLayout({ role, view, setView, user, dispatch, state, children }
         ...(isNarrow ? { minHeight: '100vh' } : {}),
       }}>
         {/* 상단 앱바 — 정체(누구로 접속했는지)와 이탈(나가기)만 남긴다 */}
-        <div style={{
+        <div className="eum-noprint" style={{
           position: 'sticky', top: 0, zIndex: 50,
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           padding: isSenior ? '14px 22px' : '12px 18px',
@@ -2446,7 +2452,7 @@ function ConsumerLayout({ role, view, setView, user, dispatch, state, children }
         </div>
 
         {/* 하단 탭 — 플로팅 아일랜드 + 활성 필. 손가락이 닿는 곳을 명확히 한다. */}
-        <div style={{ position: 'sticky', bottom: 0, zIndex: 50, padding: isSenior ? '10px 16px 16px' : '8px 14px 14px', background: `linear-gradient(180deg, rgba(244,245,247,0) 0%, ${C.appBg} 55%)` }}>
+        <div className="eum-noprint" style={{ position: 'sticky', bottom: 0, zIndex: 50, padding: isSenior ? '10px 16px 16px' : '8px 14px 14px', background: `linear-gradient(180deg, rgba(244,245,247,0) 0%, ${C.appBg} 55%)` }}>
           <div role="navigation" aria-label="주요 메뉴" style={{
             display: 'flex', gap: 4, padding: 6,
             background: 'rgba(255,255,255,0.96)', backdropFilter: 'saturate(180%) blur(14px)', WebkitBackdropFilter: 'saturate(180%) blur(14px)',
@@ -2514,7 +2520,7 @@ function Layout({ role, view, setView, user, dispatch, children, state }) {
     return (
       <div style={{ minHeight: '100vh', background: C.bg, fontFamily: FONT_STACK, color: C.ink }}>
         {/* 모바일 상단바 */}
-        <div style={{ position: 'sticky', top: 0, zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '11px 16px', background: 'rgba(250,247,242,0.92)', backdropFilter: 'blur(12px)', borderBottom: `1px solid ${C.borderSoft}` }}>
+        <div className="eum-noprint" style={{ position: 'sticky', top: 0, zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '11px 16px', background: 'rgba(250,247,242,0.92)', backdropFilter: 'blur(12px)', borderBottom: `1px solid ${C.borderSoft}` }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <button onClick={() => setDrawer(true)} aria-label="메뉴" style={{ display: 'flex', border: `1px solid ${C.border}`, background: C.card, borderRadius: 10, padding: 8, cursor: 'pointer', color: C.ink }}><Menu size={18} /></button>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }} onClick={() => setView('overview')} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setView('overview'); } }} role="button" tabIndex={0} aria-label="대시보드로">
@@ -2545,7 +2551,7 @@ function Layout({ role, view, setView, user, dispatch, children, state }) {
       <Sidebar role={role} currentView={view} onNavigate={setView} onLogout={handleLogout} userName={user?.name} dataCount={dataCount} />
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', overflowX: 'hidden' }}>
         {/* 상단바 — 브레드크럼 + 알림. 사이드바와 같은 64px 높이로 시각적 기준선을 맞춘다. */}
-        <div style={{
+        <div className="eum-noprint" style={{
           position: 'sticky', top: 0, zIndex: 40,
           height: 64, flexShrink: 0,
           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
@@ -3471,7 +3477,7 @@ function WelfareFab({ role }) {
   const cks = [['alone', '혼자 살아요'], ['digitalWeak', '스마트폰이 어려워요'], ['careNeed', '아프거나 외로워요'], ['familyCareYouth', '가족을 돌봐요(청년)']];
   return (
     <>
-      <button onClick={() => setOpen(true)} aria-label="복지 어드바이저" style={{ position: 'fixed', right: 22, bottom, zIndex: 9000, display: 'flex', alignItems: 'center', gap: 8, background: C.lavender, color: '#fff', border: 'none', borderRadius: 999, padding: big ? '16px 22px' : '13px 18px', fontFamily: FONT_STACK, fontWeight: 800, fontSize: big ? 16 : 14, cursor: 'pointer', boxShadow: '0 8px 24px rgba(127,111,160,.45)' }}>
+      <button className="eum-noprint" onClick={() => setOpen(true)} aria-label="복지 어드바이저" style={{ position: 'fixed', right: 22, bottom, zIndex: 9000, display: 'flex', alignItems: 'center', gap: 8, background: C.lavender, color: '#fff', border: 'none', borderRadius: 999, padding: big ? '16px 22px' : '13px 18px', fontFamily: FONT_STACK, fontWeight: 800, fontSize: big ? 16 : 14, cursor: 'pointer', boxShadow: '0 8px 24px rgba(127,111,160,.45)' }}>
         <Sparkles size={big ? 22 : 18} /> 복지 찾기
       </button>
       {open && (
@@ -4915,7 +4921,7 @@ function AccessibilityFab() {
   }, []);
   const toggle = () => { const n = !big; setBig(n); apply(n); try { if (typeof localStorage !== 'undefined') localStorage.setItem('eum:bigfont', n ? '1' : '0'); } catch (e) {} };
   return (
-    <button onClick={toggle} aria-label="큰 글씨 전환" title="큰 글씨 전환" style={{ position: 'fixed', left: 22, bottom: 24, zIndex: 9000, display: 'flex', alignItems: 'center', gap: 7, background: big ? C.ink : C.card, color: big ? '#fff' : C.ink, border: `1.5px solid ${C.ink}`, borderRadius: 999, padding: '11px 16px', fontFamily: FONT_STACK, fontWeight: 800, fontSize: 14, cursor: 'pointer', boxShadow: '0 6px 18px rgba(26,24,20,.2)' }}>
+    <button className="eum-noprint" onClick={toggle} aria-label="큰 글씨 전환" title="큰 글씨 전환" style={{ position: 'fixed', left: 22, bottom: 24, zIndex: 9000, display: 'flex', alignItems: 'center', gap: 7, background: big ? C.ink : C.card, color: big ? '#fff' : C.ink, border: `1.5px solid ${C.ink}`, borderRadius: 999, padding: '11px 16px', fontFamily: FONT_STACK, fontWeight: 800, fontSize: 14, cursor: 'pointer', boxShadow: '0 6px 18px rgba(26,24,20,.2)' }}>
       <span style={{ fontSize: 17 }}>가</span>{big ? '기본 글씨' : '큰 글씨'}
     </button>
   );
@@ -5876,7 +5882,7 @@ function CoordActivities({ state, dispatch, showToast, user }) {
                     <span style={{ color: '#D4D7DD' }}>·</span>
                     <span style={{ fontSize: 11.5, color: C.navMute, fontWeight: 500 }}>{act?.title}</span>
                     {log.has_photo && <Camera size={12} style={{ color: C.muteLight }} />}
-                    {log.mood && <span style={{ fontSize: 12 }}>{moodEmoji(log.mood)}</span>}
+                    {log.mood && <span role="img" aria-label={`기분 ${moodLabel(log.mood)}`} style={{ fontSize: 12 }}>{moodEmoji(log.mood)}</span>}
                   </div>
                   <div style={{ fontSize: 12.5, color: C.inkSoft, lineHeight: 1.55, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{log.summary}</div>
                   <div style={{ fontSize: 11.5, color: C.muteLight, marginTop: 5, fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>{log.hours}시간 · 매칭 {match?.id?.toUpperCase()}</div>
@@ -5916,7 +5922,7 @@ function CoordActivities({ state, dispatch, showToast, user }) {
               {detailLog.mood && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 14px', background: C.cardWarm, border: `1px solid ${C.line}`, borderRadius: 12 }}>
                   <span style={{ fontSize: 12, color: C.navMute, fontWeight: 600 }}>오늘 기분</span>
-                  <span style={{ fontSize: 20 }}>{moodEmoji(detailLog.mood)}</span>
+                  <span role="img" aria-label={`기분 ${moodLabel(detailLog.mood)}`} style={{ fontSize: 20 }}>{moodEmoji(detailLog.mood)}</span>
                   <span style={{ fontSize: 12.5, color: C.inkSoft, fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>{detailLog.mood}/5</span>
                 </div>
               )}
@@ -5929,6 +5935,8 @@ function CoordActivities({ state, dispatch, showToast, user }) {
 }
 
 function moodEmoji(m) { return ['😟', '😐', '🙂', '😊', '🥰'][Math.max(0, Math.min(4, m - 1))]; }
+// 스크린리더용 기분 라벨 — 이모지만으로는 의미가 전달되지 않아 함께 사용(접근성)
+function moodLabel(m) { return ['힘들어요', '그저 그래요', '괜찮아요', '좋아요', '아주 좋아요'][Math.max(0, Math.min(4, m - 1))]; }
 
 // --- 11.5 Settlements (정산 처리) ---
 
@@ -6809,6 +6817,13 @@ function App() {
         /* Firefox 스크롤바 — webkit과 톤 일관 */
         html { scrollbar-width: thin; scrollbar-color: ${C.border} transparent; }
         @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; } html { scroll-behavior: auto; } }
+        /* 인쇄 — 리포트·정산 등 지면 제출용. 내비·FAB·토스트 등 화면 크롬을 숨기고 본문만 흰 배경으로 */
+        @media print {
+          .eum-noprint, .eum-skip { display: none !important; }
+          body { background: #fff !important; }
+          #eum-main { animation: none !important; }
+          * { box-shadow: none !important; }
+        }
       `}</style>
 
       {role && user && (
