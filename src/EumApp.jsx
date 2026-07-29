@@ -104,7 +104,9 @@ function InsuranceBadge({ size = 'sm', style = {} }) {
   );
 }
 
-function Button({ children, onClick, variant = 'primary', size = 'md', disabled, icon, iconRight, fullWidth, type = 'button', style = {} }) {
+function Button({ children, onClick, variant = 'primary', size = 'md', disabled, loading, icon, iconRight, fullWidth, type = 'button', style = {} }) {
+  // loading: 디자인 시스템 §5 "로딩 시 스피너+비활성" — 스피너가 아이콘 자리를 대체하고
+  // 클릭이 차단되며 aria-busy로 보조기술에 진행 상태를 알린다. 선택적 prop이라 하위호환.
   const variants = {
     primary: { bg: C.headline, fg: '#fff', border: C.headline, hoverBg: '#000' },
     brand: { bg: C.brand, fg: '#fff', border: C.brand, hoverBg: C.brandDark },
@@ -123,12 +125,15 @@ function Button({ children, onClick, variant = 'primary', size = 'md', disabled,
   const [hover, setHover] = useState(false);
   const [press, setPress] = useState(false);
   const isSolid = ['primary', 'brand', 'danger', 'success'].includes(variant);
+  const isOff = disabled || loading;
+  const spinnerSize = size === 'lg' ? 16 : size === 'sm' ? 13 : 14;
   return (
     <button
       type={type}
       className="eum-btn"
       onClick={onClick}
-      disabled={disabled}
+      disabled={isOff}
+      aria-busy={loading || undefined}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => { setHover(false); setPress(false); }}
       onPointerDown={() => setPress(true)}
@@ -137,22 +142,22 @@ function Button({ children, onClick, variant = 'primary', size = 'md', disabled,
       onBlur={() => setPress(false)}
       style={{
         display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 7,
-        background: hover && !disabled ? v.hoverBg : v.bg,
+        background: hover && !isOff ? v.hoverBg : v.bg,
         color: v.fg, border: `1px solid ${v.border}`,
         padding: s.pad, fontSize: s.fs, fontWeight: 700,
-        borderRadius: 10, cursor: disabled ? 'not-allowed' : 'pointer',
+        borderRadius: 10, cursor: loading ? 'progress' : disabled ? 'not-allowed' : 'pointer',
         // 컬러 글로우(광원 없는 색번짐)는 아마추어 신호 — 얕고 중성적인 그림자만 쓴다.
         // 호버 시 1px 리프트+그림자 심화로 프리미엄 촉감(토스/에어비앤비 문법). transform이라 리플로우 없음.
-        boxShadow: !disabled && isSolid ? (press ? 'none' : (hover ? SHADOW.sm : SHADOW.xs)) : 'none',
-        opacity: disabled ? 0.5 : 1,
+        boxShadow: !isOff && isSolid ? (press ? 'none' : (hover ? SHADOW.sm : SHADOW.xs)) : 'none',
+        opacity: disabled ? 0.5 : loading ? 0.85 : 1,
         transition: 'background 0.16s ease, box-shadow 0.18s ease, transform 0.12s cubic-bezier(0.22,1,0.36,1)',
-        transform: disabled ? 'none' : press ? 'scale(0.975)' : (hover ? 'translateY(-1px)' : 'none'),
+        transform: isOff ? 'none' : press ? 'scale(0.975)' : (hover ? 'translateY(-1px)' : 'none'),
         height: s.h, width: fullWidth ? '100%' : 'auto',
         fontFamily: FONT_STACK, letterSpacing: '-0.01em',
         ...style
       }}
     >
-      {icon}
+      {loading ? <Loader2 size={spinnerSize} aria-hidden="true" style={{ animation: 'spin 1s linear infinite', flexShrink: 0 }} /> : icon}
       {children}
       {iconRight}
     </button>
@@ -3399,7 +3404,7 @@ function CoordB2G({ state, showToast }) {
               <Badge color={C.brand} soft={C.brandSoft} size="sm">발굴</Badge>
             </div>
           ))}
-          <Button variant="brand" size="sm" fullWidth style={{ marginTop: 14 }} onClick={() => showToast && showToast('지자체 제출용 운영보고서를 생성했습니다', 'success')}>지자체 운영보고서 자동 생성</Button>
+          <Button variant="brand" size="sm" fullWidth style={{ marginTop: 14 }} onClick={() => showToast && showToast({ type: 'success', message: '지자체 제출용 운영보고서를 생성했습니다' })}>지자체 운영보고서 자동 생성</Button>
         </Panel>
       </div>
 
@@ -3583,6 +3588,7 @@ function ConsumerPricing() {
 function VolunteerHub({ user, totalHours, setView, showToast }) {
   const hrs = totalHours || 0;
   const miles = Math.round(hrs * 100); // 봉사 마일리지(가정)
+  const [issuing, setIssuing] = useState(false); // 발급 진행 표시(순수 표현 상태)
   return (
     <div style={{ marginBottom: 18, overflow: 'hidden', border: `1px solid ${C.line}`, borderRadius: 16, background: C.panel, boxShadow: SHADOW.sm }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 18px', background: C.brand, color: '#fff' }}>
@@ -3598,7 +3604,7 @@ function VolunteerHub({ user, totalHours, setView, showToast }) {
         </div>
         <div style={{ fontSize: 12, color: C.navMute, lineHeight: 1.6, marginBottom: 14 }}>이음 활동은 <b style={{ color: C.inkSoft }}>1365 자원봉사 실적</b>으로 인정됩니다. 실적확인서를 발급해 대학·취업·학교생활기록부(나이스)에 활용하세요.</div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          <Button variant="brand" size="sm" icon={<Download size={14} />} onClick={async()=>{ const r=await EUM_API.v1365.issueCertificate(user.id); showToast ? showToast('실적확인서 발급 완료 · '+r.certNo,'success') : setView('settlement'); }}>실적확인서 발급</Button>
+          <Button variant="brand" size="sm" icon={<Download size={14} />} loading={issuing} onClick={async()=>{ if (issuing) return; setIssuing(true); try { const r=await EUM_API.v1365.issueCertificate(user.id); showToast ? showToast({ type: 'success', message: '실적확인서 발급 완료 · '+r.certNo }) : setView('settlement'); } finally { setIssuing(false); } }}>실적확인서 발급</Button>
           <Button variant="secondary" size="sm" icon={<Search size={14} />} onClick={() => setView('discover')}>활동 찾기</Button>
         </div>
       </div>
@@ -6599,12 +6605,15 @@ function App() {
     return () => window.removeEventListener('popstate', onPop);
   }, [dispatch]);
 
-  const showToast = useCallback((toast) => {
+  const showToast = useCallback((toast, maybeType) => {
+    // 두 가지 호출 서명 허용: showToast({ type, title, message, duration }) 또는 showToast('메시지', 'success').
+    // 문자열 호출 시 스프레드가 글자 단위로 퍼져 빈 토스트가 뜨던 결함 방지(정규화 후 표시).
+    const t = typeof toast === 'string' ? { message: toast, type: maybeType || 'info' } : (toast || {});
     const id = uid('toast');
-    setToasts(prev => [...prev, { id, ...toast }]);
+    setToasts(prev => [...prev, { id, ...t }]);
     setTimeout(() => {
-      setToasts(prev => prev.filter(t => t.id !== id));
-    }, toast.duration || 3500);
+      setToasts(prev => prev.filter(x => x.id !== id));
+    }, t.duration || 3500);
   }, []);
 
   const handleSelectRole = (role, userId) => {
