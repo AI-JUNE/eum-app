@@ -3089,10 +3089,13 @@ function CoordAdvisor({ state, showToast }){
   return (
     <div>
       <PageHeader title="복지 어드바이저" subtitle="참여자가 받을 수 있는 복지서비스를 AI가 찾아 추천하고 신청처를 안내합니다 — ‘몰라서 못 받는’ 사각지대를 먼저 발굴합니다." right={<Badge color={C.lavender} soft={C.lavenderSoft}>AI · 사각지대 발굴</Badge>} />
-      <div style={{ display:'grid', gridTemplateColumns:'320px 1fr', gap:16 }}>
+      <div className="eum-ai-cols" style={{ display:'grid', gridTemplateColumns:'320px 1fr', gap:16 }}>
         <Card>
           <div style={{ fontSize:13, fontWeight:700, color:C.headline, marginBottom:10, letterSpacing:'-0.02em' }}>참여자 선택</div>
-          <select value={pid} onChange={e=>{ setPid(e.target.value); setRun(false); }} style={{ width:'100%', padding:'9px 12px', borderRadius:10, border:'1px solid '+C.line, background:C.panel, fontFamily:FONT_STACK, fontSize:13, fontWeight:600, color:C.ink, cursor:'pointer' }}>
+          <select value={pid} onChange={e=>{ setPid(e.target.value); setRun(false); }}
+            onFocus={e=>{ e.target.style.borderColor = C.brand; e.target.style.boxShadow = `0 0 0 3px ${C.brand}1f`; }}
+            onBlur={e=>{ e.target.style.borderColor = C.line; e.target.style.boxShadow = 'none'; }}
+            style={{ width:'100%', padding:'9px 12px', borderRadius:10, border:'1px solid '+C.line, background:C.panel, fontFamily:FONT_STACK, fontSize:13, fontWeight:600, color:C.ink, cursor:'pointer', outline:'none', transition:'border-color 0.15s ease, box-shadow 0.15s ease' }}>
             {people.map(p=><option key={p.id} value={p.id}>{p.name} · {PERSONA[p.type]?.label} · {p.age}세</option>)}
           </select>
           <div style={{ marginTop:16, display:'flex', flexDirection:'column', gap:11 }}>
@@ -3102,10 +3105,10 @@ function CoordAdvisor({ state, showToast }){
               </label>
             ))}
           </div>
-          <Button variant="brand" fullWidth style={{ marginTop:16 }} disabled={busy} onClick={go}>{busy ? '분석 중…' : '복지 추천 받기'}</Button>
+          <Button variant="brand" fullWidth style={{ marginTop:16 }} loading={busy} onClick={go}>{busy ? '분석 중…' : '복지 추천 받기'}</Button>
         </Card>
         <div>
-          {!run && !busy && <Card style={{ textAlign:'center', color:C.muteLight, padding:'40px 30px', fontSize:13 }}>참여자와 상황을 선택하고 ‘복지 추천 받기’를 누르세요.</Card>}
+          {!run && !busy && <Card padding={0}><Empty icon={<Sparkles size={26} />} title="아직 추천 결과가 없습니다" sub="왼쪽에서 참여자와 상황을 선택하고 ‘복지 추천 받기’를 누르면 결과가 이곳에 표시돼요" /></Card>}
           {run && (
             <AIWrap label="AI 복지 어드바이저" color={C.lavender}>
               <div style={{ fontSize:13, color:C.inkSoft, marginBottom:14 }}><b style={{ color:C.headline }}>{person.name}</b>님이 받을 수 있는 복지서비스 <b style={{ color:C.lavender }}>{res.length}건</b>을 찾았습니다.</div>
@@ -3149,7 +3152,7 @@ function CoordAIMatch({ state, showToast }){
         right={<div style={{ display:'inline-flex', gap:2, background:C.lineSoft, padding:4, borderRadius:12, border:`1px solid ${C.line}` }}>{[['auto','AI 자동추천'],['self','직접 선택']].map(([m,t])=><button key={m} onClick={()=>setMode(m)} style={{ border:'none', cursor:'pointer', fontFamily:FONT_STACK, fontWeight:mode===m?700:600, fontSize:13, padding:'7px 13px', borderRadius:9, background:mode===m?C.panel:'transparent', color:mode===m?C.headline:C.navMute, boxShadow:mode===m?SHADOW.sm:'none', transition:'background .16s ease, color .16s ease' }}>{t}</button>)}</div>} />
       {mode==='auto' && (
         <div>
-          <Button variant="brand" disabled={busy} onClick={runAuto}>{busy ? '조합 계산 중…' : 'AI 자동매칭 실행'}</Button>
+          <Button variant="brand" loading={busy} onClick={runAuto}>{busy ? '조합 계산 중…' : 'AI 자동매칭 실행'}</Button>
           {autoRes && (
             <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(290px,1fr))', gap:13, marginTop:14 }}>
               {autoRes.map((t,i)=>(
@@ -3168,7 +3171,7 @@ function CoordAIMatch({ state, showToast }){
       {mode==='self' && (
         <div>
           <div style={{ fontSize:12.5, color:C.inkSoft, marginBottom:12 }}>직접 상대를 골라 조를 구성하세요. <Badge color={C.gold} soft={C.goldSoft}>안전·거리 가드레일 통과 후보만</Badge></div>
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:10 }}>
+          <div className="eum-ai-cols" style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:10 }}>
             {[['청년',youths,yId,setY],['어르신',seniors,sId,setS],['아동',children,cId,setC]].map(([t,arr,val,set])=>(
               <Card key={t} padding={13}>
                 <div style={{ fontSize:11.5, fontWeight:700, color:C.navMute, marginBottom:9 }}>{t} 선택</div>
@@ -3230,7 +3233,7 @@ function CoordCopilot({ state, showToast }){
   return (
     <div>
       <PageHeader title="AI 코디 코파일럿" subtitle="흩어진 활동기록을 요약하고, 정산을 자동 합산하고, 지자체 제출용 운영보고서 초안까지 한 번에 만들어 코디네이터를 보조합니다." right={<Badge color={C.lavender} soft={C.lavenderSoft}>AI · 운영 자동화</Badge>} />
-      <Button variant="brand" disabled={busy} onClick={go}>{busy ? '요약·정산·보고서 생성 중…' : '코파일럿 실행'}</Button>
+      <Button variant="brand" loading={busy} onClick={go}>{busy ? '요약·정산·보고서 생성 중…' : '코파일럿 실행'}</Button>
       {out && (
         <div style={{ marginTop:16 }}>
           <KpiStrip items={[
@@ -3267,16 +3270,16 @@ function CoordChaperone({ state, showToast }){
   return (
     <div>
       <PageHeader title="AI 안전 채퍼론" subtitle="활동 중 대화를 음성인식(STT)·텍스트분석(TA)해 건강·경제·정서·고립 위험 신호를 자동 감지합니다. 위험이 쌓이면 코디에게 알리고, 누적 시 매칭을 자동 중단합니다." right={<Badge color={C.lavender} soft={C.lavenderSoft}>AI · STT·TA</Badge>} />
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 340px', gap:14 }}>
+      <div className="eum-ai-cols" style={{ display:'grid', gridTemplateColumns:'1fr 340px', gap:14 }}>
         <Card>
           <div style={{ fontSize:13, fontWeight:700, marginBottom:12, color:C.headline, letterSpacing:'-0.02em' }}>활동 대화 (STT 전사)</div>
           {AI_TRANSCRIPT.map((u,i)=>{ const hit = done && flags.some(f=>f.i===i); return (
             <div key={i} style={{ fontSize:13, padding: hit?'8px 10px':'8px 0', color:C.inkSoft, background:hit?C.redSoft:'transparent', borderRadius:8, marginBottom:2, lineHeight:1.5, transition:'.3s', display:'flex', alignItems:'center', gap:7, flexWrap:'wrap' }}><b style={{ color:C.headline }}>{u.sp}</b> · {u.t} {hit && <Badge color={C.red} soft={C.redSoft} size="sm">위험신호</Badge>}</div>
           ); })}
-          <Button variant="brand" style={{ marginTop:12 }} disabled={busy} onClick={go}>{busy ? '음성·텍스트 분석 중…' : 'AI 안전 분석 실행'}</Button>
+          <Button variant="brand" style={{ marginTop:12 }} loading={busy} onClick={go}>{busy ? '음성·텍스트 분석 중…' : 'AI 안전 분석 실행'}</Button>
         </Card>
         <div>
-          {!done && !busy && <Card style={{ textAlign:'center', color:C.muteLight, padding:'40px 28px', fontSize:13 }}>분석을 실행하면 위험신호가 표시됩니다.</Card>}
+          {!done && !busy && <Card padding={0}><Empty icon={<ShieldCheck size={26} />} title="아직 분석 전입니다" sub="왼쪽에서 ‘AI 안전 분석 실행’을 누르면 위험신호와 권고 조치가 이곳에 표시돼요" /></Card>}
           {done && (
             <AIWrap label="AI 안전 채퍼론" color={C.lavender}>
               <div style={{ textAlign:'center', margin:'2px 0 14px' }}><div style={{ fontSize:36, fontWeight:800, color:rc, letterSpacing:'-0.04em', fontVariantNumeric:'tabular-nums' }}>{score}</div><div style={{ fontSize:11.5, color:C.navMute, fontWeight:500 }}>위험 점수 / 100</div></div>
@@ -6742,6 +6745,8 @@ function App() {
         @media (max-width: 1180px) { .eum-col-md { display: none !important; } }
         /* 대시보드 2단 그리드 — 좁아지면 세로로 쌓는다 */
         @media (max-width: 1080px) { .eum-dash-grid { grid-template-columns: 1fr !important; } }
+        /* AI 모듈 고정폭 그리드(어드바이저·직접매칭·채퍼론) — 좁은 화면에선 한 열로 쌓아 오버플로 방지 */
+        @media (max-width: 880px) { .eum-ai-cols { grid-template-columns: 1fr !important; } }
         /* 사이드바 스크롤바 — 얇고 조용하게 */
         .eum-scroll { scrollbar-width: thin; scrollbar-color: #DFE2E7 transparent; }
         .eum-scroll::-webkit-scrollbar { width: 6px; }
