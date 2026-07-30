@@ -9,6 +9,8 @@
 //    (콘솔 설정은 되돌리기 어려운 보안 변경이라 코드에서 수행하지 않음 → 다음 회차 점검 항목)
 // ============================================================================
 
+import { authHeaders } from './auth.js';
+
 // --- Supabase 인라인 연결 (외부 패키지·파일 불필요, REST fetch) ---
 const SUPA_URL = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_URL) || '';
 const SUPA_KEY = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_ANON_KEY) || '';
@@ -16,8 +18,10 @@ const SUPA_KEY = (typeof import.meta !== 'undefined' && import.meta.env && impor
 export const HAS_SUPABASE = !!(SUPA_URL && SUPA_KEY);
 
 export async function dbList(table) {
+  // 인증 활성화(AUTH_ENABLED=true) 시 사용자 토큰으로 호출 → RLS 정책 적용.
+  // 플래그 OFF(기본)면 authHeaders 가 기존과 동일한 anon 헤더를 반환한다(동작 불변).
   const res = await fetch(SUPA_URL + '/rest/v1/' + table + '?select=*', {
-    headers: { apikey: SUPA_KEY, Authorization: 'Bearer ' + SUPA_KEY },
+    headers: authHeaders(SUPA_KEY),
   });
   if (!res.ok) throw new Error('Supabase ' + table + ' ' + res.status);
   return await res.json();
