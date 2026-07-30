@@ -501,7 +501,8 @@ function Toast({ toast, onClose }) {
     <div className="eum-noprint" role="status" aria-live={toast.type === 'error' ? 'assertive' : 'polite'}
       onMouseEnter={pause} onMouseLeave={resume} onFocus={pause} onBlur={resume}
       style={{
-      position: 'fixed', bottom: 24, right: 24, zIndex: 2000,
+      // 위치는 App 하단의 토스트 컨테이너(fixed 우하단 flex 스택)가 잡는다.
+      // 이전엔 여기서도 fixed(bottom 24)를 걸어 토스트가 여러 개일 때 같은 자리에 겹쳤다.
       background: C.panel, color: C.headline, padding: '12px 10px 12px 12px',
       border: `1px solid ${C.line}`, borderRadius: 12,
       display: 'flex', alignItems: 'center', gap: 11,
@@ -2452,7 +2453,8 @@ function ConsumerLayout({ role, view, setView, user, dispatch, state, children }
         </div>
 
         {/* 하단 탭 — 플로팅 아일랜드 + 활성 필. 손가락이 닿는 곳을 명확히 한다. */}
-        <div className="eum-noprint" style={{ position: 'sticky', bottom: 0, zIndex: 50, padding: isSenior ? '10px 16px 16px' : '8px 14px 14px', background: `linear-gradient(180deg, rgba(244,245,247,0) 0%, ${C.appBg} 55%)` }}>
+        {/* paddingBottom은 padding 뒤에 선언 — env() 미지원 브라우저에선 무시되어 숏핸드 값이 유지된다 */}
+        <div className="eum-noprint" style={{ position: 'sticky', bottom: 0, zIndex: 50, padding: isSenior ? '10px 16px 16px' : '8px 14px 14px', paddingBottom: isSenior ? 'calc(16px + env(safe-area-inset-bottom, 0px))' : 'calc(14px + env(safe-area-inset-bottom, 0px))', background: `linear-gradient(180deg, rgba(244,245,247,0) 0%, ${C.appBg} 55%)` }}>
           <div role="navigation" aria-label="주요 메뉴" style={{
             display: 'flex', gap: 4, padding: 6,
             background: 'rgba(255,255,255,0.96)', backdropFilter: 'saturate(180%) blur(14px)', WebkitBackdropFilter: 'saturate(180%) blur(14px)',
@@ -3480,7 +3482,7 @@ function WelfareFab({ role }) {
   const cks = [['alone', '혼자 살아요'], ['digitalWeak', '스마트폰이 어려워요'], ['careNeed', '아프거나 외로워요'], ['familyCareYouth', '가족을 돌봐요(청년)']];
   return (
     <>
-      <button className="eum-noprint" onClick={() => setOpen(true)} aria-label="복지 어드바이저" style={{ position: 'fixed', right: 22, bottom, zIndex: 9000, display: 'flex', alignItems: 'center', gap: 8, background: C.lavender, color: '#fff', border: 'none', borderRadius: 999, padding: big ? '16px 22px' : '13px 18px', fontFamily: FONT_STACK, fontWeight: 800, fontSize: big ? 16 : 14, cursor: 'pointer', boxShadow: '0 8px 24px rgba(127,111,160,.45)' }}>
+      <button className="eum-noprint" onClick={() => setOpen(true)} aria-label="복지 어드바이저" style={{ position: 'fixed', right: 22, bottom, marginBottom: 'env(safe-area-inset-bottom, 0px)', zIndex: 9000, display: 'flex', alignItems: 'center', gap: 8, background: C.lavender, color: '#fff', border: 'none', borderRadius: 999, padding: big ? '16px 22px' : '13px 18px', fontFamily: FONT_STACK, fontWeight: 800, fontSize: big ? 16 : 14, cursor: 'pointer', boxShadow: '0 8px 24px rgba(127,111,160,.45)' }}>
         <Sparkles size={big ? 22 : 18} /> 복지 찾기
       </button>
       {open && (
@@ -4924,7 +4926,7 @@ function AccessibilityFab() {
   }, []);
   const toggle = () => { const n = !big; setBig(n); apply(n); try { if (typeof localStorage !== 'undefined') localStorage.setItem('eum:bigfont', n ? '1' : '0'); } catch (e) {} };
   return (
-    <button className="eum-noprint" onClick={toggle} aria-label="큰 글씨 전환" title="큰 글씨 전환" style={{ position: 'fixed', left: 22, bottom: 24, zIndex: 9000, display: 'flex', alignItems: 'center', gap: 7, background: big ? C.ink : C.card, color: big ? '#fff' : C.ink, border: `1.5px solid ${C.ink}`, borderRadius: 999, padding: '11px 16px', fontFamily: FONT_STACK, fontWeight: 800, fontSize: 14, cursor: 'pointer', boxShadow: '0 6px 18px rgba(26,24,20,.2)' }}>
+    <button className="eum-noprint" onClick={toggle} aria-label="큰 글씨 전환" title="큰 글씨 전환" style={{ position: 'fixed', left: 22, bottom: 24, marginBottom: 'env(safe-area-inset-bottom, 0px)', zIndex: 9000, display: 'flex', alignItems: 'center', gap: 7, background: big ? C.ink : C.card, color: big ? '#fff' : C.ink, border: `1.5px solid ${C.ink}`, borderRadius: 999, padding: '11px 16px', fontFamily: FONT_STACK, fontWeight: 800, fontSize: 14, cursor: 'pointer', boxShadow: '0 6px 18px rgba(26,24,20,.2)' }}>
       <span style={{ fontSize: 17 }}>가</span>{big ? '기본 글씨' : '큰 글씨'}
     </button>
   );
@@ -6747,6 +6749,12 @@ function App() {
         @media (max-width: 1080px) { .eum-dash-grid { grid-template-columns: 1fr !important; } }
         /* AI 모듈 고정폭 그리드(어드바이저·직접매칭·채퍼론) — 좁은 화면에선 한 열로 쌓아 오버플로 방지 */
         @media (max-width: 880px) { .eum-ai-cols { grid-template-columns: 1fr !important; } }
+        /* 모바일 입력 확대 방지 — iOS 사파리는 글꼴 16px 미만 입력에 포커스하면 화면을 강제 확대한다.
+           터치 기기 좁은 화면에서만 16px로 올린다(핀치 줌 차단 없이 해결 · 어르신 가독성에도 이득).
+           체크박스·라디오는 크기 규격이 달라 제외. 인라인 style보다 우선해야 하므로 !important. */
+        @media (max-width: 640px) and (pointer: coarse) {
+          input:not([type="checkbox"]):not([type="radio"]), select, textarea { font-size: 16px !important; }
+        }
         /* 사이드바 스크롤바 — 얇고 조용하게 */
         .eum-scroll { scrollbar-width: thin; scrollbar-color: #DFE2E7 transparent; }
         .eum-scroll::-webkit-scrollbar { width: 6px; }
@@ -6866,8 +6874,9 @@ function App() {
           관리자 콘솔에서는 사이드바 계정 영역과 겹치고, 운영자에게 필요한 기능도 아니다. */}
       {role !== 'coordinator' && <AccessibilityFab />}
 
-      {/* Toast 컨테이너 */}
-      <div role="region" aria-live="polite" aria-atomic="false" aria-label="알림" style={{ position: 'fixed', top: 20, right: 20, zIndex: 9999, display: 'flex', flexDirection: 'column', gap: 10, pointerEvents: 'none' }}>
+      {/* Toast 컨테이너 — 우하단 스택. 개별 Toast의 fixed를 걷어내고 여기서 위치·간격을 잡아
+          여러 알림이 겹치지 않고 위로 쌓이게 한다. iPhone 홈 인디케이터 대응(safe-area). */}
+      <div role="region" aria-live="polite" aria-atomic="false" aria-label="알림" style={{ position: 'fixed', bottom: 24, right: 24, zIndex: 9999, marginBottom: 'env(safe-area-inset-bottom, 0px)', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 10, pointerEvents: 'none' }}>
         {toasts.map(t => (
           <div key={t.id} style={{ pointerEvents: 'auto' }}>
             <Toast toast={t} onClose={() => setToasts(prev => prev.filter(x => x.id !== t.id))} />
