@@ -417,6 +417,7 @@ function Modal({ open, onClose, title, children, size = 'md', footer }) {
   const widths = { sm: 420, md: 560, lg: 720, xl: 920 };
   return (
     <div
+      className="eum-modal-overlay"
       onClick={onClose}
       style={{
         position: 'fixed', inset: 0, background: 'rgba(16,24,40,0.45)',
@@ -427,6 +428,7 @@ function Modal({ open, onClose, title, children, size = 'md', footer }) {
     >
       <div
         ref={panelRef}
+        className="eum-modal-panel eum-sheet-grab"
         tabIndex={-1}
         role="dialog"
         aria-modal="true"
@@ -921,8 +923,8 @@ function CheckInOutCard({ activity, user, dispatch, showToast, color = C.sage })
       </Card>
 
       {feedbackOpen && (
-        <div onClick={() => setFeedbackOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(26,24,20,0.55)', backdropFilter: 'blur(4px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
-          <div ref={feedbackRef} tabIndex={-1} role="dialog" aria-modal="true" aria-label="활동 후기 작성" onClick={(e) => e.stopPropagation()} style={{ background: C.card, borderRadius: 18, maxWidth: 440, width: '100%', padding: 28, boxShadow: '0 24px 70px rgba(0,0,0,0.28)', animation: 'slideUp 0.22s ease', textAlign: 'left', outline: 'none' }}>
+        <div className="eum-modal-overlay" onClick={() => setFeedbackOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(26,24,20,0.55)', backdropFilter: 'blur(4px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+          <div ref={feedbackRef} className="eum-modal-panel" tabIndex={-1} role="dialog" aria-modal="true" aria-label="활동 후기 작성" onClick={(e) => e.stopPropagation()} style={{ background: C.card, borderRadius: 18, maxWidth: 440, width: '100%', padding: 28, boxShadow: '0 24px 70px rgba(0,0,0,0.28)', animation: 'slideUp 0.22s ease', textAlign: 'left', outline: 'none' }}>
             <div style={{ fontSize: 18, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK, marginBottom: 4 }}>활동 후기</div>
             <div style={{ fontSize: 13, color: C.inkSoft, marginBottom: 18 }}>약 <strong style={{ color }}>{computedHours}시간</strong> 활동했어요. 오늘 어땠는지 남겨주세요.</div>
             <div style={{ fontSize: 12, fontWeight: 700, color: C.mute, marginBottom: 8 }}>오늘 만족도</div>
@@ -1429,8 +1431,8 @@ function ApplicationForm({ onClose, onSubmit }) {
 
   if (submitted) {
     return (
-      <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(26,24,20,0.55)', backdropFilter: 'blur(4px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, animation: 'fadeIn 0.15s ease' }}>
-        <div ref={panelRef} tabIndex={-1} role="dialog" aria-modal="true" aria-label="신청 접수 완료" onClick={(e) => e.stopPropagation()} style={{ background: C.card, borderRadius: 18, maxWidth: 460, width: '100%', boxShadow: '0 24px 70px rgba(0,0,0,0.28)', animation: 'slideUp 0.22s ease', outline: 'none' }}>
+      <div className="eum-modal-overlay" onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(26,24,20,0.55)', backdropFilter: 'blur(4px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, animation: 'fadeIn 0.15s ease' }}>
+        <div ref={panelRef} className="eum-modal-panel eum-sheet-grab" tabIndex={-1} role="dialog" aria-modal="true" aria-label="신청 접수 완료" onClick={(e) => e.stopPropagation()} style={{ background: C.card, borderRadius: 18, maxWidth: 460, width: '100%', boxShadow: '0 24px 70px rgba(0,0,0,0.28)', animation: 'slideUp 0.22s ease', outline: 'none' }}>
           <div style={{ textAlign: 'center', padding: '44px 28px' }}>
         <div style={{ width: 72, height: 72, borderRadius: '50%', background: C.sageSoft, color: C.sage, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
           <Check size={36} strokeWidth={3} />
@@ -1457,8 +1459,8 @@ function ApplicationForm({ onClose, onSubmit }) {
   ];
 
   return (
-    <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(26,24,20,0.55)', backdropFilter: 'blur(4px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, animation: 'fadeIn 0.15s ease' }}>
-      <div ref={panelRef} tabIndex={-1} role="dialog" aria-modal="true" aria-label="참여 신청" onClick={(e) => e.stopPropagation()} style={{ background: C.card, borderRadius: 18, maxWidth: 600, width: '100%', maxHeight: '92vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 24px 70px rgba(0,0,0,0.28)', animation: 'slideUp 0.22s ease', outline: 'none' }}>
+    <div className="eum-modal-overlay" onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(26,24,20,0.55)', backdropFilter: 'blur(4px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, animation: 'fadeIn 0.15s ease' }}>
+      <div ref={panelRef} className="eum-modal-panel eum-sheet-grab" tabIndex={-1} role="dialog" aria-modal="true" aria-label="참여 신청" onClick={(e) => e.stopPropagation()} style={{ background: C.card, borderRadius: 18, maxWidth: 600, width: '100%', maxHeight: '92vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 24px 70px rgba(0,0,0,0.28)', animation: 'slideUp 0.22s ease', outline: 'none' }}>
         {/* Header */}
         <div style={{ padding: '18px 24px 16px', borderBottom: `1px solid ${C.border}`, flexShrink: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
@@ -3508,8 +3510,8 @@ function WelfareFab({ role }) {
         <Sparkles size={big ? 22 : 18} /> 복지 찾기
       </button>
       {open && (
-        <div onClick={() => setOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 9400, background: 'rgba(26,24,20,.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
-          <div role="dialog" aria-modal="true" aria-label="복지 어드바이저" onClick={e => e.stopPropagation()} style={{ background: C.card, borderRadius: 18, width: '100%', maxWidth: 460, maxHeight: '86vh', overflowY: 'auto', padding: 22, fontFamily: FONT_STACK }}>
+        <div className="eum-modal-overlay" onClick={() => setOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 9400, background: 'rgba(26,24,20,.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+          <div className="eum-modal-panel" role="dialog" aria-modal="true" aria-label="복지 어드바이저" onClick={e => e.stopPropagation()} style={{ background: C.card, borderRadius: 18, width: '100%', maxWidth: 460, maxHeight: '86vh', overflowY: 'auto', padding: 22, fontFamily: FONT_STACK }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 17, fontWeight: 800, color: C.lavender }}><Sparkles size={20} /> 복지 어드바이저</div>
               <button onClick={() => setOpen(false)} aria-label="닫기" style={{ border: 'none', background: 'none', cursor: 'pointer', color: C.mute }}><X size={20} /></button>
@@ -6779,6 +6781,24 @@ function App() {
         @keyframes eumPop { from { transform: scale(0.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         @keyframes eumHeroIn { from { opacity: 0; transform: translateY(26px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes eumShimmer { 100% { transform: translateX(100%); } }
+        @keyframes eumSheetUp { from { opacity: 0.5; transform: translateY(48px); } to { opacity: 1; transform: translateY(0); } }
+        /* 모달 → 모바일 바텀시트 (디자인시스템 §5: 모바일은 바텀시트, 데스크톱은 중앙 모달).
+           좁은 터치 화면에서 다이얼로그를 하단에 붙여 엄지 도달 거리를 줄이고,
+           위 라운드+그래버 핸들로 토스식 시트 문법을 따른다. 표현만 바꾸므로 로직 무관. */
+        @media (max-width: 640px) {
+          .eum-modal-overlay { align-items: flex-end !important; padding: 0 !important; }
+          .eum-modal-panel {
+            max-width: none !important; width: 100% !important;
+            border-radius: 20px 20px 0 0 !important;
+            max-height: 92vh !important; max-height: 92dvh !important;
+            animation: eumSheetUp 0.32s cubic-bezier(0.22,1,0.36,1) !important;
+            /* iPhone 홈 인디케이터 — 시트가 화면 하단에 붙으므로 안전영역만큼 띄운다
+               (인라인 padding을 가진 패널은 자체 여백 유지) */
+            padding-bottom: env(safe-area-inset-bottom, 0px);
+          }
+          /* 그래버 핸들 — 상단이 플러시한 패널(표준 Modal·참여신청·접수완료)에만 */
+          .eum-sheet-grab::before { content: ''; display: block; flex-shrink: 0; width: 44px; height: 5px; border-radius: 999px; background: ${C.border}; margin: 9px auto 1px; }
+        }
         /* 콘솔 리스트 — 좁은 폭에서 보조 컬럼을 접어 핵심 정보만 남긴다 */
         @media (max-width: 1180px) { .eum-col-md { display: none !important; } }
         /* 대시보드 2단 그리드 — 좁아지면 세로로 쌓는다 */
