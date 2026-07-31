@@ -1367,6 +1367,7 @@ function ageErrorFor(type, ageRaw) {
 
 function ApplicationForm({ onClose, onSubmit }) {
   const [step, setStep] = useState(1);
+  const [legalDoc, setLegalDoc] = useState(null); // 'terms' | 'privacy' | null — 동의 단계 전문 보기
   const [form, setForm] = useState({
     type: '', name: '', age: '', phone: '', address: '광산구 ', emergency_contact: '',
     occupation: '', bio: '', skills: [], interests: [], availability: [],
@@ -1379,10 +1380,14 @@ function ApplicationForm({ onClose, onSubmit }) {
   const panelRef = useRef(null);
   useFocusTrap(true, panelRef);
   useEffect(() => {
-    const onKey = (e) => { if (e.key === 'Escape' && onClose) onClose(); };
+    const onKey = (e) => {
+      if (e.key !== 'Escape') return;
+      if (legalDoc) { setLegalDoc(null); return; } // 전문 모달만 닫기
+      if (onClose) onClose();
+    };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [onClose]);
+  }, [onClose, legalDoc]);
   useEffect(() => {
     const t = setTimeout(() => { if (panelRef.current) panelRef.current.focus(); }, 0);
     return () => clearTimeout(t);
@@ -1589,7 +1594,13 @@ function ApplicationForm({ onClose, onSubmit }) {
       {/* Step 4: Consents */}
       {step === 4 && (
         <div>
-          <div style={{ fontSize: 15, fontWeight: 700, color: C.ink, marginBottom: 14 }}>법적 동의 사항</div>
+          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12, marginBottom: 14, flexWrap: 'wrap' }}>
+            <div style={{ fontSize: 15, fontWeight: 700, color: C.ink }}>법적 동의 사항</div>
+            <div style={{ fontSize: 12.5, display: 'flex', gap: 10 }}>
+              <span role="button" tabIndex={0} onClick={() => setLegalDoc('terms')} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setLegalDoc('terms'); } }} style={{ color: C.inkSoft, fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}>이용약관 전문</span>
+              <span role="button" tabIndex={0} onClick={() => setLegalDoc('privacy')} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setLegalDoc('privacy'); } }} style={{ color: C.ink, fontWeight: 700, cursor: 'pointer', textDecoration: 'underline' }}>개인정보처리방침 전문</span>
+            </div>
+          </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             <Checkbox checked={form.consent_data} onChange={(v) => set('consent_data', v)} label="개인정보 수집·이용 동의" sublabel="개인정보보호법에 따라 신청·매칭·정산 목적으로만 활용되며, 사업 종료 후 5년간 보관 후 파기됩니다." required />
             <Checkbox checked={form.consent_photo} onChange={(v) => set('consent_photo', v)} label="활동 사진·기록 동의" sublabel="활동 사진은 코디네이터 승인 후에만 동네 기억 아카이브에 활용됩니다. 본인 식별 가능한 사진은 사전 동의 후 게재." required />
@@ -1602,6 +1613,13 @@ function ApplicationForm({ onClose, onSubmit }) {
             {form.type === 'parent' && (
               <Checkbox checked={form.consent_guardian} onChange={(v) => set('consent_guardian', v)} label="보호자 동의서 5종 작성 동의" sublabel="활동참여·개인정보·영상사진·응급의료·외부활동(공공공간 한정) 5종 동의서를 코디네이터를 통해 별도 작성합니다." required />
             )}
+          </div>
+          {/* 파일럿 안내 — 실수집 OFF: 서버 전송 없이 이 브라우저에만 저장 */}
+          <div role="note" style={{ marginTop: 14, padding: '10px 12px', borderRadius: 10, background: C.amberSoft, display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+            <Info size={15} style={{ color: C.gold, flexShrink: 0, marginTop: 1 }} />
+            <div style={{ fontSize: 12.5, color: C.inkSoft, lineHeight: 1.6 }}>
+              현재는 <b>파일럿(시연) 단계</b>입니다. 제출하신 내용은 서버로 전송되지 않고 <b>이 기기(브라우저)에만 저장</b>되며, 정식 수집 시작 시 별도 고지와 동의 절차를 거칩니다.
+            </div>
           </div>
         </div>
       )}
@@ -1619,6 +1637,7 @@ function ApplicationForm({ onClose, onSubmit }) {
         )}
         </div>
       </div>
+      <LegalModal doc={legalDoc} onClose={() => setLegalDoc(null)} />
     </div>
   );
 }
@@ -6663,6 +6682,8 @@ function App() {
       consent_photo: data.consent_photo,
       consent_criminal_check: data.consent_criminal || data.consent_criminal_check || false,
       consent_guardian: data.consent_guardian || false,
+      consented_at: new Date().toISOString(), // 동의 시각 기록(분쟁 대비)
+      legal_version: LEGAL_META.effectiveDate + '/' + LEGAL_META.status, // 동의한 약관·방침 버전
     };
     const adultHelper = data.type === 'youth' || data.type === 'adult' || data.type === 'senior';
     const verifSteps = adultHelper
