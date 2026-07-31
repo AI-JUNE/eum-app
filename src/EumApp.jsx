@@ -4168,6 +4168,8 @@ function HomeHub({ setView, items }) {
 }
 
 function CoordOverview({ state, setView, dispatch }) {
+  // 데모 초기화 확인 — 네이티브 confirm 대신 디자인시스템 Modal(포커스트랩·ESC·바텀시트) 사용
+  const [resetOpen, setResetOpen] = useState(false);
   const kpis = useMemo(() => {
     const totalParticipants = state.participants.length;
     const youthCount = state.participants.filter(p => p.type === 'youth' && p.status === 'active').length;
@@ -4212,7 +4214,24 @@ function CoordOverview({ state, setView, dispatch }) {
 
   return (
     <>
-      <PageHeader title="대시보드" subtitle={`${fmtDate(TODAY)} · 광주 광산구 우산동 1차 파일럿`} right={<Button variant="ghost" size="sm" icon={<Trash2 size={14} />} onClick={() => { if (typeof window !== 'undefined' && window.confirm('데모 데이터를 처음 상태로 초기화할까요? (현재 화면 변경분이 사라집니다)')) dispatch && dispatch({ type: 'RESET_DATA' }); }}>데모 초기화</Button>} />
+      <PageHeader title="대시보드" subtitle={`${fmtDate(TODAY)} · 광주 광산구 우산동 1차 파일럿`} right={<Button variant="ghost" size="sm" icon={<Trash2 size={14} />} onClick={() => setResetOpen(true)}>데모 초기화</Button>} />
+      <Modal
+        open={resetOpen}
+        onClose={() => setResetOpen(false)}
+        title="데모 데이터 초기화"
+        size="sm"
+        footer={(
+          <>
+            <Button variant="ghost" onClick={() => setResetOpen(false)}>취소</Button>
+            <Button variant="danger" icon={<Trash2 size={14} />} onClick={() => { setResetOpen(false); dispatch && dispatch({ type: 'RESET_DATA' }); }}>초기화</Button>
+          </>
+        )}
+      >
+        <div style={{ fontSize: 14, color: C.inkSoft, lineHeight: 1.7 }}>
+          데모 데이터를 처음 상태로 되돌릴까요?<br />
+          지금까지 화면에서 변경한 내용은 모두 사라집니다.
+        </div>
+      </Modal>
       <QuickAccessStrip setView={setView} />
 
       {/* 알림 영역 */}
@@ -4278,6 +4297,12 @@ function CoordOverview({ state, setView, dispatch }) {
           right={<span style={{ fontSize: 11.5, color: C.muteLight, fontWeight: 600 }}>연 목표 1,440시간</span>}
         >
           {monthlyChart.length === 0 ? <Empty icon={<TrendingUp size={28} />} title="아직 활동 기록이 없습니다" sub="활동이 승인되면 시간 추이가 이곳에 그려져요" /> : (
+            /* 차트 접근성 — SVG 차트는 스크린리더에 비어 보이므로, 데이터 요약을 role=img 라벨로 제공 */
+            <div
+              role="img"
+              aria-label={`누적 활동시간 추이 차트. ${monthlyChart[0].month}부터 ${monthlyChart[monthlyChart.length - 1].month}까지, 현재 누적 ${monthlyChart[monthlyChart.length - 1].cumulative}시간.`}
+            >
+              <div aria-hidden="true">
             <ResponsiveContainer width="100%" height={258}>
               <AreaChart data={monthlyChart} margin={{ top: 8, right: 6, left: -18, bottom: 0 }}>
                 <defs>
@@ -4300,6 +4325,8 @@ function CoordOverview({ state, setView, dispatch }) {
                   dot={{ r: 3, fill: C.panel, stroke: C.brand, strokeWidth: 2 }} activeDot={{ r: 5, fill: C.brand, stroke: C.panel, strokeWidth: 2 }} />
               </AreaChart>
             </ResponsiveContainer>
+              </div>
+            </div>
           )}
         </Panel>
 
@@ -4312,7 +4339,11 @@ function CoordOverview({ state, setView, dispatch }) {
               const sum = rows.reduce((s, r) => s + r[1], 0) || 1;
               return (
                 <>
-                  <div style={{ display: 'flex', height: 10, borderRadius: 999, overflow: 'hidden', background: C.lineSoft, marginBottom: 16 }}>
+                  <div
+                    role="img"
+                    aria-label={`세대 구성 비율 막대. ${rows.map(([lab, val]) => `${lab} ${val}명`).join(', ')}.`}
+                    style={{ display: 'flex', height: 10, borderRadius: 999, overflow: 'hidden', background: C.lineSoft, marginBottom: 16 }}
+                  >
                     {rows.map(([lab, val, col]) => val > 0 && (
                       <div key={lab} title={`${lab} ${val}명`} style={{ width: `${(val / sum) * 100}%`, background: col, transition: 'width 0.7s cubic-bezier(0.22,1,0.36,1)' }} />
                     ))}
@@ -4350,7 +4381,12 @@ function CoordOverview({ state, setView, dispatch }) {
         <Panel title="활동 유형 분포" sub="전체 활동 기준">
           {typeChart.length === 0 ? <Empty icon={<Activity size={28} />} title="아직 활동이 없습니다" sub="활동을 시작하면 유형별로 모아 보여드려요" /> : (
             <div style={{ display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap' }}>
-              <div style={{ width: 168, height: 168, flexShrink: 0 }}>
+              <div
+                role="img"
+                aria-label={`활동 유형 분포 도넛 차트. ${typeChart.map((t) => `${t.name} ${t.value}건`).join(', ')}.`}
+                style={{ width: 168, height: 168, flexShrink: 0 }}
+              >
+                <div aria-hidden="true" style={{ width: '100%', height: '100%' }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie data={typeChart} dataKey="value" cx="50%" cy="50%" innerRadius={54} outerRadius={80} paddingAngle={2} stroke="none" isAnimationActive={false}>
@@ -4359,6 +4395,7 @@ function CoordOverview({ state, setView, dispatch }) {
                     <Tooltip contentStyle={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 10, boxShadow: SHADOW.md, fontFamily: FONT_STACK, fontSize: 12.5, padding: '8px 12px' }} />
                   </PieChart>
                 </ResponsiveContainer>
+                </div>
               </div>
               {/* 범례를 차트 밖 목록으로 — 값을 함께 읽을 수 있게 한다 */}
               <div style={{ flex: 1, minWidth: 150 }}>
@@ -5615,6 +5652,16 @@ JSON 형식으로만 답변:
       <Card padding={22} style={{ marginBottom: 18 }}>
         <div style={{ fontSize: 14, fontWeight: 700, color: C.ink, marginBottom: 14 }}>매칭별 활동 현황</div>
         {Object.entries(stats.matchHours).length === 0 ? <Empty icon={<Activity size={28} />} title="이달의 활동이 없습니다" sub="활동 로그가 쌓이면 매칭별 활동 현황이 표시됩니다" /> : (
+          /* 차트 접근성 — 매칭별 시간 요약을 role=img 라벨로 제공(스크린리더) */
+          <div
+            role="img"
+            aria-label={`매칭별 활동 현황 막대 차트. ${Object.entries(stats.matchHours).map(([mid, h]) => {
+              const m = state.matches.find(mm => mm.id === mid);
+              const y = state.participants.find(p => p.id === m?.youth_id);
+              return `${y?.name || mid} ${h}시간`;
+            }).join(', ')}.`}
+          >
+          <div aria-hidden="true">
           <ResponsiveContainer width="100%" height={280}>
             <BarChart data={Object.entries(stats.matchHours).map(([mid, h]) => {
               const m = state.matches.find(mm => mm.id === mid);
@@ -5628,6 +5675,8 @@ JSON 형식으로만 답변:
               <Bar dataKey="hours" fill={C.brand} radius={[8, 8, 0, 0]} name="시간" isAnimationActive={false} />
             </BarChart>
           </ResponsiveContainer>
+          </div>
+          </div>
         )}
       </Card>
 
