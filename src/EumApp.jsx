@@ -8,7 +8,7 @@ import {
   CheckCircle2, AlertCircle, Eye, EyeOff, Menu, Smile, ThumbsUp, Activity,
   ClipboardCheck, FileSignature, Wallet, ShieldAlert, Megaphone, Info,
   ChevronUp, UserPlus, PenLine, Upload, Hash, Mail, MapPinned, Cake, ArrowDown,
-  BellOff
+  BellOff, WifiOff
 } from 'lucide-react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -2916,6 +2916,8 @@ function ParentMatchInfo({ myMatches, myChildren, state }) {
 function ParentSafety({ user, myMatches, myIncidents, dispatch, showToast }) {
   const [reporting, setReporting] = useState(false);
   const [form, setForm] = useState({ category: '', severity: 'medium', description: '' });
+  // 연락 카드 2열 그리드는 좁은 화면에서 글줄이 부러져 읽기 어렵다 → 640px 이하 한 열 스택
+  const isMobile = useIsMobile(640);
 
   const submitReport = () => {
     if (!form.category || !form.description) {
@@ -2948,14 +2950,15 @@ function ParentSafety({ user, myMatches, myIncidents, dispatch, showToast }) {
     <>
       <PageHeader title="안전" subtitle="아이의 안전이 최우선입니다" right={<Button variant="brand" icon={<AlertTriangle size={16} />} onClick={() => setReporting(true)}>안전 신고</Button>} />
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 14, marginBottom: 16 }}>
         <div style={{ background: C.panel, border: `1px solid ${C.line}`, borderLeft: `3px solid ${C.success}`, borderRadius: 12, boxShadow: SHADOW.xs, padding: 20 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
             <Phone size={16} style={{ color: C.success }} />
             <div style={{ fontSize: 13.5, fontWeight: 700, color: C.headline }}>코디네이터 직통</div>
           </div>
           <div style={{ fontSize: 22, fontWeight: 800, color: C.headline, letterSpacing: '-0.03em' }}>한가은</div>
-          <div style={{ fontSize: 13.5, color: C.inkSoft, marginTop: 5, fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>010-2345-6789</div>
+          {/* 모바일 원탭 통화 — 긴급 상황에서 번호를 옮겨 적지 않고 바로 전화 (데스크톱에서도 무해) */}
+          <a href="tel:010-2345-6789" aria-label="코디네이터 한가은에게 전화 걸기, 010-2345-6789" style={{ display: 'inline-block', fontSize: 13.5, color: C.brand, marginTop: 5, fontWeight: 700, fontVariantNumeric: 'tabular-nums', textDecoration: 'underline', textUnderlineOffset: 3 }}>010-2345-6789</a>
           <div style={{ fontSize: 11.5, color: C.muteLight, marginTop: 8, fontWeight: 500 }}>평일 9시~21시 / 주말 10시~18시 응답</div>
         </div>
         <div style={{ background: C.panel, border: `1px solid ${C.line}`, borderLeft: `3px solid ${C.red}`, borderRadius: 12, boxShadow: SHADOW.xs, padding: 20 }}>
@@ -2964,7 +2967,7 @@ function ParentSafety({ user, myMatches, myIncidents, dispatch, showToast }) {
             <div style={{ fontSize: 13.5, fontWeight: 700, color: C.headline }}>긴급 시</div>
           </div>
           <div style={{ fontSize: 13, color: C.inkSoft, lineHeight: 1.7 }}>
-            아이의 안전이 위협받는 위험 상황에서는 <strong style={{ color: C.red }}>112</strong> 또는 <strong style={{ color: C.red }}>119</strong>에 먼저 신고 후 코디네이터에게 알려주세요.
+            아이의 안전이 위협받는 위험 상황에서는 <a href="tel:112" aria-label="112에 전화 걸기" style={{ color: C.red, fontWeight: 800, textDecoration: 'underline', textUnderlineOffset: 2 }}>112</a> 또는 <a href="tel:119" aria-label="119에 전화 걸기" style={{ color: C.red, fontWeight: 800, textDecoration: 'underline', textUnderlineOffset: 2 }}>119</a>에 먼저 신고 후 코디네이터에게 알려주세요.
           </div>
         </div>
       </div>
@@ -6648,6 +6651,18 @@ function App() {
     }, t.duration || 3500);
   }, []);
 
+  // 오프라인 감지 — 연결이 끊기면 상단 배너로 즉시 알리고, 복구되면 토스트로 안내.
+  // 모바일 현장(활동 체크인·신고 등)에서 "왜 안 되지"를 어르신·보호자도 바로 알 수 있게 한다.
+  // 순수 표현: 네트워크 상태 표시만 하며 리듀서·저장 로직에는 관여하지 않는다.
+  const [offline, setOffline] = useState(() => typeof navigator !== 'undefined' && navigator.onLine === false);
+  useEffect(() => {
+    const onOffline = () => setOffline(true);
+    const onOnline = () => { setOffline(false); showToast({ type: 'success', message: '인터넷에 다시 연결되었습니다.' }); };
+    window.addEventListener('offline', onOffline);
+    window.addEventListener('online', onOnline);
+    return () => { window.removeEventListener('offline', onOffline); window.removeEventListener('online', onOnline); };
+  }, [showToast]);
+
   const handleSelectRole = (role, userId) => {
     dispatch({ type: 'LOGIN', payload: { role, userId } });
   };
@@ -6872,6 +6887,14 @@ function App() {
         >
           본문 바로가기
         </a>
+      )}
+
+      {/* 오프라인 배너 — 네트워크 단절을 상단에서 즉시 안내 (인쇄 제외, 안전영역 대응) */}
+      {offline && (
+        <div className="eum-noprint" role="status" aria-live="assertive" style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 10001, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '10px 16px', paddingTop: 'calc(10px + env(safe-area-inset-top, 0px))', background: C.ink, color: '#fff', fontSize: 13.5, fontWeight: 700, fontFamily: FONT_STACK, letterSpacing: '-0.01em', lineHeight: 1.5, textAlign: 'center' }}>
+          <WifiOff size={15} aria-hidden="true" style={{ flexShrink: 0 }} />
+          인터넷 연결이 끊겼습니다 — 연결을 확인해 주세요.
+        </div>
       )}
 
       {!role || !user ? (
