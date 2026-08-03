@@ -4,6 +4,15 @@
 // ============================================================================
 import { useMemo, useState } from 'react';
 import { Calendar, Clock, MapPin, Phone, Wallet } from 'lucide-react';
+import { C, SHADOW } from '../theme.js';
+import { TODAY, fmtDate, fmtRelativeDate, krw, uid } from '../utils.js';
+import { Avatar } from '../avatar.jsx';
+import { Badge, Button, Card, InsuranceBadge, OfficialSenderBadge } from '../ui.jsx';
+import { HomeHub, Layout } from '../chrome.jsx';
+
+// ============================================================================
+// 10. SENIOR APP (큰 글씨, 단순 UI)
+// ============================================================================
 
 // 어르신 전용 빈 상태 — 표준 Empty(15.5px)보다 큰 활자(디자인 원칙: 큰 글씨).
 // 순수 표현 컴포넌트, 로직 없음.
@@ -18,15 +27,6 @@ function SeniorEmpty({ icon: Icon, color, soft, title, sub }) {
     </div>
   );
 }
-import { C, SHADOW } from '../theme.js';
-import { TODAY, fmtDate, fmtRelativeDate, krw, uid } from '../utils.js';
-import { Avatar } from '../avatar.jsx';
-import { Badge, Button, Card, InsuranceBadge, OfficialSenderBadge } from '../ui.jsx';
-import { HomeHub, Layout } from '../chrome.jsx';
-
-// ============================================================================
-// 10. SENIOR APP (큰 글씨, 단순 UI)
-// ============================================================================
 
 function SeniorApp({ state, user, dispatch, showToast }) {
   const [view, setView] = useState('dashboard');

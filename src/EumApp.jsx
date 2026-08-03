@@ -2030,7 +2030,7 @@ function RLLanding({ state, onSelectRole, onShowApplication }) {
           <div style={{ display: 'flex', justifyContent: 'center' }}>
             <div style={{ position: 'relative', width: '100%', maxWidth: 560, animation: 'eumHeroIn 0.9s cubic-bezier(0.22,1,0.36,1) both, eumHeroFloat 7s ease-in-out 0.9s infinite' }}>
               <div style={{ borderRadius: 28, overflow: 'hidden', boxShadow: '0 30px 60px -24px rgba(26,26,30,0.28)' }}>
-                <img className="eum-hero-img" src="/hero-3gen.png" alt="청년·어르신·아동 3세대가 함께하는 모습" style={{ width: '100%', display: 'block', aspectRatio: '4 / 3.4', objectFit: 'cover', objectPosition: 'center 30%' }} loading="eager" decoding="async" fetchPriority="high" />
+                <img className="eum-hero-img" src="/hero-3gen.jpg" alt="청년·어르신·아동 3세대가 우리 동네에서 함께 걷는 모습" style={{ width: '100%', display: 'block', aspectRatio: '4 / 3.4', objectFit: 'cover', objectPosition: 'center 42%' }} loading="eager" decoding="async" fetchPriority="high" />
               </div>
               <div style={{ position: 'absolute', left: isMobile ? 10 : -16, bottom: 24, background: '#fff', borderRadius: 16, padding: '12px 16px', boxShadow: '0 18px 40px -14px rgba(26,26,30,0.3)', display: 'flex', alignItems: 'center', gap: 11, border: `1px solid ${C.borderSoft}` }}>
                 <div style={{ display: 'flex' }}>
