@@ -4,7 +4,21 @@
 // ============================================================================
 import { useMemo, useState } from 'react';
 import { Calendar, Clock, MapPin, Phone, Wallet } from 'lucide-react';
-import { C, SERIF_STACK, SHADOW } from '../theme.js';
+
+// 어르신 전용 빈 상태 — 표준 Empty(15.5px)보다 큰 활자(디자인 원칙: 큰 글씨).
+// 순수 표현 컴포넌트, 로직 없음.
+function SeniorEmpty({ icon: Icon, color, soft, title, sub }) {
+  return (
+    <div style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 20, boxShadow: SHADOW.sm, padding: '36px 24px', textAlign: 'center', marginBottom: 20 }}>
+      <span aria-hidden="true" style={{ width: 60, height: 60, borderRadius: 18, background: soft, color, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: 14 }}>
+        <Icon size={30} />
+      </span>
+      <div style={{ fontSize: 21, fontWeight: 800, color: C.headline, letterSpacing: '-0.03em', lineHeight: 1.35 }}>{title}</div>
+      {sub && <div style={{ fontSize: 17, color: C.navMute, marginTop: 8, fontWeight: 500, lineHeight: 1.55 }}>{sub}</div>}
+    </div>
+  );
+}
+import { C, SHADOW } from '../theme.js';
 import { TODAY, fmtDate, fmtRelativeDate, krw, uid } from '../utils.js';
 import { Avatar } from '../avatar.jsx';
 import { Badge, Button, Card, InsuranceBadge, OfficialSenderBadge } from '../ui.jsx';
@@ -92,6 +106,15 @@ function SeniorApp({ state, user, dispatch, showToast }) {
             </div>
           )}
 
+          {/* 빈 상태 — 예정된 만남이 없어도 화면을 비워두지 않는다(디자인 원칙 6). */}
+          {!(nextActivity && youth) && (
+            <SeniorEmpty
+              icon={Calendar} color={C.lavender} soft={C.lavenderSoft}
+              title="아직 예정된 만남이 없습니다"
+              sub={<>새 일정이 잡히면 이 자리에서 가장 먼저 알려드려요.<br />코디네이터가 곧 연락드립니다.</>}
+            />
+          )}
+
           {/* 지금까지 받은 상품권 — 금액 하나만 크게. 나머지는 조용히. */}
           <div style={{ marginBottom: 20, background: C.panel, border: `1px solid ${C.line}`, borderRadius: 20, boxShadow: SHADOW.sm, padding: '24px 22px', display: 'flex', alignItems: 'center', gap: 18 }}>
             <span style={{ width: 52, height: 52, borderRadius: 15, background: C.goldSoft, color: C.gold, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -113,11 +136,19 @@ function SeniorApp({ state, user, dispatch, showToast }) {
 
       {view === 'schedule' && (
         <>
-          <div style={{ fontSize: 32, fontWeight: 700, color: C.ink, marginBottom: 24, fontFamily: SERIF_STACK, letterSpacing: '-0.03em' }}>다음 만남</div>
+          <div style={{ fontSize: 32, fontWeight: 800, color: C.headline, marginBottom: 8, letterSpacing: '-0.04em' }}>다음 만남</div>
+          <div style={{ fontSize: 17, color: C.navMute, marginBottom: 24, fontWeight: 500 }}>예정된 만남과 지난 활동을 한눈에 보실 수 있습니다</div>
+          {myActivities.filter(a => a.status === 'scheduled').length === 0 && (
+            <SeniorEmpty
+              icon={Calendar} color={C.lavender} soft={C.lavenderSoft}
+              title="예정된 만남이 없습니다"
+              sub={<>새 일정이 잡히면 여기에서 알려드려요.<br />코디네이터가 곧 연락드립니다.</>}
+            />
+          )}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             {myActivities.filter(a => a.status === 'scheduled').map((act) => (
               <Card key={act.id} padding={24}>
-                <div style={{ fontSize: 22, fontWeight: 700, color: C.ink, marginBottom: 6, fontFamily: SERIF_STACK }}>{fmtRelativeDate(act.scheduled_at)}</div>
+                <div style={{ fontSize: 22, fontWeight: 800, color: C.headline, marginBottom: 6, letterSpacing: '-0.03em' }}>{fmtRelativeDate(act.scheduled_at)}</div>
                 <div style={{ fontSize: 18, color: C.inkSoft, marginBottom: 4 }}>{act.scheduled_at.split(' ')[1]} · {act.type}</div>
                 <div style={{ fontSize: 17, color: C.mute, display: 'flex', alignItems: 'center', gap: 6 }}><MapPin size={16} /> {act.location}</div>
                 <div style={{ marginTop: 12 }}><InsuranceBadge size="md" /></div>
@@ -126,7 +157,7 @@ function SeniorApp({ state, user, dispatch, showToast }) {
             {myActivities.filter(a => a.status === 'completed').slice(-3).reverse().map((act) => (
               <Card key={act.id} padding={20} style={{ background: C.cream }}>
                 <Badge color={C.sage} soft={C.sageSoft} size="md">완료</Badge>
-                <div style={{ fontSize: 18, fontWeight: 700, color: C.ink, marginTop: 6, fontFamily: SERIF_STACK }}>{fmtDate(act.scheduled_at)}</div>
+                <div style={{ fontSize: 18, fontWeight: 700, color: C.headline, marginTop: 6, letterSpacing: '-0.02em' }}>{fmtDate(act.scheduled_at)}</div>
                 <div style={{ fontSize: 16, color: C.inkSoft, marginTop: 4 }}>{act.type}</div>
               </Card>
             ))}
@@ -145,14 +176,21 @@ function SeniorApp({ state, user, dispatch, showToast }) {
               <div style={{ fontSize: 46, fontWeight: 800, color: C.headline, letterSpacing: '-0.04em', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>{krw(totalEarned)}</div>
             </div>
           </div>
+          {mySettlements.length === 0 && (
+            <SeniorEmpty
+              icon={Wallet} color={C.gold} soft={C.goldSoft}
+              title="아직 받으신 상품권이 없습니다"
+              sub={<>활동을 마치시면 매월 1일에<br />광주상생카드가 자동으로 발급됩니다.</>}
+            />
+          )}
           {mySettlements.map(s => (
             <Card key={s.id} padding={20} style={{ marginBottom: 10 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
-                  <div style={{ fontSize: 19, fontWeight: 700, color: C.ink, fontFamily: SERIF_STACK }}>{s.month.split('-')[0]}년 {s.month.split('-')[1]}월</div>
+                  <div style={{ fontSize: 19, fontWeight: 700, color: C.headline, letterSpacing: '-0.02em' }}>{s.month.split('-')[0]}년 {s.month.split('-')[1]}월</div>
                   <div style={{ fontSize: 15, color: C.mute, marginTop: 4 }}>{fmtDate(s.issued_at)} 받음</div>
                 </div>
-                <div style={{ fontSize: 24, fontWeight: 700, color: C.gold, fontFamily: SERIF_STACK }}>{krw(s.amount_krw)}</div>
+                <div style={{ fontSize: 24, fontWeight: 700, color: C.gold, fontVariantNumeric: 'tabular-nums' }}>{krw(s.amount_krw)}</div>
               </div>
             </Card>
           ))}
