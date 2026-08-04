@@ -3238,9 +3238,30 @@ function moodLabel(m) { return ['힘들어요', '그저 그래요', '괜찮아�
 
 // --- 11.5 Settlements (정산 처리) ---
 
+// 정산 이의 상태 라벨 — 참여자 화면과 동일 어휘 (received=이의접수 / accepted=승인 / rejected=반려)
+const SETTLE_DISPUTE_LABEL = {
+  received: { label: '이의접수', color: C.amber, soft: C.amberSoft },
+  accepted: { label: '승인 처리', color: C.sage, soft: C.sageSoft },
+  rejected: { label: '반려 처리', color: C.red, soft: C.redSoft },
+};
+
 function CoordSettlements({ state, dispatch, showToast, user }) {
   const [monthFilter, setMonthFilter] = useState(TODAY.slice(0, 7));
   const [generating, setGenerating] = useState(false);
+  // 정산 이의신청 검토 (백로그 #1, additive) — 이의 목록·검토 모달·처리 메모
+  const [disputeSel, setDisputeSel] = useState(null);
+  const [disputeMemo, setDisputeMemo] = useState('');
+  const disputes = state.settlements.filter(s => s.dispute);
+  const openDisputes = disputes.filter(s => s.dispute.status === 'received');
+  const resolveDispute = (result) => {
+    if (!disputeMemo.trim()) { showToast({ type: 'error', message: '처리 메모를 입력해주세요.' }); return; }
+    dispatch({
+      type: 'RESOLVE_SETTLEMENT_DISPUTE',
+      payload: { id: disputeSel.id, result, resolution: disputeMemo.trim(), resolved_at: new Date().toISOString().slice(0, 10), resolved_by: user.name || user.id },
+    });
+    showToast({ type: 'success', message: result === 'accepted' ? '이의를 승인 처리했습니다. 참여자 화면에 반영됩니다.' : '이의를 반려 처리했습니다. 참여자 화면에 반영됩니다.' });
+    setDisputeSel(null); setDisputeMemo('');
+  };
 
   // 월별 정산 가능 항목 (승인된 로그 합산)
   const calculatedSettlements = useMemo(() => {
@@ -3354,6 +3375,81 @@ function CoordSettlements({ state, dispatch, showToast, user }) {
           </div>
         ))}
       </Panel>
+
+      {/* 정산 이의신청 — 참여자가 접수한 이의를 검토·기록 (백로그 #1) */}
+      {disputes.length > 0 && (
+        <Panel
+          title={
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+              정산 이의신청
+              {openDisputes.length > 0 && (
+                <span aria-label={`검토 대기 ${openDisputes.length}건`} style={{ fontSize: 11, fontWeight: 800, color: '#fff', background: C.amber, borderRadius: 999, padding: '2px 8px', lineHeight: 1.4 }}>{openDisputes.length}건 대기</span>
+              )}
+            </span>
+          }
+          sub="참여자가 접수한 정산 이의를 검토하고 처리 이력을 남깁니다"
+          padding={0}
+          style={{ marginTop: 16 }}
+        >
+          {disputes.map((s, i) => {
+            const p = state.participants.find(pp => pp.id === s.participant_id);
+            const d = s.dispute;
+            const lb = SETTLE_DISPUTE_LABEL[d.status] || SETTLE_DISPUTE_LABEL.received;
+            const periodLabel = (s.month || s.period || '').replace('-', '년 ') + '월';
+            return (
+              <div key={s.id} style={{ padding: '14px 20px', borderTop: i === 0 ? 'none' : `1px solid ${C.lineSoft}`, display: 'flex', gap: 14, alignItems: 'flex-start' }}>
+                <Avatar type={p?.type} gender={p?.gender} name={p?.name} size={34} color={PERSONA[p?.type]?.color || C.brand} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: 13.5, fontWeight: 700, color: C.headline }}>{p?.name || s.participant_id}</span>
+                    <span style={{ fontSize: 12, color: C.muteLight, fontVariantNumeric: 'tabular-nums' }}>{periodLabel} · {krw(s.amount_krw ?? s.amount ?? 0)}</span>
+                    <Badge color={lb.color} soft={lb.soft} size="sm">{lb.label}</Badge>
+                  </div>
+                  <div style={{ fontSize: 12.5, color: C.inkSoft, marginTop: 5, lineHeight: 1.6 }}>"{d.reason}"</div>
+                  <div style={{ fontSize: 11.5, color: C.navMute, marginTop: 4, fontVariantNumeric: 'tabular-nums' }}>{fmtDate(d.raised_at)} 접수{d.resolved_at ? ` · ${fmtDate(d.resolved_at)} ${d.resolved_by} 처리` : ''}</div>
+                  {d.resolution && (
+                    <div style={{ fontSize: 12, color: C.ink, marginTop: 6, padding: '9px 12px', background: C.lineSoft, borderRadius: 8, lineHeight: 1.55 }}>처리 메모: {d.resolution}</div>
+                  )}
+                </div>
+                {d.status === 'received' && (
+                  <Button variant="secondary" size="sm" onClick={() => { setDisputeSel(s); setDisputeMemo(''); }} style={{ flexShrink: 0 }}>검토</Button>
+                )}
+              </div>
+            );
+          })}
+        </Panel>
+      )}
+
+      {/* 이의 검토 모달 — 처리 메모 필수, 승인/반려 기록 */}
+      <Modal
+        open={!!disputeSel}
+        onClose={() => setDisputeSel(null)}
+        title="정산 이의 검토"
+        size="sm"
+        footer={
+          <>
+            <Button variant="secondary" onClick={() => setDisputeSel(null)}>취소</Button>
+            <Button variant="danger" onClick={() => resolveDispute('rejected')}>반려</Button>
+            <Button variant="brand" onClick={() => resolveDispute('accepted')}>승인</Button>
+          </>
+        }
+      >
+        {disputeSel && (
+          <>
+            <div style={{ padding: '12px 14px', background: C.lineSoft, borderRadius: 10, marginBottom: 14 }}>
+              <div style={{ fontSize: 13.5, fontWeight: 700, color: C.headline }}>
+                {state.participants.find(pp => pp.id === disputeSel.participant_id)?.name || disputeSel.participant_id} · {(disputeSel.month || disputeSel.period || '').replace('-', '년 ')}월 · {krw(disputeSel.amount_krw ?? disputeSel.amount ?? 0)}
+              </div>
+              <div style={{ fontSize: 12.5, color: C.inkSoft, marginTop: 6, lineHeight: 1.6 }}>"{disputeSel.dispute?.reason}"</div>
+              <div style={{ fontSize: 11.5, color: C.navMute, marginTop: 4 }}>{fmtDate(disputeSel.dispute?.raised_at)} 접수</div>
+            </div>
+            <Field label="처리 메모" required>
+              <Textarea value={disputeMemo} onChange={setDisputeMemo} rows={4} placeholder="예) 미승인 활동기록 2건 확인 후 승인 — 차월 정산에 합산 반영 예정." />
+            </Field>
+            <div style={{ fontSize: 12, color: C.navMute, marginTop: 10, lineHeight: 1.6 }}>승인/반려와 처리 메모는 이력으로 남고 참여자 정산 화면에 표시됩니다.</div>
+          </>
+        )}
+      </Modal>
     </>
   );
 }
@@ -3842,6 +3938,24 @@ function appReducer(state, action) {
     }
     case 'ADD_SETTLEMENT': {
       return { ...state, settlements: [...state.settlements, action.payload] };
+    }
+    case 'RAISE_SETTLEMENT_DISPUTE': {
+      // 참여자 정산 이의신청 — 해당 정산 항목에 dispute 객체를 추가(상태 '이의접수')
+      return {
+        ...state,
+        settlements: state.settlements.map(s => s.id === action.payload.id
+          ? { ...s, dispute: { status: 'received', reason: action.payload.reason, raised_at: action.payload.raised_at, raised_by: action.payload.raised_by, resolution: null, resolved_at: null, resolved_by: null } }
+          : s)
+      };
+    }
+    case 'RESOLVE_SETTLEMENT_DISPUTE': {
+      // 코디네이터 이의 검토 — 승인(accepted)/반려(rejected) + 처리 메모·이력 기록
+      return {
+        ...state,
+        settlements: state.settlements.map(s => (s.id === action.payload.id && s.dispute)
+          ? { ...s, dispute: { ...s.dispute, status: action.payload.result, resolution: action.payload.resolution, resolved_at: action.payload.resolved_at, resolved_by: action.payload.resolved_by } }
+          : s)
+      };
     }
     case 'RESET_DATA': {
       return { ...SEED_DATA, currentUserId: null, currentRole: null };

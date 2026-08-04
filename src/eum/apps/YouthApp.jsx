@@ -165,7 +165,7 @@ function YouthApp({ state, user, dispatch, showToast }) {
       {view === 'logs' && <YouthLogs state={state} user={user} match={match} myLogs={myLogs} myActivities={myActivities} dispatch={dispatch} showToast={showToast} />}
       {view === 'mentor' && <YouthMentor senior={senior} myLogs={myLogs} state={state} />}
       {view === 'archive' && <ArchiveView state={state} />}
-      {view === 'settlement' && <SettlementView settlements={mySettlements} totalHours={totalHours} totalEarned={totalEarned} user={user} />}
+      {view === 'settlement' && <SettlementView settlements={mySettlements} totalHours={totalHours} totalEarned={totalEarned} user={user} dispatch={dispatch} showToast={showToast} />}
     </Layout>
   );
 }
@@ -460,7 +460,23 @@ function ArchiveView({ state }) {
   );
 }
 
-function SettlementView({ settlements, totalHours, totalEarned, user }) {
+// 이의 상태 라벨 — 참여자·코디 화면 공통 어휘 (received=이의접수 / accepted=승인 / rejected=반려)
+const DISPUTE_LABEL = {
+  received: { label: '이의접수 · 검토 중', color: C.amber, soft: C.amberSoft },
+  accepted: { label: '이의 승인 · 처리 완료', color: C.sage, soft: C.sageSoft },
+  rejected: { label: '이의 반려', color: C.red, soft: C.redSoft },
+};
+
+function SettlementView({ settlements, totalHours, totalEarned, user, dispatch, showToast }) {
+  // 정산 이의신청 — 사유 입력 모달 (백로그 #1, additive)
+  const [disputeTarget, setDisputeTarget] = useState(null);
+  const [disputeReason, setDisputeReason] = useState('');
+  const submitDispute = () => {
+    if (!disputeReason.trim()) { showToast && showToast({ type: 'error', message: '이의 사유를 입력해주세요.' }); return; }
+    dispatch && dispatch({ type: 'RAISE_SETTLEMENT_DISPUTE', payload: { id: disputeTarget.id, reason: disputeReason.trim(), raised_at: new Date().toISOString().slice(0, 10), raised_by: user.id } });
+    showToast && showToast({ type: 'success', message: '이의 신청이 접수되었습니다. 코디네이터 검토 후 결과를 알려드립니다.' });
+    setDisputeTarget(null); setDisputeReason('');
+  };
   return (
     <>
       <PageHeader title="정산 내역" subtitle="광주상생카드 (월 1회 일괄 발급)" />
@@ -491,13 +507,57 @@ function SettlementView({ settlements, totalHours, totalEarned, user }) {
             </div>
             <div style={{ textAlign: 'right', flexShrink: 0 }}>
               <div style={{ fontSize: 18, fontWeight: 800, color: C.headline, letterSpacing: '-0.03em', fontVariantNumeric: 'tabular-nums' }}>{krw(s.amount_krw)}</div>
-              <Badge color={s.status === 'paid' ? C.sage : C.amber} soft={s.status === 'paid' ? C.sageSoft : C.amberSoft} size="sm">
-                {s.status === 'paid' ? '발급 완료' : '발급 예정'}
-              </Badge>
+              <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end', alignItems: 'center', flexWrap: 'wrap' }}>
+                <Badge color={s.status === 'paid' ? C.sage : C.amber} soft={s.status === 'paid' ? C.sageSoft : C.amberSoft} size="sm">
+                  {s.status === 'paid' ? '발급 완료' : '발급 예정'}
+                </Badge>
+                {s.dispute ? (
+                  <Badge color={DISPUTE_LABEL[s.dispute.status]?.color || C.amber} soft={DISPUTE_LABEL[s.dispute.status]?.soft || C.amberSoft} size="sm">
+                    {DISPUTE_LABEL[s.dispute.status]?.label || '이의접수'}
+                  </Badge>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => { setDisputeTarget(s); setDisputeReason(''); }}
+                    aria-label={`${s.month.replace('-', '년 ')}월 정산에 이의 신청`}
+                    style={{ border: 'none', background: 'transparent', padding: '2px 4px', fontSize: 11.5, fontWeight: 700, color: C.mute, textDecoration: 'underline', textUnderlineOffset: 3, cursor: 'pointer', fontFamily: 'inherit' }}
+                  >이의 신청</button>
+                )}
+              </div>
+              {s.dispute && (s.dispute.status === 'accepted' || s.dispute.status === 'rejected') && s.dispute.resolution && (
+                <div style={{ fontSize: 11.5, color: C.navMute, marginTop: 5, maxWidth: 260, lineHeight: 1.5, textAlign: 'right' }}>처리 결과: {s.dispute.resolution}</div>
+              )}
             </div>
           </div>
         ))}
       </Panel>
+
+      {/* 이의 신청 모달 — 사유 입력 후 코디네이터에게 접수 */}
+      <Modal
+        open={!!disputeTarget}
+        onClose={() => setDisputeTarget(null)}
+        title="정산 이의 신청"
+        size="sm"
+        footer={
+          <>
+            <Button variant="secondary" onClick={() => setDisputeTarget(null)}>취소</Button>
+            <Button variant="brand" icon={<Send size={14} />} onClick={submitDispute}>이의 신청</Button>
+          </>
+        }
+      >
+        {disputeTarget && (
+          <>
+            <div style={{ padding: '12px 14px', background: C.lineSoft, borderRadius: 10, marginBottom: 14 }}>
+              <div style={{ fontSize: 13.5, fontWeight: 700, color: C.headline }}>{disputeTarget.month.replace('-', '년 ')}월 활동분 · {krw(disputeTarget.amount_krw)}</div>
+              <div style={{ fontSize: 11.5, color: C.muteLight, marginTop: 3 }}>{disputeTarget.total_hours}시간 · {disputeTarget.voucher_code}</div>
+            </div>
+            <Field label="이의 사유" required>
+              <Textarea value={disputeReason} onChange={setDisputeReason} rows={4} placeholder="예) 활동 시간이 실제와 다르게 집계된 것 같습니다." />
+            </Field>
+            <div style={{ fontSize: 12, color: C.navMute, marginTop: 10, lineHeight: 1.6 }}>접수된 이의는 코디네이터가 검토하며, 처리 결과는 이 화면에서 확인할 수 있습니다.</div>
+          </>
+        )}
+      </Modal>
     </>
   );
 }

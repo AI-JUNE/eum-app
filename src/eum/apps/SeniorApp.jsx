@@ -184,19 +184,64 @@ function SeniorApp({ state, user, dispatch, showToast }) {
             />
           )}
           {mySettlements.map(s => (
-            <Card key={s.id} padding={20} style={{ marginBottom: 10 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                  <div style={{ fontSize: 19, fontWeight: 700, color: C.headline, letterSpacing: '-0.02em' }}>{s.month.split('-')[0]}년 {s.month.split('-')[1]}월</div>
-                  <div style={{ fontSize: 15, color: C.mute, marginTop: 4 }}>{fmtDate(s.issued_at)} 받음</div>
-                </div>
-                <div style={{ fontSize: 24, fontWeight: 700, color: C.gold, fontVariantNumeric: 'tabular-nums' }}>{krw(s.amount_krw)}</div>
-              </div>
-            </Card>
+            <SeniorSettlementCard key={s.id} s={s} user={user} dispatch={dispatch} showToast={showToast} />
           ))}
         </>
       )}
     </Layout>
+  );
+}
+
+// 어르신 정산 카드 + 이의신청 — 큰 글씨·2단계 확인(SOS 카드와 같은 문법). 백로그 #1, additive.
+function SeniorSettlementCard({ s, user, dispatch, showToast }) {
+  const [asking, setAsking] = useState(false);
+  const [reason, setReason] = useState('');
+  const send = () => {
+    if (!reason.trim()) { showToast({ type: 'error', message: '어떤 점이 잘못되었는지 적어주세요.' }); return; }
+    dispatch({ type: 'RAISE_SETTLEMENT_DISPUTE', payload: { id: s.id, reason: reason.trim(), raised_at: new Date().toISOString().slice(0, 10), raised_by: user.id } });
+    showToast({ type: 'success', message: '접수되었습니다. 코디네이터가 확인 후 연락드립니다.', duration: 4000 });
+    setAsking(false); setReason('');
+  };
+  const d = s.dispute;
+  return (
+    <Card padding={20} style={{ marginBottom: 10 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <div style={{ fontSize: 19, fontWeight: 700, color: C.headline, letterSpacing: '-0.02em' }}>{s.month.split('-')[0]}년 {s.month.split('-')[1]}월</div>
+          <div style={{ fontSize: 15, color: C.mute, marginTop: 4 }}>{fmtDate(s.issued_at)} 받음</div>
+        </div>
+        <div style={{ fontSize: 24, fontWeight: 700, color: C.gold, fontVariantNumeric: 'tabular-nums' }}>{krw(s.amount_krw)}</div>
+      </div>
+      {d ? (
+        <div role="status" style={{ marginTop: 14, padding: '13px 16px', background: d.status === 'received' ? C.amberSoft : C.sageSoft, borderRadius: 12, fontSize: 16, fontWeight: 600, color: C.ink, lineHeight: 1.55 }}>
+          {d.status === 'received' && '문의가 접수되었습니다. 코디네이터가 확인하고 있습니다.'}
+          {d.status === 'accepted' && `처리 완료 — ${d.resolution || '확인하여 처리해 드렸습니다.'}`}
+          {d.status === 'rejected' && `확인 결과 — ${d.resolution || '금액에 이상이 없는 것으로 확인되었습니다.'}`}
+        </div>
+      ) : asking ? (
+        <div style={{ marginTop: 14 }}>
+          <label htmlFor={`dispute-${s.id}`} style={{ display: 'block', fontSize: 16, fontWeight: 700, color: C.ink, marginBottom: 8 }}>어떤 점이 잘못되었나요?</label>
+          <textarea
+            id={`dispute-${s.id}`}
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            rows={3}
+            placeholder="예) 상품권 금액이 들어오지 않았어요"
+            style={{ width: '100%', boxSizing: 'border-box', fontSize: 17, lineHeight: 1.55, padding: '12px 14px', borderRadius: 12, border: `1.5px solid ${C.line}`, fontFamily: 'inherit', resize: 'vertical', background: C.panel, color: C.ink }}
+          />
+          <div style={{ display: 'flex', gap: 10, marginTop: 10 }}>
+            <Button variant="brand" size="lg" fullWidth onClick={send}><span style={{ fontSize: 17 }}>보내기</span></Button>
+            <Button variant="secondary" size="lg" onClick={() => { setAsking(false); setReason(''); }}><span style={{ fontSize: 17 }}>취소</span></Button>
+          </div>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setAsking(true)}
+          style={{ marginTop: 14, width: '100%', padding: '12px 14px', borderRadius: 12, border: `1.5px solid ${C.line}`, background: C.cream, fontSize: 16, fontWeight: 700, color: C.inkSoft, cursor: 'pointer', fontFamily: 'inherit' }}
+        >금액이 이상한가요? 코디네이터에게 문의하기</button>
+      )}
+    </Card>
   );
 }
 
