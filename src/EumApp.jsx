@@ -3246,6 +3246,8 @@ const SETTLE_DISPUTE_LABEL = {
 };
 
 function CoordSettlements({ state, dispatch, showToast, user }) {
+  // 반응형: 720px 이하에서 명세 표를 카드형으로 전환(디자인 시스템 §5 "모바일에선 카드형").
+  const isMobile = useIsMobile(720);
   const [monthFilter, setMonthFilter] = useState(TODAY.slice(0, 7));
   const [generating, setGenerating] = useState(false);
   // 정산 이의신청 검토 (백로그 #1, additive) — 이의 목록·검토 모달·처리 메모
@@ -3347,10 +3349,30 @@ function CoordSettlements({ state, dispatch, showToast, user }) {
             style={{ width: 150 }} />
         }
       >
-        <div style={{ padding: '11px 20px', borderBottom: `1px solid ${C.line}`, display: 'grid', gridTemplateColumns: '1fr 84px 84px 130px 120px 92px', gap: 12, fontSize: 11.5, color: C.navMute, fontWeight: 700, background: C.lineSoft }}>
-          <div>참여자</div><div>활동</div><div>시간</div><div style={{ textAlign: 'right' }}>금액</div><div>지급 방법</div><div style={{ textAlign: 'right' }}>상태</div>
-        </div>
+        {!isMobile && (
+          <div style={{ padding: '11px 20px', borderBottom: `1px solid ${C.line}`, display: 'grid', gridTemplateColumns: '1fr 84px 84px 130px 120px 92px', gap: 12, fontSize: 11.5, color: C.navMute, fontWeight: 700, background: C.lineSoft }}>
+            <div>참여자</div><div>활동</div><div>시간</div><div style={{ textAlign: 'right' }}>금액</div><div>지급 방법</div><div style={{ textAlign: 'right' }}>상태</div>
+          </div>
+        )}
         {calculatedSettlements.length === 0 ? <Empty icon={<Wallet size={28} />} title="이번 달 산정 대상이 없습니다" sub="활동이 승인되면 매월 정산 대상에 자동으로 포함됩니다" /> : calculatedSettlements.map((calc, i) => (
+          isMobile ? (
+            /* 모바일 카드형 행 — 6열 고정 그리드는 좁은 화면에서 잘리므로 카드 문법으로 전환 */
+            <div key={calc.participant.id} style={{ padding: '16px 18px', borderTop: i === 0 ? 'none' : `1px solid ${C.lineSoft}` }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <Avatar type={calc.participant?.type} gender={calc.participant?.gender} name={calc.participant.name} size={36} color={PERSONA[calc.participant.type]?.color || C.brand} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 14.5, fontWeight: 700, color: C.headline, letterSpacing: '-0.02em' }}>{calc.participant.name}</div>
+                  <div style={{ fontSize: 12, color: C.muteLight, fontWeight: 500 }}>{PERSONA[calc.participant.type]?.label} · {calc.participant.type === 'youth' ? '계좌이체' : '온누리상품권'}</div>
+                </div>
+                {(calc.existing?.status === 'issued' || calc.existing?.status === 'paid') ? <Badge color={C.success} soft={C.successSoft} size="sm">발급 완료</Badge> :
+                  <Button variant="brand" size="sm" onClick={() => { issueOne(calc); showToast({ type: 'success', message: `${calc.participant.name}님께 발급되었습니다.` }); }}>발급</Button>}
+              </div>
+              <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginTop: 12, paddingTop: 10, borderTop: `1px dashed ${C.lineSoft}` }}>
+                <span style={{ fontSize: 12.5, color: C.inkSoft, fontVariantNumeric: 'tabular-nums' }}>활동 {calc.count}회 · {calc.hours}시간</span>
+                <span style={{ fontSize: 17, fontWeight: 800, color: C.headline, letterSpacing: '-0.02em', fontVariantNumeric: 'tabular-nums' }}>{krw(calc.amount)}</span>
+              </div>
+            </div>
+          ) : (
           <div
             key={calc.participant.id}
             onMouseEnter={(e) => (e.currentTarget.style.background = C.hover)}
@@ -3373,6 +3395,7 @@ function CoordSettlements({ state, dispatch, showToast, user }) {
                 <Button variant="brand" size="sm" onClick={() => { issueOne(calc); showToast({ type: 'success', message: `${calc.participant.name}님께 발급되었습니다.` }); }}>발급</Button>}
             </div>
           </div>
+          )
         ))}
       </Panel>
 
