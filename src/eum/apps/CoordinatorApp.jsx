@@ -3,7 +3,7 @@
 //   값·로직은 EumApp.jsx 원본과 100% 동일(이동만). 상태·리듀서는 EumApp에 유지.
 // ============================================================================
 import { useMemo, useState } from 'react';
-import { Activity, AlertCircle, AlertTriangle, ArrowRight, Award, Bell, Calendar, Camera, Check, CheckCircle2, ChevronRight, ClipboardCheck, Clock, FileText, GraduationCap, Hash, Heart, Info, Loader2, Phone, Printer, Send, ShieldAlert, ShieldCheck, Smile, Sparkles, Star, Trash2, TrendingUp, UserPlus, Users, Wallet, X } from 'lucide-react';
+import { Activity, AlertCircle, AlertTriangle, ArrowRight, Award, Bell, Calendar, Camera, Check, CheckCircle2, ChevronRight, ClipboardCheck, Clock, Download, FileText, GraduationCap, Hash, Heart, Info, Loader2, Phone, Printer, Search, Send, ShieldAlert, ShieldCheck, Smile, Sparkles, Star, Trash2, TrendingUp, UserPlus, Users, Wallet, X } from 'lucide-react';
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { C, FONT_STACK, PERSONA, SERIF_STACK, SHADOW } from '../theme.js';
 import { TODAY, fmtDate, krw, uid } from '../utils.js';
@@ -1911,21 +1911,34 @@ function CoordRoadmap() {
   );
 }
 
+// --- 실적 집계·검색 (백로그 #3, additive) — 월/분기 토글 · CSV 다운로드 · 참여자 통합 검색 ---
+const REPORT_QUARTERS = [
+  { value: '2027-Q2', label: '2027년 2분기', months: ['2027-04', '2027-05', '2027-06'] },
+  { value: '2027-Q3', label: '2027년 3분기', months: ['2027-07', '2027-08', '2027-09'] },
+];
+
 function CoordReports({ state, dispatch, showToast }) {
   const [period, setPeriod] = useState('2027-06'); // 데이터가 풍부한 직전 달 기본 표시
+  const [mode, setMode] = useState('month'); // 'month' | 'quarter' — 월/분기 토글 (백로그 #3, additive)
+  const [quarter, setQuarter] = useState('2027-Q2');
+  const months = mode === 'quarter' ? (REPORT_QUARTERS.find(qt => qt.value === quarter)?.months || []) : [period];
+  const monthsKey = months.join(',');
+  const periodLabel = mode === 'quarter' ? (REPORT_QUARTERS.find(qt => qt.value === quarter)?.label || quarter) : period + '월';
   const [aiSummary, setAiSummary] = useState(null);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState(null);
 
   const stats = useMemo(() => {
-    const monthLogs = state.activity_logs.filter(l => (l.date || '').startsWith(period));
+    // 월/분기 공용 순수 집계 — months(대상 월 배열)에 대해 동일 로직 (월 1개 = 기존 월간과 동일 결과)
+    const inMonths = (v) => months.some(m => (v || '').startsWith(m));
+    const monthLogs = state.activity_logs.filter(l => inMonths(l.date));
     const approvedLogs = monthLogs.filter(l => l.approved);
     const activeMatches = state.matches.filter(m => m.status === 'active').length;
     const totalHours = approvedLogs.reduce((s, l) => s + l.hours, 0);
-    const settlements = state.settlements.filter(s => s.period === period && (s.status === 'issued' || s.status === 'paid'));
+    const settlements = state.settlements.filter(s => months.includes(s.period) && (s.status === 'issued' || s.status === 'paid'));
     const settlementAmount = settlements.reduce((s, x) => s + x.amount, 0);
-    const incidents = state.safety_incidents.filter(i => i.reported_at?.startsWith(period));
-    const surveys = state.surveys?.filter(sv => sv.month === period) || [];
+    const incidents = state.safety_incidents.filter(i => inMonths(i.reported_at));
+    const surveys = state.surveys?.filter(sv => months.includes(sv.month)) || [];
     const avgScore = surveys.length ? (surveys.reduce((s, x) => s + (x.satisfaction || 0), 0) / surveys.length).toFixed(1) : 'N/A';
     const matchHours = {};
     approvedLogs.forEach(l => {
@@ -1933,7 +1946,43 @@ function CoordReports({ state, dispatch, showToast }) {
       if (act) matchHours[act.match_id] = (matchHours[act.match_id] || 0) + l.hours;
     });
     return { monthLogs, approvedLogs, activeMatches, totalHours, settlements, settlementAmount, incidents, surveys, avgScore, matchHours };
-  }, [state, period]);
+  }, [state, monthsKey]);
+
+  // CSV 다운로드 (백로그 #3) — 집계 결과를 클라이언트 Blob으로 생성(외부 전송 없음), 엑셀 한글 호환 BOM 포함
+  const downloadCsv = () => {
+    const esc = (v) => { const t = String(v ?? ''); return /[",\r\n]/.test(t) ? '"' + t.replace(/"/g, '""') + '"' : t; };
+    const nameOf = (id) => state.participants.find(p => p.id === id)?.name || '';
+    const rows = [
+      ['이음 실적 보고서'],
+      ['집계 기간', periodLabel],
+      ['발행일', fmtDate(TODAY)],
+      [],
+      ['구분', '값'],
+      ['활성 매칭(건)', stats.activeMatches],
+      ['승인 활동(회)', stats.approvedLogs.length],
+      ['활동시간(시간)', stats.totalHours],
+      ['정산 지급(원)', stats.settlementAmount],
+      ['정산 건수(건)', stats.settlements.length],
+      ['안전 이슈(건)', stats.incidents.length],
+      ['안전 이슈 해결(건)', stats.incidents.filter(i => i.status === 'resolved').length],
+      ['만족도 평균(점)', stats.avgScore],
+      ['설문 응답(건)', stats.surveys.length],
+      [],
+      ['매칭', '청년', '어르신', '아동', '승인 활동시간(시간)'],
+      ...Object.entries(stats.matchHours).map(([mid, h]) => {
+        const m = state.matches.find(mm => mm.id === mid);
+        return [mid.toUpperCase(), nameOf(m?.youth_id), nameOf(m?.senior_id), nameOf(m?.child_id), h];
+      }),
+    ];
+    const csv = '\uFEFF' + rows.map(r => r.map(esc).join(',')).join('\r\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `이음_실적_${mode === 'quarter' ? quarter : period}.csv`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    showToast({ type: 'success', message: `실적 CSV 다운로드 완료 — ${periodLabel}` });
+  };
 
   const generateAiSummary = async () => {
     setAiLoading(true);
@@ -1954,7 +2003,7 @@ function CoordReports({ state, dispatch, showToast }) {
     try {
       const text = await callClaude({
         system: '당신은 광산구 3세대 상생 품앗이 프로그램 "이음"의 월간 리포트 작성을 돕는 AI입니다. 따뜻하지만 구조적이고 객관적인 한국어로 작성하며, 정량 지표와 정성적 변화를 균형 있게 다룹니다.',
-        user: `${period}월 이음 프로그램 활동 데이터입니다.
+        user: `${periodLabel} 이음 프로그램 활동 데이터입니다.
 
 [핵심 지표]
 - 활성 매칭: ${stats.activeMatches}건
@@ -1984,7 +2033,7 @@ JSON 형식으로만 답변:
       console.error(e);
       // Fallback summary
       setAiSummary({
-        highlights: `${period}월 동안 ${stats.activeMatches}개 트리오에서 총 ${stats.totalHours}시간의 활동이 이루어졌습니다. ${stats.approvedLogs.length}회의 활동이 승인되었으며, 만족도 평균 ${stats.avgScore}점을 기록했습니다.`,
+        highlights: `${periodLabel} 동안 ${stats.activeMatches}개 트리오에서 총 ${stats.totalHours}시간의 활동이 이루어졌습니다. ${stats.approvedLogs.length}회의 활동이 승인되었으며, 만족도 평균 ${stats.avgScore}점을 기록했습니다.`,
         matches: `각 트리오는 격주 단위로 안정적으로 만남을 이어가고 있으며, 청년의 디지털·학습 지원과 어르신의 돌봄 손길이 양육가정 자녀에게 함께 전달되고 있습니다.`,
         operations: `정산 ${krw(stats.settlementAmount)}이 지급 완료되었으며, ${stats.incidents.length}건의 안전 이슈 중 ${stats.incidents.filter(i => i.status === 'resolved').length}건이 해결되었습니다.`,
         next_actions: `검토 대기 중인 신청자 검증을 우선 처리하고, 매칭별 1차 6개월 평가를 준비할 시기입니다.`,
@@ -1998,12 +2047,24 @@ JSON 형식으로만 답변:
 
   return (
     <>
-      <PageHeader title="월간 리포트"
-        subtitle="활동 데이터를 종합한 운영 리포트"
+      <PageHeader title={mode === 'quarter' ? '분기 리포트' : '월간 리포트'}
+        subtitle="활동 데이터를 월·분기로 집계한 운영 리포트"
         right={<span className="eum-noprint" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-          <Select value={period} onChange={setPeriod}
-            options={['2027-05', '2027-06', '2027-07'].map(m => ({ value: m, label: m + '월' }))}
-            style={{ width: 140 }} />
+          {/* 월/분기 토글 (백로그 #3) — 순수 집계 전환, 기존 월간 경로는 그대로 */}
+          <Select value={mode} onChange={setMode}
+            options={[{ value: 'month', label: '월별' }, { value: 'quarter', label: '분기별' }]}
+            style={{ width: 104 }} />
+          {mode === 'month' ? (
+            <Select value={period} onChange={setPeriod}
+              options={['2027-05', '2027-06', '2027-07'].map(m => ({ value: m, label: m + '월' }))}
+              style={{ width: 140 }} />
+          ) : (
+            <Select value={quarter} onChange={setQuarter}
+              options={REPORT_QUARTERS.map(qt => ({ value: qt.value, label: qt.label }))}
+              style={{ width: 150 }} />
+          )}
+          {/* CSV 다운로드 — 클라이언트 Blob 생성, 지자체 제출·사업계획 첨부용 */}
+          <Button variant="secondary" icon={<Download size={16} />} onClick={downloadCsv}>CSV</Button>
           {/* 인쇄·PDF — 지자체 제출용 지면 산출. window.print()만 호출(순수 표현), 브라우저 '대상: PDF 저장'으로 파일화 */}
           <Button variant="secondary" icon={<Printer size={16} />} onClick={() => window.print()}>인쇄 · PDF</Button>
           <Button variant="brand" icon={<Sparkles size={16} />} onClick={generateAiSummary} disabled={aiLoading}>{aiLoading ? '생성 중…' : 'AI 요약 생성'}</Button>
@@ -2013,7 +2074,7 @@ JSON 형식으로만 답변:
       <div className="eum-printonly" style={{ display: 'none' }}>
         <div style={{ borderBottom: `2.5px solid ${C.brand}`, paddingBottom: 14, marginBottom: 20 }}>
           <div style={{ fontSize: 12, fontWeight: 700, color: C.brand, letterSpacing: '0.1em', marginBottom: 6 }}>이음 — 3세대 상생 품앗이</div>
-          <div style={{ fontSize: 24, fontWeight: 800, color: C.headline, letterSpacing: '-0.03em' }}>월간 운영 리포트 · {period.split('-')[0]}년 {period.split('-')[1]}월</div>
+          <div style={{ fontSize: 24, fontWeight: 800, color: C.headline, letterSpacing: '-0.03em' }}>{mode === 'quarter' ? '분기 운영 리포트' : '월간 운영 리포트'} · {periodLabel}</div>
           <div style={{ fontSize: 12, color: C.navMute, marginTop: 6 }}>발행일 {fmtDate(TODAY)} · 광주광역시 광산구 · 담당 코디네이터</div>
         </div>
       </div>
@@ -2032,7 +2093,7 @@ JSON 형식으로만 답변:
         <Card padding={24} style={{ marginBottom: 16, borderLeft: `3px solid ${C.brand}` }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
             <Loader2 size={16} style={{ color: C.brand, animation: 'spin 1s linear infinite' }} />
-            <div style={{ fontSize: 12, fontWeight: 700, color: C.brand, letterSpacing: '0.08em' }}>월간 리포트 작성 중 · {period}</div>
+            <div style={{ fontSize: 12, fontWeight: 700, color: C.brand, letterSpacing: '0.08em' }}>리포트 작성 중 · {periodLabel}</div>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             {[0, 1, 2].map((i) => (
@@ -2051,7 +2112,7 @@ JSON 형식으로만 답변:
         <Card padding={24} style={{ marginBottom: 16, borderLeft: `3px solid ${C.brand}` }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
             <Sparkles size={16} style={{ color: C.brand }} />
-            <div style={{ fontSize: 12, fontWeight: 700, color: C.brand, letterSpacing: '0.08em' }}>AI 월간 리포트 · {period}</div>
+            <div style={{ fontSize: 12, fontWeight: 700, color: C.brand, letterSpacing: '0.08em' }}>AI 운영 리포트 · {periodLabel}</div>
             {aiSummary.fallback && <Badge color={C.amber} soft={C.amberSoft} size="sm">기본 템플릿</Badge>}
           </div>
           {aiError && (
@@ -2131,7 +2192,84 @@ JSON 형식으로만 답변:
           </div>
         </Card>
       )}
+
+      {/* 참여자 통합 검색 (백로그 #3) — 화면 조회 전용이라 인쇄 지면에서는 제외 */}
+      <div className="eum-noprint" style={{ marginTop: 18 }}>
+        <CoordParticipantSearch state={state} />
+      </div>
     </>
+  );
+}
+
+// --- 참여자 통합 검색 (백로그 #3, additive) — 이름·역할·지역 필터. 기존 SEED 조회만(신규 수집 없음) ---
+
+const SEARCH_ROLE_OPTS = [
+  { value: 'all', label: '전체 역할' },
+  { value: 'youth', label: '청년' },
+  { value: 'senior', label: '어르신' },
+  { value: 'parent', label: '보호자' },
+  { value: 'child', label: '아동' },
+];
+const SEARCH_STATUS_LABEL = { active: '활동 중', verifying: '검증 중', pending: '검토 대기' };
+
+function CoordParticipantSearch({ state }) {
+  const [q, setQ] = useState('');
+  const [role, setRole] = useState('all');
+  const [region, setRegion] = useState('all');
+  const regions = useMemo(() => {
+    const set = new Set();
+    state.participants.forEach(p => { const m = (p.address || '').match(/([가-힣]+동)/); if (m) set.add(m[1]); });
+    return Array.from(set).sort();
+  }, [state.participants]);
+  const results = useMemo(() => {
+    const kw = q.trim().toLowerCase();
+    return state.participants.filter(p => {
+      if (role !== 'all' && p.type !== role) return false;
+      if (region !== 'all' && !(p.address || '').includes(region)) return false;
+      if (!kw) return true;
+      const hay = [p.name, p.occupation, ...(p.skills || []), ...(p.interests || [])].join(' ').toLowerCase();
+      return hay.includes(kw);
+    });
+  }, [state.participants, q, role, region]);
+  return (
+    <Card padding={22}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
+        <Search size={16} style={{ color: C.brand }} aria-hidden="true" />
+        <span style={{ fontSize: 14, fontWeight: 700, color: C.ink }}>참여자 통합 검색</span>
+        <span style={{ fontSize: 11.5, color: C.mute }}>이름·직업·기술·관심사 검색과 역할·지역 필터</span>
+      </div>
+      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 12 }}>
+        <SearchBar value={q} onChange={setQ} placeholder="이름·직업·기술·관심사 검색…" style={{ flex: '1 1 220px', minWidth: 200 }} />
+        <Select value={role} onChange={setRole} options={SEARCH_ROLE_OPTS} style={{ width: 128 }} />
+        <Select value={region} onChange={setRegion}
+          options={[{ value: 'all', label: '전체 지역' }, ...regions.map(r => ({ value: r, label: r }))]}
+          style={{ width: 128 }} />
+      </div>
+      <div style={{ fontSize: 12, color: C.mute, marginBottom: 10 }} aria-live="polite">{results.length}명 조회됨</div>
+      {results.length === 0 ? (
+        <Empty icon={<Users size={26} />} title="조건에 맞는 참여자가 없습니다" sub="검색어나 필터를 조정해 보세요" />
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {results.map(p => (
+            <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px', background: C.lineSoft, borderRadius: 10, flexWrap: 'wrap' }}>
+              <Avatar type={p.type} gender={p.gender} name={p.name} size={30} color={PERSONA[p.type]?.color || C.brand} />
+              <div style={{ minWidth: 130 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: C.ink }}>{p.name}</span>
+                  <Badge color={PERSONA[p.type]?.color || C.brand} soft={PERSONA[p.type]?.soft || C.lineSoft} size="sm">{PERSONA[p.type]?.label || p.type}</Badge>
+                </div>
+                <div style={{ fontSize: 11.5, color: C.mute, marginTop: 2 }}>{p.age}세 · {p.occupation || '—'}</div>
+              </div>
+              <div style={{ flex: '1 1 160px', minWidth: 140, fontSize: 11.5, color: C.inkSoft }}>{p.address}</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                <Badge color={p.status === 'active' ? C.success : C.amber} soft={p.status === 'active' ? C.successSoft : C.amberSoft} size="sm">{SEARCH_STATUS_LABEL[p.status] || p.status}</Badge>
+                <span style={{ fontSize: 11, color: C.mute }}>가입 {fmtDate(p.joined_at)}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </Card>
   );
 }
 
