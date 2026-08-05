@@ -6,7 +6,7 @@ import {
   GraduationCap, Camera, Phone, Send, Trash2, Download, ArrowRight, Star,
   TrendingUp, Loader2, CheckCircle2, AlertCircle, Menu, Smile, Activity,
   ClipboardCheck, Wallet, ShieldAlert, Info, ChevronUp, UserPlus, PenLine,
-  Hash, BellOff, WifiOff
+  Hash, BellOff, WifiOff, Printer
 } from 'lucide-react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -3756,12 +3756,23 @@ JSON 형식으로만 답변:
     <>
       <PageHeader title="월간 리포트"
         subtitle="활동 데이터를 종합한 운영 리포트"
-        right={<>
+        right={<span className="eum-noprint" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
           <Select value={period} onChange={setPeriod}
             options={['2027-05', '2027-06', '2027-07'].map(m => ({ value: m, label: m + '월' }))}
             style={{ width: 140 }} />
+          {/* 인쇄·PDF — 지자체 제출용 지면 산출. window.print()만 호출(순수 표현), 브라우저 '대상: PDF 저장'으로 파일화 */}
+          <Button variant="secondary" icon={<Printer size={16} />} onClick={() => window.print()}>인쇄 · PDF</Button>
           <Button variant="brand" icon={<Sparkles size={16} />} onClick={generateAiSummary} disabled={aiLoading}>{aiLoading ? '생성 중…' : 'AI 요약 생성'}</Button>
-        </>} />
+        </span>} />
+
+      {/* 인쇄 전용 레터헤드 — 화면에는 숨김(.eum-printonly). 제출 지면의 첫인상: 발행 주체·기간·발행일 명기 */}
+      <div className="eum-printonly" style={{ display: 'none' }}>
+        <div style={{ borderBottom: `2.5px solid ${C.brand}`, paddingBottom: 14, marginBottom: 20 }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: C.brand, letterSpacing: '0.1em', marginBottom: 6 }}>이음 — 3세대 상생 품앗이</div>
+          <div style={{ fontSize: 24, fontWeight: 800, color: C.headline, letterSpacing: '-0.03em' }}>월간 운영 리포트 · {period.split('-')[0]}년 {period.split('-')[1]}월</div>
+          <div style={{ fontSize: 12, color: C.navMute, marginTop: 6 }}>발행일 {fmtDate(TODAY)} · 광주광역시 광산구 · 담당 코디네이터</div>
+        </div>
+      </div>
 
       <KpiStrip
         style={{ marginBottom: 16 }}
@@ -3856,7 +3867,8 @@ JSON 형식으로만 답변:
       {stats.surveys.length > 0 && (
         <Card padding={22}>
           <div style={{ fontSize: 14, fontWeight: 700, color: C.ink, marginBottom: 14 }}>이달의 만족도 응답</div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+          {/* 640px 이하 1열 스택(.eum-survey-grid) — 모바일에서 인용문 글줄 부러짐 해소 */}
+          <div className="eum-survey-grid">
             {stats.surveys.slice(0, 6).map(sv => {
               const p = state.participants.find(pp => pp.id === sv.participant_id);
               return (
@@ -4507,12 +4519,19 @@ function App() {
         /* Firefox 스크롤바 — webkit과 톤 일관 */
         html { scrollbar-width: thin; scrollbar-color: ${C.border} transparent; }
         @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; } html { scroll-behavior: auto; } }
+        /* 만족도 응답 그리드 — 데스크톱 2열, 640px 이하 1열(모바일 인용문 가독) */
+        .eum-survey-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        @media (max-width: 640px) { .eum-survey-grid { grid-template-columns: 1fr; } }
         /* 인쇄 — 리포트·정산 등 지면 제출용. 내비·FAB·토스트 등 화면 크롬을 숨기고 본문만 흰 배경으로 */
         @media print {
+          @page { margin: 16mm 14mm; }
           .eum-noprint, .eum-skip { display: none !important; }
+          .eum-printonly { display: block !important; }
           body { background: #fff !important; }
           #eum-main { animation: none !important; }
           * { box-shadow: none !important; }
+          /* 카드가 페이지 경계에서 두 동강 나지 않게 */
+          #eum-main > div { break-inside: avoid; }
         }
       `}</style>
 
