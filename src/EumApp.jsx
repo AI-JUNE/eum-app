@@ -540,6 +540,7 @@ function CoordinatorApp({ state, user, dispatch, showToast }) {
       {view === 'matching' && <CoordMatching state={state} dispatch={dispatch} showToast={showToast} user={user} />}
       {view === 'activities' && <CoordActivities state={state} dispatch={dispatch} showToast={showToast} user={user} />}
       {view === 'settlements' && <CoordSettlements state={state} dispatch={dispatch} showToast={showToast} user={user} />}
+      {view === 'notices' && <CoordNotices state={state} dispatch={dispatch} showToast={showToast} user={user} />}
       {view === 'safety' && <CoordSafety state={state} dispatch={dispatch} showToast={showToast} user={user} />}
       {view === 'reports' && <CoordReports state={state} dispatch={dispatch} showToast={showToast} />}
       {view === 'b2g' && <CoordB2G state={state} showToast={showToast} />}
@@ -3878,6 +3879,188 @@ JSON 형식으로만 답변:
   );
 }
 
+// --- 11.x 공지 발송 (백로그 #2, additive) — 채널 선택·수신자별 전달 결과·미전달 재발송 (데모 시뮬레이션, 실채널 연동 아님) ---
+
+const NOTICE_CHANNELS = [
+  { id: 'kakao', label: '카카오 알림톡' },
+  { id: 'sms', label: '문자(SMS)' },
+  { id: 'app', label: '앱 알림' },
+];
+const NOTICE_AUDIENCES = [
+  { value: 'all', label: '전체 (청년·어르신·보호자)' },
+  { value: 'youth', label: '청년' },
+  { value: 'senior', label: '어르신' },
+  { value: 'parent', label: '보호자' },
+];
+const noticeChannelLabel = (id) => NOTICE_CHANNELS.find(c => c.id === id)?.label || id;
+const noticeAudienceLabel = (v) => NOTICE_AUDIENCES.find(a => a.value === v)?.label || v;
+
+function CoordNotices({ state, dispatch, showToast, user }) {
+  const [title, setTitle] = useState('');
+  const [body, setBody] = useState('');
+  const [channels, setChannels] = useState(['kakao']);
+  const [audience, setAudience] = useState('all');
+  const [sending, setSending] = useState(false);
+  const [resendingId, setResendingId] = useState(null);
+  const [expandedId, setExpandedId] = useState(null);
+
+  const notices = state.notices || [];
+  const pById = useMemo(() => { const m = {}; state.participants.forEach(p => { m[p.id] = p; }); return m; }, [state.participants]);
+  const recipientsFor = (aud) => state.participants.filter(p =>
+    p.type !== 'child' && p.status === 'active' && (aud === 'all' || p.type === aud));
+
+  const toggleChannel = (id) => setChannels(prev => prev.includes(id) ? prev.filter(c => c !== id) : [...prev, id]);
+  const nowStamp = () => new Date().toISOString().slice(0, 16).replace('T', ' ');
+
+  const send = async () => {
+    if (!title.trim() || !body.trim()) { showToast({ type: 'error', message: '제목과 내용을 입력해주세요.' }); return; }
+    if (channels.length === 0) { showToast({ type: 'error', message: '발송 채널을 1개 이상 선택해주세요.' }); return; }
+    const recips = recipientsFor(audience);
+    if (recips.length === 0) { showToast({ type: 'error', message: '발송 대상이 없습니다.' }); return; }
+    setSending(true);
+    await new Promise(r => setTimeout(r, 700)); // 발송 시뮬레이션 지연
+    const at = nowStamp();
+    const delivery = recips.map((p, i) => ({
+      participant_id: p.id,
+      channel: channels[i % channels.length],
+      status: Math.random() < 0.85 ? 'delivered' : 'failed', // 데모: 일부 미전달 시뮬레이션
+      at,
+    }));
+    const payload = {
+      id: uid('n'), title: title.trim(), body: body.trim(),
+      channels: [...channels], audience, sent_at: at, sent_by: user.name || user.id,
+      resend_count: 0, last_resend_at: null, delivery,
+    };
+    dispatch({ type: 'SEND_NOTICE', payload });
+    setSending(false);
+    const failed = delivery.filter(d => d.status === 'failed').length;
+    showToast({ type: failed > 0 ? 'info' : 'success', message: `공지 발송 완료 — 전달 ${delivery.length - failed}건 · 미전달 ${failed}건 (시뮬레이션)` });
+    setTitle(''); setBody(''); setExpandedId(payload.id);
+  };
+
+  const resend = async (n) => {
+    const failed = (n.delivery || []).filter(d => d.status === 'failed');
+    if (failed.length === 0) return;
+    setResendingId(n.id);
+    await new Promise(r => setTimeout(r, 700));
+    const at = nowStamp();
+    const results = {};
+    failed.forEach(d => { results[d.participant_id] = Math.random() < 0.9 ? 'delivered' : 'failed'; });
+    dispatch({ type: 'RESEND_UNDELIVERED', payload: { id: n.id, at, results } });
+    setResendingId(null);
+    const ok = Object.values(results).filter(v => v === 'delivered').length;
+    showToast({ type: 'success', message: `미전달 ${failed.length}건 재발송 — ${ok}건 전달 완료 (시뮬레이션)` });
+  };
+
+  const totalSent = notices.reduce((sum, n) => sum + (n.delivery || []).length, 0);
+  const totalFailed = notices.reduce((sum, n) => sum + (n.delivery || []).filter(d => d.status === 'failed').length, 0);
+
+  return (
+    <>
+      <PageHeader title="공지 발송"
+        subtitle="채널(카카오 알림톡·문자·앱)을 선택해 공지를 보내고, 수신자별 전달 결과를 확인한 뒤 미전달만 재발송합니다." />
+
+      <div role="note" style={{ marginBottom: 16, padding: '10px 14px', fontSize: 12, lineHeight: 1.6, color: C.inkSoft, background: C.brandSoft, border: `1px solid ${C.border}`, borderRadius: 10 }}>
+        데모 시뮬레이션 — 실제 카카오·문자 채널로 발송되지 않으며, 전달 결과는 화면 안에서만 기록됩니다.
+      </div>
+
+      <KpiStrip
+        style={{ marginBottom: 16 }}
+        items={[
+          { label: '발송한 공지', value: String(notices.length), sub: '누적', color: C.brand, icon: <Send size={15} /> },
+          { label: '발송 시도', value: String(totalSent), sub: '수신자 × 채널', color: C.sage, icon: <Bell size={15} /> },
+          { label: '미전달', value: String(totalFailed), sub: totalFailed > 0 ? '재발송 필요' : '없음', color: totalFailed > 0 ? C.amber : C.success, icon: totalFailed > 0 ? <AlertCircle size={15} /> : <CheckCircle2 size={15} /> },
+        ]}
+      />
+
+      {/* 공지 작성 */}
+      <Card style={{ marginBottom: 16 }}>
+        <div style={{ fontSize: 14, fontWeight: 800, color: C.ink, marginBottom: 12 }}>새 공지 작성</div>
+        <Field label="제목">
+          <Input value={title} onChange={setTitle} placeholder="예) 8월 정산 발급 안내" />
+        </Field>
+        <Field label="내용">
+          <Textarea value={body} onChange={setBody} rows={4} placeholder="수신자에게 전달할 공지 내용을 입력하세요." />
+        </Field>
+        <Field label="발송 채널" sub="여러 채널을 함께 선택할 수 있어요">
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
+            {NOTICE_CHANNELS.map(ch => (
+              <Checkbox key={ch.id} checked={channels.includes(ch.id)} onChange={() => toggleChannel(ch.id)} label={ch.label} />
+            ))}
+          </div>
+        </Field>
+        <Field label="발송 대상">
+          <Select value={audience} onChange={setAudience} options={NOTICE_AUDIENCES} />
+        </Field>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 4 }}>
+          <Button variant="brand" icon={<Send size={15} />} onClick={send} disabled={sending}>{sending ? '발송 중…' : `발송 (대상 ${recipientsFor(audience).length}명)`}</Button>
+          <span style={{ fontSize: 11.5, color: C.mute }}>아동은 보호자를 통해 전달되어 발송 대상에서 제외됩니다.</span>
+        </div>
+      </Card>
+
+      {/* 발송 내역 + 전달 결과 */}
+      <div style={{ fontSize: 14, fontWeight: 800, color: C.ink, margin: '4px 0 10px' }}>발송 내역</div>
+      {notices.length === 0 && <Empty icon={<Send size={22} />} title="발송한 공지가 없습니다" sub="위에서 첫 공지를 작성해 보세요." />}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        {notices.map(n => {
+          const delv = n.delivery || [];
+          const failed = delv.filter(d => d.status === 'failed');
+          const open = expandedId === n.id;
+          return (
+            <Card key={n.id}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, flexWrap: 'wrap' }}>
+                <div style={{ flex: '1 1 240px', minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: 13.5, fontWeight: 800, color: C.ink }}>{n.title}</span>
+                    {n.channels.map(c => <Badge key={c} color={C.sage} soft={C.sageSoft}>{noticeChannelLabel(c)}</Badge>)}
+                    <Badge color={C.lavender} soft={C.lavenderSoft}>{noticeAudienceLabel(n.audience)}</Badge>
+                  </div>
+                  <div style={{ fontSize: 12, color: C.inkSoft, lineHeight: 1.6, marginTop: 6 }}>{n.body}</div>
+                  <div style={{ fontSize: 11, color: C.mute, marginTop: 6 }}>
+                    {n.sent_at} · {n.sent_by}{n.resend_count > 0 ? ` · 재발송 ${n.resend_count}회 (최근 ${n.last_resend_at})` : ''}
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                  <Badge color={C.success} soft={C.successSoft}>전달 {delv.length - failed.length}</Badge>
+                  <Badge color={failed.length > 0 ? C.amber : C.mute} soft={failed.length > 0 ? C.amberSoft : C.lineSoft}>미전달 {failed.length}</Badge>
+                  {failed.length > 0 && (
+                    <Button variant="secondary" size="sm" onClick={() => resend(n)} disabled={resendingId === n.id}>
+                      {resendingId === n.id ? '재발송 중…' : `미전달 ${failed.length}건 재발송`}
+                    </Button>
+                  )}
+                  <Button variant="ghost" size="sm" onClick={() => setExpandedId(open ? null : n.id)} aria-expanded={open}>
+                    {open ? '결과 접기' : '수신자별 결과'}
+                  </Button>
+                </div>
+              </div>
+              {open && (
+                <div style={{ marginTop: 12, borderTop: `1px solid ${C.border}`, paddingTop: 10, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  {delv.map(d => {
+                    const p = pById[d.participant_id];
+                    const ok = d.status === 'delivered';
+                    return (
+                      <div key={d.participant_id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '7px 10px', background: C.lineSoft, borderRadius: 8, flexWrap: 'wrap' }}>
+                        <Avatar type={p?.type} gender={p?.gender} name={p?.name} size={24} color={PERSONA[p?.type]?.color || C.brand} />
+                        <span style={{ fontSize: 12, fontWeight: 700, color: C.ink }}>{p?.name || d.participant_id}</span>
+                        <span style={{ fontSize: 11, color: C.mute }}>{noticeChannelLabel(d.channel)}</span>
+                        <span style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
+                          {d.resent && <span style={{ fontSize: 10.5, color: C.mute }}>재발송</span>}
+                          <Badge color={ok ? C.success : C.amber} soft={ok ? C.successSoft : C.amberSoft}>{ok ? '전달' : '미전달'}</Badge>
+                          <span style={{ fontSize: 10.5, color: C.mute }}>{d.at}</span>
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </Card>
+          );
+        })}
+      </div>
+    </>
+  );
+}
+
 // ============================================================================
 // 12. REDUCER (모든 dispatch 액션 처리)
 // ============================================================================
@@ -3978,6 +4161,26 @@ function appReducer(state, action) {
         settlements: state.settlements.map(s => (s.id === action.payload.id && s.dispute)
           ? { ...s, dispute: { ...s.dispute, status: action.payload.result, resolution: action.payload.resolution, resolved_at: action.payload.resolved_at, resolved_by: action.payload.resolved_by } }
           : s)
+      };
+    }
+    case 'SEND_NOTICE': {
+      // 공지 발송(백로그 #2, additive) — 채널·대상·수신자별 전달결과(시뮬레이션)를 포함한 공지 추가
+      return { ...state, notices: [action.payload, ...(state.notices || [])] };
+    }
+    case 'RESEND_UNDELIVERED': {
+      // 미전달 재발송(백로그 #2, additive) — 해당 공지의 미전달 수신자만 결과 갱신, 재발송 이력 기록
+      return {
+        ...state,
+        notices: (state.notices || []).map(n => n.id === action.payload.id
+          ? {
+              ...n,
+              resend_count: (n.resend_count || 0) + 1,
+              last_resend_at: action.payload.at,
+              delivery: (n.delivery || []).map(d => (d.status === 'failed' && action.payload.results[d.participant_id])
+                ? { ...d, status: action.payload.results[d.participant_id], at: action.payload.at, resent: true }
+                : d),
+            }
+          : n)
       };
     }
     case 'RESET_DATA': {

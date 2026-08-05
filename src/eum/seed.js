@@ -199,4 +199,43 @@ export const SEED_DATA = {
     { id: 'sv008', participant_id: 'p104', month: '2027-06', satisfaction: 5, would_continue: true, comment: '손주뻘 아이와 김치 담그니 사는 재미가 생겼어요.' },
     { id: 'sv009', participant_id: 'p006', month: '2027-06', satisfaction: 4, would_continue: true, comment: '어르신 인생 이야기가 진로에 큰 도움이 됐어요. 횟수가 더 늘면 좋겠어요.' },
   ],
+
+  // 공지 발송(백로그 #2, additive) — 채널별 발송·수신자별 전달 결과(데모 시뮬레이션)
+  notices: [
+    {
+      id: 'n001', title: '7월 정산·상생카드 발급 안내',
+      body: '6월 활동분 청년 활동급여와 어르신 상생카드가 7월 1일자로 발급되었습니다. 앱의 정산 화면에서 내역을 확인해 주세요. 이상이 있으면 정산 화면의 이의 신청 버튼을 이용해 주세요.',
+      channels: ['kakao', 'sms'], audience: 'all', sent_at: '2027-07-01 10:00', sent_by: '코디 한가은',
+      resend_count: 1, last_resend_at: '2027-07-01 15:30',
+      delivery: [
+        { participant_id: 'p001', channel: 'kakao', status: 'delivered', at: '2027-07-01 10:00' },
+        { participant_id: 'p002', channel: 'kakao', status: 'delivered', at: '2027-07-01 10:00' },
+        { participant_id: 'p003', channel: 'kakao', status: 'delivered', at: '2027-07-01 10:00' },
+        { participant_id: 'p004', channel: 'sms', status: 'delivered', at: '2027-07-01 15:30', resent: true },
+        { participant_id: 'p006', channel: 'kakao', status: 'delivered', at: '2027-07-01 10:00' },
+        { participant_id: 'p007', channel: 'kakao', status: 'delivered', at: '2027-07-01 10:00' },
+        { participant_id: 'p101', channel: 'kakao', status: 'delivered', at: '2027-07-01 10:00' },
+        { participant_id: 'p102', channel: 'sms', status: 'delivered', at: '2027-07-01 10:00' },
+        { participant_id: 'p103', channel: 'kakao', status: 'delivered', at: '2027-07-01 10:00' },
+        { participant_id: 'p104', channel: 'sms', status: 'delivered', at: '2027-07-01 10:00' },
+        { participant_id: 'p105', channel: 'sms', status: 'failed', at: '2027-07-01 15:30', resent: true },
+        { participant_id: 'p201', channel: 'kakao', status: 'delivered', at: '2027-07-01 10:00' },
+        { participant_id: 'p202', channel: 'kakao', status: 'delivered', at: '2027-07-01 10:00' },
+        { participant_id: 'p203', channel: 'kakao', status: 'delivered', at: '2027-07-01 10:00' },
+      ],
+    },
+    {
+      id: 'n002', title: '여름철 폭염 활동 안전 수칙',
+      body: '한낮(12~16시) 야외 활동은 피하고 실내 냉방 공간을 이용해 주세요. 활동 전 어르신 컨디션 체크리스트를 꼭 확인하고, 어지럼증 등 이상 시 즉시 활동을 중단하고 코디네이터에게 연락 바랍니다.',
+      channels: ['kakao', 'app'], audience: 'senior', sent_at: '2027-07-28 09:30', sent_by: '코디 한가은',
+      resend_count: 0, last_resend_at: null,
+      delivery: [
+        { participant_id: 'p101', channel: 'kakao', status: 'delivered', at: '2027-07-28 09:30' },
+        { participant_id: 'p102', channel: 'app', status: 'delivered', at: '2027-07-28 09:30' },
+        { participant_id: 'p103', channel: 'kakao', status: 'delivered', at: '2027-07-28 09:30' },
+        { participant_id: 'p104', channel: 'kakao', status: 'failed', at: '2027-07-28 09:30' },
+        { participant_id: 'p105', channel: 'app', status: 'failed', at: '2027-07-28 09:30' },
+      ],
+    },
+  ],
 };

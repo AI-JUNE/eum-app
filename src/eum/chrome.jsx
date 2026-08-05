@@ -234,6 +234,7 @@ function Sidebar({ role, currentView, onNavigate, onLogout, userName, dataCount 
       { id: 'activities', label: '활동 승인', icon: <ClipboardCheck size={17} />, count: dataCount?.pendingLogs, group: '운영' },
       { id: 'settlements', label: '정산', icon: <Wallet size={17} />, group: '운영' },
       { id: 'safety', label: '안전 이슈', icon: <ShieldAlert size={17} />, count: dataCount?.openIncidents, danger: dataCount?.openIncidents > 0, group: '운영' },
+      { id: 'notices', label: '공지 발송', icon: <Send size={17} />, group: '운영' },
       { id: 'reports', label: '리포트', icon: <FileText size={17} />, group: '성과·납품' },
       { id: 'b2g', label: '공공 성과·납품', icon: <TrendingUp size={17} />, group: '성과·납품' },
       { id: 'b2b', label: '기업·기관 복지', icon: <Award size={17} />, group: '성과·납품' },

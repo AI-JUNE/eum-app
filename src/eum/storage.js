@@ -83,7 +83,7 @@ export function normalizeState(s) {
     }
   });
   const mergedVerifs = [...baseVerifs, ...stepVerifs];
-  return { ...s, activities, activity_logs, participants, settlements, applications: synthApps, verifications: mergedVerifs };
+  return { ...s, activities, activity_logs, participants, settlements, applications: synthApps, verifications: mergedVerifs, notices: s.notices || [] };
 }
 
 export async function loadState() {
