@@ -400,6 +400,24 @@ const PARTICIPANT_NAV = {
 };
 
 // 소비자(참여자) 셸 — 상단 앱바 + 하단 탭, 따뜻한 캔버스 (관리자 콘솔과 구분)
+// 화면 전환 스크린리더 안내 — SPA는 화면(view)이 바뀌어도 브라우저 내비게이션 이벤트가
+// 없어 스크린리더가 침묵한다. 시각적으로 숨긴 aria-live(polite) 영역이 새 화면 이름을
+// 읽어 주어 "지금 어느 화면인지"를 비시각 사용자에게도 전달한다. 최초 진입은 침묵
+// (불필요한 소음 방지), 이후 전환만 안내. 순수 표현 — 리듀서/SEED/로직 무관.
+function ViewAnnouncer({ label }) {
+  const [msg, setMsg] = useState('');
+  const firstRef = useRef(true);
+  useEffect(() => {
+    if (firstRef.current) { firstRef.current = false; return; }
+    if (label) setMsg(label + ' 화면');
+  }, [label]);
+  return (
+    <div aria-live="polite" role="status" style={{ position: 'absolute', width: 1, height: 1, margin: -1, padding: 0, overflow: 'hidden', clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap', border: 0 }}>
+      {msg}
+    </div>
+  );
+}
+
 function ConsumerLayout({ role, view, setView, user, dispatch, state, children }) {
   const persona = PERSONA[role] || PERSONA.youth;
   const isSenior = role === 'senior';
@@ -432,6 +450,7 @@ function ConsumerLayout({ role, view, setView, user, dispatch, state, children }
         ...surface,
         ...(isNarrow ? { minHeight: '100vh' } : {}),
       }}>
+        <ViewAnnouncer label={(items.find((it) => it.id === view) || {}).label} />
         {/* 상단 앱바 — 정체(누구로 접속했는지)와 이탈(나가기)만 남긴다 */}
         <div className="eum-noprint" style={{
           position: 'sticky', top: 0, zIndex: 50,
@@ -531,6 +550,7 @@ function Layout({ role, view, setView, user, dispatch, children, state }) {
   if (isMobile) {
     return (
       <div style={{ minHeight: '100vh', background: C.bg, fontFamily: FONT_STACK, color: C.ink }}>
+        <ViewAnnouncer label={COORD_VIEW_LABEL[view]} />
         {/* 모바일 상단바 */}
         <div className="eum-noprint" style={{ position: 'sticky', top: 0, zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '11px 16px', background: 'rgba(250,247,242,0.92)', backdropFilter: 'blur(12px)', borderBottom: `1px solid ${C.borderSoft}` }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -560,6 +580,7 @@ function Layout({ role, view, setView, user, dispatch, children, state }) {
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: C.appBg, fontFamily: FONT_STACK, color: C.ink }}>
+      <ViewAnnouncer label={crumb} />
       <Sidebar role={role} currentView={view} onNavigate={setView} onLogout={handleLogout} userName={user?.name} dataCount={dataCount} />
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', overflowX: 'hidden' }}>
         {/* 상단바 — 브레드크럼 + 알림. 사이드바와 같은 64px 높이로 시각적 기준선을 맞춘다. */}
