@@ -90,11 +90,11 @@ function ParentDashboard({ user, myChildren, myMatches, todayActivities, upcomin
           </div>
           <div style={{ display: 'flex', gap: 12, marginTop: 20, paddingTop: 18, borderTop: `1px solid ${C.lineSoft}` }}>
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 11.5, color: C.navMute, fontWeight: 600, marginBottom: 5 }}>이번 달 활동시간</div>
+              <div style={{ fontSize: 13, color: C.navMute, fontWeight: 600, marginBottom: 5 }}>이번 달 활동시간</div>
               <div style={{ fontSize: 22, fontWeight: 800, color: C.headline, letterSpacing: '-0.03em', fontVariantNumeric: 'tabular-nums' }}>{totalHoursThisMonth}시간</div>
             </div>
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 11.5, color: C.navMute, fontWeight: 600, marginBottom: 5 }}>매칭 시작</div>
+              <div style={{ fontSize: 13, color: C.navMute, fontWeight: 600, marginBottom: 5 }}>매칭 시작</div>
               <div style={{ fontSize: 22, fontWeight: 800, color: C.headline, letterSpacing: '-0.03em', fontVariantNumeric: 'tabular-nums' }}>{fmtDate(match.started_at)}</div>
             </div>
           </div>
@@ -121,7 +121,7 @@ function ParentDashboard({ user, myChildren, myMatches, todayActivities, upcomin
                       <div style={{ fontWeight: 700, fontSize: 14, color: C.ink }}>{act.title}</div>
                       <Badge color={C.sage} soft={C.sageSoft}>{act.type}</Badge>
                     </div>
-                    <div style={{ display: 'flex', gap: 14, fontSize: 12, color: C.inkSoft }}>
+                    <div style={{ display: 'flex', gap: 14, fontSize: 13, color: C.inkSoft }}>
                       <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Clock size={11} /> {act.time || ''}</span>
                       <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><MapPin size={11} /> {act.location}</span>
                       <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Users size={11} /> {y?.name}</span>
@@ -141,13 +141,13 @@ function ParentDashboard({ user, myChildren, myMatches, todayActivities, upcomin
           {openIssues > 0 ? (
             <>
               <div style={{ fontSize: 28, fontWeight: 800, color: C.red, fontFamily: SERIF_STACK }}>{openIssues}건</div>
-              <div style={{ fontSize: 12, color: C.red, marginTop: 4 }}>처리 중인 안전 이슈가 있습니다.</div>
+              <div style={{ fontSize: 13, color: C.red, marginTop: 4 }}>처리 중인 안전 이슈가 있습니다.</div>
               <Button variant="secondary" size="sm" fullWidth style={{ marginTop: 14 }} onClick={() => setView('safety')}>자세히 보기</Button>
             </>
           ) : (
             <>
               <div style={{ fontSize: 28, fontWeight: 800, color: C.success, fontFamily: SERIF_STACK }}>안전</div>
-              <div style={{ fontSize: 12, color: C.inkSoft, marginTop: 4 }}>모든 활동이 정상 진행 중입니다.</div>
+              <div style={{ fontSize: 13, color: C.inkSoft, marginTop: 4 }}>모든 활동이 정상 진행 중입니다.</div>
               <Button variant="ghost" size="sm" fullWidth style={{ marginTop: 14 }} onClick={() => setView('safety')} icon={<Phone size={14} />}>긴급 연락처</Button>
             </>
           )}
@@ -166,13 +166,13 @@ function ParentDashboard({ user, myChildren, myMatches, todayActivities, upcomin
               const y = state.participants.find(p => p.id === m?.youth_id);
               return (
                 <div key={act.id} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '10px 12px', borderRadius: 8, background: C.bg }}>
-                  <div style={{ minWidth: 64, textAlign: 'center', padding: '6px 8px', background: C.card, borderRadius: 6, border: `1px solid ${C.borderSoft}` }}>
-                    <div style={{ fontSize: 10, color: C.mute, fontWeight: 600 }}>{fmtRelativeDate(act.date)}</div>
+                  <div style={{ minWidth: 72, textAlign: 'center', padding: '6px 8px', background: C.card, borderRadius: 6, border: `1px solid ${C.borderSoft}` }}>
+                    <div style={{ fontSize: 12.5, color: C.mute, fontWeight: 600 }}>{fmtRelativeDate(act.date)}</div>
                     <div style={{ fontSize: 14, fontWeight: 700, color: C.ink, marginTop: 1 }}>{(act.time || '').slice(0, 5)}</div>
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: 13, fontWeight: 600, color: C.ink, marginBottom: 2 }}>{act.title}</div>
-                    <div style={{ fontSize: 11, color: C.inkSoft }}>{act.location} · {y?.name}</div>
+                    <div style={{ fontSize: 13, color: C.inkSoft }}>{act.location} · {y?.name}</div>
                   </div>
                   <Badge color={C.sage} soft={C.sageSoft} size="sm">{act.type}</Badge>
                 </div>
@@ -198,7 +198,7 @@ function ParentDashboard({ user, myChildren, myMatches, todayActivities, upcomin
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                       <span style={{ fontSize: 13, fontWeight: 700, color: C.ink }}>{author?.name}</span>
-                      <span style={{ fontSize: 11, color: C.mute }}>· {fmtDate(log.date)} · {act?.title}</span>
+                      <span style={{ fontSize: 12.5, color: C.mute }}>· {fmtDate(log.date)} · {act?.title}</span>
                       {log.approved && <Badge color={C.success} soft={C.successSoft} size="sm">승인</Badge>}
                     </div>
                     <div style={{ fontSize: 13, color: C.inkSoft, lineHeight: 1.5 }}>{log.summary}</div>
@@ -250,14 +250,14 @@ function ActivityCard({ activity, state }) {
         <div style={{ fontWeight: 700, fontSize: 14, color: C.headline, letterSpacing: '-0.02em' }}>{activity.title}</div>
         <Badge color={C.sage} soft={C.sageSoft} size="sm">{activity.type}</Badge>
       </div>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, fontSize: 12, color: C.navMute, marginBottom: 12, fontWeight: 500 }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, fontSize: 13, color: C.navMute, marginBottom: 12, fontWeight: 500 }}>
         <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Calendar size={12} style={{ color: C.muteLight }} /> {fmtRelativeDate(activity.date)} {(activity.time || '').slice(0, 5)}</span>
         <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><MapPin size={12} style={{ color: C.muteLight }} /> {activity.location}</span>
         <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Clock size={12} style={{ color: C.muteLight }} /> {activity.duration_hours}시간</span>
       </div>
       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
         {[y, s, c].filter(Boolean).map(p => (
-          <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 10px 4px 5px', background: C.lineSoft, borderRadius: 999, fontSize: 11.5, color: C.inkSoft, fontWeight: 600 }}>
+          <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 10px 4px 5px', background: C.lineSoft, borderRadius: 999, fontSize: 13, color: C.inkSoft, fontWeight: 600 }}>
             <Avatar type={p?.type} gender={p?.gender} name={p.name} size={18} color={PERSONA[p.type]?.color || C.brand} />
             {p.name}
           </div>
@@ -293,15 +293,15 @@ function ParentMatchInfo({ myMatches, myChildren, state }) {
                       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 12 }}>
                         <Avatar type={p?.type} gender={p?.gender} name={p.name} size={60} color={color} ring />
                         <div style={{ fontSize: 15.5, fontWeight: 800, color: C.headline, marginTop: 10, letterSpacing: '-0.02em' }}>{p.name}</div>
-                        <div style={{ fontSize: 11.5, color: color, fontWeight: 700, marginTop: 3 }}>{label}</div>
+                        <div style={{ fontSize: 13, color: color, fontWeight: 700, marginTop: 3 }}>{label}</div>
                       </div>
-                      <div style={{ fontSize: 11.5, color: C.navMute, lineHeight: 1.6, padding: '10px 0 0', borderTop: `1px solid ${C.line}` }}>
+                      <div style={{ fontSize: 13, color: C.navMute, lineHeight: 1.6, padding: '10px 0 0', borderTop: `1px solid ${C.line}` }}>
                         {p.bio || (p.type === 'child' ? `${p.age}세 · ${p.school || ''}` : '')}
                       </div>
                       {p.skills?.length > 0 && (
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 8 }}>
                           {p.skills.slice(0, 3).map((s, i) => (
-                            <span key={i} style={{ fontSize: 10.5, padding: '2px 8px', background: C.panel, borderRadius: 7, color: C.navMute, border: `1px solid ${C.line}`, fontWeight: 600 }}>{s}</span>
+                            <span key={i} style={{ fontSize: 12.5, padding: '2px 8px', background: C.panel, borderRadius: 7, color: C.navMute, border: `1px solid ${C.line}`, fontWeight: 600 }}>{s}</span>
                           ))}
                         </div>
                       )}
@@ -309,7 +309,7 @@ function ParentMatchInfo({ myMatches, myChildren, state }) {
                   ))}
                 </div>
                 <div style={{ marginTop: 18, padding: '14px 16px', background: C.brandBg, borderRadius: 12, borderLeft: `3px solid ${C.brand}` }}>
-                  <div style={{ fontSize: 11.5, color: C.brand, fontWeight: 700, marginBottom: 6 }}>코디네이터 메모</div>
+                  <div style={{ fontSize: 13, color: C.brand, fontWeight: 700, marginBottom: 6 }}>코디네이터 메모</div>
                   <div style={{ fontSize: 13, color: C.inkSoft, lineHeight: 1.6 }}>{match.coordinator_note || '활발하게 활동 중입니다. 별다른 이슈 없이 진행 중이니 안심하셔도 됩니다.'}</div>
                 </div>
               </Card>
@@ -367,7 +367,7 @@ function ParentSafety({ user, myMatches, myIncidents, dispatch, showToast }) {
           <div style={{ fontSize: 22, fontWeight: 800, color: C.headline, letterSpacing: '-0.03em' }}>한가은</div>
           {/* 모바일 원탭 통화 — 긴급 상황에서 번호를 옮겨 적지 않고 바로 전화 (데스크톱에서도 무해) */}
           <a href="tel:010-2345-6789" aria-label="코디네이터 한가은에게 전화 걸기, 010-2345-6789" style={{ display: 'inline-block', fontSize: 13.5, color: C.brand, marginTop: 5, fontWeight: 700, fontVariantNumeric: 'tabular-nums', textDecoration: 'underline', textUnderlineOffset: 3 }}>010-2345-6789</a>
-          <div style={{ fontSize: 11.5, color: C.muteLight, marginTop: 8, fontWeight: 500 }}>평일 9시~21시 / 주말 10시~18시 응답</div>
+          <div style={{ fontSize: 13, color: C.muteLight, marginTop: 8, fontWeight: 500 }}>평일 9시~21시 / 주말 10시~18시 응답</div>
         </div>
         <div style={{ background: C.panel, border: `1px solid ${C.line}`, borderLeft: `3px solid ${C.red}`, borderRadius: 12, boxShadow: SHADOW.xs, padding: 20 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
@@ -393,7 +393,7 @@ function ParentSafety({ user, myMatches, myIncidents, dispatch, showToast }) {
                   <Badge color={inc.status === 'resolved' ? C.success : C.amber} soft={inc.status === 'resolved' ? C.successSoft : C.amberSoft} size="sm">{inc.status === 'resolved' ? '해결됨' : '처리 중'}</Badge>
                 </div>
                 <div style={{ fontSize: 12.5, color: C.inkSoft, marginBottom: 7, lineHeight: 1.55 }}>{inc.description}</div>
-                <div style={{ fontSize: 11.5, color: C.muteLight, fontWeight: 500, fontVariantNumeric: 'tabular-nums' }}>접수 {inc.reported_at}{inc.resolved_at && ` · 해결 ${inc.resolved_at}`}</div>
+                <div style={{ fontSize: 12.5, color: C.muteLight, fontWeight: 500, fontVariantNumeric: 'tabular-nums' }}>접수 {inc.reported_at}{inc.resolved_at && ` · 해결 ${inc.resolved_at}`}</div>
                 {inc.resolution && <div style={{ fontSize: 12, color: C.success, marginTop: 8, padding: '8px 10px', background: C.successSoft, borderRadius: 8 }}>처리 내용: {inc.resolution}</div>}
               </div>
             ))}
@@ -421,9 +421,9 @@ function ParentSafety({ user, myMatches, myIncidents, dispatch, showToast }) {
           <div style={{ display: 'flex', gap: 8 }}>
             {[{ k: 'low', l: '낮음', c: C.success }, { k: 'medium', l: '중간', c: C.amber }, { k: 'high', l: '높음', c: C.red }].map(opt => (
               <button key={opt.k} onClick={() => setForm({ ...form, severity: opt.k })}
-                style={{ flex: 1, padding: '10px', borderRadius: 8, border: form.severity === opt.k ? `2px solid ${opt.c}` : `1px solid ${C.border}`,
+                style={{ flex: 1, padding: '13px 10px', minHeight: 48, borderRadius: 10, border: form.severity === opt.k ? `2px solid ${opt.c}` : `1px solid ${C.border}`,
                   background: form.severity === opt.k ? `${opt.c}15` : C.card, color: form.severity === opt.k ? opt.c : C.inkSoft,
-                  fontWeight: form.severity === opt.k ? 700 : 500, cursor: 'pointer', fontFamily: FONT_STACK, fontSize: 13 }}>{opt.l}</button>
+                  fontWeight: form.severity === opt.k ? 700 : 500, cursor: 'pointer', fontFamily: FONT_STACK, fontSize: 14 }}>{opt.l}</button>
             ))}
           </div>
         </Field>
@@ -459,26 +459,26 @@ function ConsumerPricing() {
   return (
     <Card padding={18} style={{ marginTop: 18, background: C.cream, border: `1px dashed ${C.border}` }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
-        <div style={{ fontSize: 13, fontWeight: 800, color: C.inkSoft }}>참여는 무료, 더 깊은 안심은 선택</div>
+        <div style={{ fontSize: 14.5, fontWeight: 800, color: C.inkSoft }}>참여는 무료, 더 깊은 안심은 선택</div>
         <Badge color={C.mute} soft={C.borderSoft} size="sm">선택 · 베타 예정</Badge>
       </div>
-      <div style={{ fontSize: 11, color: C.mute, marginBottom: 12 }}>기본 활동은 누구나 무료입니다. 공공·기업 지원 시 구독도 무료로 제공돼요.</div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(150px,1fr))', gap: 9, opacity: 0.92 }}>
+      <div style={{ fontSize: 13, color: C.mute, marginBottom: 12 }}>기본 활동은 누구나 무료입니다. 공공·기업 지원 시 구독도 무료로 제공돼요.</div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(176px,1fr))', gap: 9, opacity: 0.92 }}>
         {PLANS.map(t => {
           const st = STYLE[t.id] || { c: C.mute, hot: false };
           const paid = isPaidPlan(t.id);
           return (
             <div key={t.id} style={{ border: `1px solid ${st.hot ? C.brand + '66' : C.border}`, borderRadius: 11, padding: '12px 13px', background: C.card }}>
-              <div style={{ fontSize: 10.5, color: C.mute, fontWeight: 700 }}>{t.sub}</div>
-              <div style={{ fontSize: 13.5, fontWeight: 800, color: st.c, marginTop: 2 }}>{t.name}</div>
-              <div style={{ fontSize: 17, fontWeight: 800, color: C.ink, margin: '4px 0 8px' }}>{formatKRW(t.amount)}<span style={{ fontSize: 11, color: C.mute, fontWeight: 600 }}>{paid ? ' /월' : ''}</span></div>
-              {t.feats.map((f, i) => <div key={i} style={{ fontSize: 11, color: C.inkSoft, marginBottom: 4 }}>· {f}</div>)}
+              <div style={{ fontSize: 12.5, color: C.mute, fontWeight: 700 }}>{t.sub}</div>
+              <div style={{ fontSize: 15, fontWeight: 800, color: st.c, marginTop: 2 }}>{t.name}</div>
+              <div style={{ fontSize: 21, fontWeight: 800, color: C.ink, margin: '4px 0 8px' }}>{formatKRW(t.amount)}<span style={{ fontSize: 12.5, color: C.mute, fontWeight: 600 }}>{paid ? ' /월' : ''}</span></div>
+              {t.feats.map((f, i) => <div key={i} style={{ fontSize: 13, color: C.inkSoft, marginBottom: 4 }}>· {f}</div>)}
               {paid && (
                 <button
                   type="button"
                   onClick={() => onSubscribe(t.id)}
                   title={BILLING_ENABLED ? '구독 신청' : '[승인 필요] 결제 비활성 — 승인 후 활성화'}
-                  style={{ marginTop: 8, width: '100%', padding: '7px 0', fontSize: 11.5, fontWeight: 700, cursor: 'pointer',
+                  style={{ marginTop: 8, width: '100%', padding: '11px 0', minHeight: 44, fontSize: 14, fontWeight: 700, cursor: 'pointer',
                     color: st.hot ? '#fff' : st.c, background: st.hot ? C.brand : 'transparent',
                     border: `1px solid ${st.hot ? C.brand : C.border}`, borderRadius: 8 }}
                 >
@@ -490,9 +490,9 @@ function ConsumerPricing() {
         })}
       </div>
       {notice && (
-        <div role="status" style={{ marginTop: 10, padding: '8px 10px', fontSize: 10.5, lineHeight: 1.5, color: C.inkSoft, background: C.borderSoft, border: `1px solid ${C.border}`, borderRadius: 8 }}>{notice}</div>
+        <div role="status" style={{ marginTop: 10, padding: '8px 10px', fontSize: 13, lineHeight: 1.5, color: C.inkSoft, background: C.borderSoft, border: `1px solid ${C.border}`, borderRadius: 8 }}>{notice}</div>
       )}
-      <div style={{ fontSize: 10, color: C.mute, marginTop: 10 }}>구독료는 우산동 파일럿 가정 기준 예시이며, 시장조사상 개인 구독은 장기 옵션입니다(B2G·B2B 우선).</div>
+      <div style={{ fontSize: 12.5, color: C.mute, marginTop: 10 }}>구독료는 우산동 파일럿 가정 기준 예시이며, 시장조사상 개인 구독은 장기 옵션입니다(B2G·B2B 우선).</div>
     </Card>
   );
 }
