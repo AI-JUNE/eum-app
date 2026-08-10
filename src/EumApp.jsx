@@ -752,6 +752,16 @@ function appReducer(state, action) {
           : n)
       };
     }
+    case 'MARK_NOTICE_READ': {
+      // 참여자 공지 읽음(additive) — 해당 공지의 read_by 배열에 참여자 id를 1회만 추가.
+      // 기존 공지 필드(채널·전달결과·재발송 이력)는 그대로 보존한다.
+      return {
+        ...state,
+        notices: (state.notices || []).map(n => (n.id === action.payload.id && !(n.read_by || []).includes(action.payload.participant_id))
+          ? { ...n, read_by: [...(n.read_by || []), action.payload.participant_id] }
+          : n)
+      };
+    }
     case 'RESET_DATA': {
       return { ...SEED_DATA, currentUserId: null, currentRole: null };
     }

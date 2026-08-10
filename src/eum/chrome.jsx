@@ -8,6 +8,7 @@ import { C, FONT_STACK, PERSONA, SERIF_STACK, SHADOW } from './theme.js';
 import { TODAY, fmtRelativeDate, uid } from './utils.js';
 import { Avatar } from './avatar.jsx';
 import { Badge, Button, Card, EumLogo, Textarea, useBodyScrollLock, useFocusTrap, useIsMobile } from './ui.jsx';
+import { unreadNoticeCount } from './notices.js';
 
 // 참가자 신뢰 상태 계산 (시드 participant 검증 + 신청서 단계 검증 종합)
 function trustStatus(state, participantId) {
@@ -47,6 +48,9 @@ function buildNotifications(state, role, user) {
     }
     const approved = state.activity_logs.filter(l => l.participant_id === user.id && l.approved).length;
     if (approved) out.push({ id: 'n-appr', icon: CheckCircle2, color: C.sage, title: `승인된 활동 ${approved}건`, desc: '정산에 반영되었습니다', view: 'settlement' });
+    // 코디가 보낸 공지 중 아직 읽지 않은 건(additive) — 공지 수신함으로 이동
+    const unreadNotices = unreadNoticeCount(state.notices, user.id);
+    if (unreadNotices) out.push({ id: 'n-notice', icon: Bell, color: C.brand, title: `읽지 않은 공지 ${unreadNotices}건`, desc: '코디네이터가 보낸 안내입니다', view: 'notices' });
   }
   return out;
 }
@@ -388,14 +392,16 @@ const PARTICIPANT_NAV = {
     { id: 'dashboard', label: '홈', icon: Home }, { id: 'schedule', label: '일정', icon: Calendar },
     { id: 'discover', label: '찾기', icon: Search }, { id: 'logs', label: '기록', icon: PenLine }, { id: 'mentor', label: '멘토', icon: GraduationCap },
     { id: 'archive', label: '기억', icon: BookOpen }, { id: 'settlement', label: '정산', icon: Wallet },
+    { id: 'notices', label: '공지', icon: Bell },
   ],
   senior: [
     { id: 'dashboard', label: '홈', icon: Home }, { id: 'schedule', label: '다음 만남', icon: Calendar },
-    { id: 'settlement', label: '상품권', icon: Wallet },
+    { id: 'settlement', label: '상품권', icon: Wallet }, { id: 'notices', label: '공지', icon: Bell },
   ],
   parent: [
     { id: 'dashboard', label: '홈', icon: Home }, { id: 'today', label: '오늘', icon: Activity },
     { id: 'match', label: '매칭', icon: Users }, { id: 'safety', label: '안전', icon: ShieldCheck },
+    { id: 'notices', label: '공지', icon: Bell },
   ],
 };
 

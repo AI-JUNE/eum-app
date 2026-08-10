@@ -10,6 +10,7 @@ import { Avatar } from '../avatar.jsx';
 import { BILLING_ENABLED, PLANS, formatKRW, isPaidPlan, requestSubscription } from '../billing.js';
 import { Badge, Button, Card, Empty, Field, Modal, PageHeader, Panel, Select, Textarea, useIsMobile } from '../ui.jsx';
 import { HomeHub, Layout, TrustRow, trustStatus } from '../chrome.jsx';
+import { NoticeInbox } from './NoticeInbox.jsx';
 import { TrioMember } from './YouthApp.jsx';
 
 // ============================================================================
@@ -56,6 +57,8 @@ function ParentApp({ state, user, dispatch, showToast }) {
         <ParentSafety user={user} myMatches={myMatches} myIncidents={myIncidents}
           dispatch={dispatch} showToast={showToast} />
       )}
+      {/* 공지 수신함(additive) — 코디가 보낸 공지를 학부모가 확인·읽음 처리 */}
+      {view === 'notices' && <NoticeInbox state={state} user={user} dispatch={dispatch} />}
     </Layout>
   );
 }

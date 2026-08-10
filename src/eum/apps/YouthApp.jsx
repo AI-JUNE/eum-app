@@ -9,6 +9,7 @@ import { TODAY, fmtDate, fmtRelativeDate, krw, uid } from '../utils.js';
 import { Avatar } from '../avatar.jsx';
 import { AnimatedBar, Badge, Button, Card, Checkbox, CountUp, Empty, Field, InsuranceBadge, KpiStrip, Modal, PageHeader, Panel, Reveal, Ring, Select, Tabs, Textarea } from '../ui.jsx';
 import { CheckInOutCard, HomeHub, Layout, TrustRow, trustStatus } from '../chrome.jsx';
+import { NoticeInbox } from './NoticeInbox.jsx';
 import { EUM_API } from '../eumApi.js';
 
 // ============================================================================
@@ -166,6 +167,8 @@ function YouthApp({ state, user, dispatch, showToast }) {
       {view === 'mentor' && <YouthMentor senior={senior} myLogs={myLogs} state={state} />}
       {view === 'archive' && <ArchiveView state={state} />}
       {view === 'settlement' && <SettlementView settlements={mySettlements} totalHours={totalHours} totalEarned={totalEarned} user={user} dispatch={dispatch} showToast={showToast} />}
+      {/* 공지 수신함(additive) — 코디가 보낸 공지를 청년이 확인·읽음 처리 */}
+      {view === 'notices' && <NoticeInbox state={state} user={user} dispatch={dispatch} />}
     </Layout>
   );
 }

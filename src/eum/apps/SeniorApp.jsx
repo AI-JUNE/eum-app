@@ -9,6 +9,7 @@ import { TODAY, fmtDate, fmtRelativeDate, krw, uid } from '../utils.js';
 import { Avatar } from '../avatar.jsx';
 import { Badge, Button, Card, InsuranceBadge, OfficialSenderBadge } from '../ui.jsx';
 import { HomeHub, Layout } from '../chrome.jsx';
+import { NoticeInbox } from './NoticeInbox.jsx';
 
 // ============================================================================
 // 10. SENIOR APP (큰 글씨, 단순 UI)
@@ -188,6 +189,9 @@ function SeniorApp({ state, user, dispatch, showToast }) {
           ))}
         </>
       )}
+
+      {/* 공지 수신함(additive) — 어르신은 큰 활자(senior)로 표시 */}
+      {view === 'notices' && <NoticeInbox state={state} user={user} dispatch={dispatch} senior />}
     </Layout>
   );
 }

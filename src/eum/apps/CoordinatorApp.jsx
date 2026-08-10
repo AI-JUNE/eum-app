@@ -2399,6 +2399,9 @@ function CoordNotices({ state, dispatch, showToast, user }) {
         {notices.map(n => {
           const delv = n.delivery || [];
           const failed = delv.filter(d => d.status === 'failed');
+          // 읽음 확인(additive) — 참여자 앱 공지 수신함에서 열람하면 read_by에 기록된다.
+          const readBy = n.read_by || [];
+          const readCount = delv.filter(d => d.status === 'delivered' && readBy.includes(d.participant_id)).length;
           const open = expandedId === n.id;
           return (
             <Card key={n.id}>
@@ -2417,6 +2420,7 @@ function CoordNotices({ state, dispatch, showToast, user }) {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                   <Badge color={C.success} soft={C.successSoft}>전달 {delv.length - failed.length}</Badge>
                   <Badge color={failed.length > 0 ? C.amber : C.mute} soft={failed.length > 0 ? C.amberSoft : C.lineSoft}>미전달 {failed.length}</Badge>
+                  <Badge color={C.blue} soft={C.blueSoft}>읽음 {readCount}</Badge>
                   {failed.length > 0 && (
                     <Button variant="secondary" size="sm" onClick={() => resend(n)} disabled={resendingId === n.id}>
                       {resendingId === n.id ? '재발송 중…' : `미전달 ${failed.length}건 재발송`}
@@ -2439,6 +2443,7 @@ function CoordNotices({ state, dispatch, showToast, user }) {
                         <span style={{ fontSize: 11, color: C.mute }}>{noticeChannelLabel(d.channel)}</span>
                         <span style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
                           {d.resent && <span style={{ fontSize: 10.5, color: C.mute }}>재발송</span>}
+                          {ok && readBy.includes(d.participant_id) && <Badge color={C.blue} soft={C.blueSoft}>읽음</Badge>}
                           <Badge color={ok ? C.success : C.amber} soft={ok ? C.successSoft : C.amberSoft}>{ok ? '전달' : '미전달'}</Badge>
                           <span style={{ fontSize: 10.5, color: C.mute }}>{d.at}</span>
                         </span>

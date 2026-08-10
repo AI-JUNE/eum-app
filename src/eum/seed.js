@@ -207,6 +207,8 @@ export const SEED_DATA = {
       body: '6월 활동분 청년 활동급여와 어르신 상생카드가 7월 1일자로 발급되었습니다. 앱의 정산 화면에서 내역을 확인해 주세요. 이상이 있으면 정산 화면의 이의 신청 버튼을 이용해 주세요.',
       channels: ['kakao', 'sms'], audience: 'all', sent_at: '2027-07-01 10:00', sent_by: '코디 한가은',
       resend_count: 1, last_resend_at: '2027-07-01 15:30',
+      // 읽음 확인(additive) — 참여자 공지 수신함 열람 기록. 데모 샘플.
+      read_by: ['p002', 'p003', 'p101', 'p201'],
       delivery: [
         { participant_id: 'p001', channel: 'kakao', status: 'delivered', at: '2027-07-01 10:00' },
         { participant_id: 'p002', channel: 'kakao', status: 'delivered', at: '2027-07-01 10:00' },
@@ -229,6 +231,7 @@ export const SEED_DATA = {
       body: '한낮(12~16시) 야외 활동은 피하고 실내 냉방 공간을 이용해 주세요. 활동 전 어르신 컨디션 체크리스트를 꼭 확인하고, 어지럼증 등 이상 시 즉시 활동을 중단하고 코디네이터에게 연락 바랍니다.',
       channels: ['kakao', 'app'], audience: 'senior', sent_at: '2027-07-28 09:30', sent_by: '코디 한가은',
       resend_count: 0, last_resend_at: null,
+      read_by: ['p101'],
       delivery: [
         { participant_id: 'p101', channel: 'kakao', status: 'delivered', at: '2027-07-28 09:30' },
         { participant_id: 'p102', channel: 'app', status: 'delivered', at: '2027-07-28 09:30' },
