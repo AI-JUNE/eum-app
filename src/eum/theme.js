@@ -25,8 +25,8 @@ export const C = {
   sageSoft: '#DDF3EC',
   lavender: '#6C5CE7',
   lavenderSoft: '#E9E6FB',
-  peach: '#E08A4B',
-  peachSoft: '#FBEBDA',
+  peach: '#2D8C9E',
+  peachSoft: '#DFF1F4',
   gold: '#C79A3A',
   goldSoft: '#F5ECD3',
   red: '#E1524B',
@@ -71,9 +71,9 @@ export const PERSONA = {
   youth: { label: '청년', color: C.sage, soft: C.sageSoft, ring: 'rgba(95,133,86,0.25)' },
   adult: { label: '중년·서포터', color: C.gold, soft: C.goldSoft, ring: 'rgba(184,136,74,0.25)' },
   senior: { label: '어르신', color: C.lavender, soft: C.lavenderSoft, ring: 'rgba(127,111,160,0.25)' },
-  parent: { label: '양육가정', color: C.peach, soft: C.peachSoft, ring: 'rgba(216,147,104,0.25)' },
-  child: { label: '아동', color: C.peach, soft: C.peachSoft, ring: 'rgba(216,147,104,0.25)' },
-  coordinator: { label: '코디네이터', color: C.ink, soft: '#EDEAE5', ring: 'rgba(26,24,20,0.15)' },
+  parent: { label: '양육가정', color: C.peach, soft: C.peachSoft, ring: 'rgba(45,140,158,0.25)' },
+  child: { label: '아동', color: C.peach, soft: C.peachSoft, ring: 'rgba(45,140,158,0.25)' },
+  coordinator: { label: '코디네이터', color: C.ink, soft: '#EAEDF4', ring: 'rgba(20,26,38,0.15)' },
 };
 
 export const FONT_STACK = `"Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif`;

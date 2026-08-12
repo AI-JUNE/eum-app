@@ -105,12 +105,12 @@ function RLHeroScene() {
       {/* 배경 — 동네 */}
       <circle cx="402" cy="250" r="44" fill="#CBD9BC" />
       <circle cx="372" cy="280" r="30" fill="#D7E2CB" />
-      <rect x="356" y="300" width="78" height="70" fill="#EADFce" opacity="0.7" />
+      <rect x="356" y="300" width="78" height="70" fill="#DCE3EF" opacity="0.7" />
       <path d="M352,300 L395,272 L438,300 Z" fill="#B9A7C2" opacity="0.7" />
       <circle cx="60" cy="250" r="34" fill="#D7E2CB" />
       <rect x="42" y="316" width="40" height="56" rx="6" fill="#EFE6D8" />
       <ellipse cx="62" cy="318" rx="22" ry="14" fill="#CBD9BC" />
-      <line x1="20" y1="398" x2="440" y2="398" stroke="#E3D9C8" strokeWidth="2.5" />
+      <line x1="20" y1="398" x2="440" y2="398" stroke="#D7DEEA" strokeWidth="2.5" />
 
       {/* 청년 */}
       <g className="eum-fig-a">
@@ -149,8 +149,8 @@ function RLHeroScene() {
         <circle cx="243" cy="181" r="2.5" fill="#3A352F" />
         <circle cx="258" cy="181" r="2.5" fill="#3A352F" />
         <path d="M243,190 q7,5 14,0" fill="none" stroke="#3A352F" strokeWidth="2.2" strokeLinecap="round" />
-        <circle cx="237" cy="187" r="4" fill="#E79A87" opacity="0.5" />
-        <circle cx="265" cy="187" r="4" fill="#E79A87" opacity="0.5" />
+        <circle cx="237" cy="187" r="4" fill="#B9CCEB" opacity="0.5" />
+        <circle cx="265" cy="187" r="4" fill="#B9CCEB" opacity="0.5" />
       </g>
 
       {/* 아이 */}
@@ -565,7 +565,7 @@ const AX_ROWS_HTML = `<div class="axrow">
       <div class="axmic" style="width:92px; height:92px; border-radius:50%; background:var(--coral); margin:0 auto 12px; display:flex; align-items:center; justify-content:center; font-size:38px;">🎤</div>
       <div class="axlisten" style="font-size:12px; color:var(--coral); font-weight:700; margin-bottom:16px;">● 듣고 있어요…</div>
       <div style="background:var(--coral-soft); color:var(--coral-d); border-radius:12px; padding:9px 12px; font-size:12px; display:inline-block; margin-bottom:10px;">기초연금 신청하고 싶어요</div>
-      <div style="background:#fff; border:1px solid #f0e7dd; border-radius:12px; padding:10px 12px; font-size:12px; color:var(--sub); text-align:left;">네, 기초연금 신청을 도와드릴게요. 생년월일을 말씀해 주세요.</div>
+      <div style="background:#fff; border:1px solid #E5E9F1; border-radius:12px; padding:10px 12px; font-size:12px; color:var(--sub); text-align:left;">네, 기초연금 신청을 도와드릴게요. 생년월일을 말씀해 주세요.</div>
     </div>
   </div></div>
 </div>
@@ -671,14 +671,14 @@ const KAKAO_PHONE_HTML = `<div class="scr kk">
   </div>
   <div class="kInput"><span class="plus">＋</span><div class="kbox">메시지 입력</div><span class="ksnd">↑</span></div>
 </div>`;
-const TOBE_CSS = `.eum-tobe{--ink:#241d17;--paper:#fff;--cream:#fbf7f2;--cream2:#f4ede4;--coral:#BE5535;--coral-d:#9E4329;--coral-soft:#F4E7E0;--green:#4b7a52;--green-soft:#e9f1e7;--purple:#6a5aa0;--purple-soft:#efeaf6;--clay:#9a6a52;--sub:#5f564d;--mut:#9b9186;--line:#eee6dc;word-break:keep-all;-webkit-font-smoothing:antialiased;}
+const TOBE_CSS = `.eum-tobe{--ink:#161B24;--paper:#fff;--cream:#F5F7FB;--cream2:#E9EDF5;--coral:#2E6BF0;--coral-d:#1D4FD7;--coral-soft:#E4EDFD;--green:#4b7a52;--green-soft:#e9f1e7;--purple:#6a5aa0;--purple-soft:#efeaf6;--clay:#5E6B7E;--sub:#586173;--mut:#94A0B2;--line:#E5E9F1;word-break:keep-all;-webkit-font-smoothing:antialiased;}
 .eum-tobe *{box-sizing:border-box;}
 .eum-tobe .kick{font-size:13px;font-weight:700;color:var(--coral);letter-spacing:1.4px;text-transform:uppercase;margin-bottom:16px;}
 .eum-tobe h2{font-size:clamp(31px,3.9vw,48px);line-height:1.14;font-weight:800;letter-spacing:-1.1px;margin:0;color:var(--ink);}
 .eum-tobe h2 .ac,.eum-tobe .ac{color:var(--coral);}
 .eum-tobe .txt p{text-wrap:pretty;}
 .eum-tobe .win{border-radius:16px;overflow:hidden;border:1px solid var(--line);box-shadow:0 12px 32px rgba(36,29,23,.09);background:#fff;width:100%;}
-.eum-tobe .win .bar{display:flex;align-items:center;gap:8px;padding:10px 14px;background:#f6f2ec;border-bottom:1px solid var(--line);}
+.eum-tobe .win .bar{display:flex;align-items:center;gap:8px;padding:10px 14px;background:#F1F3F8;border-bottom:1px solid var(--line);}
 .eum-tobe .win .bar i{width:10px;height:10px;border-radius:50%;background:#dcd4c9;}
 .eum-tobe .win .bar .url{margin-left:10px;font-size:12px;color:var(--mut);background:#fff;border:1px solid var(--line);border-radius:8px;padding:4px 12px;}
 .eum-tobe .axrows{display:grid;gap:56px;margin-top:8px;}
@@ -688,7 +688,7 @@ const TOBE_CSS = `.eum-tobe{--ink:#241d17;--paper:#fff;--cream:#fbf7f2;--cream2:
 .eum-tobe .axrow h3{font-size:23px;font-weight:800;letter-spacing:-.6px;margin-bottom:8px;color:var(--ink);}
 .eum-tobe .axrow p{font-size:16px;color:var(--sub);}
 .eum-tobe .axphone{width:min(300px,100%);margin:0 auto;background:#1c1712;border-radius:46px;padding:8px;box-shadow:0 30px 70px rgba(36,29,23,.2),inset 0 0 0 2px #3a2c22;}
-.eum-tobe .axsc{background:#faf3ee;border-radius:38px;overflow:hidden;position:relative;min-height:544px;}
+.eum-tobe .axsc{background:#F5F7FB;border-radius:38px;overflow:hidden;position:relative;min-height:544px;}
 .eum-tobe .axnotch{position:absolute;top:9px;left:50%;transform:translateX(-50%);width:104px;height:20px;background:#1c1712;border-radius:12px;z-index:6;}
 .eum-tobe .axstat{display:flex;justify-content:space-between;align-items:center;padding:11px 22px 3px;font-size:12px;font-weight:700;color:var(--ink);}
 .eum-tobe .axstat .r{display:inline-flex;align-items:center;gap:6px;}
@@ -696,16 +696,16 @@ const TOBE_CSS = `.eum-tobe{--ink:#241d17;--paper:#fff;--cream:#fbf7f2;--cream2:
 .eum-tobe .axstat .bars i{width:3px;background:var(--ink);border-radius:1px;}
 .eum-tobe .axstat .batt{display:inline-block;width:20px;height:11px;border:1.5px solid var(--ink);border-radius:3px;position:relative;}
 .eum-tobe .axstat .batt::after{content:'';position:absolute;left:1.5px;top:1.5px;bottom:1.5px;width:68%;background:var(--ink);border-radius:1px;}
-.eum-tobe .axhd{background:#fff;padding:8px 15px 11px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #f2e9df;}
+.eum-tobe .axhd{background:#fff;padding:8px 15px 11px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #E7ECF4;}
 .eum-tobe .axhd .bk{font-size:19px;color:#a99e93;}
 .eum-tobe .axhd .ico{width:26px;height:26px;border-radius:8px;object-fit:cover;flex:none;display:block;}
 .eum-tobe .axhd .tt{font-size:14px;font-weight:700;line-height:1.15;color:var(--ink);}
 .eum-tobe .axhd .tt small{display:block;font-size:10px;color:var(--mut);font-weight:500;}
 .eum-tobe .axbd{padding:18px 16px 22px;}
-.eum-tobe .axtile{background:#fff;border:1px solid #f0e7dd;border-radius:12px;padding:12px 8px;text-align:center;}
+.eum-tobe .axtile{background:#fff;border:1px solid #E5E9F1;border-radius:12px;padding:12px 8px;text-align:center;}
 .eum-tobe .axtile .e{font-size:20px;}
 .eum-tobe .axtile .l{font-size:12px;font-weight:700;margin-top:5px;color:var(--ink);}
-.eum-tobe .axrowc{background:#fff;border:1px solid #f0e7dd;border-radius:13px;padding:11px 12px;margin-bottom:9px;display:flex;align-items:center;gap:10px;}
+.eum-tobe .axrowc{background:#fff;border:1px solid #E5E9F1;border-radius:13px;padding:11px 12px;margin-bottom:9px;display:flex;align-items:center;gap:10px;}
 .eum-tobe .axrowc .ic{width:34px;height:34px;border-radius:9px;background:var(--coral-soft);display:flex;align-items:center;justify-content:center;font-size:16px;flex:none;}
 .eum-tobe .axrowc b{font-weight:700;font-size:13px;color:var(--ink);}
 .eum-tobe .axrowc small{display:block;color:var(--mut);font-size:11px;}
@@ -717,7 +717,7 @@ const TOBE_CSS = `.eum-tobe{--ink:#241d17;--paper:#fff;--cream:#fbf7f2;--cream2:
 .eum-tobe .step h3{font-size:19px;font-weight:700;margin:12px 0 6px;color:var(--ink);}
 .eum-tobe .step p{font-size:14px;color:var(--sub);}
 .eum-tobe .step:not(:last-child){border-right:1px solid var(--line);}
-.eum-tobe .mbwrap{background:#faf7f2;padding:20px;}
+.eum-tobe .mbwrap{background:#F5F7FB;padding:20px;}
 .eum-tobe .mbtop{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
 .eum-tobe .mbtitle{font-size:17px;font-weight:800;color:var(--ink);}
 .eum-tobe .mbsub{font-size:12px;color:var(--mut);margin-top:2px;}
@@ -736,7 +736,7 @@ const TOBE_CSS = `.eum-tobe{--ink:#241d17;--paper:#fff;--cream:#fbf7f2;--cream2:
 .eum-tobe .mbwait>span:first-child{color:var(--sub);font-weight:600;}
 .eum-tobe .mbwaitp{background:var(--cream2);padding:6px 11px;border-radius:999px;font-weight:600;color:var(--ink);}
 .eum-tobe .appshow{display:grid;grid-template-columns:1fr 330px;gap:60px;align-items:center;}
-.eum-tobe .phone{background:#241d17;border-radius:46px;padding:11px;box-shadow:0 30px 70px rgba(36,29,23,.16);width:min(318px,100%);margin:0 auto;}
+.eum-tobe .phone{background:#161B24;border-radius:46px;padding:11px;box-shadow:0 30px 70px rgba(36,29,23,.16);width:min(318px,100%);margin:0 auto;}
 .eum-tobe .phone .scr{background:#fff;border-radius:36px;overflow:hidden;}
 .eum-tobe .scr.kk{display:flex;flex-direction:column;height:566px;}
 .eum-tobe .kkTop{display:flex;align-items:center;gap:9px;padding:14px 14px 12px;border-bottom:1px solid #eee;}
@@ -765,7 +765,7 @@ const TOBE_CSS = `.eum-tobe{--ink:#241d17;--paper:#fff;--cream:#fbf7f2;--cream2:
 .eum-tobe .kquicks span{background:#fff;border:1px solid rgba(0,0,0,.08);color:#33404d;font-size:11px;font-weight:600;padding:6px 10px;border-radius:999px;}
 .eum-tobe .kInput{background:#fff;border-top:1px solid #eee;padding:8px 11px;display:flex;align-items:center;gap:9px;}
 .eum-tobe .kInput .plus{color:#999;font-size:16px;}
-.eum-tobe .kInput .kbox{flex:1;background:#f2f1ee;border-radius:999px;padding:7px 13px;font-size:12px;color:#9a938a;}
+.eum-tobe .kInput .kbox{flex:1;background:#EEF1F6;border-radius:999px;padding:7px 13px;font-size:12px;color:#94A0B2;}
 .eum-tobe .kInput .ksnd{width:28px;height:28px;border-radius:50%;background:#FEE500;display:flex;align-items:center;justify-content:center;font-size:14px;color:#191600;}
 @media(max-width:880px){.eum-tobe .axrow,.eum-tobe .axrow.rev,.eum-tobe .prod,.eum-tobe .appshow{grid-template-columns:1fr;gap:30px;}.eum-tobe .axrow.rev > .axphone{order:2;}.eum-tobe .steps{grid-template-columns:1fr;}.eum-tobe .step{padding:0;}.eum-tobe .step:not(:last-child){border-right:none;border-bottom:1px solid var(--line);padding-bottom:18px;margin-bottom:18px;}.eum-tobe .axrow .txt,.eum-tobe .appshow .txt{text-align:center;}.eum-tobe .axrow .tag{margin-left:auto;margin-right:auto;}}@media(max-width:560px){.eum-tobe .mbgrid{grid-template-columns:1fr;}.eum-tobe .mbwrap{padding:14px;}}
 @keyframes eumFloatP{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
@@ -779,17 +779,17 @@ const TOBE_CSS = `.eum-tobe{--ink:#241d17;--paper:#fff;--cream:#fbf7f2;--cream2:
 .eum-tobe .mbcard{transition:transform .2s ease,box-shadow .2s ease;}
 .eum-tobe .mbcard:hover{transform:translateY(-4px);box-shadow:0 16px 34px rgba(36,29,23,.12);}
 .eum-tobe .axtile{transition:transform .16s ease,background .16s ease,box-shadow .16s ease;}
-.eum-tobe .axtile:hover{transform:translateY(-3px);background:#fff7f2;box-shadow:0 10px 22px rgba(36,29,23,.08);}
+.eum-tobe .axtile:hover{transform:translateY(-3px);background:#F1F6FF;box-shadow:0 10px 22px rgba(36,29,23,.08);}
 .eum-tobe .axrowc{transition:transform .16s ease,box-shadow .16s ease;}
 .eum-tobe .axrowc:hover{transform:translateX(3px);box-shadow:0 8px 18px rgba(36,29,23,.07);}
 .eum-tobe .krbtns a{transition:background .14s ease;}
-.eum-tobe .krbtns a:hover{background:#faf6f2;}
+.eum-tobe .krbtns a:hover{background:#F1F6FF;}
 @media(prefers-reduced-motion:reduce){.eum-tobe .axphone,.eum-tobe .phone,.eum-tobe .axmic,.eum-tobe .axlisten{animation:none;}}`;
 function TobeStyles() { return <style dangerouslySetInnerHTML={{ __html: TOBE_CSS }} />; }
 
 function FullBand({ bg, isMobile, children }) {
   return (
-    <div style={{ position: 'relative', width: '100vw', marginLeft: 'calc(50% - 50vw)', background: bg, borderTop: '1px solid #EDE9E3', borderBottom: '1px solid #EDE9E3' }}>
+    <div style={{ position: 'relative', width: '100vw', marginLeft: 'calc(50% - 50vw)', background: bg, borderTop: '1px solid #E5E9F1', borderBottom: '1px solid #E5E9F1' }}>
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: isMobile ? '48px 20px' : '82px 40px' }}>
         {children}
       </div>
@@ -812,7 +812,7 @@ function RLAXBand({ isMobile }) {
       <div style={{ maxWidth: 680, marginBottom: 44 }}>
         <div className="kick">AX · AI Experience</div>
         <h2>기술로 완성하는 <span className="ac">안심 돌봄</span></h2>
-        <p style={{ fontSize: 17, color: '#5f564d', marginTop: 16, lineHeight: 1.62 }}>이음은 15년 AX·AICC 경험과 고원의 AI 콜봇·보이는 ARS 자산을 복지에 연결합니다. 사람이 놓치는 순간을 기술이 먼저 살핍니다.</p>
+        <p style={{ fontSize: 17, color: '#586173', marginTop: 16, lineHeight: 1.62 }}>이음은 15년 AX·AICC 경험과 고원의 AI 콜봇·보이는 ARS 자산을 복지에 연결합니다. 사람이 놓치는 순간을 기술이 먼저 살핍니다.</p>
       </div>
       <div className="axrows" dangerouslySetInnerHTML={{ __html: AX_ROWS_HTML }} />
     </div>
@@ -858,7 +858,7 @@ function RLKakaoBand({ isMobile, onShowApplication }) {
         <div className="txt" style={{ textAlign: isMobile ? 'center' : 'left' }}>
           <div className="kick">참여 방법</div>
           <h2 style={{ margin: '8px 0 16px' }}>앱 설치 없이,<br />카톡으로 <span className="ac">이음</span></h2>
-          <p style={{ fontSize: 17, color: '#5f564d', marginBottom: 26, maxWidth: '33ch', lineHeight: 1.62, marginLeft: isMobile ? 'auto' : 0, marginRight: isMobile ? 'auto' : 0 }}>카카오톡 채널·웹으로 바로 참여합니다. 큰 글씨와 단순한 흐름으로 어르신도 쉽게 사용합니다.</p>
+          <p style={{ fontSize: 17, color: '#586173', marginBottom: 26, maxWidth: '33ch', lineHeight: 1.62, marginLeft: isMobile ? 'auto' : 0, marginRight: isMobile ? 'auto' : 0 }}>카카오톡 채널·웹으로 바로 참여합니다. 큰 글씨와 단순한 흐름으로 어르신도 쉽게 사용합니다.</p>
           <button onClick={onShowApplication} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontWeight: 700, borderRadius: 15, padding: '16px 28px', fontSize: 16, cursor: 'pointer', border: '1.5px solid transparent', background: C.brand, color: '#fff', boxShadow: '0 8px 20px rgba(190,85,53,.24)', fontFamily: 'inherit' }}>카카오톡으로 시작하기</button>
         </div>
         <div className="phone" dangerouslySetInnerHTML={{ __html: KAKAO_PHONE_HTML }} />
@@ -928,8 +928,8 @@ function RLLanding({ state, onSelectRole, onShowApplication }) {
   const personas = [
     { role: 'youth', id: 'p001', gender: 'M', name: '김민준', subtitle: '27세 · 스타트업 개발자', desc: '어르신껜 디지털을 알려드리고, 저는 인생 조언을 얻어요.', color: C.sage, soft: C.sageSoft, gradient: 'linear-gradient(135deg, #6B8E5A 0%, #8FB47E 100%)' },
     { role: 'senior', id: 'p101', gender: 'F', name: '박순자', subtitle: '73세 · 前 교사', desc: '청년에게 디지털을 배우고, 아이에겐 옛이야기를 들려줘요.', color: C.lavender, soft: C.lavenderSoft, gradient: 'linear-gradient(135deg, #7F6FA0 0%, #A797C0 100%)' },
-    { role: 'parent', id: 'p201', gender: 'F', name: '이서영', subtitle: '38세 · IT기업 PM (유진 8세 보호자)', desc: '아이가 이웃 어른들과 안전하게 어울리는 시간이 참 든든해요.', color: C.peach, soft: C.peachSoft, gradient: 'linear-gradient(135deg, #D89368 0%, #E8B58F 100%)' },
-    { role: 'coordinator', id: 'cdn001', gender: 'F', name: '한가은', subtitle: '코디네이터 · 광주 광산구', desc: '신청·검증·매칭·정산을 한눈에 관리해요.', color: C.ink, soft: '#EDEAE5', gradient: 'linear-gradient(135deg, #1A1814 0%, #3A352F 100%)' },
+    { role: 'parent', id: 'p201', gender: 'F', name: '이서영', subtitle: '38세 · IT기업 PM (유진 8세 보호자)', desc: '아이가 이웃 어른들과 안전하게 어울리는 시간이 참 든든해요.', color: C.peach, soft: C.peachSoft, gradient: 'linear-gradient(135deg, #2D8C9E 0%, #63C2D0 100%)' },
+    { role: 'coordinator', id: 'cdn001', gender: 'F', name: '한가은', subtitle: '코디네이터 · 광주 광산구', desc: '신청·검증·매칭·정산을 한눈에 관리해요.', color: C.ink, soft: '#EAEDF4', gradient: 'linear-gradient(135deg, #1A1814 0%, #3A352F 100%)' },
   ];
 
   const isMobile = useIsMobile(820);
@@ -1039,7 +1039,7 @@ function RLLanding({ state, onSelectRole, onShowApplication }) {
 
         <Reveal><RLProductShowcase /></Reveal>
 
-        <FullBand isMobile={isMobile} bg="#F1EAE0"><Reveal><RLSafetyBand isMobile={isMobile} /></Reveal></FullBand>
+        <FullBand isMobile={isMobile} bg="#EAEEF6"><Reveal><RLSafetyBand isMobile={isMobile} /></Reveal></FullBand>
 
         <FullBand isMobile={isMobile} bg="#FFFFFF"><Reveal><RLKakaoBand isMobile={isMobile} onShowApplication={onShowApplication} /></Reveal></FullBand>
 
