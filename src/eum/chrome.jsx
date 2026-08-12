@@ -80,7 +80,7 @@ function NotificationBell({ state, role, user, onNavigate, dark }) {
         onMouseLeave={(e) => { if (!dark) e.currentTarget.style.background = C.panel; }}>
         <Bell size={18} />
         {items.length > 0 && (
-          <span aria-hidden="true" style={{ position: 'absolute', top: -4, right: -4, minWidth: 17, height: 17, padding: '0 4px', borderRadius: 9, background: urgent ? C.red : C.brand, color: '#fff', fontSize: 10, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', border: `2px solid ${dark ? '#1A1814' : C.panel}`, fontVariantNumeric: 'tabular-nums' }}>{items.length}</span>
+          <span aria-hidden="true" style={{ position: 'absolute', top: -4, right: -4, minWidth: 17, height: 17, padding: '0 4px', borderRadius: 9, background: urgent ? C.red : C.brand, color: '#fff', fontSize: 10, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', border: `2px solid ${dark ? C.navy : C.panel}`, fontVariantNumeric: 'tabular-nums' }}>{items.length}</span>
         )}
       </button>
       {open && (
