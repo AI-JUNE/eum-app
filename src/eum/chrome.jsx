@@ -285,28 +285,28 @@ function Sidebar({ role, currentView, onNavigate, onLogout, userName, dataCount 
 
   return (
     <div className="eum-noprint" style={{
-      width: isSenior ? 244 : 248, height: '100vh', background: C.panel,
-      borderRight: `1px solid ${C.line}`,
+      width: isSenior ? 244 : 248, height: '100vh', background: C.navy,
+      borderRight: `1px solid ${C.navyLine}`,
       display: 'flex', flexDirection: 'column', flexShrink: 0,
       position: 'sticky', top: 0,
     }}>
       {/* 브랜드 */}
-      <div style={{ height: 64, padding: '0 18px', display: 'flex', alignItems: 'center', borderBottom: `1px solid ${C.lineSoft}`, flexShrink: 0 }}>
+      <div style={{ height: 64, padding: '0 18px', display: 'flex', alignItems: 'center', borderBottom: `1px solid ${C.navyLine}`, flexShrink: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 9, cursor: 'pointer' }} onClick={() => onNavigate('overview')} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onNavigate('overview'); } }} role="button" tabIndex={0} aria-label="대시보드로">
           <EumLogo size={28} />
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 7 }}>
-            <span style={{ fontSize: 17, fontWeight: 800, color: C.headline, letterSpacing: '-0.04em', lineHeight: 1 }}>이음</span>
-            <span style={{ fontSize: 11, color: C.navMute, fontWeight: 600, letterSpacing: '-0.01em' }}>{persona.label}</span>
+            <span style={{ fontSize: 17, fontWeight: 800, color: C.navyText, letterSpacing: '-0.04em', lineHeight: 1 }}>이음</span>
+            <span style={{ fontSize: 11, color: C.navyMute, fontWeight: 600, letterSpacing: '-0.01em' }}>{persona.label}</span>
           </div>
         </div>
       </div>
 
       {/* 내비게이션 */}
-      <nav className="eum-scroll" role="navigation" aria-label={`${persona.label} 메뉴`} style={{ flex: 1, padding: '12px 10px 8px', overflowY: 'auto' }}>
+      <nav className="eum-scroll eum-scroll-dark" role="navigation" aria-label={`${persona.label} 메뉴`} style={{ flex: 1, padding: '12px 10px 8px', overflowY: 'auto' }}>
         {groups.map((g, gi) => (
           <div key={g.name || gi} style={{ marginBottom: 6 }}>
             {g.name && (
-              <div style={{ fontSize: 10.5, color: C.muteLight, fontWeight: 700, letterSpacing: '0.09em', padding: gi === 0 ? '2px 12px 7px' : '14px 12px 7px', textTransform: 'uppercase' }}>
+              <div style={{ fontSize: 10.5, color: C.navyMute, fontWeight: 700, letterSpacing: '0.09em', padding: gi === 0 ? '2px 12px 7px' : '14px 12px 7px', textTransform: 'uppercase', opacity: 0.75 }}>
                 {g.name}
               </div>
             )}
@@ -320,26 +320,27 @@ function Sidebar({ role, currentView, onNavigate, onLogout, userName, dataCount 
                   style={{
                     width: '100%', display: 'flex', alignItems: 'center', gap: 10,
                     padding: isSenior ? '13px 12px' : '9px 12px', marginBottom: 1,
-                    background: active ? C.brandSoft : 'transparent',
-                    color: active ? C.brand : C.inkSoft,
+                    background: active ? C.brand : 'transparent',
+                    color: active ? '#fff' : C.navyMute,
                     border: 'none', borderRadius: 10, cursor: 'pointer',
                     fontWeight: active ? 700 : 500,
                     fontSize: isSenior ? 16 : 13.5, textAlign: 'left',
                     letterSpacing: '-0.015em',
                     fontFamily: FONT_STACK,
+                    boxShadow: active ? '0 6px 16px -6px rgba(46,107,240,0.6)' : 'none',
                     transition: 'background 0.14s ease, color 0.14s ease',
                   }}
-                  onMouseEnter={(e) => { if (!active) e.currentTarget.style.background = C.hover; }}
-                  onMouseLeave={(e) => { if (!active) e.currentTarget.style.background = 'transparent'; }}
+                  onMouseEnter={(e) => { if (!active) { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = C.navyText; } }}
+                  onMouseLeave={(e) => { if (!active) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = C.navyMute; } }}
                 >
-                  <span style={{ color: active ? C.brand : C.muteLight, display: 'flex', flexShrink: 0 }}>{item.icon}</span>
+                  <span style={{ color: active ? '#fff' : C.navyMute, display: 'flex', flexShrink: 0 }}>{item.icon}</span>
                   <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.label}</span>
                   {item.count !== undefined && item.count > 0 && (
                     <span aria-label={`${item.danger ? '미처리 ' : ''}${item.count}건`} style={{
                       fontSize: 11, fontWeight: 700,
-                      background: item.danger ? C.red : 'transparent',
-                      color: item.danger ? '#fff' : (active ? C.brand : C.muteLight),
-                      padding: item.danger ? '1px 6px' : '1px 2px', borderRadius: 6,
+                      background: item.danger ? C.red : (active ? 'rgba(255,255,255,0.22)' : 'rgba(255,255,255,0.10)'),
+                      color: '#fff',
+                      padding: '1px 6px', borderRadius: 6,
                       minWidth: 16, textAlign: 'center', fontVariantNumeric: 'tabular-nums',
                     }}>{item.count}</span>
                   )}
@@ -351,28 +352,28 @@ function Sidebar({ role, currentView, onNavigate, onLogout, userName, dataCount 
       </nav>
 
       {/* 계정 */}
-      <div style={{ padding: 10, borderTop: `1px solid ${C.lineSoft}`, flexShrink: 0 }}>
+      <div style={{ padding: 10, borderTop: `1px solid ${C.navyLine}`, flexShrink: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 8px', borderRadius: 10 }}>
           <Avatar type={role} name={userName} color={persona.color} size={32} />
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: C.headline, letterSpacing: '-0.02em' }}>{userName}</div>
-            <div style={{ fontSize: 11, color: C.muteLight, fontWeight: 500 }}>{persona.label}</div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: C.navyText, letterSpacing: '-0.02em' }}>{userName}</div>
+            <div style={{ fontSize: 11, color: C.navyMute, fontWeight: 500 }}>{persona.label}</div>
           </div>
           <button
             onClick={onLogout}
-            style={{ background: 'transparent', border: 'none', color: C.muteLight, padding: 6, borderRadius: 8, cursor: 'pointer', display: 'flex' }}
+            style={{ background: 'transparent', border: 'none', color: C.navyMute, padding: 6, borderRadius: 8, cursor: 'pointer', display: 'flex' }}
             aria-label="로그아웃"
             title="로그아웃"
-            onMouseEnter={(e) => { e.currentTarget.style.background = C.hover; e.currentTarget.style.color = C.inkSoft; }}
-            onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = C.muteLight; }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = C.navyText; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = C.navyMute; }}
           >
             <LogOut size={16} />
           </button>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, marginTop: 8, paddingTop: 8, borderTop: `1px solid ${C.lineSoft}` }}>
-          <span style={{ fontSize: 9.5, color: C.muteLight, fontWeight: 600 }}>운영</span>
-          <img src="/logos/gowon.png" alt="고원 GOWON" loading="lazy" decoding="async" style={{ height: 14, objectFit: 'contain', opacity: 0.7 }} onError={(e) => { e.currentTarget.style.display = 'none'; const n = e.currentTarget.nextElementSibling; if (n) n.style.display = 'inline'; }} />
-          <span style={{ display: 'none', fontSize: 9.5, color: C.muteLight, fontWeight: 700 }}>고원(GOWON)</span>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, marginTop: 8, paddingTop: 8, borderTop: `1px solid ${C.navyLine}` }}>
+          <span style={{ fontSize: 9.5, color: C.navyMute, fontWeight: 600 }}>운영</span>
+          <img src="/logos/gowon.png" alt="고원 GOWON" loading="lazy" decoding="async" style={{ height: 14, objectFit: 'contain', opacity: 0.55, filter: 'brightness(0) invert(1)' }} onError={(e) => { e.currentTarget.style.display = 'none'; const n = e.currentTarget.nextElementSibling; if (n) n.style.display = 'inline'; }} />
+          <span style={{ display: 'none', fontSize: 9.5, color: C.navyMute, fontWeight: 700 }}>고원(GOWON)</span>
         </div>
       </div>
     </div>

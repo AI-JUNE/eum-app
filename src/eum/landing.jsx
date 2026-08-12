@@ -966,27 +966,27 @@ function RLLanding({ state, onSelectRole, onShowApplication }) {
         </div>
       </div>
       <div style={{ maxWidth: 1200, width: '100%', padding: isMobile ? '28px 20px 56px' : '64px 40px 96px' }}>
-        {/* 히어로 — 토스 계열 + 모션(그라데이션 오브·진입 스태거·플로팅) */}
-        <div style={{ position: 'relative', margin: isMobile ? '8px 0 56px' : '20px 0 80px' }}>
-          <div className="eum-orb" style={{ width: 400, height: 400, background: C.brand + '24', top: -130, right: -70, animation: 'eumOrb 17s ease-in-out infinite' }} />
-          <div className="eum-orb" style={{ width: 320, height: 320, background: C.peach + '28', bottom: -110, left: -90, animation: 'eumOrb 21s ease-in-out infinite reverse' }} />
+        {/* 히어로 — D-ARS 계열 다크 네이비 프리미엄 밴드 */}
+        <div style={{ position: 'relative', margin: isMobile ? '8px 0 56px' : '20px 0 80px', borderRadius: isMobile ? 24 : 32, overflow: 'hidden', background: `radial-gradient(1100px 500px at 78% 12%, ${C.navy3} 0%, ${C.navy2} 42%, ${C.navy} 100%)`, boxShadow: '0 40px 90px -46px rgba(9,17,34,0.7)', padding: isMobile ? '32px 22px 40px' : '58px 56px' }}>
+          <div className="eum-orb" style={{ width: 420, height: 420, background: 'rgba(46,107,240,0.38)', top: -150, right: -80, animation: 'eumOrb 17s ease-in-out infinite' }} />
+          <div className="eum-orb" style={{ width: 320, height: 320, background: 'rgba(108,92,231,0.26)', bottom: -120, left: -90, animation: 'eumOrb 21s ease-in-out infinite reverse' }} />
           <div style={{ position: 'relative', zIndex: 1, display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: isMobile ? 36 : 56, alignItems: 'center' }}>
           <div className="eum-heroin" style={{ textAlign: isMobile ? 'center' : 'left', display: 'flex', flexDirection: 'column', alignItems: isMobile ? 'center' : 'flex-start' }}>
-            <div className="eum-kicker" style={{ marginBottom: 20 }}><Sparkles size={14} /> 청년·어르신·아동 3세대 · 2027 파일럿</div>
-            <h1 className="eum-serif" style={{ fontSize: isMobile ? 'clamp(40px, 12vw, 54px)' : 'clamp(48px, 5.6vw, 70px)', fontWeight: 800, color: C.ink, lineHeight: 1.12, margin: '0 0 20px' }}>
-              세대를 잇다,<br /><span style={{ color: C.brand }}>이음</span>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: 12.5, fontWeight: 700, letterSpacing: '-0.01em', padding: '6px 13px', borderRadius: 999, background: 'rgba(46,107,240,0.16)', color: '#9FC0FF', border: '1px solid rgba(46,107,240,0.32)', marginBottom: 20 }}><Sparkles size={14} /> 청년·어르신·아동 3세대 · 2027 파일럿</div>
+            <h1 className="eum-serif" style={{ fontSize: isMobile ? 'clamp(40px, 12vw, 54px)' : 'clamp(48px, 5.6vw, 70px)', fontWeight: 800, color: C.navyText, lineHeight: 1.12, margin: '0 0 20px' }}>
+              세대를 잇다,<br /><span style={{ color: '#6B9BFF' }}>이음</span>
             </h1>
-            <p style={{ fontSize: isMobile ? 17.5 : 22, color: C.inkSoft, maxWidth: 520, margin: '0 0 34px', lineHeight: 1.6, fontWeight: 500 }}>
+            <p style={{ fontSize: isMobile ? 17.5 : 22, color: C.navyMute, maxWidth: 520, margin: '0 0 34px', lineHeight: 1.6, fontWeight: 500 }}>
               혼자인 어르신, 방과후 혼자인 아이, 낯선 동네의 청년. 서로의 빈자리를 채우는 우리 동네 3세대 품앗이예요.
             </p>
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 24, justifyContent: isMobile ? 'center' : 'flex-start' }}>
               <Button variant="brand" size="lg" onClick={onShowApplication} iconRight={<ArrowRight size={16} />}>5분 만에 참여 신청</Button>
-              <Button variant="secondary" size="lg" onClick={() => { const el = document.getElementById('eum-demo'); if (el) el.scrollIntoView({ behavior: 'smooth' }); }}>데모 둘러보기</Button>
+              <button type="button" onClick={() => { const el = document.getElementById('eum-demo'); if (el) el.scrollIntoView({ behavior: 'smooth' }); }} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', height: 48, padding: '0 24px', fontSize: 15.5, fontWeight: 700, borderRadius: 10, cursor: 'pointer', fontFamily: FONT_STACK, background: 'rgba(255,255,255,0.08)', color: C.navyText, border: '1px solid rgba(255,255,255,0.18)', transition: 'background .16s ease' }} onMouseEnter={(e)=>e.currentTarget.style.background='rgba(255,255,255,0.14)'} onMouseLeave={(e)=>e.currentTarget.style.background='rgba(255,255,255,0.08)'}>데모 둘러보기</button>
             </div>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: isMobile ? 'center' : 'flex-start' }}>
-              <Badge color={C.blue} soft={C.blueSoft} size="md"><ShieldCheck size={13} /> 통합돌봄 연계</Badge>
-              <Badge color={C.gold} soft={C.goldSoft} size="md"><Wallet size={13} /> 상생카드 보상</Badge>
-              <Badge color={C.sage} soft={C.sageSoft} size="md"><UserCheck size={13} /> 4단계 안전검증</Badge>
+              {[['통합돌봄 연계', ShieldCheck], ['상생카드 보상', Wallet], ['4단계 안전검증', UserCheck]].map(([t, Ic]) => (
+                <span key={t} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12.5, fontWeight: 600, color: C.navyText, background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.14)', padding: '5px 12px', borderRadius: 999 }}><Ic size={13} style={{ opacity: 0.85 }} /> {t}</span>
+              ))}
             </div>
           </div>
           <div style={{ display: 'flex', justifyContent: 'center' }}>
