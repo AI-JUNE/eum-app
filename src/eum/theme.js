@@ -6,48 +6,56 @@
 // ============================================================================
 
 export const C = {
-  // 토스·카카오 계열 상용 팔레트 — 밝고 깨끗한 배경 + 선명한 테라코타 포인트
-  brand: '#BE5535',
-  brandDark: '#9E4329',
-  brandSoft: '#F4E7E0',
-  brandBg: '#FAF3EF',
-  ink: '#1A1A1E',
-  inkSoft: '#46464E',
-  mute: '#71717A',
-  muteLight: '#A2A2AB',
-  cream: '#FBF8F5',
-  cardWarm: '#FCFAF7',
-  bg: '#F5F4F2',
+  // D-ARS 계열 상용 팔레트 — 딥 네이비 + 로열 블루 액센트 + 쿨 라이트(씨크래프 TOBE 시안 반영)
+  brand: '#2E6BF0',
+  brandDark: '#1D50D0',
+  brandSoft: '#E1EAFE',
+  brandBg: '#EEF3FE',
+  ink: '#15181F',
+  inkSoft: '#404652',
+  mute: '#6B7280',
+  muteLight: '#9AA1AD',
+  cream: '#F6F8FC',
+  cardWarm: '#FAFBFE',
+  bg: '#F4F6FB',
   card: '#FFFFFF',
-  border: '#EBE9E4',
-  borderSoft: '#F3F1ED',
-  sage: '#5C7C4F',
-  sageSoft: '#E7EEE0',
-  lavender: '#766B94',
-  lavenderSoft: '#EBE7F0',
-  peach: '#CE885B',
-  peachSoft: '#F6E8D9',
-  gold: '#AC8040',
-  goldSoft: '#F0E6D2',
-  red: '#BD4747',
-  redSoft: '#F6E2E2',
-  blue: '#456A9E',
-  blueSoft: '#E2E9F1',
-  amber: '#CB9836',
-  amberSoft: '#F5ECD1',
-  success: '#5C7C4F',
-  successSoft: '#E7EEE0',
-  muteSoft: '#EDE9DF',
+  border: '#E6E9EF',
+  borderSoft: '#F0F2F6',
+  sage: '#2FA37A',
+  sageSoft: '#DDF3EC',
+  lavender: '#6C5CE7',
+  lavenderSoft: '#E9E6FB',
+  peach: '#E08A4B',
+  peachSoft: '#FBEBDA',
+  gold: '#C79A3A',
+  goldSoft: '#F5ECD3',
+  red: '#E1524B',
+  redSoft: '#FBE4E3',
+  blue: '#2E6BF0',
+  blueSoft: '#E1EAFE',
+  amber: '#E0A32E',
+  amberSoft: '#FAEFD4',
+  success: '#2FA37A',
+  successSoft: '#DDF3EC',
+  muteSoft: '#EAEDF2',
 
-  // ── 콘솔·앱 내부 화면 전용 뉴트럴 (2차 개편) ──────────────────────────
-  // 랜딩(웜 크림 톤)과 분리해, 내부 화면은 차갑고 정밀한 프로덕트 뉴트럴을 쓴다.
-  appBg: '#F4F5F7',
+  // ── 콘솔·앱 내부 화면 전용 뉴트럴 (D-ARS 쿨 톤) ──────────────────────────
+  appBg: '#F4F6FB',
   panel: '#FFFFFF',
-  line: '#E7E9ED',
-  lineSoft: '#F0F1F4',
-  hover: '#F5F6F8',
-  navMute: '#7C828C',
-  headline: '#12141A',
+  line: '#E6E9EF',
+  lineSoft: '#F0F2F6',
+  hover: '#F3F6FC',
+  navMute: '#79808D',
+  headline: '#111827',
+
+  // ── 다크 네이비 (히어로·사이드바 등 D-ARS 프리미엄 다크 서피스) ──────────
+  navy: '#0E1A30',            // 최심부(사이드바 배경)
+  navy2: '#15294A',           // 히어로 그라데이션 중간
+  navy3: '#1E355C',           // 다크 카드/보더 톤
+  navyLine: 'rgba(255,255,255,0.09)',
+  navyText: '#EAF0FA',        // 다크 위 본문
+  navyMute: '#93A2BC',        // 다크 위 보조
+  navyActive: 'rgba(46,107,240,0.18)', // 다크 사이드바 활성 배경
 };
 
 // 내부 화면 공통 그림자 — 얕고 정밀하게(프로덕트 콘솔 문법)
