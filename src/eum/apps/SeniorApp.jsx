@@ -130,8 +130,8 @@ function SeniorApp({ state, user, dispatch, showToast }) {
             </div>
           </div>
 
-          {/* SOS 버튼 */}
-          <SeniorSosCard user={user} dispatch={dispatch} showToast={showToast} match={match} />
+          {/* SOS 버튼 — state를 넘겨 내 호출의 접수·처리 상태를 함께 보여준다(additive) */}
+          <SeniorSosCard user={user} dispatch={dispatch} showToast={showToast} match={match} state={state} />
         </>
       )}
 
@@ -249,8 +249,17 @@ function SeniorSettlementCard({ s, user, dispatch, showToast }) {
   );
 }
 
-function SeniorSosCard({ user, dispatch, showToast, match }) {
+function SeniorSosCard({ user, dispatch, showToast, match, state }) {
   const [confirming, setConfirming] = useState(false);
+
+  // 내가 보낸 호출의 접수·처리 상태 (additive · 표현만) — 토스트가 사라진 뒤에도
+  // "접수됐는지 / 어떻게 처리됐는지"를 어르신이 화면에서 직접 확인할 수 있게 한다.
+  // state가 없으면(구형 호출부) 기존과 동일하게 동작한다.
+  const myReports = (state?.safety_incidents || [])
+    .filter((i) => i.reported_by === user.id)
+    .sort((a, b) => (b.reported_at || '').localeCompare(a.reported_at || ''));
+  const openReport = myReports.find((i) => i.status === 'open');
+  const lastResolved = !openReport ? myReports.find((i) => i.status === 'resolved') : null;
 
   const sendSos = () => {
     const newIncident = {
@@ -278,6 +287,20 @@ function SeniorSosCard({ user, dispatch, showToast, match }) {
       <div style={{ fontSize: 17, color: C.ink, marginBottom: 18, lineHeight: 1.55, fontWeight: 500 }}>
         활동 중 어떤 문제가 있으시면 아래 버튼을 누르세요.<br />코디네이터 한가은이 바로 연락드립니다.
       </div>
+      {/* 접수 확인 — 호출 직후·앱 재방문 시에도 "전달됐다"는 사실을 화면으로 보증 */}
+      {openReport && (
+        <div role="status" style={{ marginBottom: 14, padding: '14px 16px', background: C.amberSoft, borderRadius: 12, fontSize: 16, fontWeight: 600, color: C.ink, lineHeight: 1.55 }}>
+          {fmtDate(openReport.reported_at.slice(0, 10))} 보내신 호출이 접수되었습니다.<br />
+          코디네이터가 확인하고 있으니 조금만 기다려 주세요.
+        </div>
+      )}
+      {/* 처리 결과 — 정산 이의 카드와 같은 문법으로 "어떻게 처리됐는지"까지 알려 안심시킨다 */}
+      {lastResolved && (
+        <div role="status" style={{ marginBottom: 14, padding: '14px 16px', background: C.sageSoft, borderRadius: 12, fontSize: 16, fontWeight: 600, color: C.ink, lineHeight: 1.55 }}>
+          지난 호출은 처리되었습니다{lastResolved.resolved_at ? ` (${fmtDate(lastResolved.resolved_at)})` : ''}.
+          {lastResolved.resolution && <><br /><span style={{ fontWeight: 500, color: C.inkSoft }}>{lastResolved.resolution}</span></>}
+        </div>
+      )}
       {confirming ? (
         <div style={{ display: 'flex', gap: 10 }}>
           <Button variant="danger" size="lg" fullWidth onClick={sendSos} icon={<Phone size={18} />}>
