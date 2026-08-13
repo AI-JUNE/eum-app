@@ -482,7 +482,10 @@ function CoordOverview({ state, setView, dispatch }) {
     const surveyCount = state.surveys.length;
     const avgSatisfaction = surveyCount ? state.surveys.reduce((s, x) => s + (x.satisfaction || 0), 0) / surveyCount : 0;
     const continueRate = surveyCount ? Math.round(state.surveys.filter(x => x.would_continue).length / surveyCount * 100) : 0;
-    return { totalParticipants, youthCount, seniorCount, parentCount, childCount, activeMatches, totalHours, totalSettled, pendingLogs, openIncidents, pendingApps, surveyCount, avgSatisfaction, continueRate };
+    // 처리 대기 추가 집계(additive) — 백로그 #1(정산 이의)·#2(공지 미전달)를 오버뷰 작업 루프로 연결
+    const openDisputes = state.settlements.filter(s => s.dispute && s.dispute.status === 'received').length;
+    const undeliveredNotices = (state.notices || []).reduce((sum, n) => sum + (n.delivery || []).filter(d => d.status === 'failed').length, 0);
+    return { totalParticipants, youthCount, seniorCount, parentCount, childCount, activeMatches, totalHours, totalSettled, pendingLogs, openIncidents, pendingApps, surveyCount, avgSatisfaction, continueRate, openDisputes, undeliveredNotices };
   }, [state]);
 
   // 월별 활동 차트 데이터
@@ -532,7 +535,7 @@ function CoordOverview({ state, setView, dispatch }) {
       <QuickAccessStrip setView={setView} />
 
       {/* 알림 영역 */}
-      {(kpis.openIncidents > 0 || kpis.pendingApps > 0 || kpis.pendingLogs > 5) && (
+      {(kpis.openIncidents > 0 || kpis.pendingApps > 0 || kpis.pendingLogs > 5 || kpis.openDisputes > 0 || kpis.undeliveredNotices > 0) && (
         <div style={{
           marginBottom: 20, padding: '13px 16px 13px 14px',
           background: C.panel, border: `1px solid ${C.line}`, borderLeft: `3px solid ${C.amber}`,
@@ -547,6 +550,8 @@ function CoordOverview({ state, setView, dispatch }) {
             {kpis.openIncidents > 0 && <QueueChip label="안전 이슈" n={kpis.openIncidents} danger onClick={() => setView('safety')} />}
             {kpis.pendingApps > 0 && <QueueChip label="검토 대기" n={kpis.pendingApps} onClick={() => setView('applicants')} />}
             {kpis.pendingLogs > 0 && <QueueChip label="승인 대기" n={kpis.pendingLogs} onClick={() => setView('activities')} />}
+            {kpis.openDisputes > 0 && <QueueChip label="정산 이의" n={kpis.openDisputes} onClick={() => setView('settlements')} />}
+            {kpis.undeliveredNotices > 0 && <QueueChip label="공지 미전달" n={kpis.undeliveredNotices} onClick={() => setView('notices')} />}
           </div>
         </div>
       )}
