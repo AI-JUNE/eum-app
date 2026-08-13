@@ -27,6 +27,7 @@ import { Avatar } from './eum/avatar.jsx';
 import { TERMS_SECTIONS, PRIVACY_SECTIONS, LEGAL_META } from './eum/legal.js';
 import { PLANS, formatKRW, isPaidPlan, requestSubscription, BILLING_ENABLED } from './eum/billing.js';
 import { captureError } from './eum/telemetry.js';
+import { auditFromAction } from './eum/audit.js';
 import {
   Badge,
   OfficialSenderBadge,
@@ -813,6 +814,9 @@ function App() {
   }, [state, loading]);
 
   const dispatch = useCallback((action) => {
+    // 접근·감사 로그(additive) — 감사 대상 액션만 audit.js 링버퍼에 기록.
+    // 리듀서·상태 흐름은 그대로 두고, 실패해도 앱 동작에 영향을 주지 않는다.
+    try { auditFromAction(action, stateRef.current); } catch (e) { /* no-op */ }
     setState(prev => appReducer(prev, action));
   }, []);
 

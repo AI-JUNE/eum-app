@@ -3,7 +3,7 @@
 //   값·로직은 EumApp.jsx 원본과 100% 동일(이동만). 상태·리듀서는 EumApp에 유지.
 // ============================================================================
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Activity, Award, Bell, BellOff, BookOpen, Calendar, Check, CheckCircle2, ClipboardCheck, Clock, FileText, GraduationCap, Heart, Home, LogOut, MapPin, Menu, PenLine, Search, Send, ShieldAlert, ShieldCheck, Sparkles, Star, TrendingUp, UserCheck, UserPlus, Users, Wallet } from 'lucide-react';
+import { Activity, Award, Bell, BellOff, BookOpen, Calendar, Check, CheckCircle2, ClipboardCheck, Clock, FileText, GraduationCap, Heart, Home, LogOut, MapPin, Menu, PenLine, ScrollText, Search, Send, ShieldAlert, ShieldCheck, Sparkles, Star, TrendingUp, UserCheck, UserPlus, Users, Wallet } from 'lucide-react';
 import { C, FONT_STACK, PERSONA, SERIF_STACK, SHADOW } from './theme.js';
 import { TODAY, fmtRelativeDate, uid } from './utils.js';
 import { Avatar } from './avatar.jsx';
@@ -239,6 +239,7 @@ function Sidebar({ role, currentView, onNavigate, onLogout, userName, dataCount 
       { id: 'settlements', label: '정산', icon: <Wallet size={17} />, group: '운영' },
       { id: 'safety', label: '안전 이슈', icon: <ShieldAlert size={17} />, count: dataCount?.openIncidents, danger: dataCount?.openIncidents > 0, group: '운영' },
       { id: 'notices', label: '공지 발송', icon: <Send size={17} />, group: '운영' },
+      { id: 'audit', label: '감사 로그', icon: <ScrollText size={17} />, group: '운영' },
       { id: 'reports', label: '리포트', icon: <FileText size={17} />, group: '성과·납품' },
       { id: 'b2g', label: '공공 성과·납품', icon: <TrendingUp size={17} />, group: '성과·납품' },
       { id: 'b2b', label: '기업·기관 복지', icon: <Award size={17} />, group: '성과·납품' },

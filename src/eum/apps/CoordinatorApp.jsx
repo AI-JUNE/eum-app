@@ -13,6 +13,7 @@ import { Avatar } from '../avatar.jsx';
 import { Badge, Button, Card, Checkbox, CountUp, Empty, Field, Input, KpiStrip, Modal, PageHeader, Panel, Ring, SearchBar, Select, Skeleton, Tabs, Textarea, TrustBadge, useIsMobile } from '../ui.jsx';
 import { Layout, trustStatus } from '../chrome.jsx';
 import { EUM_API } from '../eumApi.js';
+import CoordAudit from './AuditLog.jsx';
 
 function CoordinatorApp({ state, user, dispatch, showToast }) {
   const [view, setView] = useState('overview');
@@ -26,6 +27,7 @@ function CoordinatorApp({ state, user, dispatch, showToast }) {
       {view === 'settlements' && <CoordSettlements state={state} dispatch={dispatch} showToast={showToast} user={user} />}
       {view === 'notices' && <CoordNotices state={state} dispatch={dispatch} showToast={showToast} user={user} />}
       {view === 'safety' && <CoordSafety state={state} dispatch={dispatch} showToast={showToast} user={user} />}
+      {view === 'audit' && <CoordAudit state={state} />}
       {view === 'reports' && <CoordReports state={state} dispatch={dispatch} showToast={showToast} />}
       {view === 'b2g' && <CoordB2G state={state} showToast={showToast} />}
       {view === 'b2b' && <CoordB2B state={state} showToast={showToast} />}
