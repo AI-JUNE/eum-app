@@ -6,6 +6,7 @@ import { useMemo, useState } from 'react';
 import { Activity, AlertCircle, AlertTriangle, ArrowRight, Award, Bell, Calendar, Camera, Check, CheckCircle2, ChevronRight, ClipboardCheck, Clock, Download, FileText, GraduationCap, Hash, Heart, Info, Loader2, Phone, Printer, Search, Send, ShieldAlert, ShieldCheck, Smile, Sparkles, Star, Trash2, TrendingUp, UserPlus, Users, Wallet, X } from 'lucide-react';
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { C, FONT_STACK, PERSONA, SERIF_STACK, SHADOW } from '../theme.js';
+import { validateResolutionMemo, validateNotice, throttleAction } from '../validate.js';
 import { TODAY, fmtDate, krw, uid } from '../utils.js';
 import { callClaude } from '../api.js';
 import { aiAutoTrios, aiDong, aiTrioScore, aiWelfare } from '../matching.js';
@@ -1517,10 +1518,11 @@ function CoordSettlements({ state, dispatch, showToast, user }) {
   const disputes = state.settlements.filter(s => s.dispute);
   const openDisputes = disputes.filter(s => s.dispute.status === 'received');
   const resolveDispute = (result) => {
-    if (!disputeMemo.trim()) { showToast({ type: 'error', message: '처리 메모를 입력해주세요.' }); return; }
+    const v = validateResolutionMemo(disputeMemo);
+    if (!v.ok) { showToast({ type: 'error', message: v.message }); return; }
     dispatch({
       type: 'RESOLVE_SETTLEMENT_DISPUTE',
-      payload: { id: disputeSel.id, result, resolution: disputeMemo.trim(), resolved_at: new Date().toISOString().slice(0, 10), resolved_by: user.name || user.id },
+      payload: { id: disputeSel.id, result, resolution: v.value, resolved_at: new Date().toISOString().slice(0, 10), resolved_by: user.name || user.id },
     });
     showToast({ type: 'success', message: result === 'accepted' ? '이의를 승인 처리했습니다. 참여자 화면에 반영됩니다.' : '이의를 반려 처리했습니다. 참여자 화면에 반영됩니다.' });
     setDisputeSel(null); setDisputeMemo('');
@@ -2323,8 +2325,11 @@ function CoordNotices({ state, dispatch, showToast, user }) {
   const nowStamp = () => new Date().toISOString().slice(0, 16).replace('T', ' ');
 
   const send = async () => {
-    if (!title.trim() || !body.trim()) { showToast({ type: 'error', message: '제목과 내용을 입력해주세요.' }); return; }
+    const v = validateNotice(title, body);
+    if (!v.ok) { showToast({ type: 'error', message: v.message }); return; }
     if (channels.length === 0) { showToast({ type: 'error', message: '발송 채널을 1개 이상 선택해주세요.' }); return; }
+    const gate = throttleAction('notice:send', 2000);
+    if (!gate.ok) { showToast({ type: 'error', message: gate.message }); return; }
     const recips = recipientsFor(audience);
     if (recips.length === 0) { showToast({ type: 'error', message: '발송 대상이 없습니다.' }); return; }
     setSending(true);
@@ -2337,7 +2342,7 @@ function CoordNotices({ state, dispatch, showToast, user }) {
       at,
     }));
     const payload = {
-      id: uid('n'), title: title.trim(), body: body.trim(),
+      id: uid('n'), title: v.value.title, body: v.value.body,
       channels: [...channels], audience, sent_at: at, sent_by: user.name || user.id,
       resend_count: 0, last_resend_at: null, delivery,
     };

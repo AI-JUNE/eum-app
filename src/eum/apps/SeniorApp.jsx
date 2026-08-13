@@ -5,6 +5,7 @@
 import { useMemo, useState } from 'react';
 import { Calendar, Clock, MapPin, Phone, Wallet } from 'lucide-react';
 import { C, SHADOW } from '../theme.js';
+import { validateDisputeReason, throttleAction } from '../validate.js';
 import { TODAY, fmtDate, fmtRelativeDate, krw, uid } from '../utils.js';
 import { Avatar } from '../avatar.jsx';
 import { Badge, Button, Card, InsuranceBadge, OfficialSenderBadge } from '../ui.jsx';
@@ -201,8 +202,11 @@ function SeniorSettlementCard({ s, user, dispatch, showToast }) {
   const [asking, setAsking] = useState(false);
   const [reason, setReason] = useState('');
   const send = () => {
-    if (!reason.trim()) { showToast({ type: 'error', message: '어떤 점이 잘못되었는지 적어주세요.' }); return; }
-    dispatch({ type: 'RAISE_SETTLEMENT_DISPUTE', payload: { id: s.id, reason: reason.trim(), raised_at: new Date().toISOString().slice(0, 10), raised_by: user.id } });
+    const v = validateDisputeReason(reason);
+    if (!v.ok) { showToast({ type: 'error', message: v.message }); return; }
+    const gate = throttleAction('dispute:' + s.id);
+    if (!gate.ok) { showToast({ type: 'error', message: gate.message }); return; }
+    dispatch({ type: 'RAISE_SETTLEMENT_DISPUTE', payload: { id: s.id, reason: v.value, raised_at: new Date().toISOString().slice(0, 10), raised_by: user.id } });
     showToast({ type: 'success', message: '접수되었습니다. 코디네이터가 확인 후 연락드립니다.', duration: 4000 });
     setAsking(false); setReason('');
   };

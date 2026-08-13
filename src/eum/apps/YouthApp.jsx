@@ -5,6 +5,7 @@
 import { useMemo, useState } from 'react';
 import { Activity, ArrowRight, Award, BookOpen, Calendar, Camera, Check, CheckCircle2, Clock, Download, GraduationCap, MapPin, PenLine, Plus, Search, Send, ShieldCheck, Smile, Users, Wallet, X } from 'lucide-react';
 import { C, FONT_STACK, SERIF_STACK, SHADOW } from '../theme.js';
+import { validateDisputeReason, throttleAction } from '../validate.js';
 import { TODAY, fmtDate, fmtRelativeDate, krw, uid } from '../utils.js';
 import { Avatar } from '../avatar.jsx';
 import { AnimatedBar, Badge, Button, Card, Checkbox, CountUp, Empty, Field, InsuranceBadge, KpiStrip, Modal, PageHeader, Panel, Reveal, Ring, Select, Tabs, Textarea } from '../ui.jsx';
@@ -475,8 +476,11 @@ function SettlementView({ settlements, totalHours, totalEarned, user, dispatch, 
   const [disputeTarget, setDisputeTarget] = useState(null);
   const [disputeReason, setDisputeReason] = useState('');
   const submitDispute = () => {
-    if (!disputeReason.trim()) { showToast && showToast({ type: 'error', message: '이의 사유를 입력해주세요.' }); return; }
-    dispatch && dispatch({ type: 'RAISE_SETTLEMENT_DISPUTE', payload: { id: disputeTarget.id, reason: disputeReason.trim(), raised_at: new Date().toISOString().slice(0, 10), raised_by: user.id } });
+    const v = validateDisputeReason(disputeReason);
+    if (!v.ok) { showToast && showToast({ type: 'error', message: v.message }); return; }
+    const gate = throttleAction('dispute:' + disputeTarget.id);
+    if (!gate.ok) { showToast && showToast({ type: 'error', message: gate.message }); return; }
+    dispatch && dispatch({ type: 'RAISE_SETTLEMENT_DISPUTE', payload: { id: disputeTarget.id, reason: v.value, raised_at: new Date().toISOString().slice(0, 10), raised_by: user.id } });
     showToast && showToast({ type: 'success', message: '이의 신청이 접수되었습니다. 코디네이터 검토 후 결과를 알려드립니다.' });
     setDisputeTarget(null); setDisputeReason('');
   };
