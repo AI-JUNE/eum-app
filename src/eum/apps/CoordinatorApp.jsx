@@ -313,15 +313,17 @@ function QuickAccessStrip({ setView }) {
     // 바로가기 — 카드 4개가 KPI와 경쟁하지 않도록 톤을 낮추고, 아이콘·라벨만 남긴다.
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: 10, marginBottom: 20 }}>
       {items.map(it => (
-        <button key={it.id} onClick={() => setView(it.id)} style={{ textAlign: 'left', cursor: 'pointer', fontFamily: FONT_STACK, background: C.panel, border: `1px solid ${C.line}`, borderRadius: 12, padding: '12px 14px', boxShadow: SHADOW.xs, display: 'flex', alignItems: 'center', gap: 11, transition: 'border-color .16s ease, background .16s ease, transform .2s cubic-bezier(0.22,1,0.36,1), box-shadow .2s ease' }}
+        <button key={it.id} type="button" onClick={() => setView(it.id)} aria-label={`${it.t} — ${it.d}`} style={{ textAlign: 'left', cursor: 'pointer', fontFamily: FONT_STACK, background: C.panel, border: `1px solid ${C.line}`, borderRadius: 12, padding: '12px 14px', boxShadow: SHADOW.xs, outline: 'none', outlineOffset: 2, display: 'flex', alignItems: 'center', gap: 11, transition: 'border-color .16s ease, background .16s ease, transform .2s cubic-bezier(0.22,1,0.36,1), box-shadow .2s ease' }}
           onMouseEnter={e => { e.currentTarget.style.borderColor = '#D7DAE0'; e.currentTarget.style.background = C.hover; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = SHADOW.md; }}
-          onMouseLeave={e => { e.currentTarget.style.borderColor = C.line; e.currentTarget.style.background = C.panel; e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = SHADOW.xs; }}>
-          <span style={{ display: 'inline-flex', width: 32, height: 32, alignItems: 'center', justifyContent: 'center', borderRadius: 9, background: it.c + '14', color: it.c, flexShrink: 0 }}>{it.ic}</span>
-          <span style={{ flex: 1, minWidth: 0 }}>
+          onMouseLeave={e => { e.currentTarget.style.borderColor = C.line; e.currentTarget.style.background = C.panel; e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = SHADOW.xs; }}
+          onFocus={e => { e.currentTarget.style.outline = `2px solid ${C.brand}`; }}
+          onBlur={e => { e.currentTarget.style.outline = 'none'; }}>
+          <span aria-hidden="true" style={{ display: 'inline-flex', width: 32, height: 32, alignItems: 'center', justifyContent: 'center', borderRadius: 9, background: it.c + '14', color: it.c, flexShrink: 0 }}>{it.ic}</span>
+          <span aria-hidden="true" style={{ flex: 1, minWidth: 0 }}>
             <span style={{ display: 'block', color: C.headline, fontWeight: 700, fontSize: 13, letterSpacing: '-0.02em' }}>{it.t}</span>
             <span style={{ display: 'block', fontSize: 11, color: C.muteLight, marginTop: 2, fontWeight: 500 }}>{it.d}</span>
           </span>
-          <ChevronRight size={15} color="#C8CCD3" style={{ flexShrink: 0 }} />
+          <ChevronRight size={15} color="#C8CCD3" aria-hidden="true" style={{ flexShrink: 0 }} />
         </button>
       ))}
     </div>
@@ -331,28 +333,35 @@ function QuickAccessStrip({ setView }) {
 // 처리 대기 칩 — 숫자를 앞세워 '무엇이 몇 건'인지 한 호흡에 읽히게 한다.
 function QueueChip({ label, n, danger, onClick }) {
   const col = danger ? C.red : C.inkSoft;
+  const [focused, setFocused] = useState(false);
   return (
+    // 숫자 배지와 라벨이 따로 읽히면 "3 안전 이슈"처럼 들린다 — 문장형 aria-label로 묶고,
+    // 안쪽 시각 요소는 aria-hidden 처리해 중복 낭독을 막는다.
     <button
       type="button"
       onClick={onClick}
+      aria-label={`${label} ${n}건 — 해당 화면으로 이동`}
+      onFocus={() => setFocused(true)}
+      onBlur={() => setFocused(false)}
       style={{
         display: 'inline-flex', alignItems: 'center', gap: 7,
-        padding: '6px 10px 6px 8px', borderRadius: 9,
+        padding: '6px 10px 6px 8px', borderRadius: 9, minHeight: 32,
         border: `1px solid ${C.line}`, background: C.panel,
         cursor: 'pointer', fontFamily: FONT_STACK,
+        outline: focused ? `2px solid ${C.brand}` : 'none', outlineOffset: 2,
         transition: 'background .14s ease, border-color .14s ease',
       }}
       onMouseEnter={(e) => { e.currentTarget.style.background = C.hover; e.currentTarget.style.borderColor = '#D7DAE0'; }}
       onMouseLeave={(e) => { e.currentTarget.style.background = C.panel; e.currentTarget.style.borderColor = C.line; }}
     >
-      <span style={{
+      <span aria-hidden="true" style={{
         minWidth: 20, height: 20, padding: '0 5px', borderRadius: 6,
         background: danger ? C.red : C.headline, color: '#fff',
         fontSize: 11.5, fontWeight: 800, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
         fontVariantNumeric: 'tabular-nums',
       }}>{n}</span>
-      <span style={{ fontSize: 12.5, fontWeight: 600, color: col, letterSpacing: '-0.01em' }}>{label}</span>
-      <ChevronRight size={13} color="#C8CCD3" />
+      <span aria-hidden="true" style={{ fontSize: 12.5, fontWeight: 600, color: col, letterSpacing: '-0.01em' }}>{label}</span>
+      <ChevronRight size={13} color="#C8CCD3" aria-hidden="true" />
     </button>
   );
 }
@@ -536,7 +545,7 @@ function CoordOverview({ state, setView, dispatch }) {
 
       {/* 알림 영역 */}
       {(kpis.openIncidents > 0 || kpis.pendingApps > 0 || kpis.pendingLogs > 5 || kpis.openDisputes > 0 || kpis.undeliveredNotices > 0) && (
-        <div style={{
+        <div role="region" aria-labelledby="coord-today-queue" style={{
           marginBottom: 20, padding: '13px 16px 13px 14px',
           background: C.panel, border: `1px solid ${C.line}`, borderLeft: `3px solid ${C.amber}`,
           borderRadius: 12, boxShadow: SHADOW.xs,
@@ -545,7 +554,7 @@ function CoordOverview({ state, setView, dispatch }) {
           <span style={{ width: 26, height: 26, borderRadius: 8, background: C.amberSoft, color: C.amber, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
             <AlertTriangle size={15} />
           </span>
-          <div style={{ fontSize: 13.5, fontWeight: 700, color: C.headline, letterSpacing: '-0.02em' }}>오늘 처리해야 할 일</div>
+          <div id="coord-today-queue" style={{ fontSize: 13.5, fontWeight: 700, color: C.headline, letterSpacing: '-0.02em' }}>오늘 처리해야 할 일</div>
           <div style={{ marginLeft: 'auto', display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             {kpis.openIncidents > 0 && <QueueChip label="안전 이슈" n={kpis.openIncidents} danger onClick={() => setView('safety')} />}
             {kpis.pendingApps > 0 && <QueueChip label="검토 대기" n={kpis.pendingApps} onClick={() => setView('applicants')} />}
