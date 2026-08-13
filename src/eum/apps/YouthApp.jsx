@@ -58,7 +58,7 @@ function YouthApp({ state, user, dispatch, showToast }) {
               <div style={{ padding: 22 }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, flexWrap: 'wrap', gap: 10 }}>
                   <div>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: C.brand, letterSpacing: '0.08em', marginBottom: 5 }}>우리 매칭 트리오</div>
+                    <div style={{ fontSize: 12.5, fontWeight: 700, color: C.brand, letterSpacing: '0.08em', marginBottom: 5 }}>우리 매칭 트리오</div>
                     <div style={{ fontSize: 19, fontWeight: 800, color: C.headline, letterSpacing: '-0.03em' }}>세 세대가 함께하고 있어요</div>
                     <div style={{ fontSize: 12.5, color: C.muteLight, marginTop: 4, fontWeight: 500 }}>매칭 시작 {fmtDate(match.started_at)} · {myActivities.filter(a => a.status === 'completed').length}회차 진행</div>
                   </div>
@@ -75,7 +75,7 @@ function YouthApp({ state, user, dispatch, showToast }) {
 
                 {match.match_notes && (
                   <div style={{ marginTop: 20, padding: '12px 14px', background: C.lineSoft, borderRadius: 10, fontSize: 13, color: C.inkSoft, lineHeight: 1.6 }}>
-                    <span style={{ fontSize: 11.5, fontWeight: 700, color: C.navMute, marginRight: 7 }}>코디 메모</span>
+                    <span style={{ fontSize: 12.5, fontWeight: 700, color: C.navMute, marginRight: 7 }}>코디 메모</span>
                     {match.match_notes}
                   </div>
                 )}
@@ -129,7 +129,7 @@ function YouthApp({ state, user, dispatch, showToast }) {
             <div style={{ padding: '16px 20px', borderBottom: `1px solid ${C.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
                 <div style={{ fontSize: 15, fontWeight: 700, color: C.ink }}>최근 활동 기록</div>
-                <div style={{ fontSize: 12, color: C.mute, marginTop: 2 }}>코디 승인 후 정산에 반영됩니다</div>
+                <div style={{ fontSize: 13, color: C.mute, marginTop: 2 }}>코디 승인 후 정산에 반영됩니다</div>
               </div>
               <Button variant="primary" size="sm" icon={<PenLine size={14} />} onClick={() => setView('logs')}>새 기록 작성</Button>
             </div>
@@ -142,8 +142,8 @@ function YouthApp({ state, user, dispatch, showToast }) {
                       <div style={{ flex: 1 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
                           <Badge color={C.brand} soft={C.brandSoft}>{act?.type || '—'}</Badge>
-                          <span style={{ fontSize: 12, color: C.mute }}>{act ? fmtDate(act.scheduled_at) : ''}</span>
-                          <span style={{ fontSize: 12, color: C.mute }}>· {log.hours}시간</span>
+                          <span style={{ fontSize: 13, color: C.mute }}>{act ? fmtDate(act.scheduled_at) : ''}</span>
+                          <span style={{ fontSize: 13, color: C.mute }}>· {log.hours}시간</span>
                         </div>
                         <div style={{ fontSize: 13.5, color: C.ink, lineHeight: 1.6 }}>{log.summary}</div>
                       </div>
@@ -187,7 +187,7 @@ function TrioMember({ person, sub, color, highlight, trust }) {
         </div>}
       </div>
       <div style={{ fontSize: 14, fontWeight: 700, color: C.headline, letterSpacing: '-0.02em' }}>{person.name}</div>
-      <div style={{ fontSize: 11.5, color: C.muteLight, marginTop: 2, fontWeight: 500 }}>{sub} · {person.age}세</div>
+      <div style={{ fontSize: 12.5, color: C.muteLight, marginTop: 2, fontWeight: 500 }}>{sub} · {person.age}세</div>
     </div>
   );
 }
@@ -197,10 +197,10 @@ function ActivityTypeCard({ type, icon, desc, color, count }) {
     <Card padding={16} hoverable style={{ borderColor: color + '30' }}>
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 10 }}>
         <div style={{ padding: 8, borderRadius: 9, background: color + '20', color }}>{icon}</div>
-        <span style={{ fontSize: 11, color, fontWeight: 700, background: color + '15', padding: '2px 7px', borderRadius: 6 }}>{count}회 완료</span>
+        <span style={{ fontSize: 12.5, color, fontWeight: 700, background: color + '15', padding: '2px 7px', borderRadius: 6 }}>{count}회 완료</span>
       </div>
       <div style={{ fontSize: 15, fontWeight: 700, color: C.ink, marginBottom: 4 }}>{type}</div>
-      <div style={{ fontSize: 12, color: C.mute, lineHeight: 1.5 }}>{desc}</div>
+      <div style={{ fontSize: 13, color: C.mute, lineHeight: 1.5 }}>{desc}</div>
     </Card>
   );
 }
@@ -239,7 +239,7 @@ function YouthSchedule({ match, activities, state, user, dispatch, showToast }) 
                     background: isPast ? C.lineSoft : C.brandBg, borderRadius: 10,
                     border: `1px solid ${isPast ? C.line : C.brand + '33'}`,
                   }}>
-                    <div style={{ fontSize: 10, fontWeight: 700, color: isPast ? C.muteLight : C.brand, letterSpacing: '0.03em' }}>{act.scheduled_at.split('-')[1]}월</div>
+                    <div style={{ fontSize: 12.5, fontWeight: 700, color: isPast ? C.muteLight : C.brand, letterSpacing: '0.03em' }}>{act.scheduled_at.split('-')[1]}월</div>
                     <div style={{ fontSize: 20, fontWeight: 800, color: isPast ? C.navMute : C.headline, letterSpacing: '-0.02em', lineHeight: 1.1, fontVariantNumeric: 'tabular-nums' }}>{act.scheduled_at.split(' ')[0].split('-')[2]}</div>
                   </div>
                   <div>
@@ -250,7 +250,7 @@ function YouthSchedule({ match, activities, state, user, dispatch, showToast }) 
                     <div style={{ fontSize: 14, fontWeight: 700, color: C.headline, marginBottom: 3, letterSpacing: '-0.02em', fontVariantNumeric: 'tabular-nums' }}>
                       {act.scheduled_at.split(' ')[1]} · {act.duration_hours}시간
                     </div>
-                    <div style={{ fontSize: 12, color: C.navMute, display: 'flex', alignItems: 'center', gap: 4, fontWeight: 500 }}>
+                    <div style={{ fontSize: 13, color: C.navMute, display: 'flex', alignItems: 'center', gap: 4, fontWeight: 500 }}>
                       <MapPin size={12} style={{ color: C.muteLight }} /> {act.location}
                     </div>
                   </div>
@@ -323,9 +323,9 @@ function YouthLogs({ state, user, match, myLogs, myActivities, dispatch, showToa
               <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                   <Badge color={C.brand} soft={C.brandSoft} size="sm">{act?.type}</Badge>
-                  <span style={{ fontSize: 12, color: C.muteLight, fontWeight: 500, fontVariantNumeric: 'tabular-nums' }}>{act ? fmtDate(act.scheduled_at) : ''}</span>
-                  <span style={{ fontSize: 12, color: C.muteLight, fontWeight: 500 }}>· {log.hours}시간</span>
-                  {log.has_photo && <span style={{ fontSize: 11, color: C.muteLight, display: 'inline-flex', alignItems: 'center', gap: 3 }}><Camera size={11} /> 사진</span>}
+                  <span style={{ fontSize: 13, color: C.muteLight, fontWeight: 500, fontVariantNumeric: 'tabular-nums' }}>{act ? fmtDate(act.scheduled_at) : ''}</span>
+                  <span style={{ fontSize: 13, color: C.muteLight, fontWeight: 500 }}>· {log.hours}시간</span>
+                  {log.has_photo && <span style={{ fontSize: 12.5, color: C.muteLight, display: 'inline-flex', alignItems: 'center', gap: 3 }}><Camera size={11} /> 사진</span>}
                 </div>
                 {log.approved ? (
                   <Badge color={C.sage} soft={C.sageSoft} size="sm"><Check size={11} /> 승인됨</Badge>
@@ -387,7 +387,7 @@ function YouthMentor({ senior, myLogs, state }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
             <Avatar type="senior" name={senior.name} color={C.lavender} size={64} ring />
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 11.5, color: C.lavender, fontWeight: 700, marginBottom: 4 }}>나의 멘토</div>
+              <div style={{ fontSize: 12.5, color: C.lavender, fontWeight: 700, marginBottom: 4 }}>나의 멘토</div>
               <div style={{ fontSize: 20, fontWeight: 800, color: C.headline, letterSpacing: '-0.03em' }}>{senior.name} 어르신</div>
               <div style={{ fontSize: 13, color: C.inkSoft, marginTop: 4, fontWeight: 500 }}>{senior.occupation} · {senior.age}세</div>
               <div style={{ fontSize: 12.5, color: C.navMute, marginTop: 7, lineHeight: 1.55 }}>“{senior.bio}”</div>
@@ -405,7 +405,7 @@ function YouthMentor({ senior, myLogs, state }) {
             <Card key={log.id} padding={18}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
                 <Badge color={C.brand} soft={C.brandSoft}>진로조언</Badge>
-                <span style={{ fontSize: 12, color: C.mute }}>{act ? fmtDate(act.scheduled_at) : ''}</span>
+                <span style={{ fontSize: 13, color: C.mute }}>{act ? fmtDate(act.scheduled_at) : ''}</span>
               </div>
               <div style={{ fontSize: 14, color: C.inkSoft, lineHeight: 1.7, paddingLeft: 14, borderLeft: `3px solid ${C.lavender}` }}>{log.summary}</div>
             </Card>
@@ -449,7 +449,7 @@ function ArchiveView({ state }) {
                   <Avatar type={author?.type} gender={author?.gender} name={author?.name} color={author?.avatar_color || C.brand} size={32} />
                   <div>
                     <div style={{ fontSize: 13, fontWeight: 700, color: C.ink }}>{author?.name}</div>
-                    <div style={{ fontSize: 11, color: C.mute }}>{fmtDate(act?.scheduled_at)} 채록</div>
+                    <div style={{ fontSize: 12.5, color: C.mute }}>{fmtDate(act?.scheduled_at)} 채록</div>
                   </div>
                 </div>
                 {log.has_photo && <Badge color={C.gold} soft={C.goldSoft}><Camera size={11} /> 사진</Badge>}
@@ -500,7 +500,7 @@ function SettlementView({ settlements, totalHours, totalEarned, user, dispatch, 
           <div key={s.id} style={{ padding: '14px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, borderTop: i === 0 ? 'none' : `1px solid ${C.lineSoft}` }}>
             <div style={{ minWidth: 0 }}>
               <div style={{ fontSize: 14, fontWeight: 700, color: C.headline, marginBottom: 4, letterSpacing: '-0.02em' }}>{s.month.replace('-', '년 ')}월 활동분</div>
-              <div style={{ fontSize: 11.5, color: C.muteLight, display: 'flex', gap: 8, flexWrap: 'wrap', fontWeight: 500 }}>
+              <div style={{ fontSize: 12.5, color: C.muteLight, display: 'flex', gap: 8, flexWrap: 'wrap', fontWeight: 500 }}>
                 <span style={{ fontVariantNumeric: 'tabular-nums' }}>{s.total_hours}시간</span>
                 <span>·</span>
                 <span style={{ fontVariantNumeric: 'tabular-nums' }}>{fmtDate(s.issued_at)} 발급</span>
@@ -523,12 +523,12 @@ function SettlementView({ settlements, totalHours, totalEarned, user, dispatch, 
                     type="button"
                     onClick={() => { setDisputeTarget(s); setDisputeReason(''); }}
                     aria-label={`${s.month.replace('-', '년 ')}월 정산에 이의 신청`}
-                    style={{ border: 'none', background: 'transparent', padding: '2px 4px', fontSize: 11.5, fontWeight: 700, color: C.mute, textDecoration: 'underline', textUnderlineOffset: 3, cursor: 'pointer', fontFamily: 'inherit' }}
+                    style={{ border: 'none', background: 'transparent', padding: '8px 10px', fontSize: 12.5, fontWeight: 700, color: C.mute, textDecoration: 'underline', textUnderlineOffset: 3, cursor: 'pointer', fontFamily: 'inherit' }}
                   >이의 신청</button>
                 )}
               </div>
               {s.dispute && (s.dispute.status === 'accepted' || s.dispute.status === 'rejected') && s.dispute.resolution && (
-                <div style={{ fontSize: 11.5, color: C.navMute, marginTop: 5, maxWidth: 260, lineHeight: 1.5, textAlign: 'right' }}>처리 결과: {s.dispute.resolution}</div>
+                <div style={{ fontSize: 12.5, color: C.navMute, marginTop: 5, maxWidth: 260, lineHeight: 1.5, textAlign: 'right' }}>처리 결과: {s.dispute.resolution}</div>
               )}
             </div>
           </div>
@@ -552,12 +552,12 @@ function SettlementView({ settlements, totalHours, totalEarned, user, dispatch, 
           <>
             <div style={{ padding: '12px 14px', background: C.lineSoft, borderRadius: 10, marginBottom: 14 }}>
               <div style={{ fontSize: 13.5, fontWeight: 700, color: C.headline }}>{disputeTarget.month.replace('-', '년 ')}월 활동분 · {krw(disputeTarget.amount_krw)}</div>
-              <div style={{ fontSize: 11.5, color: C.muteLight, marginTop: 3 }}>{disputeTarget.total_hours}시간 · {disputeTarget.voucher_code}</div>
+              <div style={{ fontSize: 12.5, color: C.muteLight, marginTop: 3 }}>{disputeTarget.total_hours}시간 · {disputeTarget.voucher_code}</div>
             </div>
             <Field label="이의 사유" required>
               <Textarea value={disputeReason} onChange={setDisputeReason} rows={4} placeholder="예) 활동 시간이 실제와 다르게 집계된 것 같습니다." />
             </Field>
-            <div style={{ fontSize: 12, color: C.navMute, marginTop: 10, lineHeight: 1.6 }}>접수된 이의는 코디네이터가 검토하며, 처리 결과는 이 화면에서 확인할 수 있습니다.</div>
+            <div style={{ fontSize: 13, color: C.navMute, marginTop: 10, lineHeight: 1.6 }}>접수된 이의는 코디네이터가 검토하며, 처리 결과는 이 화면에서 확인할 수 있습니다.</div>
           </>
         )}
       </Modal>
@@ -581,15 +581,15 @@ function VolunteerHub({ user, totalHours, setView, showToast }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 18px', background: C.brand, color: '#fff' }}>
         <Award size={17} />
         <div style={{ fontSize: 13.5, fontWeight: 700, letterSpacing: '-0.01em' }}>1365 자원봉사 실적 연계</div>
-        <span style={{ marginLeft: 'auto', fontSize: 10.5, fontWeight: 700, background: 'rgba(255,255,255,.22)', padding: '3px 9px', borderRadius: 7 }}>공식 인정</span>
+        <span style={{ marginLeft: 'auto', fontSize: 12.5, fontWeight: 700, background: 'rgba(255,255,255,.22)', padding: '3px 9px', borderRadius: 7 }}>공식 인정</span>
       </div>
       <div style={{ padding: 18 }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(120px,1fr))', gap: 14, marginBottom: 16 }}>
-          <div><div style={{ fontSize: 11.5, color: C.navMute, fontWeight: 600 }}>인정 봉사시간</div><div style={{ fontSize: 24, fontWeight: 800, color: C.headline, letterSpacing: '-0.03em', marginTop: 3, fontVariantNumeric: 'tabular-nums' }}>{hrs}<span style={{ fontSize: 12.5, color: C.muteLight, fontWeight: 600 }}>시간</span></div></div>
-          <div><div style={{ fontSize: 11.5, color: C.navMute, fontWeight: 600 }}>봉사 마일리지</div><div style={{ fontSize: 24, fontWeight: 800, color: C.brand, letterSpacing: '-0.03em', marginTop: 3, fontVariantNumeric: 'tabular-nums' }}>{miles.toLocaleString('ko-KR')}<span style={{ fontSize: 12.5, color: C.muteLight, fontWeight: 600 }}>P</span></div></div>
-          <div><div style={{ fontSize: 11.5, color: C.navMute, fontWeight: 600 }}>나이스(학생부) 연계</div><div style={{ fontSize: 14, fontWeight: 700, color: C.sage, marginTop: 6, display: 'flex', alignItems: 'center', gap: 4 }}><CheckCircle2 size={14} /> 연계 가능</div></div>
+          <div><div style={{ fontSize: 12.5, color: C.navMute, fontWeight: 600 }}>인정 봉사시간</div><div style={{ fontSize: 24, fontWeight: 800, color: C.headline, letterSpacing: '-0.03em', marginTop: 3, fontVariantNumeric: 'tabular-nums' }}>{hrs}<span style={{ fontSize: 12.5, color: C.muteLight, fontWeight: 600 }}>시간</span></div></div>
+          <div><div style={{ fontSize: 12.5, color: C.navMute, fontWeight: 600 }}>봉사 마일리지</div><div style={{ fontSize: 24, fontWeight: 800, color: C.brand, letterSpacing: '-0.03em', marginTop: 3, fontVariantNumeric: 'tabular-nums' }}>{miles.toLocaleString('ko-KR')}<span style={{ fontSize: 12.5, color: C.muteLight, fontWeight: 600 }}>P</span></div></div>
+          <div><div style={{ fontSize: 12.5, color: C.navMute, fontWeight: 600 }}>나이스(학생부) 연계</div><div style={{ fontSize: 14, fontWeight: 700, color: C.sage, marginTop: 6, display: 'flex', alignItems: 'center', gap: 4 }}><CheckCircle2 size={14} /> 연계 가능</div></div>
         </div>
-        <div style={{ fontSize: 12, color: C.navMute, lineHeight: 1.6, marginBottom: 14 }}>이음 활동은 <b style={{ color: C.inkSoft }}>1365 자원봉사 실적</b>으로 인정됩니다. 실적확인서를 발급해 대학·취업·학교생활기록부(나이스)에 활용하세요.</div>
+        <div style={{ fontSize: 13, color: C.navMute, lineHeight: 1.6, marginBottom: 14 }}>이음 활동은 <b style={{ color: C.inkSoft }}>1365 자원봉사 실적</b>으로 인정됩니다. 실적확인서를 발급해 대학·취업·학교생활기록부(나이스)에 활용하세요.</div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           <Button variant="brand" size="sm" icon={<Download size={14} />} loading={issuing} onClick={async()=>{ if (issuing) return; setIssuing(true); try { const r=await EUM_API.v1365.issueCertificate(user.id); showToast ? showToast({ type: 'success', message: '실적확인서 발급 완료 · '+r.certNo }) : setView('settlement'); } finally { setIssuing(false); } }}>실적확인서 발급</Button>
           <Button variant="secondary" size="sm" icon={<Search size={14} />} onClick={() => setView('discover')}>활동 찾기</Button>
@@ -653,7 +653,7 @@ function YouthDiscover({ user, totalHours, showToast, setView }) {
         {DISCOVER_CATS.map(c => {
           const on = cat === c;
           return (
-            <button key={c} onClick={() => setCat(c)} aria-pressed={on} style={{ cursor: 'pointer', fontFamily: FONT_STACK, fontSize: 12.5, fontWeight: on ? 700 : 500, padding: '7px 13px', borderRadius: 9, border: `1px solid ${on ? 'transparent' : C.line}`, background: on ? C.headline : C.panel, color: on ? '#fff' : C.inkSoft, transition: 'background .14s ease, color .14s ease' }}>{c}</button>
+            <button key={c} onClick={() => setCat(c)} aria-pressed={on} style={{ cursor: 'pointer', fontFamily: FONT_STACK, fontSize: 12.5, fontWeight: on ? 700 : 500, padding: '9px 14px', borderRadius: 10, border: `1px solid ${on ? 'transparent' : C.line}`, background: on ? C.headline : C.panel, color: on ? '#fff' : C.inkSoft, transition: 'background .14s ease, color .14s ease' }}>{c}</button>
           );
         })}
       </div>
@@ -676,13 +676,13 @@ function YouthDiscover({ user, totalHours, showToast, setView }) {
               {full ? <Badge color={C.mute} soft={C.lineSoft} size="sm">모집 마감</Badge> : x.hot && <Badge color={C.brand} soft={C.brandSoft} size="sm">인기</Badge>}
             </div>
             <div style={{ fontSize: 15, fontWeight: 800, marginBottom: 8 }}>{x.t}</div>
-            <div style={{ fontSize: 12, color: C.inkSoft, display: 'flex', flexDirection: 'column', gap: 5, marginBottom: 11 }}>
+            <div style={{ fontSize: 13, color: C.inkSoft, display: 'flex', flexDirection: 'column', gap: 5, marginBottom: 11 }}>
               <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><MapPin size={13} style={{ color: C.mute }} />{x.org} · {x.place}</span>
               <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Clock size={13} style={{ color: C.mute }} />{x.when} · 모집 {x.cap}</span>
             </div>
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 12 }}>
-              <span style={{ fontSize: 11.5, fontWeight: 700, color: C.gold, background: C.goldSoft, padding: '4px 9px', borderRadius: 7 }}>상품권 {x.reward.toLocaleString('ko-KR')}원</span>
-              <span style={{ fontSize: 11.5, fontWeight: 700, color: '#FF6B35', background: '#FFE9DF', padding: '4px 9px', borderRadius: 7 }}>봉사 {x.hrs}시간 인정</span>
+              <span style={{ fontSize: 12.5, fontWeight: 700, color: C.gold, background: C.goldSoft, padding: '4px 9px', borderRadius: 7 }}>상품권 {x.reward.toLocaleString('ko-KR')}원</span>
+              <span style={{ fontSize: 12.5, fontWeight: 700, color: '#FF6B35', background: '#FFE9DF', padding: '4px 9px', borderRadius: 7 }}>봉사 {x.hrs}시간 인정</span>
             </div>
             <Button variant="brand" size="sm" fullWidth disabled={full} onClick={() => showToast && showToast(`'${x.t}' 참여를 신청했습니다 · 코디 확인 후 확정`, 'success')}>{full ? '모집 마감' : '참여 신청'}</Button>
           </Card>
@@ -693,7 +693,7 @@ function YouthDiscover({ user, totalHours, showToast, setView }) {
 
       <Card style={{ marginTop: 16, background: '#FFF4EE', border: '1px solid #FFD9C7' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}><Award size={16} style={{ color: '#FF6B35' }} /><div style={{ fontSize: 13, fontWeight: 800, color: '#D9531E' }}>참여하면 1365 봉사실적으로 인정</div></div>
-        <div style={{ fontSize: 12, color: C.inkSoft, lineHeight: 1.6 }}>이음 활동시간은 <b>1365 자원봉사포털 실적</b>과 연계되어 실적확인서·나이스(학생부) 연계·봉사 마일리지로 쌓입니다. 단기 알바와 달리 <b>경력·스펙·보상</b>을 동시에.</div>
+        <div style={{ fontSize: 13, color: C.inkSoft, lineHeight: 1.6 }}>이음 활동시간은 <b>1365 자원봉사포털 실적</b>과 연계되어 실적확인서·나이스(학생부) 연계·봉사 마일리지로 쌓입니다. 단기 알바와 달리 <b>경력·스펙·보상</b>을 동시에.</div>
       </Card>
     </div>
   );
