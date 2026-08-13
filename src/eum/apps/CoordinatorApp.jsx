@@ -59,7 +59,7 @@ function AIWrap({ label, children, color }){
       <div style={{ display:'flex', alignItems:'center', gap:7, padding:'10px 16px', borderBottom:`1px solid ${C.lineSoft}`, background:C.lineSoft }}>
         <Sparkles size={13} style={{ color:c }} />
         <span style={{ fontSize:12, fontWeight:700, color:C.headline, letterSpacing:'-0.01em' }}>{label}</span>
-        <span style={{ marginLeft:'auto', fontSize:10.5, fontWeight:700, color:c, background:c+'14', padding:'2px 7px', borderRadius:6 }}>AI 생성</span>
+        <span style={{ marginLeft:'auto', fontSize:12.5, fontWeight:700, color:c, background:c+'14', padding:'2px 7px', borderRadius:6 }}>AI 생성</span>
       </div>
       <div style={{ padding:'16px 18px' }}>{children}</div>
     </div>
@@ -70,7 +70,7 @@ function AIBars({ parts }){
     <div style={{ display:'flex', flexDirection:'column', gap:7, marginTop:8 }}>
       {parts.map(p=>(
         <div key={p.k} style={{ display:'flex', alignItems:'center', gap:9 }}>
-          <div style={{ flex:'0 0 118px', fontSize:11, color:C.inkSoft, fontWeight:600 }}>{p.label}<span style={{ color:C.mute, fontWeight:500 }}> ·{p.w}</span></div>
+          <div style={{ flex:'0 0 118px', fontSize:12.5, color:C.inkSoft, fontWeight:600 }}>{p.label}<span style={{ color:C.mute, fontWeight:500 }}> ·{p.w}</span></div>
           <div style={{ flex:1, height:9, borderRadius:6, background:C.bg, overflow:'hidden' }}><div style={{ width:p.v+'%', height:'100%', background:'linear-gradient(90deg,#9db4dd,'+C.blue+')' }} /></div>
           <div style={{ flex:'0 0 28px', textAlign:'right', fontSize:12, fontWeight:800, color:C.blue }}>{p.v}</div>
         </div>
@@ -124,12 +124,12 @@ function CoordAdvisor({ state, showToast }){
                       {x.gap ? <Badge color={C.brand} soft={C.brandSoft} size="sm">사각지대 발굴</Badge> : <Badge color={C.sage} soft={C.sageSoft} size="sm">수급 중</Badge>}
                     </div>
                     <div style={{ fontSize:12.5, color:C.navMute, marginTop:6, lineHeight:1.55 }}>{x.why}</div>
-                    <div style={{ display:'flex', gap:14, marginTop:9, flexWrap:'wrap', fontSize:11.5, color:C.inkSoft }}><span><b style={{ color:C.gold }}>혜택</b> {x.benefit}</span><span><b style={{ color:C.blue }}>신청</b> {x.where}</span></div>
+                    <div style={{ display:'flex', gap:14, marginTop:9, flexWrap:'wrap', fontSize:12.5, color:C.inkSoft }}><span><b style={{ color:C.gold }}>혜택</b> {x.benefit}</span><span><b style={{ color:C.blue }}>신청</b> {x.where}</span></div>
                   </div>
                 ))}
               </div>
               <div style={{ display:'flex', gap:8, marginTop:12 }}><Button variant="brand" size="sm" onClick={async()=>{ await EUM_API.notify.alimtalk(); showToast && showToast('신청 동행 등록 + 알림톡 발송(API)','success'); }}>신청 동행 등록</Button></div>
-              <div style={{ fontSize:10.5, color:C.mute, marginTop:9, lineHeight:1.5 }}>※ 규칙기반 추정이며 실제 수급 자격은 신청·심사로 확정됩니다. 코디가 최종 확인 후 신청을 동행합니다.</div>
+              <div style={{ fontSize:12.5, color:C.mute, marginTop:9, lineHeight:1.5 }}>※ 규칙기반 추정이며 실제 수급 자격은 신청·심사로 확정됩니다. 코디가 최종 확인 후 신청을 동행합니다.</div>
             </AIWrap>
           )}
         </div>
@@ -164,7 +164,7 @@ function CoordAIMatch({ state, showToast }){
                   <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}><Badge color={C.blue} soft={C.blueSoft} size="sm">추천 #{i+1}</Badge><span style={{ fontSize:22, fontWeight:800, color:C.headline, letterSpacing:'-0.03em', fontVariantNumeric:'tabular-nums' }}>{t.total}<span style={{ fontSize:12, color:C.muteLight, fontWeight:600 }}>점</span></span></div>
                   <div style={{ display:'flex', gap:6, margin:'11px 0', flexWrap:'wrap' }}><Badge color={C.sage} soft={C.sageSoft} size="sm">{t.y.name}</Badge><Badge color={C.lavender} soft={C.lavenderSoft} size="sm">{t.s.name}</Badge><Badge color={C.peach} soft={C.peachSoft} size="sm">{t.c.name}</Badge></div>
                   <AIBars parts={t.parts} />
-                  <div style={{ marginTop:10, display:'flex', flexDirection:'column', gap:3 }}>{t.tags.slice(0,3).map((tg,j)=><div key={j} style={{ fontSize:11.5, color:C.navMute }}>· <b style={{ color:C.inkSoft }}>{tg[0]}</b> {tg[1]}</div>)}</div>
+                  <div style={{ marginTop:10, display:'flex', flexDirection:'column', gap:3 }}>{t.tags.slice(0,3).map((tg,j)=><div key={j} style={{ fontSize:12.5, color:C.navMute }}>· <b style={{ color:C.inkSoft }}>{tg[0]}</b> {tg[1]}</div>)}</div>
                   <Button variant="secondary" size="sm" fullWidth style={{ marginTop:12 }} onClick={()=>showToast && showToast('코디 확정 대기열에 담았습니다','success')}>코디 확정 검토</Button>
                 </Card>
               ))}
@@ -178,9 +178,9 @@ function CoordAIMatch({ state, showToast }){
           <div className="eum-ai-cols" style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:10 }}>
             {[['청년',youths,yId,setY],['어르신',seniors,sId,setS],['아동',children,cId,setC]].map(([t,arr,val,set])=>(
               <Card key={t} padding={13}>
-                <div style={{ fontSize:11.5, fontWeight:700, color:C.navMute, marginBottom:9 }}>{t} 선택</div>
+                <div style={{ fontSize:12.5, fontWeight:700, color:C.navMute, marginBottom:9 }}>{t} 선택</div>
                 <div style={{ display:'flex', flexDirection:'column', gap:5 }}>
-                  {arr.map(o=><button key={o.id} onClick={()=>set(o.id)} style={{ textAlign:'left', cursor:'pointer', fontFamily:FONT_STACK, fontSize:12.5, fontWeight:val===o.id?700:500, padding:'8px 10px', borderRadius:9, background:val===o.id?C.brandSoft:C.panel, border:'1px solid '+(val===o.id?'transparent':C.line), color:val===o.id?C.brand:C.ink, transition:'background .14s ease' }}>{o.name} <span style={{ fontSize:10.5, color:C.muteLight, fontWeight:500 }}>{o.age}·{aiDong(o.address)}</span></button>)}
+                  {arr.map(o=><button key={o.id} onClick={()=>set(o.id)} style={{ textAlign:'left', cursor:'pointer', fontFamily:FONT_STACK, fontSize:12.5, fontWeight:val===o.id?700:500, padding:'8px 10px', borderRadius:9, background:val===o.id?C.brandSoft:C.panel, border:'1px solid '+(val===o.id?'transparent':C.line), color:val===o.id?C.brand:C.ink, transition:'background .14s ease' }}>{o.name} <span style={{ fontSize:12.5, color:C.muteLight, fontWeight:500 }}>{o.age}·{aiDong(o.address)}</span></button>)}
                 </div>
               </Card>
             ))}
@@ -286,7 +286,7 @@ function CoordChaperone({ state, showToast }){
           {!done && !busy && <Card padding={0}><Empty icon={<ShieldCheck size={26} />} title="아직 분석 전입니다" sub="왼쪽에서 ‘AI 안전 분석 실행’을 누르면 위험신호와 권고 조치가 이곳에 표시돼요" /></Card>}
           {done && (
             <AIWrap label="AI 안전 채퍼론" color={C.lavender}>
-              <div style={{ textAlign:'center', margin:'2px 0 14px' }}><div style={{ fontSize:36, fontWeight:800, color:rc, letterSpacing:'-0.04em', fontVariantNumeric:'tabular-nums' }}>{score}</div><div style={{ fontSize:11.5, color:C.navMute, fontWeight:500 }}>위험 점수 / 100</div></div>
+              <div style={{ textAlign:'center', margin:'2px 0 14px' }}><div style={{ fontSize:36, fontWeight:800, color:rc, letterSpacing:'-0.04em', fontVariantNumeric:'tabular-nums' }}>{score}</div><div style={{ fontSize:12.5, color:C.navMute, fontWeight:500 }}>위험 점수 / 100</div></div>
               <div style={{ display:'flex', flexDirection:'column', gap:8 }}>{flags.map((f,j)=><div key={j} style={{ display:'flex', alignItems:'center', gap:8, fontSize:12.5 }}><Badge color={f.sev>=2?C.red:C.gold} soft={f.sev>=2?C.redSoft:C.goldSoft} size="sm">{f.risk}</Badge><span style={{ color:C.inkSoft }}>“…{f.w}…” ({f.sp})</span></div>)}</div>
               <div style={{ marginTop:14, padding:'12px 14px', background:C.brandBg, borderLeft:`3px solid ${C.brand}`, borderRadius:10 }}><div style={{ fontSize:12, fontWeight:700, color:C.brand, marginBottom:5 }}>권고 조치</div><div style={{ fontSize:12, color:C.inkSoft, lineHeight:1.6 }}>① 건강(무릎)·경제 부담 → 복지 어드바이저 연계 ② 고립·정서 신호 → 다음 방문 우선 ③ 위험 누적 시 매칭 일시중단.</div></div>
               <Button variant="brand" size="sm" fullWidth style={{ marginTop:12 }} onClick={()=>showToast && showToast('안전 이슈 등록 + 복지 어드바이저 연계 완료','success')}>안전 이슈 등록 + 어드바이저 연계</Button>
@@ -323,7 +323,7 @@ function QuickAccessStrip({ setView }) {
           <span aria-hidden="true" style={{ display: 'inline-flex', width: 32, height: 32, alignItems: 'center', justifyContent: 'center', borderRadius: 9, background: it.c + '14', color: it.c, flexShrink: 0 }}>{it.ic}</span>
           <span aria-hidden="true" style={{ flex: 1, minWidth: 0 }}>
             <span style={{ display: 'block', color: C.headline, fontWeight: 700, fontSize: 13, letterSpacing: '-0.02em' }}>{it.t}</span>
-            <span style={{ display: 'block', fontSize: 11, color: C.muteLight, marginTop: 2, fontWeight: 500 }}>{it.d}</span>
+            <span style={{ display: 'block', fontSize: 12.5, color: C.muteLight, marginTop: 2, fontWeight: 500 }}>{it.d}</span>
           </span>
           <ChevronRight size={15} color="#C8CCD3" aria-hidden="true" style={{ flexShrink: 0 }} />
         </button>
@@ -359,7 +359,7 @@ function QueueChip({ label, n, danger, onClick }) {
       <span aria-hidden="true" style={{
         minWidth: 20, height: 20, padding: '0 5px', borderRadius: 6,
         background: danger ? C.red : C.headline, color: '#fff',
-        fontSize: 11.5, fontWeight: 800, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+        fontSize: 12.5, fontWeight: 800, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
         fontVariantNumeric: 'tabular-nums',
       }}>{n}</span>
       <span aria-hidden="true" style={{ fontSize: 12.5, fontWeight: 600, color: col, letterSpacing: '-0.01em' }}>{label}</span>
@@ -374,7 +374,7 @@ function BigStat({ label, value, sub, color }) {
     <div style={{ background: C.panel, border: `1px solid ${C.line}`, borderLeft: `3px solid ${color}`, borderRadius: 12, boxShadow: SHADOW.xs, padding: '16px 18px' }}>
       <div style={{ fontSize: 12, color: C.navMute, fontWeight: 600 }}>{label}</div>
       <div style={{ fontSize: 24, fontWeight: 800, color: C.headline, marginTop: 6, letterSpacing: '-0.03em', fontVariantNumeric: 'tabular-nums' }}>{value}</div>
-      {sub && <div style={{ fontSize: 11.5, color: C.muteLight, marginTop: 5, lineHeight: 1.45, fontWeight: 500 }}>{sub}</div>}
+      {sub && <div style={{ fontSize: 12.5, color: C.muteLight, marginTop: 5, lineHeight: 1.45, fontWeight: 500 }}>{sub}</div>}
     </div>
   );
 }
@@ -413,7 +413,7 @@ function CoordB2G({ state, showToast }) {
           {link.map((l, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '11px 0', borderTop: i === 0 ? 'none' : `1px solid ${C.lineSoft}` }}>
               <ShieldCheck size={15} style={{ color: C.blue, flex: '0 0 auto' }} />
-              <div style={{ flex: 1, minWidth: 0 }}><div style={{ fontSize: 12.5, fontWeight: 700, color: C.headline, letterSpacing: '-0.02em' }}>{l[0]}</div><div style={{ fontSize: 11.5, color: C.navMute, marginTop: 1 }}>{l[1]}</div></div>
+              <div style={{ flex: 1, minWidth: 0 }}><div style={{ fontSize: 12.5, fontWeight: 700, color: C.headline, letterSpacing: '-0.02em' }}>{l[0]}</div><div style={{ fontSize: 12.5, color: C.navMute, marginTop: 1 }}>{l[1]}</div></div>
               <Badge color={C.sage} soft={C.sageSoft} size="sm">{l[2]}</Badge>
             </div>
           ))}
@@ -422,7 +422,7 @@ function CoordB2G({ state, showToast }) {
           {gapList.map((g, i) => (
             <div key={g.p.id} style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '10px 0', borderTop: i === 0 ? 'none' : `1px solid ${C.lineSoft}` }}>
               <Avatar type="senior" name={g.p.name} size={30} color={C.lavender} />
-              <div style={{ flex: 1, minWidth: 0 }}><div style={{ fontSize: 12.5, fontWeight: 700, color: C.headline }}>{g.p.name} · {g.p.age}세</div><div style={{ fontSize: 11.5, color: C.navMute, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>미신청 {g.gaps.length}건 · {g.names.join(' · ')}</div></div>
+              <div style={{ flex: 1, minWidth: 0 }}><div style={{ fontSize: 12.5, fontWeight: 700, color: C.headline }}>{g.p.name} · {g.p.age}세</div><div style={{ fontSize: 12.5, color: C.navMute, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>미신청 {g.gaps.length}건 · {g.names.join(' · ')}</div></div>
               <Badge color={C.brand} soft={C.brandSoft} size="sm">발굴</Badge>
             </div>
           ))}
@@ -461,7 +461,7 @@ function CoordB2B({ state, showToast }) {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: 10 }}>
           {esg.map((e, i) => (
             <div key={i} style={{ border: `1px solid ${C.line}`, borderRadius: 11, padding: '13px 15px', borderLeft: `3px solid ${e[2]}`, background: C.panel }}>
-              <div style={{ fontSize: 11.5, color: C.navMute, fontWeight: 600 }}>{e[0]}</div>
+              <div style={{ fontSize: 12.5, color: C.navMute, fontWeight: 600 }}>{e[0]}</div>
               <div style={{ fontSize: 15.5, fontWeight: 800, color: C.headline, marginTop: 4, letterSpacing: '-0.02em' }}>{e[1]}</div>
             </div>
           ))}
@@ -607,7 +607,7 @@ function CoordOverview({ state, setView, dispatch }) {
         <Panel
           title="누적 활동시간 추이"
           sub="승인된 활동 로그 누적 기준"
-          right={<span style={{ fontSize: 11.5, color: C.muteLight, fontWeight: 600 }}>연 목표 1,440시간</span>}
+          right={<span style={{ fontSize: 12.5, color: C.muteLight, fontWeight: 600 }}>연 목표 1,440시간</span>}
         >
           {monthlyChart.length === 0 ? <Empty icon={<TrendingUp size={28} />} title="아직 활동 기록이 없습니다" sub="활동이 승인되면 시간 추이가 이곳에 그려져요" /> : (
             /* 차트 접근성 — SVG 차트는 스크린리더에 비어 보이므로, 데이터 요약을 role=img 라벨로 제공 */
@@ -735,7 +735,7 @@ function CoordOverview({ state, setView, dispatch }) {
                 <div style={{ minWidth: 46, fontSize: 13.5, fontWeight: 800, color: C.brand, fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.02em' }}>{(act.time || '').slice(0, 5)}</div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 13, fontWeight: 700, color: C.headline, marginBottom: 3, letterSpacing: '-0.02em' }}>{act.title}</div>
-                  <div style={{ fontSize: 11.5, color: C.muteLight, fontWeight: 500 }}>{act.location} · {y?.name}</div>
+                  <div style={{ fontSize: 12.5, color: C.muteLight, fontWeight: 500 }}>{act.location} · {y?.name}</div>
                 </div>
               </div>
             );
@@ -759,7 +759,7 @@ function CoordOverview({ state, setView, dispatch }) {
               <Avatar type={author?.type} gender={author?.gender} name={author?.name} size={32} color={PERSONA[author?.type]?.color || C.brand} />
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 13, fontWeight: 700, color: C.headline, letterSpacing: '-0.02em', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>{author?.name} · {act?.title}</div>
-                <div style={{ fontSize: 11.5, color: C.muteLight, marginTop: 2, fontWeight: 500, fontVariantNumeric: 'tabular-nums' }}>{fmtDate(log.date)} · {log.hours}시간</div>
+                <div style={{ fontSize: 12.5, color: C.muteLight, marginTop: 2, fontWeight: 500, fontVariantNumeric: 'tabular-nums' }}>{fmtDate(log.date)} · {log.hours}시간</div>
               </div>
               {log.approved ? <Badge color={C.success} soft={C.successSoft} size="sm">승인</Badge> : <Badge color={C.amber} soft={C.amberSoft} size="sm">대기</Badge>}
             </div>
@@ -873,7 +873,7 @@ function CoordApplicants({ state, dispatch, showToast, user }) {
       {filtered.length === 0 ? <Empty icon={<UserPlus size={32} />} title={query || typeFilter !== 'all' ? '조건에 맞는 신청자가 없습니다' : `${activeTab === 'screening' ? '검토 대기' : activeTab === 'verified' ? '검증 중인' : activeTab === 'completed' ? '활동 중인' : '반려된'} 신청자가 없습니다`} sub={query || typeFilter !== 'all' ? '검색어나 필터 조건을 조정해보세요' : '새 신청이 접수되면 이곳에 표시됩니다'} /> : (
         <div style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 16, boxShadow: SHADOW.xs, overflow: 'hidden' }}>
           {/* 리스트 헤더 */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '11px 20px', background: C.lineSoft, borderBottom: `1px solid ${C.line}`, fontSize: 11.5, fontWeight: 700, color: C.navMute, letterSpacing: '0.02em' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '11px 20px', background: C.lineSoft, borderBottom: `1px solid ${C.line}`, fontSize: 12.5, fontWeight: 700, color: C.navMute, letterSpacing: '0.02em' }}>
             <div style={{ flex: '1 1 260px', minWidth: 200 }}>신청자</div>
             <div style={{ width: 120, flexShrink: 0 }} className="eum-col-md">연락처</div>
             <div style={{ width: 96, flexShrink: 0 }} className="eum-col-md">신청일</div>
@@ -917,8 +917,8 @@ function CoordApplicants({ state, dispatch, showToast, user }) {
                 <div style={{ width: 96, flexShrink: 0, fontSize: 12.5, color: C.navMute, fontVariantNumeric: 'tabular-nums' }} className="eum-col-md">{fmtDate(app.applied_at)}</div>
                 <div style={{ width: 168, flexShrink: 0 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 5 }}>
-                    <span style={{ fontSize: 11.5, color: done ? C.success : C.navMute, fontWeight: 700 }}>{done ? '검증 완료' : `${passedCount}/${totalSteps} 단계`}</span>
-                    <span style={{ fontSize: 11, color: C.muteLight, fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>{Math.round(pct)}%</span>
+                    <span style={{ fontSize: 12.5, color: done ? C.success : C.navMute, fontWeight: 700 }}>{done ? '검증 완료' : `${passedCount}/${totalSteps} 단계`}</span>
+                    <span style={{ fontSize: 12.5, color: C.muteLight, fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>{Math.round(pct)}%</span>
                   </div>
                   <div style={{ height: 5, background: C.lineSoft, borderRadius: 999, overflow: 'hidden' }}>
                     <div style={{ height: '100%', width: `${pct}%`, background: done ? C.success : C.brand, borderRadius: 999, transition: 'width 0.5s cubic-bezier(0.22,1,0.36,1)' }} />
@@ -986,7 +986,7 @@ function CoordApplicants({ state, dispatch, showToast, user }) {
                     </div>
                     <div style={{ flex: 1 }}>
                       <div style={{ fontSize: 13, fontWeight: 700, color: C.ink }}>{verifLabel(v.step)}</div>
-                      <div style={{ fontSize: 11, color: C.mute }}>{v.note || '메모 없음'}</div>
+                      <div style={{ fontSize: 12.5, color: C.mute }}>{v.note || '메모 없음'}</div>
                     </div>
                     {selectedApp.status === 'verified' && v.status !== 'passed' && (
                       <div style={{ display: 'flex', gap: 6 }}>
@@ -1152,7 +1152,7 @@ JSON 형식으로만 응답해주세요 (다른 텍스트 없이):
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
               {[['청년 멘토', availableYouth, C.sage], ['어르신 멘토', availableSenior, C.lavender], ['아동', availableChild, C.peach]].map(([label, arr, col]) => (
                 <div key={label}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: col, marginBottom: 8, letterSpacing: '0.04em' }}>{label} · {arr.length}</div>
+                  <div style={{ fontSize: 12.5, fontWeight: 700, color: col, marginBottom: 8, letterSpacing: '0.04em' }}>{label} · {arr.length}</div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                     {arr.length === 0 ? <div style={{ fontSize: 12, color: C.mute, padding: '8px 4px' }}>대기 없음</div> :
                       arr.map(p => (
@@ -1160,7 +1160,7 @@ JSON 형식으로만 응답해주세요 (다른 텍스트 없이):
                           <Avatar type={p.type} gender={p.gender} name={p.name} size={30} color={col} />
                           <div style={{ minWidth: 0, flex: 1 }}>
                             <div style={{ fontSize: 12.5, fontWeight: 700, color: C.ink }}>{p.name}</div>
-                            <div style={{ fontSize: 11, color: C.mute, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.age}세 · {(p.skills && p.skills[0]) || (p.interests && p.interests[0]) || '활동 희망'}</div>
+                            <div style={{ fontSize: 12.5, color: C.mute, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.age}세 · {(p.skills && p.skills[0]) || (p.interests && p.interests[0]) || '활동 희망'}</div>
                           </div>
                         </div>
                       ))}
@@ -1228,7 +1228,7 @@ JSON 형식으로만 응답해주세요 (다른 텍스트 없이):
                         <div key={p.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: 10, background: C.card, borderRadius: 8 }}>
                           <Avatar type={p?.type} gender={p?.gender} name={p.name} size={44} color={PERSONA[p.type]?.color || C.brand} />
                           <div style={{ fontSize: 13, fontWeight: 700, color: C.ink, marginTop: 6 }}>{p.name}</div>
-                          <div style={{ fontSize: 10, color: C.mute, marginTop: 2 }}>{label} · {p.age}세</div>
+                          <div style={{ fontSize: 12.5, color: C.mute, marginTop: 2 }}>{label} · {p.age}세</div>
                         </div>
                       ))}
                     </div>
@@ -1264,7 +1264,7 @@ JSON 형식으로만 응답해주세요 (다른 텍스트 없이):
                   <div key={p.id} style={{ padding: 14, background: C.lineSoft, borderRadius: 10, textAlign: 'center' }}>
                     <Avatar type={p?.type} gender={p?.gender} name={p.name} size={56} color={color} />
                     <div style={{ fontSize: 15, fontWeight: 800, color: C.ink, marginTop: 8, fontFamily: SERIF_STACK }}>{p.name}</div>
-                    <div style={{ fontSize: 11, color: color, fontWeight: 700, marginTop: 3 }}>{label}</div>
+                    <div style={{ fontSize: 12.5, color: color, fontWeight: 700, marginTop: 3 }}>{label}</div>
                   </div>
                 ))}
               </div>
@@ -1275,7 +1275,7 @@ JSON 형식으로만 응답해주세요 (다른 텍스트 없이):
                   ['시작일', fmtDate(selectedMatch.started_at)],
                 ].map(([lab, val]) => (
                   <div key={lab} style={{ padding: '12px 14px', background: C.lineSoft, borderRadius: 10 }}>
-                    <div style={{ fontSize: 11.5, color: C.navMute, fontWeight: 600 }}>{lab}</div>
+                    <div style={{ fontSize: 12.5, color: C.navMute, fontWeight: 600 }}>{lab}</div>
                     <div style={{ fontSize: 19, fontWeight: 800, color: C.headline, letterSpacing: '-0.03em', marginTop: 4, fontVariantNumeric: 'tabular-nums' }}>{val}</div>
                   </div>
                 ))}
@@ -1311,8 +1311,8 @@ function MatchCard({ match, state, onClick, accent }) {
       <div style={{ height: 2, background: accent }} />
       <div style={{ padding: 18 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-          <span style={{ fontSize: 11.5, fontWeight: 700, color: C.muteLight, letterSpacing: '0.06em', fontVariantNumeric: 'tabular-nums' }}>{match.id.toUpperCase()}</span>
-          <span style={{ fontSize: 11.5, color: C.navMute, fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>{fmtDate(match.started_at)}</span>
+          <span style={{ fontSize: 12.5, fontWeight: 700, color: C.muteLight, letterSpacing: '0.06em', fontVariantNumeric: 'tabular-nums' }}>{match.id.toUpperCase()}</span>
+          <span style={{ fontSize: 12.5, color: C.navMute, fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>{fmtDate(match.started_at)}</span>
         </div>
 
         {/* 트리오 — 겹친 아바타로 '한 팀'임을 형태로 보여준다 */}
@@ -1328,7 +1328,7 @@ function MatchCard({ match, state, onClick, accent }) {
             <div style={{ fontSize: 14, fontWeight: 700, color: C.headline, letterSpacing: '-0.02em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {trio.map(t => t.p.name).join(' · ')}
             </div>
-            <div style={{ fontSize: 11.5, color: C.muteLight, marginTop: 2, fontWeight: 500 }}>청년 · 어르신 · 아동</div>
+            <div style={{ fontSize: 12.5, color: C.muteLight, marginTop: 2, fontWeight: 500 }}>청년 · 어르신 · 아동</div>
           </div>
         </div>
 
@@ -1437,14 +1437,14 @@ function CoordActivities({ state, dispatch, showToast, user }) {
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 4, flexWrap: 'wrap' }}>
                     <span style={{ fontSize: 13.5, fontWeight: 700, color: C.headline, letterSpacing: '-0.02em' }}>{author?.name}</span>
-                    <span style={{ fontSize: 11.5, color: C.muteLight, fontWeight: 500, fontVariantNumeric: 'tabular-nums' }}>{fmtDate(log.date)}</span>
+                    <span style={{ fontSize: 12.5, color: C.muteLight, fontWeight: 500, fontVariantNumeric: 'tabular-nums' }}>{fmtDate(log.date)}</span>
                     <span style={{ color: '#D4D7DD' }}>·</span>
-                    <span style={{ fontSize: 11.5, color: C.navMute, fontWeight: 500 }}>{act?.title}</span>
+                    <span style={{ fontSize: 12.5, color: C.navMute, fontWeight: 500 }}>{act?.title}</span>
                     {log.has_photo && <Camera size={12} style={{ color: C.muteLight }} />}
                     {log.mood && <span role="img" aria-label={`기분 ${moodLabel(log.mood)}`} style={{ fontSize: 12 }}>{moodEmoji(log.mood)}</span>}
                   </div>
                   <div style={{ fontSize: 12.5, color: C.inkSoft, lineHeight: 1.55, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{log.summary}</div>
-                  <div style={{ fontSize: 11.5, color: C.muteLight, marginTop: 5, fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>{log.hours}시간 · 매칭 {match?.id?.toUpperCase()}</div>
+                  <div style={{ fontSize: 12.5, color: C.muteLight, marginTop: 5, fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>{log.hours}시간 · 매칭 {match?.id?.toUpperCase()}</div>
                 </div>
                 <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
                   <Button variant="secondary" size="sm" onClick={() => setDetailLog(log)}>상세</Button>
@@ -1611,7 +1611,7 @@ function CoordSettlements({ state, dispatch, showToast, user }) {
         }
       >
         {!isMobile && (
-          <div style={{ padding: '11px 20px', borderBottom: `1px solid ${C.line}`, display: 'grid', gridTemplateColumns: '1fr 84px 84px 130px 120px 92px', gap: 12, fontSize: 11.5, color: C.navMute, fontWeight: 700, background: C.lineSoft }}>
+          <div style={{ padding: '11px 20px', borderBottom: `1px solid ${C.line}`, display: 'grid', gridTemplateColumns: '1fr 84px 84px 130px 120px 92px', gap: 12, fontSize: 12.5, color: C.navMute, fontWeight: 700, background: C.lineSoft }}>
             <div>참여자</div><div>활동</div><div>시간</div><div style={{ textAlign: 'right' }}>금액</div><div>지급 방법</div><div style={{ textAlign: 'right' }}>상태</div>
           </div>
         )}
@@ -1644,7 +1644,7 @@ function CoordSettlements({ state, dispatch, showToast, user }) {
               <Avatar type={calc.participant?.type} gender={calc.participant?.gender} name={calc.participant.name} size={32} color={PERSONA[calc.participant.type]?.color || C.brand} />
               <div style={{ minWidth: 0 }}>
                 <div style={{ fontSize: 13.5, fontWeight: 700, color: C.headline, letterSpacing: '-0.02em' }}>{calc.participant.name}</div>
-                <div style={{ fontSize: 11.5, color: C.muteLight, fontWeight: 500 }}>{PERSONA[calc.participant.type]?.label}</div>
+                <div style={{ fontSize: 12.5, color: C.muteLight, fontWeight: 500 }}>{PERSONA[calc.participant.type]?.label}</div>
               </div>
             </div>
             <div style={{ fontSize: 13, color: C.inkSoft, fontVariantNumeric: 'tabular-nums' }}>{calc.count}회</div>
@@ -1667,7 +1667,7 @@ function CoordSettlements({ state, dispatch, showToast, user }) {
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
               정산 이의신청
               {openDisputes.length > 0 && (
-                <span aria-label={`검토 대기 ${openDisputes.length}건`} style={{ fontSize: 11, fontWeight: 800, color: '#fff', background: C.amber, borderRadius: 999, padding: '2px 8px', lineHeight: 1.4 }}>{openDisputes.length}건 대기</span>
+                <span aria-label={`검토 대기 ${openDisputes.length}건`} style={{ fontSize: 12.5, fontWeight: 800, color: '#fff', background: C.amber, borderRadius: 999, padding: '2px 8px', lineHeight: 1.4 }}>{openDisputes.length}건 대기</span>
               )}
             </span>
           }
@@ -1690,7 +1690,7 @@ function CoordSettlements({ state, dispatch, showToast, user }) {
                     <Badge color={lb.color} soft={lb.soft} size="sm">{lb.label}</Badge>
                   </div>
                   <div style={{ fontSize: 12.5, color: C.inkSoft, marginTop: 5, lineHeight: 1.6 }}>"{d.reason}"</div>
-                  <div style={{ fontSize: 11.5, color: C.navMute, marginTop: 4, fontVariantNumeric: 'tabular-nums' }}>{fmtDate(d.raised_at)} 접수{d.resolved_at ? ` · ${fmtDate(d.resolved_at)} ${d.resolved_by} 처리` : ''}</div>
+                  <div style={{ fontSize: 12.5, color: C.navMute, marginTop: 4, fontVariantNumeric: 'tabular-nums' }}>{fmtDate(d.raised_at)} 접수{d.resolved_at ? ` · ${fmtDate(d.resolved_at)} ${d.resolved_by} 처리` : ''}</div>
                   {d.resolution && (
                     <div style={{ fontSize: 12, color: C.ink, marginTop: 6, padding: '9px 12px', background: C.lineSoft, borderRadius: 8, lineHeight: 1.55 }}>처리 메모: {d.resolution}</div>
                   )}
@@ -1725,7 +1725,7 @@ function CoordSettlements({ state, dispatch, showToast, user }) {
                 {state.participants.find(pp => pp.id === disputeSel.participant_id)?.name || disputeSel.participant_id} · {(disputeSel.month || disputeSel.period || '').replace('-', '년 ')}월 · {krw(disputeSel.amount_krw ?? disputeSel.amount ?? 0)}
               </div>
               <div style={{ fontSize: 12.5, color: C.inkSoft, marginTop: 6, lineHeight: 1.6 }}>"{disputeSel.dispute?.reason}"</div>
-              <div style={{ fontSize: 11.5, color: C.navMute, marginTop: 4 }}>{fmtDate(disputeSel.dispute?.raised_at)} 접수</div>
+              <div style={{ fontSize: 12.5, color: C.navMute, marginTop: 4 }}>{fmtDate(disputeSel.dispute?.raised_at)} 접수</div>
             </div>
             <Field label="처리 메모" required>
               <Textarea value={disputeMemo} onChange={setDisputeMemo} rows={4} placeholder="예) 미승인 활동기록 2건 확인 후 승인 — 차월 정산에 합산 반영 예정." />
@@ -1824,12 +1824,12 @@ function CoordSafety({ state, dispatch, showToast, user }) {
                     <Badge color={st.c} soft={st.s} size="sm">{st.t}</Badge>
                   </div>
                   <div style={{ fontSize: 13, color: C.inkSoft, lineHeight: 1.6, marginBottom: 6, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{inc.description}</div>
-                  <div style={{ fontSize: 11.5, color: C.muteLight, fontWeight: 500 }}>
+                  <div style={{ fontSize: 12.5, color: C.muteLight, fontWeight: 500 }}>
                     신고자 {reporter?.name || '익명'} · 매칭 {inc.match_id?.toUpperCase() || '-'}
                   </div>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'space-between', flexShrink: 0 }}>
-                  <span style={{ fontSize: 11.5, color: C.muteLight, fontWeight: 600, fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>{inc.reported_at}</span>
+                  <span style={{ fontSize: 12.5, color: C.muteLight, fontWeight: 600, fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>{inc.reported_at}</span>
                   <ChevronRight size={16} style={{ color: C.muteLight }} />
                 </div>
               </div>
@@ -1862,7 +1862,7 @@ function CoordSafety({ state, dispatch, showToast, user }) {
             </div>
             {selected.status === 'resolved' && selected.resolution ? (
               <div style={{ padding: '13px 14px', background: C.successSoft, borderRadius: 10 }}>
-                <div style={{ fontSize: 11.5, fontWeight: 700, color: C.success, marginBottom: 6 }}>처리 내용</div>
+                <div style={{ fontSize: 12.5, fontWeight: 700, color: C.success, marginBottom: 6 }}>처리 내용</div>
                 <div style={{ fontSize: 13, color: C.inkSoft, lineHeight: 1.6 }}>{selected.resolution}</div>
               </div>
             ) : (
@@ -2252,7 +2252,7 @@ function CoordParticipantSearch({ state }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
         <Search size={16} style={{ color: C.brand }} aria-hidden="true" />
         <span style={{ fontSize: 14, fontWeight: 700, color: C.ink }}>참여자 통합 검색</span>
-        <span style={{ fontSize: 11.5, color: C.mute }}>이름·직업·기술·관심사 검색과 역할·지역 필터</span>
+        <span style={{ fontSize: 12.5, color: C.mute }}>이름·직업·기술·관심사 검색과 역할·지역 필터</span>
       </div>
       <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 12 }}>
         <SearchBar value={q} onChange={setQ} placeholder="이름·직업·기술·관심사 검색…" style={{ flex: '1 1 220px', minWidth: 200 }} />
@@ -2274,12 +2274,12 @@ function CoordParticipantSearch({ state }) {
                   <span style={{ fontSize: 13, fontWeight: 700, color: C.ink }}>{p.name}</span>
                   <Badge color={PERSONA[p.type]?.color || C.brand} soft={PERSONA[p.type]?.soft || C.lineSoft} size="sm">{PERSONA[p.type]?.label || p.type}</Badge>
                 </div>
-                <div style={{ fontSize: 11.5, color: C.mute, marginTop: 2 }}>{p.age}세 · {p.occupation || '—'}</div>
+                <div style={{ fontSize: 12.5, color: C.mute, marginTop: 2 }}>{p.age}세 · {p.occupation || '—'}</div>
               </div>
-              <div style={{ flex: '1 1 160px', minWidth: 140, fontSize: 11.5, color: C.inkSoft }}>{p.address}</div>
+              <div style={{ flex: '1 1 160px', minWidth: 140, fontSize: 12.5, color: C.inkSoft }}>{p.address}</div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                 <Badge color={p.status === 'active' ? C.success : C.amber} soft={p.status === 'active' ? C.successSoft : C.amberSoft} size="sm">{SEARCH_STATUS_LABEL[p.status] || p.status}</Badge>
-                <span style={{ fontSize: 11, color: C.mute }}>가입 {fmtDate(p.joined_at)}</span>
+                <span style={{ fontSize: 12.5, color: C.mute }}>가입 {fmtDate(p.joined_at)}</span>
               </div>
             </div>
           ))}
@@ -2404,7 +2404,7 @@ function CoordNotices({ state, dispatch, showToast, user }) {
         </Field>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 4 }}>
           <Button variant="brand" icon={<Send size={15} />} onClick={send} disabled={sending}>{sending ? '발송 중…' : `발송 (대상 ${recipientsFor(audience).length}명)`}</Button>
-          <span style={{ fontSize: 11.5, color: C.mute }}>아동은 보호자를 통해 전달되어 발송 대상에서 제외됩니다.</span>
+          <span style={{ fontSize: 12.5, color: C.mute }}>아동은 보호자를 통해 전달되어 발송 대상에서 제외됩니다.</span>
         </div>
       </Card>
 
@@ -2429,7 +2429,7 @@ function CoordNotices({ state, dispatch, showToast, user }) {
                     <Badge color={C.lavender} soft={C.lavenderSoft}>{noticeAudienceLabel(n.audience)}</Badge>
                   </div>
                   <div style={{ fontSize: 12, color: C.inkSoft, lineHeight: 1.6, marginTop: 6 }}>{n.body}</div>
-                  <div style={{ fontSize: 11, color: C.mute, marginTop: 6 }}>
+                  <div style={{ fontSize: 12.5, color: C.mute, marginTop: 6 }}>
                     {n.sent_at} · {n.sent_by}{n.resend_count > 0 ? ` · 재발송 ${n.resend_count}회 (최근 ${n.last_resend_at})` : ''}
                   </div>
                 </div>
@@ -2456,12 +2456,12 @@ function CoordNotices({ state, dispatch, showToast, user }) {
                       <div key={d.participant_id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '7px 10px', background: C.lineSoft, borderRadius: 8, flexWrap: 'wrap' }}>
                         <Avatar type={p?.type} gender={p?.gender} name={p?.name} size={24} color={PERSONA[p?.type]?.color || C.brand} />
                         <span style={{ fontSize: 12, fontWeight: 700, color: C.ink }}>{p?.name || d.participant_id}</span>
-                        <span style={{ fontSize: 11, color: C.mute }}>{noticeChannelLabel(d.channel)}</span>
+                        <span style={{ fontSize: 12.5, color: C.mute }}>{noticeChannelLabel(d.channel)}</span>
                         <span style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
-                          {d.resent && <span style={{ fontSize: 10.5, color: C.mute }}>재발송</span>}
+                          {d.resent && <span style={{ fontSize: 12.5, color: C.mute }}>재발송</span>}
                           {ok && readBy.includes(d.participant_id) && <Badge color={C.blue} soft={C.blueSoft}>읽음</Badge>}
                           <Badge color={ok ? C.success : C.amber} soft={ok ? C.successSoft : C.amberSoft}>{ok ? '전달' : '미전달'}</Badge>
-                          <span style={{ fontSize: 10.5, color: C.mute }}>{d.at}</span>
+                          <span style={{ fontSize: 12.5, color: C.mute }}>{d.at}</span>
                         </span>
                       </div>
                     );
