@@ -327,7 +327,7 @@ function Sidebar({ role, currentView, onNavigate, onLogout, userName, dataCount 
                     fontSize: isSenior ? 16 : 13.5, textAlign: 'left',
                     letterSpacing: '-0.015em',
                     fontFamily: FONT_STACK,
-                    boxShadow: active ? '0 6px 16px -6px rgba(46,107,240,0.6)' : 'none',
+                    boxShadow: active ? '0 6px 16px -6px rgba(190,85,53,0.6)' : 'none',
                     transition: 'background 0.14s ease, color 0.14s ease',
                   }}
                   onMouseEnter={(e) => { if (!active) { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = C.navyText; } }}

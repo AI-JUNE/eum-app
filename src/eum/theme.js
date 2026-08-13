@@ -2,60 +2,62 @@
 // 디자인 토큰 — EumApp 단일파일에서 분리 (1단계 · 값 100% 동일)
 // 색상(C) · 페르소나(PERSONA) · 폰트 스택
 // ※ src/lib/theme.js 는 구버전 App.jsx 계열 팔레트(#C75D3C)라 별도 유지.
-//    라이브 엔트리(src/EumApp.jsx)는 이 파일(#E15A33 계열)을 사용한다.
+//    라이브 엔트리(src/EumApp.jsx)는 이 파일(확정 시안 #BE5535 테라코타 계열)을 사용한다.
 // ============================================================================
 
 export const C = {
-  // D-ARS 계열 상용 팔레트 — 딥 네이비 + 로열 블루 액센트 + 쿨 라이트(씨크래프 TOBE 시안 반영)
-  brand: '#2E6BF0',
-  brandDark: '#1D50D0',
-  brandSoft: '#E1EAFE',
-  brandBg: '#EEF3FE',
-  ink: '#15181F',
-  inkSoft: '#404652',
-  mute: '#6B7280',
-  muteLight: '#9AA1AD',
-  cream: '#F6F8FC',
-  cardWarm: '#FAFBFE',
-  bg: '#F4F6FB',
+  // 확정 시안 팔레트 — 웜 크림 배경 + 브랜드 테라코타(#BE5535) 포인트 (에디토리얼 금융형)
+  brand: '#BE5535',
+  brandDark: '#9E4329',
+  brandSoft: '#F4E7E0',
+  brandBg: '#FAF3EF',
+  ink: '#1A1A1E',
+  inkSoft: '#46464E',
+  mute: '#71717A',
+  muteLight: '#A2A2AB',
+  cream: '#FBF8F5',
+  cardWarm: '#FCFAF7',
+  bg: '#F5F4F2',
   card: '#FFFFFF',
-  border: '#E6E9EF',
-  borderSoft: '#F0F2F6',
-  sage: '#2FA37A',
-  sageSoft: '#DDF3EC',
-  lavender: '#6C5CE7',
-  lavenderSoft: '#E9E6FB',
-  peach: '#2D8C9E',
-  peachSoft: '#DFF1F4',
-  gold: '#C79A3A',
-  goldSoft: '#F5ECD3',
-  red: '#E1524B',
-  redSoft: '#FBE4E3',
-  blue: '#2E6BF0',
-  blueSoft: '#E1EAFE',
-  amber: '#E0A32E',
-  amberSoft: '#FAEFD4',
-  success: '#2FA37A',
-  successSoft: '#DDF3EC',
-  muteSoft: '#EAEDF2',
+  border: '#EBE9E4',
+  borderSoft: '#F3F1ED',
+  sage: '#5C7C4F',
+  sageSoft: '#E7EEE0',
+  lavender: '#766B94',
+  lavenderSoft: '#EBE7F0',
+  peach: '#CE885B',
+  peachSoft: '#F6E8D9',
+  gold: '#AC8040',
+  goldSoft: '#F0E6D2',
+  red: '#BD4747',
+  redSoft: '#F6E2E2',
+  blue: '#456A9E',
+  blueSoft: '#E2E9F1',
+  amber: '#CB9836',
+  amberSoft: '#F5ECD1',
+  success: '#5C7C4F',
+  successSoft: '#E7EEE0',
+  muteSoft: '#EDE9DF',
 
-  // ── 콘솔·앱 내부 화면 전용 뉴트럴 (D-ARS 쿨 톤) ──────────────────────────
-  appBg: '#F4F6FB',
+  // ── 콘솔·앱 내부 화면 전용 뉴트럴 ──────────────────────────────────────
+  // 랜딩(웜 크림 톤)과 분리해, 내부 화면은 차분하고 정밀한 프로덕트 뉴트럴을 쓴다.
+  appBg: '#F4F5F7',
   panel: '#FFFFFF',
-  line: '#E6E9EF',
-  lineSoft: '#F0F2F6',
-  hover: '#F3F6FC',
-  navMute: '#79808D',
-  headline: '#111827',
+  line: '#E7E9ED',
+  lineSoft: '#F0F1F4',
+  hover: '#F5F6F8',
+  navMute: '#7C828C',
+  headline: '#12141A',
 
-  // ── 다크 네이비 (히어로·사이드바 등 D-ARS 프리미엄 다크 서피스) ──────────
-  navy: '#0E1A30',            // 최심부(사이드바 배경)
-  navy2: '#15294A',           // 히어로 그라데이션 중간
-  navy3: '#1E355C',           // 다크 카드/보더 톤
-  navyLine: 'rgba(255,255,255,0.09)',
-  navyText: '#EAF0FA',        // 다크 위 본문
-  navyMute: '#93A2BC',        // 다크 위 보조
-  navyActive: 'rgba(46,107,240,0.18)', // 다크 사이드바 활성 배경
+  // ── 다크 서피스 (히어로·사이드바) — 웜 에스프레소 톤 ─────────────────────
+  // ※ 키 이름(navy*)은 호환 유지용 레거시. 값은 확정 시안의 웜 다크(#241d17 계열).
+  navy: '#241D17',            // 최심부(사이드바 배경)
+  navy2: '#332A22',           // 히어로 그라데이션 중간
+  navy3: '#43382D',           // 다크 카드/보더 톤
+  navyLine: 'rgba(255,255,255,0.10)',
+  navyText: '#F5EFE8',        // 다크 위 본문
+  navyMute: '#B6A89C',        // 다크 위 보조
+  navyActive: 'rgba(190,85,53,0.22)', // 다크 사이드바 활성 배경(테라코타)
 };
 
 // 내부 화면 공통 그림자 — 얕고 정밀하게(프로덕트 콘솔 문법)
@@ -71,9 +73,9 @@ export const PERSONA = {
   youth: { label: '청년', color: C.sage, soft: C.sageSoft, ring: 'rgba(95,133,86,0.25)' },
   adult: { label: '중년·서포터', color: C.gold, soft: C.goldSoft, ring: 'rgba(184,136,74,0.25)' },
   senior: { label: '어르신', color: C.lavender, soft: C.lavenderSoft, ring: 'rgba(127,111,160,0.25)' },
-  parent: { label: '양육가정', color: C.peach, soft: C.peachSoft, ring: 'rgba(45,140,158,0.25)' },
-  child: { label: '아동', color: C.peach, soft: C.peachSoft, ring: 'rgba(45,140,158,0.25)' },
-  coordinator: { label: '코디네이터', color: C.ink, soft: '#EAEDF4', ring: 'rgba(20,26,38,0.15)' },
+  parent: { label: '양육가정', color: C.peach, soft: C.peachSoft, ring: 'rgba(206,136,91,0.25)' },
+  child: { label: '아동', color: C.peach, soft: C.peachSoft, ring: 'rgba(206,136,91,0.25)' },
+  coordinator: { label: '코디네이터', color: C.ink, soft: '#EDEAE5', ring: 'rgba(26,24,20,0.15)' },
 };
 
 export const FONT_STACK = `"Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif`;

@@ -671,7 +671,7 @@ const KAKAO_PHONE_HTML = `<div class="scr kk">
   </div>
   <div class="kInput"><span class="plus">＋</span><div class="kbox">메시지 입력</div><span class="ksnd">↑</span></div>
 </div>`;
-const TOBE_CSS = `.eum-tobe{--ink:#161B24;--paper:#fff;--cream:#F5F7FB;--cream2:#E9EDF5;--coral:#2E6BF0;--coral-d:#1D4FD7;--coral-soft:#E4EDFD;--green:#4b7a52;--green-soft:#e9f1e7;--purple:#6a5aa0;--purple-soft:#efeaf6;--clay:#5E6B7E;--sub:#586173;--mut:#94A0B2;--line:#E5E9F1;word-break:keep-all;-webkit-font-smoothing:antialiased;}
+const TOBE_CSS = `.eum-tobe{--ink:#241d17;--paper:#fff;--cream:#fbf7f2;--cream2:#f4ede4;--coral:#BE5535;--coral-d:#9E4329;--coral-soft:#F4E7E0;--green:#4b7a52;--green-soft:#e9f1e7;--purple:#6a5aa0;--purple-soft:#efeaf6;--clay:#9a6a52;--sub:#5f564d;--mut:#9b9186;--line:#eee6dc;word-break:keep-all;-webkit-font-smoothing:antialiased;}
 .eum-tobe *{box-sizing:border-box;}
 .eum-tobe .kick{font-size:13px;font-weight:700;color:var(--coral);letter-spacing:1.4px;text-transform:uppercase;margin-bottom:16px;}
 .eum-tobe h2{font-size:clamp(31px,3.9vw,48px);line-height:1.14;font-weight:800;letter-spacing:-1.1px;margin:0;color:var(--ink);}
@@ -926,10 +926,10 @@ function LegalModal({ doc, onClose }) {
 function RLLanding({ state, onSelectRole, onShowApplication }) {
   // 시드된 페르소나 fixed assignments
   const personas = [
-    { role: 'youth', id: 'p001', gender: 'M', name: '김민준', subtitle: '27세 · 스타트업 개발자', desc: '어르신껜 디지털을 알려드리고, 저는 인생 조언을 얻어요.', color: C.sage, soft: C.sageSoft, gradient: 'linear-gradient(135deg, #2FA37A 0%, #55BD97 100%)' },
-    { role: 'senior', id: 'p101', gender: 'F', name: '박순자', subtitle: '73세 · 前 교사', desc: '청년에게 디지털을 배우고, 아이에겐 옛이야기를 들려줘요.', color: C.lavender, soft: C.lavenderSoft, gradient: 'linear-gradient(135deg, #6C5CE7 0%, #8F82EF 100%)' },
-    { role: 'parent', id: 'p201', gender: 'F', name: '이서영', subtitle: '38세 · IT기업 PM (유진 8세 보호자)', desc: '아이가 이웃 어른들과 안전하게 어울리는 시간이 참 든든해요.', color: C.peach, soft: C.peachSoft, gradient: 'linear-gradient(135deg, #2D8C9E 0%, #63C2D0 100%)' },
-    { role: 'coordinator', id: 'cdn001', gender: 'F', name: '한가은', subtitle: '코디네이터 · 광주 광산구', desc: '신청·검증·매칭·정산을 한눈에 관리해요.', color: C.ink, soft: '#EAEDF4', gradient: 'linear-gradient(135deg, #0E1A30 0%, #1E355C 100%)' },
+    { role: 'youth', id: 'p001', gender: 'M', name: '김민준', subtitle: '27세 · 스타트업 개발자', desc: '어르신껜 디지털을 알려드리고, 저는 인생 조언을 얻어요.', color: C.sage, soft: C.sageSoft, gradient: 'linear-gradient(135deg, #5C7C4F 0%, #839C77 100%)' },
+    { role: 'senior', id: 'p101', gender: 'F', name: '박순자', subtitle: '73세 · 前 교사', desc: '청년에게 디지털을 배우고, 아이에겐 옛이야기를 들려줘요.', color: C.lavender, soft: C.lavenderSoft, gradient: 'linear-gradient(135deg, #766B94 0%, #9C93B4 100%)' },
+    { role: 'parent', id: 'p201', gender: 'F', name: '이서영', subtitle: '38세 · IT기업 PM (유진 8세 보호자)', desc: '아이가 이웃 어른들과 안전하게 어울리는 시간이 참 든든해요.', color: C.peach, soft: C.peachSoft, gradient: 'linear-gradient(135deg, #CE885B 0%, #E0AA85 100%)' },
+    { role: 'coordinator', id: 'cdn001', gender: 'F', name: '한가은', subtitle: '코디네이터 · 광주 광산구', desc: '신청·검증·매칭·정산을 한눈에 관리해요.', color: C.ink, soft: '#EDEAE5', gradient: 'linear-gradient(135deg, #241D17 0%, #43382D 100%)' },
   ];
 
   const isMobile = useIsMobile(820);
@@ -967,14 +967,14 @@ function RLLanding({ state, onSelectRole, onShowApplication }) {
       </div>
       <div style={{ maxWidth: 1200, width: '100%', padding: isMobile ? '28px 20px 56px' : '64px 40px 96px' }}>
         {/* 히어로 — D-ARS 계열 다크 네이비 프리미엄 밴드 */}
-        <div style={{ position: 'relative', margin: isMobile ? '8px 0 56px' : '20px 0 80px', borderRadius: isMobile ? 24 : 32, overflow: 'hidden', background: `radial-gradient(1100px 500px at 78% 12%, ${C.navy3} 0%, ${C.navy2} 42%, ${C.navy} 100%)`, boxShadow: '0 40px 90px -46px rgba(9,17,34,0.7)', padding: isMobile ? '32px 22px 40px' : '58px 56px' }}>
-          <div className="eum-orb" style={{ width: 420, height: 420, background: 'rgba(46,107,240,0.38)', top: -150, right: -80, animation: 'eumOrb 17s ease-in-out infinite' }} />
-          <div className="eum-orb" style={{ width: 320, height: 320, background: 'rgba(108,92,231,0.26)', bottom: -120, left: -90, animation: 'eumOrb 21s ease-in-out infinite reverse' }} />
+        <div style={{ position: 'relative', margin: isMobile ? '8px 0 56px' : '20px 0 80px', borderRadius: isMobile ? 24 : 32, overflow: 'hidden', background: `radial-gradient(1100px 500px at 78% 12%, ${C.navy3} 0%, ${C.navy2} 42%, ${C.navy} 100%)`, boxShadow: '0 40px 90px -46px rgba(36,29,23,0.7)', padding: isMobile ? '32px 22px 40px' : '58px 56px' }}>
+          <div className="eum-orb" style={{ width: 420, height: 420, background: 'rgba(190,85,53,0.40)', top: -150, right: -80, animation: 'eumOrb 17s ease-in-out infinite' }} />
+          <div className="eum-orb" style={{ width: 320, height: 320, background: 'rgba(172,128,64,0.26)', bottom: -120, left: -90, animation: 'eumOrb 21s ease-in-out infinite reverse' }} />
           <div style={{ position: 'relative', zIndex: 1, display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: isMobile ? 36 : 56, alignItems: 'center' }}>
           <div className="eum-heroin" style={{ textAlign: isMobile ? 'center' : 'left', display: 'flex', flexDirection: 'column', alignItems: isMobile ? 'center' : 'flex-start' }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: 12.5, fontWeight: 700, letterSpacing: '-0.01em', padding: '6px 13px', borderRadius: 999, background: 'rgba(46,107,240,0.16)', color: '#9FC0FF', border: '1px solid rgba(46,107,240,0.32)', marginBottom: 20 }}><Sparkles size={14} /> 청년·어르신·아동 3세대 · 2027 파일럿</div>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: 12.5, fontWeight: 700, letterSpacing: '-0.01em', padding: '6px 13px', borderRadius: 999, background: 'rgba(190,85,53,0.18)', color: '#F0B49B', border: '1px solid rgba(190,85,53,0.36)', marginBottom: 20 }}><Sparkles size={14} /> 청년·어르신·아동 3세대 · 2027 파일럿</div>
             <h1 className="eum-serif" style={{ fontSize: isMobile ? 'clamp(40px, 12vw, 54px)' : 'clamp(48px, 5.6vw, 70px)', fontWeight: 800, color: C.navyText, lineHeight: 1.12, margin: '0 0 20px' }}>
-              세대를 잇다,<br /><span style={{ color: '#6B9BFF' }}>이음</span>
+              세대를 잇다,<br /><span style={{ color: '#E9906E' }}>이음</span>
             </h1>
             <p style={{ fontSize: isMobile ? 17.5 : 22, color: C.navyMute, maxWidth: 520, margin: '0 0 34px', lineHeight: 1.6, fontWeight: 500 }}>
               혼자인 어르신, 방과후 혼자인 아이, 낯선 동네의 청년. 서로의 빈자리를 채우는 우리 동네 3세대 품앗이예요.
@@ -1118,7 +1118,7 @@ function RLLanding({ state, onSelectRole, onShowApplication }) {
                 <div style={{ display: 'inline-flex', alignItems: 'center' }}>
                   <img src="/logos/gowon.png" alt="고원 GOWON" loading="lazy" decoding="async" style={{ height: 32, display: 'block', objectFit: 'contain' }} onError={(e) => { e.currentTarget.style.display = 'none'; const n = e.currentTarget.nextElementSibling; if (n) n.style.display = 'inline-flex'; }} />
                   <span style={{ display: 'none', alignItems: 'center', gap: 9, fontSize: 19, fontWeight: 800, color: C.ink, letterSpacing: '0.08em' }}>
-                    <span style={{ width: 18, height: 18, borderRadius: '50%', background: 'conic-gradient(from 200deg, #2E6BF0, #C79A3A, #2FA37A, #2D8C9E, #6C5CE7, #2E6BF0)', display: 'inline-block', flexShrink: 0 }} />
+                    <span style={{ width: 18, height: 18, borderRadius: '50%', background: 'conic-gradient(from 200deg, #BE5535, #CB9836, #5C7C4F, #456A9E, #766B94, #BE5535)', display: 'inline-block', flexShrink: 0 }} />
                     GOWON
                   </span>
                 </div>
