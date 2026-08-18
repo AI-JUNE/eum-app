@@ -201,14 +201,16 @@ function SeniorApp({ state, user, dispatch, showToast }) {
 function SeniorSettlementCard({ s, user, dispatch, showToast }) {
   const [asking, setAsking] = useState(false);
   const [reason, setReason] = useState('');
+  // 입력 오류를 토스트 대신 입력란 바로 아래에 큰 활자로 남긴다(어르신 화면 원칙: 큰 글씨·화면에 남는 안내).
+  const [err, setErr] = useState('');
   const send = () => {
     const v = validateDisputeReason(reason);
-    if (!v.ok) { showToast({ type: 'error', message: v.message }); return; }
+    if (!v.ok) { setErr(v.message); return; }
     const gate = throttleAction('dispute:' + s.id);
     if (!gate.ok) { showToast({ type: 'error', message: gate.message }); return; }
     dispatch({ type: 'RAISE_SETTLEMENT_DISPUTE', payload: { id: s.id, reason: v.value, raised_at: new Date().toISOString().slice(0, 10), raised_by: user.id } });
     showToast({ type: 'success', message: '접수되었습니다. 코디네이터가 확인 후 연락드립니다.', duration: 4000 });
-    setAsking(false); setReason('');
+    setAsking(false); setReason(''); setErr('');
   };
   const d = s.dispute;
   return (
@@ -232,20 +234,25 @@ function SeniorSettlementCard({ s, user, dispatch, showToast }) {
           <textarea
             id={`dispute-${s.id}`}
             value={reason}
-            onChange={(e) => setReason(e.target.value)}
+            onChange={(e) => { setReason(e.target.value); if (err) setErr(''); }}
             rows={3}
+            aria-invalid={err ? true : undefined}
+            aria-describedby={err ? `dispute-err-${s.id}` : undefined}
             placeholder="예) 상품권 금액이 들어오지 않았어요"
-            style={{ width: '100%', boxSizing: 'border-box', fontSize: 17, lineHeight: 1.55, padding: '12px 14px', borderRadius: 12, border: `1.5px solid ${C.line}`, fontFamily: 'inherit', resize: 'vertical', background: C.panel, color: C.ink }}
+            style={{ width: '100%', boxSizing: 'border-box', fontSize: 17, lineHeight: 1.55, padding: '12px 14px', borderRadius: 12, border: `1.5px solid ${err ? C.red : C.line}`, fontFamily: 'inherit', resize: 'vertical', background: C.panel, color: C.ink }}
           />
+          {err && (
+            <div id={`dispute-err-${s.id}`} role="alert" style={{ marginTop: 8, padding: '10px 13px', background: C.redSoft, borderRadius: 10, fontSize: 16, fontWeight: 700, color: C.red, lineHeight: 1.5 }}>{err}</div>
+          )}
           <div style={{ display: 'flex', gap: 10, marginTop: 10 }}>
             <Button variant="brand" size="lg" fullWidth onClick={send}><span style={{ fontSize: 17 }}>보내기</span></Button>
-            <Button variant="secondary" size="lg" onClick={() => { setAsking(false); setReason(''); }}><span style={{ fontSize: 17 }}>취소</span></Button>
+            <Button variant="secondary" size="lg" onClick={() => { setAsking(false); setReason(''); setErr(''); }}><span style={{ fontSize: 17 }}>취소</span></Button>
           </div>
         </div>
       ) : (
         <button
           type="button"
-          onClick={() => setAsking(true)}
+          onClick={() => { setAsking(true); setErr(''); }}
           style={{ marginTop: 14, width: '100%', padding: '12px 14px', borderRadius: 12, border: `1.5px solid ${C.line}`, background: C.cream, fontSize: 16, fontWeight: 700, color: C.inkSoft, cursor: 'pointer', fontFamily: 'inherit' }}
         >금액이 이상한가요? 코디네이터에게 문의하기</button>
       )}

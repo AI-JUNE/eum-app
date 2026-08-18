@@ -479,14 +479,18 @@ function SettlementView({ settlements, totalHours, totalEarned, user, dispatch, 
   // 정산 이의신청 — 사유 입력 모달 (백로그 #1, additive)
   const [disputeTarget, setDisputeTarget] = useState(null);
   const [disputeReason, setDisputeReason] = useState('');
+  // 입력 오류는 사라지는 토스트 대신 해당 입력란 아래에 남긴다(디자인 시스템: 에러=danger+아이콘+아래 배치).
+  // role="alert" + aria-describedby로 스크린리더가 어떤 필드가 왜 잘못됐는지 읽는다.
+  const [disputeErr, setDisputeErr] = useState('');
+  const closeDispute = () => { setDisputeTarget(null); setDisputeErr(''); };
   const submitDispute = () => {
     const v = validateDisputeReason(disputeReason);
-    if (!v.ok) { showToast && showToast({ type: 'error', message: v.message }); return; }
+    if (!v.ok) { setDisputeErr(v.message); return; }
     const gate = throttleAction('dispute:' + disputeTarget.id);
     if (!gate.ok) { showToast && showToast({ type: 'error', message: gate.message }); return; }
     dispatch && dispatch({ type: 'RAISE_SETTLEMENT_DISPUTE', payload: { id: disputeTarget.id, reason: v.value, raised_at: new Date().toISOString().slice(0, 10), raised_by: user.id } });
     showToast && showToast({ type: 'success', message: '이의 신청이 접수되었습니다. 코디네이터 검토 후 결과를 알려드립니다.' });
-    setDisputeTarget(null); setDisputeReason('');
+    setDisputeTarget(null); setDisputeReason(''); setDisputeErr('');
   };
   return (
     <>
@@ -529,7 +533,7 @@ function SettlementView({ settlements, totalHours, totalEarned, user, dispatch, 
                 ) : (
                   <button
                     type="button"
-                    onClick={() => { setDisputeTarget(s); setDisputeReason(''); }}
+                    onClick={() => { setDisputeTarget(s); setDisputeReason(''); setDisputeErr(''); }}
                     aria-label={`${s.month.replace('-', '년 ')}월 정산에 이의 신청`}
                     style={{ border: 'none', background: 'transparent', padding: '8px 10px', fontSize: 12.5, fontWeight: 700, color: C.mute, textDecoration: 'underline', textUnderlineOffset: 3, cursor: 'pointer', fontFamily: 'inherit' }}
                   >이의 신청</button>
@@ -546,12 +550,12 @@ function SettlementView({ settlements, totalHours, totalEarned, user, dispatch, 
       {/* 이의 신청 모달 — 사유 입력 후 코디네이터에게 접수 */}
       <Modal
         open={!!disputeTarget}
-        onClose={() => setDisputeTarget(null)}
+        onClose={closeDispute}
         title="정산 이의 신청"
         size="sm"
         footer={
           <>
-            <Button variant="secondary" onClick={() => setDisputeTarget(null)}>취소</Button>
+            <Button variant="secondary" onClick={closeDispute}>취소</Button>
             <Button variant="brand" icon={<Send size={14} />} onClick={submitDispute}>이의 신청</Button>
           </>
         }
@@ -562,8 +566,15 @@ function SettlementView({ settlements, totalHours, totalEarned, user, dispatch, 
               <div style={{ fontSize: 13.5, fontWeight: 700, color: C.headline }}>{disputeTarget.month.replace('-', '년 ')}월 활동분 · {krw(disputeTarget.amount_krw)}</div>
               <div style={{ fontSize: 12.5, color: C.muteLight, marginTop: 3 }}>{disputeTarget.total_hours}시간 · {disputeTarget.voucher_code}</div>
             </div>
-            <Field label="이의 사유" required>
-              <Textarea value={disputeReason} onChange={setDisputeReason} rows={4} placeholder="예) 활동 시간이 실제와 다르게 집계된 것 같습니다." />
+            <Field label="이의 사유" required error={disputeErr} errorId="youth-dispute-error">
+              <Textarea
+                value={disputeReason}
+                onChange={(v) => { setDisputeReason(v); if (disputeErr) setDisputeErr(''); }}
+                rows={4}
+                error={!!disputeErr}
+                describedBy={disputeErr ? 'youth-dispute-error' : undefined}
+                placeholder="예) 활동 시간이 실제와 다르게 집계된 것 같습니다."
+              />
             </Field>
             <div style={{ fontSize: 13, color: C.navMute, marginTop: 10, lineHeight: 1.6 }}>접수된 이의는 코디네이터가 검토하며, 처리 결과는 이 화면에서 확인할 수 있습니다.</div>
           </>

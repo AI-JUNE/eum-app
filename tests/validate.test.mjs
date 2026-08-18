@@ -3,7 +3,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   LIMITS, sanitizeText, validateText,
-  validateDisputeReason, validateResolutionMemo, validateNotice,
+  validateDisputeReason, validateResolutionMemo, validateNotice, validateNoticeFields,
   throttleAction, _resetThrottle,
 } from '../src/eum/validate.js';
 
@@ -52,4 +52,17 @@ test('throttleAction: 같은 key 연타 차단, 다른 key·시간 경과 후 �
   assert.equal(throttleAction('b', 1000).ok, true);  // 다른 key는 독립
   _resetThrottle();
   assert.equal(throttleAction('a', 1000).ok, true);  // 초기화 후 허용
+});
+
+test('validateNoticeFields: 실패 시 어느 칸(title|body)인지 함께 반환', () => {
+  const noTitle = validateNoticeFields('  ', '본문');
+  assert.equal(noTitle.ok, false);
+  assert.equal(noTitle.field, 'title');
+  const longBody = validateNoticeFields('제목', '가'.repeat(LIMITS.noticeBody + 1));
+  assert.equal(longBody.ok, false);
+  assert.equal(longBody.field, 'body');
+  const ok = validateNoticeFields(' 8월 안내 ', '줄1\n줄2');
+  assert.equal(ok.ok, true);
+  assert.equal(ok.value.title, '8월 안내');
+  assert.equal(ok.value.body, '줄1\n줄2');
 });

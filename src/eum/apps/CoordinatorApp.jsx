@@ -6,7 +6,7 @@ import { useMemo, useState } from 'react';
 import { Activity, AlertCircle, AlertTriangle, ArrowRight, Award, Bell, Calendar, Camera, Check, CheckCircle2, ChevronRight, ClipboardCheck, Clock, Download, FileText, GraduationCap, Hash, Heart, Info, Loader2, Phone, Printer, Search, Send, ShieldAlert, ShieldCheck, Smile, Sparkles, Star, Trash2, TrendingUp, UserPlus, Users, Wallet, X } from 'lucide-react';
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { C, FONT_STACK, PERSONA, SERIF_STACK, SHADOW } from '../theme.js';
-import { validateResolutionMemo, validateNotice, throttleAction } from '../validate.js';
+import { validateResolutionMemo, validateNoticeFields, throttleAction } from '../validate.js';
 import { TODAY, fmtDate, krw, uid } from '../utils.js';
 import { callClaude } from '../api.js';
 import { aiAutoTrios, aiDong, aiTrioScore, aiWelfare } from '../matching.js';
@@ -1515,17 +1515,20 @@ function CoordSettlements({ state, dispatch, showToast, user }) {
   // 정산 이의신청 검토 (백로그 #1, additive) — 이의 목록·검토 모달·처리 메모
   const [disputeSel, setDisputeSel] = useState(null);
   const [disputeMemo, setDisputeMemo] = useState('');
+  // 입력 오류는 토스트 대신 해당 입력란 아래에 인라인으로(디자인 시스템: 에러=danger+아이콘+아래 배치, role=alert).
+  const [disputeMemoErr, setDisputeMemoErr] = useState('');
+  const closeDispute = () => { setDisputeSel(null); setDisputeMemoErr(''); };
   const disputes = state.settlements.filter(s => s.dispute);
   const openDisputes = disputes.filter(s => s.dispute.status === 'received');
   const resolveDispute = (result) => {
     const v = validateResolutionMemo(disputeMemo);
-    if (!v.ok) { showToast({ type: 'error', message: v.message }); return; }
+    if (!v.ok) { setDisputeMemoErr(v.message); return; }
     dispatch({
       type: 'RESOLVE_SETTLEMENT_DISPUTE',
       payload: { id: disputeSel.id, result, resolution: v.value, resolved_at: new Date().toISOString().slice(0, 10), resolved_by: user.name || user.id },
     });
     showToast({ type: 'success', message: result === 'accepted' ? '이의를 승인 처리했습니다. 참여자 화면에 반영됩니다.' : '이의를 반려 처리했습니다. 참여자 화면에 반영됩니다.' });
-    setDisputeSel(null); setDisputeMemo('');
+    setDisputeSel(null); setDisputeMemo(''); setDisputeMemoErr('');
   };
 
   // 월별 정산 가능 항목 (승인된 로그 합산)
@@ -1698,7 +1701,7 @@ function CoordSettlements({ state, dispatch, showToast, user }) {
                   )}
                 </div>
                 {d.status === 'received' && (
-                  <Button variant="secondary" size="sm" onClick={() => { setDisputeSel(s); setDisputeMemo(''); }} style={{ flexShrink: 0 }}>검토</Button>
+                  <Button variant="secondary" size="sm" onClick={() => { setDisputeSel(s); setDisputeMemo(''); setDisputeMemoErr(''); }} style={{ flexShrink: 0 }}>검토</Button>
                 )}
               </div>
             );
@@ -1709,12 +1712,12 @@ function CoordSettlements({ state, dispatch, showToast, user }) {
       {/* 이의 검토 모달 — 처리 메모 필수, 승인/반려 기록 */}
       <Modal
         open={!!disputeSel}
-        onClose={() => setDisputeSel(null)}
+        onClose={closeDispute}
         title="정산 이의 검토"
         size="sm"
         footer={
           <>
-            <Button variant="secondary" onClick={() => setDisputeSel(null)}>취소</Button>
+            <Button variant="secondary" onClick={closeDispute}>취소</Button>
             <Button variant="danger" onClick={() => resolveDispute('rejected')}>반려</Button>
             <Button variant="brand" onClick={() => resolveDispute('accepted')}>승인</Button>
           </>
@@ -1729,8 +1732,15 @@ function CoordSettlements({ state, dispatch, showToast, user }) {
               <div style={{ fontSize: 12.5, color: C.inkSoft, marginTop: 6, lineHeight: 1.6 }}>"{disputeSel.dispute?.reason}"</div>
               <div style={{ fontSize: 12.5, color: C.navMute, marginTop: 4 }}>{fmtDate(disputeSel.dispute?.raised_at)} 접수</div>
             </div>
-            <Field label="처리 메모" required>
-              <Textarea value={disputeMemo} onChange={setDisputeMemo} rows={4} placeholder="예) 미승인 활동기록 2건 확인 후 승인 — 차월 정산에 합산 반영 예정." />
+            <Field label="처리 메모" required error={disputeMemoErr} errorId="coord-dispute-memo-error">
+              <Textarea
+                value={disputeMemo}
+                onChange={(v) => { setDisputeMemo(v); if (disputeMemoErr) setDisputeMemoErr(''); }}
+                rows={4}
+                error={!!disputeMemoErr}
+                describedBy={disputeMemoErr ? 'coord-dispute-memo-error' : undefined}
+                placeholder="예) 미승인 활동기록 2건 확인 후 승인 — 차월 정산에 합산 반영 예정."
+              />
             </Field>
             <div style={{ fontSize: 12, color: C.navMute, marginTop: 10, lineHeight: 1.6 }}>승인/반려와 처리 메모는 이력으로 남고 참여자 정산 화면에 표시됩니다.</div>
           </>
@@ -2311,6 +2321,8 @@ const noticeAudienceLabel = (v) => NOTICE_AUDIENCES.find(a => a.value === v)?.la
 function CoordNotices({ state, dispatch, showToast, user }) {
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
+  // 제목·내용 오류를 각 입력란 아래에 인라인 표시(어느 칸이 문제인지 화면에 남긴다).
+  const [formErr, setFormErr] = useState({ title: '', body: '' });
   const [channels, setChannels] = useState(['kakao']);
   const [audience, setAudience] = useState('all');
   const [sending, setSending] = useState(false);
@@ -2326,8 +2338,9 @@ function CoordNotices({ state, dispatch, showToast, user }) {
   const nowStamp = () => new Date().toISOString().slice(0, 16).replace('T', ' ');
 
   const send = async () => {
-    const v = validateNotice(title, body);
-    if (!v.ok) { showToast({ type: 'error', message: v.message }); return; }
+    const v = validateNoticeFields(title, body);
+    if (!v.ok) { setFormErr({ title: v.field === 'title' ? v.message : '', body: v.field === 'body' ? v.message : '' }); return; }
+    setFormErr({ title: '', body: '' });
     if (channels.length === 0) { showToast({ type: 'error', message: '발송 채널을 1개 이상 선택해주세요.' }); return; }
     const gate = throttleAction('notice:send', 2000);
     if (!gate.ok) { showToast({ type: 'error', message: gate.message }); return; }
@@ -2351,7 +2364,7 @@ function CoordNotices({ state, dispatch, showToast, user }) {
     setSending(false);
     const failed = delivery.filter(d => d.status === 'failed').length;
     showToast({ type: failed > 0 ? 'info' : 'success', message: `공지 발송 완료 — 전달 ${delivery.length - failed}건 · 미전달 ${failed}건 (시뮬레이션)` });
-    setTitle(''); setBody(''); setExpandedId(payload.id);
+    setTitle(''); setBody(''); setFormErr({ title: '', body: '' }); setExpandedId(payload.id);
   };
 
   const resend = async (n) => {
@@ -2392,11 +2405,24 @@ function CoordNotices({ state, dispatch, showToast, user }) {
       {/* 공지 작성 */}
       <Card style={{ marginBottom: 16 }}>
         <div style={{ fontSize: 14, fontWeight: 800, color: C.ink, marginBottom: 12 }}>새 공지 작성</div>
-        <Field label="제목">
-          <Input value={title} onChange={setTitle} placeholder="예) 8월 정산 발급 안내" />
+        <Field label="제목" error={formErr.title} errorId="coord-notice-title-error">
+          <Input
+            value={title}
+            onChange={(v) => { setTitle(v); if (formErr.title) setFormErr(prev => ({ ...prev, title: '' })); }}
+            error={!!formErr.title}
+            describedBy={formErr.title ? 'coord-notice-title-error' : undefined}
+            placeholder="예) 8월 정산 발급 안내"
+          />
         </Field>
-        <Field label="내용">
-          <Textarea value={body} onChange={setBody} rows={4} placeholder="수신자에게 전달할 공지 내용을 입력하세요." />
+        <Field label="내용" error={formErr.body} errorId="coord-notice-body-error">
+          <Textarea
+            value={body}
+            onChange={(v) => { setBody(v); if (formErr.body) setFormErr(prev => ({ ...prev, body: '' })); }}
+            rows={4}
+            error={!!formErr.body}
+            describedBy={formErr.body ? 'coord-notice-body-error' : undefined}
+            placeholder="수신자에게 전달할 공지 내용을 입력하세요."
+          />
         </Field>
         <Field label="발송 채널" sub="여러 채널을 함께 선택할 수 있어요">
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>

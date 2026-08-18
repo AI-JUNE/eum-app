@@ -81,6 +81,20 @@ export function validateNotice(rawTitle, rawBody) {
 }
 
 /**
+ * 공지 제목·본문 — 어느 필드가 잘못됐는지까지 알려주는 변형(additive).
+ * validateNotice와 동일한 규칙을 쓰되, 실패 시 field('title'|'body')를 함께 반환해
+ * 화면이 해당 입력란에 인라인 오류를 붙일 수 있게 한다. validateNotice는 그대로 유지.
+ * @returns {{ok:true, value:{title:string,body:string}}|{ok:false, field:'title'|'body', message:string}}
+ */
+export function validateNoticeFields(rawTitle, rawBody) {
+  const title = validateText(rawTitle, { label: '제목', max: LIMITS.noticeTitle });
+  if (!title.ok) return { ok: false, field: 'title', message: title.message };
+  const body = validateText(rawBody, { label: '내용', max: LIMITS.noticeBody, multiline: true });
+  if (!body.ok) return { ok: false, field: 'body', message: body.message };
+  return { ok: true, value: { title: title.value, body: body.value } };
+}
+
+/**
  * 간이 연타 방지(클라이언트 rate limit): 같은 key의 액션이 windowMs 안에
  * 다시 들어오면 차단. 모듈 메모리 한정 — 서버측 rate limit 대체가 아니다.
  * @param {string} key 액션 식별자 (예: 'dispute:se1')
