@@ -871,7 +871,7 @@ function CoordApplicants({ state, dispatch, showToast, user }) {
         </div>
       </div>
 
-      {filtered.length === 0 ? <Empty icon={<UserPlus size={32} />} title={query || typeFilter !== 'all' ? '조건에 맞는 신청자가 없습니다' : `${activeTab === 'screening' ? '검토 대기' : activeTab === 'verified' ? '검증 중인' : activeTab === 'completed' ? '활동 중인' : '반려된'} 신청자가 없습니다`} sub={query || typeFilter !== 'all' ? '검색어나 필터 조건을 조정해보세요' : '새 신청이 접수되면 이곳에 표시됩니다'} /> : (
+      {filtered.length === 0 ? <Empty icon={<UserPlus size={32} />} title={query || typeFilter !== 'all' ? '조건에 맞는 신청자가 없습니다' : `${activeTab === 'screening' ? '검토 대기' : activeTab === 'verified' ? '검증 중인' : activeTab === 'completed' ? '활동 중인' : '반려된'} 신청자가 없습니다`} sub={query || typeFilter !== 'all' ? '검색어나 필터 조건을 조정해보세요' : '새 신청이 접수되면 이곳에 표시됩니다'} action={query || typeFilter !== 'all' ? <Button variant="secondary" size="sm" onClick={() => { setQuery(''); setTypeFilter('all'); }}>검색·필터 초기화</Button> : undefined} /> : (
         <div style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 16, boxShadow: SHADOW.xs, overflow: 'hidden' }}>
           {/* 리스트 헤더 */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '11px 20px', background: C.lineSoft, borderBottom: `1px solid ${C.line}`, fontSize: 12.5, fontWeight: 700, color: C.navMute, letterSpacing: '0.02em' }}>
@@ -2265,7 +2265,8 @@ function CoordParticipantSearch({ state }) {
       </div>
       <div style={{ fontSize: 12, color: C.mute, marginBottom: 10 }} aria-live="polite">{results.length}명 조회됨</div>
       {results.length === 0 ? (
-        <Empty icon={<Users size={26} />} title="조건에 맞는 참여자가 없습니다" sub="검색어나 필터를 조정해 보세요" />
+        <Empty icon={<Users size={26} />} title="조건에 맞는 참여자가 없습니다" sub="검색어나 필터를 조정해 보세요"
+          action={(q || role !== 'all' || region !== 'all') ? <Button variant="secondary" size="sm" onClick={() => { setQ(''); setRole('all'); setRegion('all'); }}>검색·필터 초기화</Button> : undefined} />
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {results.map(p => (

@@ -316,7 +316,11 @@ function YouthLogs({ state, user, match, myLogs, myActivities, dispatch, showToa
       </div>
       <Panel padding={shownLogs.length === 0 ? 8 : 0}>
         {shownLogs.length === 0 ? (
-          <Empty icon={<PenLine size={42} />} title={tab === 'all' ? '아직 기록이 없습니다' : tab === 'approved' ? '승인된 기록이 없습니다' : '대기 중인 기록이 없습니다'} sub={tab === 'all' ? '활동 후 그날의 인상적이었던 순간을 적어주세요' : undefined} />
+          <Empty icon={<PenLine size={42} />} title={tab === 'all' ? '아직 기록이 없습니다' : tab === 'approved' ? '승인된 기록이 없습니다' : '대기 중인 기록이 없습니다'}
+            sub={tab === 'all' ? '활동 후 그날의 인상적이었던 순간을 적어주세요' : '다른 상태의 기록이 있을 수 있어요'}
+            action={tab === 'all'
+              ? <Button variant="brand" size="sm" icon={<Plus size={15} />} onClick={() => setOpen(true)}>새 기록 작성</Button>
+              : <Button variant="secondary" size="sm" onClick={() => setTab('all')}>전체 기록 보기</Button>} />
         ) : shownLogs.map((log, i) => {
           const act = state.activities.find(a => a.id === log.activity_id);
           return (

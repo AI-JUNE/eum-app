@@ -82,8 +82,9 @@ function CoordAudit({ state }) {
       </div>
 
       {list.length === 0 ? (
-        <Empty icon={<ScrollText size={28} />} title="기록된 행위가 없습니다"
-          sub="로그인·정산 이의·공지 발송 등 운영 행위가 생기면 이곳에 시간순으로 남습니다." />
+        <Empty icon={<ScrollText size={28} />} title={cat === 'all' ? '기록된 행위가 없습니다' : '이 분류의 기록이 없습니다'}
+          sub={cat === 'all' ? '로그인·정산 이의·공지 발송 등 운영 행위가 생기면 이곳에 시간순으로 남습니다.' : '다른 분류를 보거나 전체 기록으로 돌아가세요.'}
+          action={cat !== 'all' ? <Button variant="secondary" size="sm" onClick={() => setCat('all')}>전체 기록 보기</Button> : undefined} />
       ) : (
         <div style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 16, boxShadow: SHADOW.sm, overflow: 'hidden' }}>
           {list.map((e, i) => (
