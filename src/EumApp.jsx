@@ -670,6 +670,24 @@ function appReducer(state, action) {
           : l)
       };
     }
+    // 활동기록 보완 요청 (additive) — 승인의 반대편. 승인 상태는 건드리지 않고
+    // revision 필드만 덧붙여, 참여자가 "왜 아직 승인이 안 났는지"를 화면에서 확인하게 한다.
+    case 'REJECT_LOG': {
+      return {
+        ...state,
+        activity_logs: state.activity_logs.map(l => l.id === action.payload.id
+          ? {
+            ...l,
+            revision: {
+              status: 'requested',
+              note: action.payload.note,
+              requested_at: action.payload.requested_at || new Date().toISOString().slice(0, 10),
+              requested_by: action.payload.requested_by,
+            },
+          }
+          : l)
+      };
+    }
     case 'ADD_INCIDENT': {
       return { ...state, safety_incidents: [...state.safety_incidents, action.payload] };
     }

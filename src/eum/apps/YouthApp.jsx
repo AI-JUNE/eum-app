@@ -269,7 +269,11 @@ function YouthLogs({ state, user, match, myLogs, myActivities, dispatch, showToa
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState('all');
   const [form, setForm] = useState({ activity_id: '', summary: '', mood: 5, has_photo: false });
-  const shownLogs = tab === 'approved' ? myLogs.filter(l => l.approved) : tab === 'pending' ? myLogs.filter(l => !l.approved) : myLogs;
+  // 보완 요청(코디가 되돌려 보낸 기록) — 승인 상태는 그대로, revision 필드만 붙는다.
+  const needsRevision = (l) => !l.approved && !!(l.revision && l.revision.status === 'requested');
+  const shownLogs = tab === 'approved' ? myLogs.filter(l => l.approved)
+    : tab === 'revision' ? myLogs.filter(needsRevision)
+      : tab === 'pending' ? myLogs.filter(l => !l.approved && !needsRevision(l)) : myLogs;
 
   const writableActs = myActivities.filter(a => a.status === 'completed' || a.status === 'scheduled');
   const writableOptions = writableActs.map((a) => {
@@ -311,12 +315,13 @@ function YouthLogs({ state, user, match, myLogs, myActivities, dispatch, showToa
         <Tabs ariaLabel="활동 기록 상태 필터" tabs={[
           { id: 'all', label: '전체', count: myLogs.length },
           { id: 'approved', label: '승인', count: myLogs.filter(l => l.approved).length },
-          { id: 'pending', label: '대기', count: myLogs.filter(l => !l.approved).length },
+          { id: 'pending', label: '대기', count: myLogs.filter(l => !l.approved && !needsRevision(l)).length },
+          { id: 'revision', label: '보완 요청', count: myLogs.filter(needsRevision).length },
         ]} active={tab} onChange={setTab} />
       </div>
       <Panel padding={shownLogs.length === 0 ? 8 : 0}>
         {shownLogs.length === 0 ? (
-          <Empty icon={<PenLine size={42} />} title={tab === 'all' ? '아직 기록이 없습니다' : tab === 'approved' ? '승인된 기록이 없습니다' : '대기 중인 기록이 없습니다'}
+          <Empty icon={<PenLine size={42} />} title={tab === 'all' ? '아직 기록이 없습니다' : tab === 'approved' ? '승인된 기록이 없습니다' : tab === 'revision' ? '보완 요청받은 기록이 없습니다' : '대기 중인 기록이 없습니다'}
             sub={tab === 'all' ? '활동 후 그날의 인상적이었던 순간을 적어주세요' : '다른 상태의 기록이 있을 수 있어요'}
             action={tab === 'all'
               ? <Button variant="brand" size="sm" icon={<Plus size={15} />} onClick={() => setOpen(true)}>새 기록 작성</Button>
@@ -334,11 +339,23 @@ function YouthLogs({ state, user, match, myLogs, myActivities, dispatch, showToa
                 </div>
                 {log.approved ? (
                   <Badge color={C.sage} soft={C.sageSoft} size="sm"><Check size={11} /> 승인됨</Badge>
+                ) : needsRevision(log) ? (
+                  <Badge color={C.amber} soft={C.amberSoft} size="sm">보완 요청</Badge>
                 ) : (
                   <Badge color={C.amber} soft={C.amberSoft} size="sm"><Clock size={11} /> 승인 대기</Badge>
                 )}
               </div>
               <div style={{ fontSize: 14, color: C.inkSoft, lineHeight: 1.65 }}>{log.summary}</div>
+              {/* 코디 보완 요청 사유 — 토스트가 아니라 기록 옆에 남겨 재방문해도 확인 가능 */}
+              {needsRevision(log) && (
+                <div role="status" style={{ marginTop: 10, padding: '11px 13px', background: C.amberSoft, borderRadius: 12, lineHeight: 1.6 }}>
+                  <div style={{ fontSize: 12.5, fontWeight: 700, color: C.amber }}>
+                    코디네이터 보완 요청 · {fmtDate(log.revision.requested_at)}
+                  </div>
+                  <div style={{ fontSize: 13.5, color: C.inkSoft, marginTop: 4 }}>{log.revision.note}</div>
+                  <div style={{ fontSize: 12.5, color: C.navMute, marginTop: 5 }}>보완 후 코디네이터가 다시 확인하면 승인됩니다.</div>
+                </div>
+              )}
             </div>
           );
         })}

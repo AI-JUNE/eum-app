@@ -82,3 +82,12 @@ test('모든 AUDIT_RULES 항목은 라벨·분류를 갖는다', () => {
     assert.ok(rule.label && rule.category, type);
   }
 });
+
+test('REJECT_LOG: 감사 대상이며 보완 요청 사유(자유 텍스트)는 기록하지 않는다', () => {
+  const e = buildAuditEntry({ type: 'REJECT_LOG', payload: { id: 'log011', note: '시간이 일정과 다릅니다', requested_by: '코디 한가은' } }, COORD_STATE);
+  assert.ok(e);
+  assert.equal(e.category, 'activity');
+  assert.ok(e.target.includes('log011'));
+  assert.ok(!e.target.includes('시간이 일정과 다릅니다'));
+  assert.ok(!JSON.stringify(e).includes('시간이 일정과 다릅니다'));
+});

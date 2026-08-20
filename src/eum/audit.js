@@ -23,6 +23,7 @@ export const AUDIT_RULES = {
   ADD_INCIDENT: { label: '안전 이슈 등록', category: 'safety' },
   RESOLVE_INCIDENT: { label: '안전 이슈 처리', category: 'safety' },
   APPROVE_LOG: { label: '활동기록 승인', category: 'activity' },
+  REJECT_LOG: { label: '활동기록 보완 요청', category: 'activity' },
   UPDATE_APPLICATION: { label: '신청서 상태 변경', category: 'data' },
   UPDATE_PARTICIPANT: { label: '참여자 정보 수정', category: 'data' },
   UPDATE_VERIFICATION: { label: '검증 상태 변경', category: 'data' },
@@ -61,6 +62,8 @@ function targetOf(action) {
     case 'ADD_INCIDENT': return `이슈 ${p.id || ''} ${p.type ? `· ${p.type}` : ''}`.trim();
     case 'RESOLVE_INCIDENT': return `이슈 ${p.id} 처리`;
     case 'APPROVE_LOG': return `활동기록 ${p.id} 승인`;
+    // 보완 요청 사유(자유 텍스트)는 기록하지 않는다 — 식별자·상태값만.
+    case 'REJECT_LOG': return `활동기록 ${p.id} 보완 요청`;
     case 'UPDATE_APPLICATION': return `신청서 ${p.id}${p.status ? ` · ${p.status}` : ''}`;
     case 'UPDATE_PARTICIPANT': return `참여자 ${p.id}`;
     case 'UPDATE_VERIFICATION': return `신청서 ${p.application_id} · ${p.step || ''} → ${p.status || ''}`;

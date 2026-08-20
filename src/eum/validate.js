@@ -71,6 +71,14 @@ export function validateResolutionMemo(raw) {
   });
 }
 
+/** 활동기록 보완 요청 사유 (코디네이터) — 처리 메모와 동일 상한, 안내 문구만 다르다. */
+export function validateRevisionNote(raw) {
+  return validateText(raw, {
+    label: '보완 요청 사유', max: LIMITS.resolutionMemo, multiline: true,
+    requiredMessage: '어떤 점을 보완해야 하는지 적어주세요.',
+  });
+}
+
 /** 공지 제목·본문 (코디네이터) — 둘 다 유효할 때만 ok. */
 export function validateNotice(rawTitle, rawBody) {
   const title = validateText(rawTitle, { label: '제목', max: LIMITS.noticeTitle });

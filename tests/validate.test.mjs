@@ -3,7 +3,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   LIMITS, sanitizeText, validateText,
-  validateDisputeReason, validateResolutionMemo, validateNotice, validateNoticeFields,
+  validateDisputeReason, validateResolutionMemo, validateRevisionNote, validateNotice, validateNoticeFields,
   throttleAction, _resetThrottle,
 } from '../src/eum/validate.js';
 
@@ -65,4 +65,15 @@ test('validateNoticeFields: 실패 시 어느 칸(title|body)인지 함께 반�
   assert.equal(ok.ok, true);
   assert.equal(ok.value.title, '8월 안내');
   assert.equal(ok.value.body, '줄1\n줄2');
+});
+
+test('validateRevisionNote: 빈 값 거부·상한은 처리 메모와 동일·제어문자 제거', () => {
+  const empty = validateRevisionNote('   ');
+  assert.equal(empty.ok, false);
+  assert.ok(empty.message.length > 0);
+  assert.equal(validateRevisionNote('가'.repeat(LIMITS.resolutionMemo)).ok, true);
+  assert.equal(validateRevisionNote('가'.repeat(LIMITS.resolutionMemo + 1)).ok, false);
+  const ok = validateRevisionNote('  시간을\u0000 다시 확인해 주세요.\n감사합니다.  ');
+  assert.equal(ok.ok, true);
+  assert.equal(ok.value, '시간을 다시 확인해 주세요.\n감사합니다.');
 });

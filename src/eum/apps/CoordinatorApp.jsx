@@ -6,7 +6,7 @@ import { useMemo, useState } from 'react';
 import { Activity, AlertCircle, AlertTriangle, ArrowRight, Award, Bell, Calendar, Camera, Check, CheckCircle2, ChevronRight, ClipboardCheck, Clock, Download, FileText, GraduationCap, Hash, Heart, Info, Loader2, Phone, Printer, Search, Send, ShieldAlert, ShieldCheck, Smile, Sparkles, Star, Trash2, TrendingUp, UserPlus, Users, Wallet, X } from 'lucide-react';
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { C, FONT_STACK, PERSONA, SERIF_STACK, SHADOW } from '../theme.js';
-import { validateResolutionMemo, validateNoticeFields, throttleAction } from '../validate.js';
+import { validateResolutionMemo, validateRevisionNote, validateNoticeFields, throttleAction } from '../validate.js';
 import { TODAY, fmtDate, krw, uid } from '../utils.js';
 import { callClaude } from '../api.js';
 import { aiAutoTrios, aiDong, aiTrioScore, aiWelfare } from '../matching.js';
@@ -1361,11 +1361,32 @@ function CoordActivities({ state, dispatch, showToast, user }) {
   const [activeTab, setActiveTab] = useState('pending');
   const [selected, setSelected] = useState(new Set());
   const [detailLog, setDetailLog] = useState(null);
+  // 보완 요청(반려) 상태 — additive. 승인 로직·일괄 승인은 그대로 둔다.
+  const [revisionLog, setRevisionLog] = useState(null);
+  const [revisionNote, setRevisionNote] = useState('');
+  const [revisionErr, setRevisionErr] = useState('');
 
-  const pendingLogs = state.activity_logs.filter(l => !l.approved);
+  const isRevision = (l) => !!(l.revision && l.revision.status === 'requested');
+  const pendingLogs = state.activity_logs.filter(l => !l.approved && !isRevision(l));
   const approvedLogs = state.activity_logs.filter(l => l.approved);
+  const revisionLogs = state.activity_logs.filter(l => !l.approved && isRevision(l));
 
-  const list = activeTab === 'pending' ? pendingLogs : approvedLogs;
+  const list = activeTab === 'pending' ? pendingLogs : activeTab === 'revision' ? revisionLogs : approvedLogs;
+
+  const closeRevision = () => { setRevisionLog(null); setRevisionNote(''); setRevisionErr(''); };
+  const submitRevision = () => {
+    if (!revisionLog) return;
+    const v = validateRevisionNote(revisionNote);
+    if (!v.ok) { setRevisionErr(v.message); return; }
+    const gate = throttleAction('reject-log:' + revisionLog.id);
+    if (!gate.ok) { showToast({ type: 'error', message: gate.message }); return; }
+    dispatch({
+      type: 'REJECT_LOG',
+      payload: { id: revisionLog.id, note: v.value, requested_at: new Date().toISOString().slice(0, 10), requested_by: user.name || user.id },
+    });
+    showToast({ type: 'success', message: '보완을 요청했습니다. 작성자에게 사유가 표시됩니다.' });
+    closeRevision();
+  };
 
   const toggleSelect = (id) => {
     const next = new Set(selected);
@@ -1402,6 +1423,7 @@ function CoordActivities({ state, dispatch, showToast, user }) {
         ariaLabel="활동 기록 승인 상태 필터"
         tabs={[
           { id: 'pending', label: '승인 대기', count: pendingLogs.length },
+          { id: 'revision', label: '보완 요청', count: revisionLogs.length },
           { id: 'approved', label: '승인됨', count: approvedLogs.length },
         ]}
         active={activeTab}
@@ -1409,7 +1431,10 @@ function CoordActivities({ state, dispatch, showToast, user }) {
         style={{ marginBottom: 16 }}
       />
 
-      {list.length === 0 ? <Empty icon={<ClipboardCheck size={32} />} title={activeTab === 'pending' ? '승인 대기 중인 기록이 없습니다' : '승인된 기록이 없습니다'} sub={activeTab === 'pending' ? '활동 로그가 제출되면 여기에서 검토·승인하세요' : '승인을 마친 기록이 이곳에 모입니다'} /> : (
+      {list.length === 0 ? <Empty icon={<ClipboardCheck size={32} />}
+        title={activeTab === 'pending' ? '승인 대기 중인 기록이 없습니다' : activeTab === 'revision' ? '보완 요청한 기록이 없습니다' : '승인된 기록이 없습니다'}
+        sub={activeTab === 'pending' ? '활동 로그가 제출되면 여기에서 검토·승인하세요' : activeTab === 'revision' ? '보완이 필요한 기록을 되돌려 보내면 이곳에 모입니다' : '승인을 마친 기록이 이곳에 모입니다'}
+        action={activeTab !== 'pending' ? <Button variant="secondary" size="sm" onClick={() => { setActiveTab('pending'); setSelected(new Set()); }}>승인 대기 보기</Button> : undefined} /> : (
         <div style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 16, boxShadow: SHADOW.xs, overflow: 'hidden' }}>
           {/* 선택 바 — 선택 건수와 총 시간을 함께 보여준다. 승인은 곧 정산 금액이므로 '몇 시간'이 중요하다. */}
           {activeTab === 'pending' && (
@@ -1446,10 +1471,24 @@ function CoordActivities({ state, dispatch, showToast, user }) {
                   </div>
                   <div style={{ fontSize: 12.5, color: C.inkSoft, lineHeight: 1.55, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{log.summary}</div>
                   <div style={{ fontSize: 12.5, color: C.muteLight, marginTop: 5, fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>{log.hours}시간 · 매칭 {match?.id?.toUpperCase()}</div>
+                  {/* 보완 요청 이력 — 무엇을 왜 되돌려 보냈는지 목록에서 바로 확인 */}
+                  {isRevision(log) && (
+                    <div style={{ marginTop: 8, padding: '9px 12px', background: C.amberSoft, borderRadius: 10, fontSize: 12.5, color: C.inkSoft, lineHeight: 1.55 }}>
+                      <span style={{ fontWeight: 700, color: C.amber }}>보완 요청</span>
+                      <span style={{ color: C.navMute, fontWeight: 600 }}> · {fmtDate(log.revision.requested_at)}{log.revision.requested_by ? ` · ${log.revision.requested_by}` : ''}</span>
+                      <div style={{ marginTop: 3 }}>{log.revision.note}</div>
+                    </div>
+                  )}
                 </div>
                 <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
                   <Button variant="secondary" size="sm" onClick={() => setDetailLog(log)}>상세</Button>
-                  {activeTab === 'pending' && (
+                  {activeTab !== 'approved' && (
+                    <Button variant="secondary" size="sm" icon={<AlertCircle size={14} />}
+                      onClick={() => { setRevisionLog(log); setRevisionNote(isRevision(log) ? log.revision.note : ''); setRevisionErr(''); }}>
+                      {isRevision(log) ? '사유 수정' : '보완 요청'}
+                    </Button>
+                  )}
+                  {activeTab !== 'approved' && (
                     <Button variant="success" size="sm" icon={<Check size={14} />}
                       onClick={() => { dispatch({ type: 'APPROVE_LOG', payload: { id: log.id, approved_by: user.id } }); showToast({ type: 'success', message: '승인되었습니다.' }); }}>승인</Button>
                   )}
@@ -1459,6 +1498,42 @@ function CoordActivities({ state, dispatch, showToast, user }) {
           })}
         </div>
       )}
+
+      {/* 보완 요청 — 반려가 아니라 '되돌려 보내기'. 사유는 작성자 화면에 그대로 표시된다. */}
+      <Modal
+        open={!!revisionLog}
+        onClose={closeRevision}
+        title="활동 기록 보완 요청"
+        size="sm"
+        footer={<>
+          <Button variant="secondary" onClick={closeRevision}>취소</Button>
+          <Button variant="brand" icon={<Send size={14} />} onClick={submitRevision}>보완 요청</Button>
+        </>}
+      >
+        {revisionLog && (
+          <>
+            <div style={{ padding: '12px 14px', background: C.lineSoft, borderRadius: 12, marginBottom: 14 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: C.headline }}>
+                {state.participants.find(p => p.id === revisionLog.participant_id)?.name || revisionLog.participant_id} · {revisionLog.hours}시간
+              </div>
+              <div style={{ fontSize: 12.5, color: C.inkSoft, marginTop: 6, lineHeight: 1.6, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{revisionLog.summary}</div>
+            </div>
+            <Field label="보완 요청 사유" required error={revisionErr} errorId="coord-revision-note-error">
+              <Textarea
+                value={revisionNote}
+                onChange={(v) => { setRevisionNote(v); if (revisionErr) setRevisionErr(''); }}
+                placeholder="예) 활동 시간이 일정과 다릅니다. 실제 진행 시간을 다시 확인해 주세요."
+                rows={4}
+                error={!!revisionErr}
+                describedBy={revisionErr ? 'coord-revision-note-error' : undefined}
+              />
+            </Field>
+            <div style={{ fontSize: 12.5, color: C.navMute, marginTop: 10, lineHeight: 1.6 }}>
+              승인 상태는 바뀌지 않습니다. 작성자 앱의 활동 기록에 사유가 표시되며, 보완 후 다시 승인할 수 있습니다.
+            </div>
+          </>
+        )}
+      </Modal>
 
       <Modal open={!!detailLog} onClose={() => setDetailLog(null)} title="활동 기록 상세" size="md">
         {detailLog && (() => {
