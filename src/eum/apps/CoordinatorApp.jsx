@@ -317,7 +317,7 @@ function QuickAccessStrip({ setView }) {
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: 10, marginBottom: 20 }}>
       {items.map(it => (
         <button key={it.id} type="button" onClick={() => setView(it.id)} aria-label={`${it.t} — ${it.d}`} style={{ textAlign: 'left', cursor: 'pointer', fontFamily: FONT_STACK, background: C.panel, border: `1px solid ${C.line}`, borderRadius: 12, padding: '12px 14px', boxShadow: SHADOW.xs, outline: 'none', outlineOffset: 2, display: 'flex', alignItems: 'center', gap: 11, transition: 'border-color .16s ease, background .16s ease, transform .2s cubic-bezier(0.22,1,0.36,1), box-shadow .2s ease' }}
-          onMouseEnter={e => { e.currentTarget.style.borderColor = '#D7DAE0'; e.currentTarget.style.background = C.hover; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = SHADOW.md; }}
+          onMouseEnter={e => { e.currentTarget.style.borderColor = C.lineStrong; e.currentTarget.style.background = C.hover; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = SHADOW.md; }}
           onMouseLeave={e => { e.currentTarget.style.borderColor = C.line; e.currentTarget.style.background = C.panel; e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = SHADOW.xs; }}
           onFocus={e => { e.currentTarget.style.outline = `2px solid ${C.brand}`; }}
           onBlur={e => { e.currentTarget.style.outline = 'none'; }}>
@@ -326,7 +326,7 @@ function QuickAccessStrip({ setView }) {
             <span style={{ display: 'block', color: C.headline, fontWeight: 700, fontSize: 13, letterSpacing: '-0.02em' }}>{it.t}</span>
             <span style={{ display: 'block', fontSize: 12.5, color: C.muteLight, marginTop: 2, fontWeight: 500 }}>{it.d}</span>
           </span>
-          <ChevronRight size={15} color="#C8CCD3" aria-hidden="true" style={{ flexShrink: 0 }} />
+          <ChevronRight size={15} color={C.muteFaint} aria-hidden="true" style={{ flexShrink: 0 }} />
         </button>
       ))}
     </div>
@@ -354,7 +354,7 @@ function QueueChip({ label, n, danger, onClick }) {
         outline: focused ? `2px solid ${C.brand}` : 'none', outlineOffset: 2,
         transition: 'background .14s ease, border-color .14s ease',
       }}
-      onMouseEnter={(e) => { e.currentTarget.style.background = C.hover; e.currentTarget.style.borderColor = '#D7DAE0'; }}
+      onMouseEnter={(e) => { e.currentTarget.style.background = C.hover; e.currentTarget.style.borderColor = C.lineStrong; }}
       onMouseLeave={(e) => { e.currentTarget.style.background = C.panel; e.currentTarget.style.borderColor = C.line; }}
     >
       <span aria-hidden="true" style={{
@@ -364,7 +364,7 @@ function QueueChip({ label, n, danger, onClick }) {
         fontVariantNumeric: 'tabular-nums',
       }}>{n}</span>
       <span aria-hidden="true" style={{ fontSize: 12.5, fontWeight: 600, color: col, letterSpacing: '-0.01em' }}>{label}</span>
-      <ChevronRight size={13} color="#C8CCD3" aria-hidden="true" />
+      <ChevronRight size={13} color={C.muteFaint} aria-hidden="true" />
     </button>
   );
 }
@@ -1464,7 +1464,7 @@ function CoordActivities({ state, dispatch, showToast, user }) {
                   <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 4, flexWrap: 'wrap' }}>
                     <span style={{ fontSize: 13.5, fontWeight: 700, color: C.headline, letterSpacing: '-0.02em' }}>{author?.name}</span>
                     <span style={{ fontSize: 12.5, color: C.muteLight, fontWeight: 500, fontVariantNumeric: 'tabular-nums' }}>{fmtDate(log.date)}</span>
-                    <span style={{ color: '#D4D7DD' }}>·</span>
+                    <span style={{ color: C.muteFaint }}>·</span>
                     <span style={{ fontSize: 12.5, color: C.navMute, fontWeight: 500 }}>{act?.title}</span>
                     {log.has_photo && <Camera size={12} style={{ color: C.muteLight }} />}
                     {log.mood && <span role="img" aria-label={`기분 ${moodLabel(log.mood)}`} style={{ fontSize: 12 }}>{moodEmoji(log.mood)}</span>}

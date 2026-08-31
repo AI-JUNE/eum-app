@@ -307,7 +307,7 @@ function ApplicationForm({ onClose, onSubmit }) {
 
   if (submitted) {
     return (
-      <div className="eum-modal-overlay" onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(26,24,20,0.55)', backdropFilter: 'blur(4px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, animation: 'fadeIn 0.15s ease' }}>
+      <div className="eum-modal-overlay" onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(26,24,20,0.45)', backdropFilter: 'blur(4px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, animation: 'fadeIn 0.15s ease' }}>
         <div ref={panelRef} className="eum-modal-panel eum-sheet-grab" tabIndex={-1} role="dialog" aria-modal="true" aria-label="신청 접수 완료" onClick={(e) => e.stopPropagation()} style={{ background: C.card, borderRadius: 18, maxWidth: 460, width: '100%', boxShadow: '0 24px 70px rgba(0,0,0,0.28)', animation: 'slideUp 0.22s ease', outline: 'none' }}>
           <div style={{ textAlign: 'center', padding: '44px 28px' }}>
         <div style={{ width: 72, height: 72, borderRadius: '50%', background: C.sageSoft, color: C.sage, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
@@ -335,7 +335,7 @@ function ApplicationForm({ onClose, onSubmit }) {
   ];
 
   return (
-    <div className="eum-modal-overlay" onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(26,24,20,0.55)', backdropFilter: 'blur(4px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, animation: 'fadeIn 0.15s ease' }}>
+    <div className="eum-modal-overlay" onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(26,24,20,0.45)', backdropFilter: 'blur(4px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, animation: 'fadeIn 0.15s ease' }}>
       <div ref={panelRef} className="eum-modal-panel eum-sheet-grab" tabIndex={-1} role="dialog" aria-modal="true" aria-label="참여 신청" onClick={(e) => e.stopPropagation()} style={{ background: C.card, borderRadius: 18, maxWidth: 600, width: '100%', maxHeight: '92vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 24px 70px rgba(0,0,0,0.28)', animation: 'slideUp 0.22s ease', outline: 'none' }}>
         {/* Header */}
         <div style={{ padding: '18px 24px 16px', borderBottom: `1px solid ${C.border}`, flexShrink: 0 }}>
@@ -557,7 +557,7 @@ function WelfareFab({ role }) {
         <Sparkles size={big ? 22 : 18} /> 복지 찾기
       </button>
       {open && (
-        <div className="eum-modal-overlay" onClick={() => setOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 9400, background: 'rgba(26,24,20,.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+        <div className="eum-modal-overlay" onClick={() => setOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 9400, background: 'rgba(26,24,20,0.45)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
           <div className="eum-modal-panel" role="dialog" aria-modal="true" aria-label="복지 어드바이저" onClick={e => e.stopPropagation()} style={{ background: C.card, borderRadius: 18, width: '100%', maxWidth: 460, maxHeight: '86vh', overflowY: 'auto', padding: 22, fontFamily: FONT_STACK }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 17, fontWeight: 800, color: C.lavender }}><Sparkles size={20} /> 복지 어드바이저</div>
@@ -1034,9 +1034,9 @@ function App() {
           input:not([type="checkbox"]):not([type="radio"]), select, textarea { font-size: 16px !important; }
         }
         /* 사이드바 스크롤바 — 얇고 조용하게 */
-        .eum-scroll { scrollbar-width: thin; scrollbar-color: #DFE2E7 transparent; }
+        .eum-scroll { scrollbar-width: thin; scrollbar-color: ${C.lineStrong} transparent; }
         .eum-scroll::-webkit-scrollbar { width: 6px; }
-        .eum-scroll::-webkit-scrollbar-thumb { background: #DFE2E7; border-radius: 999px; }
+        .eum-scroll::-webkit-scrollbar-thumb { background: ${C.lineStrong}; border-radius: 999px; }
         .eum-scroll::-webkit-scrollbar-track { background: transparent; }
         .eum-skeleton { position: relative; overflow: hidden; background: ${C.borderSoft}; }
         .eum-skeleton::after { content: ''; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, rgba(255,255,255,0.65), transparent); animation: eumShimmer 1.4s ease-in-out infinite; }

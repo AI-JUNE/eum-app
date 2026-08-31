@@ -68,9 +68,9 @@ function YouthApp({ state, user, dispatch, showToast }) {
 
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14, flexWrap: 'wrap' }}>
                   <TrioMember person={senior} sub="멘토" color={C.lavender} trust={trustStatus(state, senior?.id)} />
-                  <ArrowRight size={17} style={{ color: '#CBD0D8' }} />
+                  <ArrowRight size={17} style={{ color: C.muteFaint }} />
                   <TrioMember person={user} sub="나" color={C.sage} highlight />
-                  <ArrowRight size={17} style={{ color: '#CBD0D8' }} />
+                  <ArrowRight size={17} style={{ color: C.muteFaint }} />
                   <TrioMember person={child} sub="멘티" color={C.peach} trust={trustStatus(state, child?.id)} />
                 </div>
 

@@ -130,7 +130,7 @@ function Card({ children, padding = 20, style = {}, onClick, hoverable }) {
       onBlur={clickable ? () => setFocused(false) : undefined}
       style={{
         background: C.panel,
-        border: `1px solid ${hover ? '#DCDFE5' : C.line}`,
+        border: `1px solid ${hover ? C.lineStrong : C.line}`,
         borderRadius: 16,
         padding,
         cursor: onClick ? 'pointer' : 'default',
@@ -271,7 +271,7 @@ function Checkbox({ checked, onChange, label, sublabel, required }) {
         style={{
           flexShrink: 0, marginTop: 1,
           width: 18, height: 18, borderRadius: 5,
-          border: `1px solid ${checked ? C.brand : '#CBD0D8'}`,
+          border: `1px solid ${checked ? C.brand : C.lineStrong}`,
           background: checked ? C.brand : C.panel,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           transition: 'background 0.14s ease, border-color 0.14s ease, box-shadow 0.14s ease',
@@ -372,10 +372,10 @@ function Modal({ open, onClose, title, children, size = 'md', footer }) {
       className="eum-modal-overlay"
       onClick={onClose}
       style={{
-        position: 'fixed', inset: 0, background: 'rgba(16,24,40,0.45)',
+        position: 'fixed', inset: 0, background: 'rgba(26,24,20,0.45)',
         zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center',
         padding: 20, animation: 'fadeIn 0.15s ease',
-        backdropFilter: 'blur(3px)',
+        backdropFilter: 'blur(4px)',
       }}
     >
       <div

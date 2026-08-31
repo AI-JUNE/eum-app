@@ -192,7 +192,7 @@ function CheckInOutCard({ activity, user, dispatch, showToast, color = C.sage })
       </Card>
 
       {feedbackOpen && (
-        <div className="eum-modal-overlay" onClick={() => setFeedbackOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(26,24,20,0.55)', backdropFilter: 'blur(4px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+        <div className="eum-modal-overlay" onClick={() => setFeedbackOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(26,24,20,0.45)', backdropFilter: 'blur(4px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
           <div ref={feedbackRef} className="eum-modal-panel" tabIndex={-1} role="dialog" aria-modal="true" aria-label="활동 후기 작성" onClick={(e) => e.stopPropagation()} style={{ background: C.card, borderRadius: 18, maxWidth: 440, width: '100%', padding: 28, boxShadow: '0 24px 70px rgba(0,0,0,0.28)', animation: 'slideUp 0.22s ease', textAlign: 'left', outline: 'none' }}>
             <div style={{ fontSize: 18, fontWeight: 800, color: C.ink, fontFamily: SERIF_STACK, marginBottom: 4 }}>활동 후기</div>
             <div style={{ fontSize: 13, color: C.inkSoft, marginBottom: 18 }}>약 <strong style={{ color }}>{computedHours}시간</strong> 활동했어요. 오늘 어땠는지 남겨주세요.</div>
@@ -440,7 +440,7 @@ function ConsumerLayout({ role, view, setView, user, dispatch, state, children }
   }, [view]);
   const surface = isNarrow ? {} : {
     border: `1px solid ${C.line}`, borderRadius: 24,
-    boxShadow: '0 32px 80px -40px rgba(16,24,40,0.28), 0 4px 16px -8px rgba(16,24,40,0.08)',
+    boxShadow: '0 32px 80px -40px rgba(36,29,23,0.28), 0 4px 16px -8px rgba(36,29,23,0.08)',
     overflow: 'hidden', margin: '28px 0 36px', minHeight: 'calc(100vh - 64px)',
   };
   return (
@@ -496,7 +496,7 @@ function ConsumerLayout({ role, view, setView, user, dispatch, state, children }
             display: 'flex', gap: 4, padding: 6,
             background: 'rgba(255,255,255,0.96)', backdropFilter: 'saturate(180%) blur(14px)', WebkitBackdropFilter: 'saturate(180%) blur(14px)',
             border: `1px solid ${C.line}`, borderRadius: 18,
-            boxShadow: '0 12px 32px -14px rgba(16,24,40,0.22)',
+            boxShadow: '0 12px 32px -14px rgba(36,29,23,0.22)',
           }}>
             {items.map((it) => {
               const active = view === it.id;
@@ -602,7 +602,7 @@ function Layout({ role, view, setView, user, dispatch, children, state }) {
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, minWidth: 0 }}>
             <span style={{ color: C.muteLight, fontWeight: 500 }}>코디네이터 콘솔</span>
-            {crumb && <><span style={{ color: '#D4D7DD' }}>/</span><span style={{ color: C.headline, fontWeight: 700, letterSpacing: '-0.02em' }}>{crumb}</span></>}
+            {crumb && <><span style={{ color: C.muteFaint }}>/</span><span style={{ color: C.headline, fontWeight: 700, letterSpacing: '-0.02em' }}>{crumb}</span></>}
           </div>
           <NotificationBell state={state} role="coordinator" user={user} onNavigate={setView} />
         </div>

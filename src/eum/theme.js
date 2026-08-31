@@ -11,10 +11,12 @@ export const C = {
   brandDark: '#9E4329',
   brandSoft: '#F4E7E0',
   brandBg: '#FAF3EF',
-  ink: '#1A1A1E',
-  inkSoft: '#46464E',
-  mute: '#71717A',
-  muteLight: '#A2A2AB',
+  // 뉴트럴 램프 — 확정 시안(ink #241d17 · sub #5f564d · mut #9b9186)에 맞춘 웜 그레이.
+  // ※ 종전 Zinc 계열(쿨) 값에서 명도(L)는 유지하고 색상(hue)만 웜으로 이동 → 대비비 보존.
+  ink: '#1E1A15',
+  inkSoft: '#4A453E',
+  mute: '#78716A',
+  muteLight: '#A8A29A',
   cream: '#FBF8F5',
   cardWarm: '#FCFAF7',
   bg: '#F5F4F2',
@@ -40,14 +42,18 @@ export const C = {
   muteSoft: '#EDE9DF',
 
   // ── 콘솔·앱 내부 화면 전용 뉴트럴 ──────────────────────────────────────
-  // 랜딩(웜 크림 톤)과 분리해, 내부 화면은 차분하고 정밀한 프로덕트 뉴트럴을 쓴다.
-  appBg: '#F4F5F7',
+  // 랜딩(웜 크림 톤)과 같은 색 온도를 쓰되, 채도만 더 낮춰 차분한 프로덕트 뉴트럴을 만든다.
+  // (종전 값은 Zinc/Slate 계열 쿨 그레이라 랜딩·브랜드와 색 온도가 어긋났다 → 명도 유지·웜 이동)
+  appBg: '#F6F4F1',
   panel: '#FFFFFF',
-  line: '#E7E9ED',
-  lineSoft: '#F0F1F4',
-  hover: '#F5F6F8',
-  navMute: '#7C828C',
-  headline: '#12141A',
+  line: '#E9E4DD',
+  lineSoft: '#F2EFEA',
+  hover: '#F7F4F0',
+  navMute: '#837B71',
+  headline: '#191510',
+  // 경계·아이콘 보조 단계 — 하드코딩 잔재를 대체하는 토큰(가드레일: 색은 C.* 로만)
+  lineStrong: '#DED8CF',   // hover/active 경계, 스크롤바 썸
+  muteFaint: '#CFC8BD',    // 장식용 셰브런·구분점(정보 없음)
 
   // ── 다크 서피스 (히어로·사이드바) — 웜 에스프레소 톤 ─────────────────────
   // ※ 키 이름(navy*)은 호환 유지용 레거시. 값은 확정 시안의 웜 다크(#241d17 계열).
@@ -61,11 +67,13 @@ export const C = {
 };
 
 // 내부 화면 공통 그림자 — 얕고 정밀하게(프로덕트 콘솔 문법)
+// 그림자 색은 웜 에스프레소(#241D17 = navy 토큰)로. 크림/화이트 위에 쿨 그림자를 얹으면
+// 카드 가장자리가 푸르스름하게 식어 보인다 — 알파는 그대로, 색상만 웜으로 이동.
 export const SHADOW = {
-  xs: '0 1px 2px rgba(16,24,40,0.04)',
-  sm: '0 1px 3px rgba(16,24,40,0.06), 0 1px 2px rgba(16,24,40,0.04)',
-  md: '0 8px 24px -12px rgba(16,24,40,0.16)',
-  lg: '0 20px 48px -24px rgba(16,24,40,0.24)',
+  xs: '0 1px 2px rgba(36,29,23,0.04)',
+  sm: '0 1px 3px rgba(36,29,23,0.06), 0 1px 2px rgba(36,29,23,0.04)',
+  md: '0 8px 24px -12px rgba(36,29,23,0.16)',
+  lg: '0 20px 48px -24px rgba(36,29,23,0.24)',
 };
 
 export const PERSONA = {
