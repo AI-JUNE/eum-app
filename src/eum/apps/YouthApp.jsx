@@ -3,9 +3,9 @@
 //   값·로직은 EumApp.jsx 원본과 100% 동일(이동만). 상태·리듀서는 EumApp에 유지.
 // ============================================================================
 import { useMemo, useState } from 'react';
-import { Activity, ArrowRight, Award, BookOpen, Calendar, Camera, Check, CheckCircle2, Clock, Download, GraduationCap, MapPin, PenLine, Plus, Search, Send, ShieldCheck, Smile, Users, Wallet, X } from 'lucide-react';
+import { Activity, AlertTriangle, ArrowRight, Award, BookOpen, Calendar, Camera, Check, CheckCircle2, Clock, Download, GraduationCap, MapPin, PenLine, Plus, Search, Send, ShieldAlert, ShieldCheck, Smile, Users, Wallet, X } from 'lucide-react';
 import { C, FONT_STACK, SERIF_STACK, SHADOW } from '../theme.js';
-import { validateDisputeReason, throttleAction } from '../validate.js';
+import { validateDisputeReason, validateIncidentDescription, throttleAction } from '../validate.js';
 import { TODAY, fmtDate, fmtRelativeDate, krw, uid } from '../utils.js';
 import { Avatar } from '../avatar.jsx';
 import { AnimatedBar, Badge, Button, Card, Checkbox, CountUp, Empty, Field, InsuranceBadge, KpiStrip, Modal, PageHeader, Panel, Reveal, Ring, Select, Tabs, Textarea } from '../ui.jsx';
@@ -218,6 +218,7 @@ function YouthSchedule({ match, activities, state, user, dispatch, showToast }) 
         <InsuranceBadge size="md" />
         <span style={{ fontSize: 12.5, color: C.navMute, fontWeight: 500, lineHeight: 1.5 }}>모든 대면 활동은 1365 자원봉사 보험 및 지자체 돌봄 특약 책임보험으로 자동 보장됩니다.</span>
       </div>
+      <YouthSafetyReport state={state} user={user} match={match} dispatch={dispatch} showToast={showToast} />
       {actionable.length > 0 && (
         <div style={{ marginBottom: 22 }}>
           <div style={{ fontSize: 13, fontWeight: 700, color: C.brand, marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}><Clock size={15} /> 오늘 활동 — 체크인하세요</div>
@@ -262,6 +263,157 @@ function YouthSchedule({ match, activities, state, user, dispatch, showToast }) 
         })}
       </div>
     </>
+  );
+}
+
+// ----------------------------------------------------------------------------
+// 안전·이상 상황 신고 (청년) — additive
+//   현장에서 어르신·아동의 이상을 마주하는 사람은 청년인데, 신고 경로는 양육가정 앱에만
+//   있었다(어르신은 SOS 카드). 기존 ADD_INCIDENT 리듀서·SEED·코디 안전 화면은 그대로 두고,
+//   청년 쪽 진입점 + 접수·처리 상태 표시만 더한다. 처리 결과는 토스트가 사라진 뒤에도
+//   이 카드에 남아, 어르신 SOS 카드·정산 이의 카드와 동일한 문법으로 루프를 닫는다.
+// ----------------------------------------------------------------------------
+const INCIDENT_CATEGORIES = [
+  { value: '건강이슈', label: '건강 이상 (어지럼·통증 등)' },
+  { value: '안전사고', label: '안전 사고·위험 요소' },
+  { value: '소통이슈', label: '소통·관계 문제' },
+  { value: '기타', label: '기타' },
+];
+const INCIDENT_SEVERITY = [
+  { value: 'low', label: '낮음 · 참고만 해주세요' },
+  { value: 'medium', label: '중간 · 확인이 필요해요' },
+  { value: 'high', label: '높음 · 즉시 조치가 필요해요' },
+];
+const SEVERITY_LABEL = { high: '높음', medium: '중간', low: '낮음' };
+
+function YouthSafetyReport({ state, user, match, dispatch, showToast }) {
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState({ category: '', severity: 'medium', description: '' });
+  // 입력 오류는 토스트 대신 해당 칸 아래에 남긴다(2026-08-18 인라인 오류 표준과 동일).
+  const [err, setErr] = useState({ category: '', description: '' });
+
+  const myIncidents = useMemo(
+    () => (state?.safety_incidents || []).filter(i => i.reported_by === user.id).slice().reverse(),
+    [state, user.id]
+  );
+  const pending = myIncidents.filter(i => i.status !== 'resolved');
+
+  const close = () => { setOpen(false); setErr({ category: '', description: '' }); };
+  const submit = () => {
+    const catErr = form.category ? '' : '상황 유형을 선택해주세요.';
+    const v = validateIncidentDescription(form.description);
+    if (catErr || !v.ok) { setErr({ category: catErr, description: v.ok ? '' : v.message }); return; }
+    const gate = throttleAction('incident:' + user.id, 2000);
+    if (!gate.ok) { showToast && showToast({ type: 'error', message: gate.message }); return; }
+    dispatch && dispatch({
+      type: 'ADD_INCIDENT',
+      payload: {
+        id: uid('inc'),
+        match_id: match?.id || null,
+        activity_id: null,
+        reported_by: user.id,
+        severity: form.severity,
+        category: form.category,
+        description: v.value,
+        status: 'open',
+        reported_at: new Date().toISOString().slice(0, 16).replace('T', ' '),
+        resolved_at: null,
+        resolved_by: null,
+        resolution: null,
+      },
+    });
+    showToast && showToast({ type: 'success', message: '신고가 접수되었습니다. 코디네이터가 확인 후 연락드립니다.' });
+    setOpen(false);
+    setForm({ category: '', severity: 'medium', description: '' });
+    setErr({ category: '', description: '' });
+  };
+
+  return (
+    <div style={{ marginBottom: 18, background: C.panel, border: `1px solid ${C.line}`, borderLeft: `3px solid ${C.amber}`, borderRadius: 12, boxShadow: SHADOW.xs, padding: '15px 16px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap' }}>
+        <div style={{ minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 4 }}>
+            <ShieldAlert size={15} style={{ color: C.amber, flexShrink: 0 }} aria-hidden="true" />
+            <span style={{ fontSize: 13.5, fontWeight: 700, color: C.headline, letterSpacing: '-0.02em' }}>안전·이상 상황 신고</span>
+            {pending.length > 0 && <Badge color={C.amber} soft={C.amberSoft} size="sm">확인 중 {pending.length}건</Badge>}
+          </div>
+          <div style={{ fontSize: 12.5, color: C.navMute, fontWeight: 500, lineHeight: 1.55 }}>
+            활동 중 어르신·아이에게 이상이 보이면 바로 알려주세요. 코디네이터가 확인해 조치합니다.
+          </div>
+        </div>
+        <Button variant="secondary" size="sm" icon={<AlertTriangle size={14} />} onClick={() => { setForm({ category: '', severity: 'medium', description: '' }); setErr({ category: '', description: '' }); setOpen(true); }}>신고하기</Button>
+      </div>
+
+      <div style={{ fontSize: 12.5, color: C.navMute, marginTop: 10, paddingTop: 10, borderTop: `1px solid ${C.lineSoft}`, lineHeight: 1.6 }}>
+        생명이 위급한 상황이라면 <a href="tel:119" aria-label="119에 전화 걸기" style={{ color: C.red, fontWeight: 800, textDecoration: 'underline', textUnderlineOffset: 2 }}>119</a>에 먼저 신고한 뒤 알려주세요.
+      </div>
+
+      {myIncidents.length > 0 && (
+        <div role="status" style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 12 }}>
+          {myIncidents.map(inc => {
+            const done = inc.status === 'resolved';
+            return (
+              <div key={inc.id} style={{ padding: '11px 13px', borderRadius: 10, border: `1px solid ${C.line}`, background: done ? C.sageSoft : C.amberSoft }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 7, flexWrap: 'wrap', marginBottom: 5 }}>
+                  <Badge color={done ? C.sage : C.amber} soft={C.panel} size="sm">{done ? '처리 완료' : '접수됨 · 확인 중'}</Badge>
+                  <span style={{ fontSize: 12.5, fontWeight: 700, color: C.headline }}>{inc.category}</span>
+                  <span style={{ fontSize: 12.5, color: C.navMute, fontWeight: 500 }}>심각도 {SEVERITY_LABEL[inc.severity] || inc.severity}</span>
+                </div>
+                <div style={{ fontSize: 12.5, color: C.inkSoft, lineHeight: 1.55, marginBottom: 4 }}>{inc.description}</div>
+                <div style={{ fontSize: 12.5, color: C.muteLight, fontWeight: 500, fontVariantNumeric: 'tabular-nums' }}>
+                  접수 {inc.reported_at}{inc.resolved_at ? ` · 처리 ${inc.resolved_at}` : ''}
+                </div>
+                {done && inc.resolution && (
+                  <div style={{ fontSize: 12.5, color: C.inkSoft, marginTop: 7, paddingTop: 7, borderTop: `1px solid ${C.line}`, lineHeight: 1.55 }}>
+                    <span style={{ fontWeight: 700, color: C.sage }}>조치 내용</span> — {inc.resolution}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      <Modal
+        open={open}
+        onClose={close}
+        title="안전·이상 상황 신고"
+        size="sm"
+        footer={
+          <>
+            <Button variant="secondary" onClick={close}>취소</Button>
+            <Button variant="brand" icon={<Send size={14} />} onClick={submit}>신고 접수</Button>
+          </>
+        }
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <Field label="상황 유형" required error={err.category} errorId="youth-incident-category-error">
+            <Select
+              value={form.category}
+              onChange={(v) => { setForm(f => ({ ...f, category: v })); if (err.category) setErr(e => ({ ...e, category: '' })); }}
+              placeholder="상황 유형을 선택해주세요"
+              options={INCIDENT_CATEGORIES}
+              error={!!err.category}
+              describedBy={err.category ? 'youth-incident-category-error' : undefined}
+            />
+          </Field>
+          <Field label="심각도" sub="판단이 어려우면 '중간'으로 두어도 괜찮습니다.">
+            <Select value={form.severity} onChange={(v) => setForm(f => ({ ...f, severity: v }))} options={INCIDENT_SEVERITY} />
+          </Field>
+          <Field label="상황 설명" required error={err.description} errorId="youth-incident-desc-error">
+            <Textarea
+              value={form.description}
+              onChange={(v) => { setForm(f => ({ ...f, description: v })); if (err.description) setErr(e => ({ ...e, description: '' })); }}
+              rows={4}
+              error={!!err.description}
+              describedBy={err.description ? 'youth-incident-desc-error' : undefined}
+              placeholder="예) 활동 중 어르신이 어지럼증을 호소하셔서 휴식 후 귀가하셨습니다."
+            />
+          </Field>
+          <div style={{ fontSize: 13, color: C.navMute, lineHeight: 1.6 }}>접수된 신고는 코디네이터가 확인하며, 처리 결과는 이 화면에서 확인할 수 있습니다.</div>
+        </div>
+      </Modal>
+    </div>
   );
 }
 

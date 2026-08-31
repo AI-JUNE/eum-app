@@ -19,6 +19,7 @@ export const LIMITS = {
   resolutionMemo: 500,  // 이의 처리 메모 (코디네이터)
   noticeTitle: 80,      // 공지 제목
   noticeBody: 2000,     // 공지 본문
+  incidentDescription: 500, // 안전·이상 상황 설명 (참여자 신고)
   generic: 1000,        // 기타 자유 텍스트 기본값
 };
 
@@ -76,6 +77,14 @@ export function validateRevisionNote(raw) {
   return validateText(raw, {
     label: '보완 요청 사유', max: LIMITS.resolutionMemo, multiline: true,
     requiredMessage: '어떤 점을 보완해야 하는지 적어주세요.',
+  });
+}
+
+/** 안전·이상 상황 설명 (참여자 신고) — 이의 사유와 동일 상한, 안내 문구만 다르다. */
+export function validateIncidentDescription(raw) {
+  return validateText(raw, {
+    label: '상황 설명', max: LIMITS.incidentDescription, multiline: true,
+    requiredMessage: '어떤 상황이었는지 적어주세요.',
   });
 }
 
