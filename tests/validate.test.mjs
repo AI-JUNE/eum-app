@@ -3,7 +3,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   LIMITS, sanitizeText, validateText,
-  validateDisputeReason, validateResolutionMemo, validateRevisionNote, validateIncidentDescription, validateNotice, validateNoticeFields,
+  validateDisputeReason, validateResolutionMemo, validateRevisionNote, validateIncidentDescription, validateIncidentResolution, validateNotice, validateNoticeFields,
   throttleAction, _resetThrottle,
 } from '../src/eum/validate.js';
 
@@ -88,4 +88,15 @@ test('validateIncidentDescription: 빈 값 거부·500자 상한·제어문자 �
   const ok = validateIncidentDescription('  어지럼증을\u0000 호소하셨습니다.\n휴식 후 귀가.  ');
   assert.equal(ok.ok, true);
   assert.equal(ok.value, '어지럼증을 호소하셨습니다.\n휴식 후 귀가.');
+});
+
+test('validateIncidentResolution: 빈 값 거부·처리 메모와 동일 상한·개행 보존', () => {
+  const empty = validateIncidentResolution('   ');
+  assert.equal(empty.ok, false);
+  assert.ok(empty.message.length > 0);
+  assert.equal(validateIncidentResolution('가'.repeat(LIMITS.resolutionMemo)).ok, true);
+  assert.equal(validateIncidentResolution('가'.repeat(LIMITS.resolutionMemo + 1)).ok, false);
+  const ok = validateIncidentResolution('  보호자에게 연락 완료.\n활동 공간 점검함.  ');
+  assert.equal(ok.ok, true);
+  assert.equal(ok.value, '보호자에게 연락 완료.\n활동 공간 점검함.');
 });

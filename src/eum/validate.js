@@ -88,6 +88,14 @@ export function validateIncidentDescription(raw) {
   });
 }
 
+/** 안전 이슈 처리 내용 (코디네이터) — 이의 처리 메모와 동일 상한, 안내 문구만 다르다. */
+export function validateIncidentResolution(raw) {
+  return validateText(raw, {
+    label: '처리 내용', max: LIMITS.resolutionMemo, multiline: true,
+    requiredMessage: '어떻게 조치했는지 적어주세요.',
+  });
+}
+
 /** 공지 제목·본문 (코디네이터) — 둘 다 유효할 때만 ok. */
 export function validateNotice(rawTitle, rawBody) {
   const title = validateText(rawTitle, { label: '제목', max: LIMITS.noticeTitle });

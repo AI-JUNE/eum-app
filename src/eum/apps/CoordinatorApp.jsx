@@ -6,7 +6,7 @@ import { useMemo, useState } from 'react';
 import { Activity, AlertCircle, AlertTriangle, ArrowRight, Award, Bell, Calendar, Camera, Check, CheckCircle2, ChevronRight, ClipboardCheck, Clock, Download, FileText, GraduationCap, Hash, Heart, Info, Loader2, Phone, Printer, Search, Send, ShieldAlert, ShieldCheck, Smile, Sparkles, Star, Trash2, TrendingUp, UserPlus, Users, Wallet, X } from 'lucide-react';
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { C, FONT_STACK, PERSONA, SERIF_STACK, SHADOW } from '../theme.js';
-import { validateResolutionMemo, validateRevisionNote, validateNoticeFields, throttleAction } from '../validate.js';
+import { validateResolutionMemo, validateRevisionNote, validateIncidentResolution, validateNoticeFields, throttleAction } from '../validate.js';
 import { TODAY, fmtDate, krw, uid } from '../utils.js';
 import { callClaude } from '../api.js';
 import { aiAutoTrios, aiDong, aiTrioScore, aiWelfare } from '../matching.js';
@@ -1827,28 +1827,45 @@ function CoordSettlements({ state, dispatch, showToast, user }) {
 
 // --- 11.6 Safety (안전 이슈) ---
 
+// 심각도 표시 단일 기준. 상세 모달이 'low'를 '중간'으로 잘못 보여주던 문제를 여기서 함께 잡는다.
+const SEV_VIEW = {
+  high: { key: 'red', t: '높음' },
+  medium: { key: 'amber', t: '중간' },
+  low: { key: 'success', t: '낮음' },
+};
+// 신고자 역할 라벨 — 청년 신고 경로가 열리며 신고 주체가 세 갈래가 되어, 누가 올린 건인지 표시한다.
+const REPORTER_ROLE = { youth: '청년', senior: '어르신', parent: '양육가정', child: '아동' };
+
 function CoordSafety({ state, dispatch, showToast, user }) {
   const [filter, setFilter] = useState('all');
   const [selected, setSelected] = useState(null);
   const [resolveForm, setResolveForm] = useState({ resolution: '' });
+  // 처리 내용 오류는 토스트 대신 입력칸 아래에 남긴다(2026-08-18 인라인 오류 표준).
+  const [resolveErr, setResolveErr] = useState('');
+
+  const openIncident = (inc) => { setSelected(inc); setResolveForm({ resolution: '' }); setResolveErr(''); };
+  const closeIncident = () => { setSelected(null); setResolveForm({ resolution: '' }); setResolveErr(''); };
 
   const filtered = filter === 'all' ? state.safety_incidents :
     filter === 'open' ? state.safety_incidents.filter(i => i.status === 'open' || i.status === 'in_progress') :
       state.safety_incidents.filter(i => i.status === 'resolved');
 
   const resolve = () => {
-    if (!resolveForm.resolution.trim()) { showToast({ type: 'error', message: '처리 내용을 입력해주세요.' }); return; }
+    const v = validateIncidentResolution(resolveForm.resolution);
+    if (!v.ok) { setResolveErr(v.message); return; }
+    const gate = throttleAction('incident-resolve:' + selected.id, 2000);
+    if (!gate.ok) { showToast({ type: 'error', message: gate.message }); return; }
     dispatch({
       type: 'RESOLVE_INCIDENT',
       payload: {
         id: selected.id,
-        resolution: resolveForm.resolution,
+        resolution: v.value,
         resolved_by: user.id,
         resolved_at: new Date().toISOString().slice(0, 16).replace('T', ' '),
       }
     });
     showToast({ type: 'success', message: '안전 이슈가 해결 처리되었습니다.' });
-    setSelected(null); setResolveForm({ resolution: '' });
+    closeIncident();
   };
 
   return (
@@ -1883,9 +1900,11 @@ function CoordSafety({ state, dispatch, showToast, user }) {
         <div style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 16, boxShadow: SHADOW.xs, overflow: 'hidden' }}>
           {filtered.map((inc, i) => {
             const reporter = state.participants.find(p => p.id === inc.reported_by);
-            const sev = inc.severity === 'high' ? { c: C.red, s: C.redSoft, t: '높음' }
-              : inc.severity === 'medium' ? { c: C.amber, s: C.amberSoft, t: '중간' }
-                : { c: C.success, s: C.successSoft, t: '낮음' };
+            const reporterRole = reporter ? (REPORTER_ROLE[reporter.type] || '') : '';
+            const sevView = SEV_VIEW[inc.severity] || SEV_VIEW.medium;
+            const sev = sevView.key === 'red' ? { c: C.red, s: C.redSoft, t: sevView.t }
+              : sevView.key === 'amber' ? { c: C.amber, s: C.amberSoft, t: sevView.t }
+                : { c: C.success, s: C.successSoft, t: sevView.t };
             const st = inc.status === 'resolved' ? { c: C.success, s: C.successSoft, t: '해결됨' }
               : inc.status === 'in_progress' ? { c: C.amber, s: C.amberSoft, t: '처리 중' }
                 : { c: C.red, s: C.redSoft, t: '접수' };
@@ -1894,8 +1913,8 @@ function CoordSafety({ state, dispatch, showToast, user }) {
                 key={inc.id}
                 role="button"
                 tabIndex={0}
-                onClick={() => setSelected(inc)}
-                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelected(inc); } }}
+                onClick={() => openIncident(inc)}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openIncident(inc); } }}
                 onMouseEnter={(e) => (e.currentTarget.style.background = C.hover)}
                 onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
                 style={{
@@ -1912,7 +1931,7 @@ function CoordSafety({ state, dispatch, showToast, user }) {
                   </div>
                   <div style={{ fontSize: 13, color: C.inkSoft, lineHeight: 1.6, marginBottom: 6, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{inc.description}</div>
                   <div style={{ fontSize: 12.5, color: C.muteLight, fontWeight: 500 }}>
-                    신고자 {reporter?.name || '익명'} · 매칭 {inc.match_id?.toUpperCase() || '-'}
+                    신고자 {reporter?.name || '익명'}{reporterRole ? ` (${reporterRole})` : ''} · 매칭 {inc.match_id?.toUpperCase() || '-'}
                   </div>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'space-between', flexShrink: 0 }}>
@@ -1925,15 +1944,18 @@ function CoordSafety({ state, dispatch, showToast, user }) {
         </div>
       )}
 
-      <Modal open={!!selected} onClose={() => setSelected(null)} title="안전 이슈 상세" size="md"
+      <Modal open={!!selected} onClose={closeIncident} title="안전 이슈 상세" size="md"
         footer={selected && selected.status !== 'resolved' && (
           <Button variant="success" icon={<CheckCircle2 size={16} />} onClick={resolve}>해결 처리</Button>
         )}>
         {selected && (
           <>
             <div style={{ display: 'flex', gap: 10, marginBottom: 14 }}>
-              <Badge color={selected.severity === 'high' ? C.red : C.amber} soft={selected.severity === 'high' ? C.redSoft : C.amberSoft}>
-                {selected.severity === 'high' ? '높음' : '중간'}
+              <Badge
+                color={selected.severity === 'high' ? C.red : selected.severity === 'low' ? C.success : C.amber}
+                soft={selected.severity === 'high' ? C.redSoft : selected.severity === 'low' ? C.successSoft : C.amberSoft}
+              >
+                {(SEV_VIEW[selected.severity] || SEV_VIEW.medium).t}
               </Badge>
               <Badge color={selected.status === 'resolved' ? C.success : C.amber} soft={selected.status === 'resolved' ? C.successSoft : C.amberSoft}>
                 {selected.status === 'resolved' ? '해결됨' : selected.status === 'in_progress' ? '처리 중' : '접수'}
@@ -1942,7 +1964,12 @@ function CoordSafety({ state, dispatch, showToast, user }) {
             <div style={{ fontSize: 16, fontWeight: 800, color: C.headline, marginBottom: 10, letterSpacing: '-0.02em' }}>{selected.category}</div>
             <div style={{ padding: '13px 14px', background: C.lineSoft, borderRadius: 10, fontSize: 13, color: C.inkSoft, lineHeight: 1.6, marginBottom: 14 }}>{selected.description}</div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 14, fontSize: 12.5, color: C.inkSoft }}>
-              <div><strong style={{ color: C.navMute, fontWeight: 600 }}>신고자</strong> {state.participants.find(p => p.id === selected.reported_by)?.name}</div>
+              <div><strong style={{ color: C.navMute, fontWeight: 600 }}>신고자</strong> {(() => {
+                const rp = state.participants.find(p => p.id === selected.reported_by);
+                if (!rp) return '익명';
+                const role = REPORTER_ROLE[rp.type];
+                return role ? `${rp.name} (${role})` : rp.name;
+              })()}</div>
               <div><strong style={{ color: C.navMute, fontWeight: 600 }}>매칭</strong> {selected.match_id?.toUpperCase()}</div>
               <div style={{ fontVariantNumeric: 'tabular-nums' }}><strong style={{ color: C.navMute, fontWeight: 600 }}>접수</strong> {selected.reported_at}</div>
               {selected.resolved_at && <div style={{ fontVariantNumeric: 'tabular-nums' }}><strong style={{ color: C.navMute, fontWeight: 600 }}>해결</strong> {selected.resolved_at}</div>}
@@ -1953,9 +1980,14 @@ function CoordSafety({ state, dispatch, showToast, user }) {
                 <div style={{ fontSize: 13, color: C.inkSoft, lineHeight: 1.6 }}>{selected.resolution}</div>
               </div>
             ) : (
-              <Field label="처리 내용" required>
-                <Textarea value={resolveForm.resolution} onChange={v => setResolveForm({ resolution: v })}
-                  placeholder="어떻게 해결했는지 구체적으로 적어주세요." rows={4} />
+              <Field label="처리 내용" required error={resolveErr} errorId="coord-incident-resolution-error">
+                <Textarea
+                  value={resolveForm.resolution}
+                  onChange={v => { setResolveForm({ resolution: v }); if (resolveErr) setResolveErr(''); }}
+                  placeholder="어떻게 해결했는지 구체적으로 적어주세요." rows={4}
+                  error={!!resolveErr}
+                  describedBy={resolveErr ? 'coord-incident-resolution-error' : undefined}
+                />
               </Field>
             )}
           </>
