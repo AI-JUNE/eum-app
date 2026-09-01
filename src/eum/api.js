@@ -10,7 +10,11 @@
 //    이번 회차는 "분리"만 수행하고 동작·값은 바꾸지 않는다.
 // ============================================================================
 
+import { startRequest, statusCode } from './reqlog.js';
+
 export async function callClaude({ system, user, maxTokens = 1024 }) {
+  // 구조화 로깅: 요청 ID·소요시간·에러코드를 남긴다(프롬프트 본문은 기록하지 않는다).
+  const req = startRequest('api.claude', { maxTokens });
   try {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -22,11 +26,17 @@ export async function callClaude({ system, user, maxTokens = 1024 }) {
         messages: [{ role: 'user', content: user }],
       }),
     });
-    if (!res.ok) throw new Error(`API ${res.status}`);
+    if (!res.ok) {
+      const err = new Error(`API ${res.status}`);
+      err.code = statusCode(res.status);
+      throw err;
+    }
     const data = await res.json();
     const text = (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('\n');
+    req.succeed({ status: res.status, chars: text.length });
     return text;
   } catch (e) {
+    req.fail(e);            // 동작 불변: 기록만 하고 그대로 다시 던진다
     console.error('Claude API error:', e);
     throw e;
   }

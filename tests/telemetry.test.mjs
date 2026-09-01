@@ -12,6 +12,7 @@ import assert from 'node:assert/strict';
 import {
   TELEMETRY_ENABLED, TELEMETRY_ENDPOINT,
   captureError, logInfo, logWarn, getRecentLogs, clearLogs, installGlobalHandlers,
+  scrub, scrubString, subscribe, listenerCount, isRemoteSinkReady,
 } from '../src/eum/telemetry.js';
 
 // 각 테스트는 링버퍼를 비운 상태에서 시작(테스트 간 격리).
@@ -111,4 +112,112 @@ test('링버퍼 상한(RING_CAP=100): 초과분은 오래된 것부터 폐기', 
 test('installGlobalHandlers: window 없으면 조용히 no-op(예외 없음)', () => {
   assert.equal(typeof globalThis.window, 'undefined');
   assert.doesNotThrow(() => installGlobalHandlers());
+});
+
+// ── PII 마스킹(scrub): 기록·전송 전에 개인정보가 남지 않아야 한다 ────────────
+test('scrubString: 주민등록번호 마스킹', () => {
+  assert.equal(scrubString('신청자 900101-1234567 확인'), '신청자 [주민번호] 확인');
+});
+
+test('scrubString: 휴대전화(하이픈 유무·점 구분) 마스킹', () => {
+  assert.equal(scrubString('010-1234-5678'), '[전화번호]');
+  assert.equal(scrubString('01012345678'), '[전화번호]');
+  assert.equal(scrubString('연락처 010.1234.5678 임'), '연락처 [전화번호] 임');
+});
+
+test('scrubString: 이메일 마스킹', () => {
+  assert.equal(scrubString('문의 hong.gil-dong@example.co.kr 로'), '문의 [이메일] 로');
+});
+
+test('scrubString: 카드번호·계좌번호 마스킹', () => {
+  assert.equal(scrubString('4111 1111 1111 1111'), '[카드번호]');
+  assert.equal(scrubString('110-234-567890'), '[계좌번호]');
+});
+
+test('scrubString: 인증 토큰 마스킹', () => {
+  assert.ok(!scrubString('Authorization: Bearer abcdef1234567890').includes('abcdef1234567890'));
+});
+
+test('scrubString: 개인정보 없는 문장은 그대로 보존(과잉 마스킹 금지)', () => {
+  const s = '매칭 요청 처리 중 오류가 발생했습니다';
+  assert.equal(scrubString(s), s);
+});
+
+test('scrub: 위험한 키는 값 형태와 무관하게 [비공개]', () => {
+  const out = scrub({ 이름: '홍길동', phone: 'x', userName: 'gildong', 비고: '정상값' });
+  assert.equal(out['이름'], '[비공개]');
+  assert.equal(out.phone, '[비공개]');
+  assert.equal(out.userName, '[비공개]');
+  assert.equal(out['비고'], '정상값');
+});
+
+test('scrub: 중첩 객체·배열도 재귀 마스킹', () => {
+  const out = scrub({ items: [{ memo: '연락은 010-1234-5678' }] });
+  assert.equal(out.items[0].memo, '연락은 [전화번호]');
+});
+
+test('scrub: 순환 참조에도 폭발하지 않음', () => {
+  const a = { memo: 'ok' };
+  a.self = a;
+  const out = scrub(a);
+  assert.equal(out.memo, 'ok');
+  assert.equal(out.self, '[순환참조]');
+});
+
+test('scrub: 함수는 기록하지 않는다', () => {
+  const out = scrub({ fn: () => {} });
+  assert.equal(out.fn, undefined);
+});
+
+test('[가드] captureError 로 넘어온 PII 는 링버퍼에 남지 않는다', () => {
+  captureError(new Error('주민번호 900101-1234567 조회 실패'), { memo: 'a@b.com' });
+  const [entry] = getRecentLogs();
+  assert.ok(!entry.message.includes('900101-1234567'));
+  assert.equal(entry.message, '주민번호 [주민번호] 조회 실패');
+  assert.equal(entry.data.memo, '[이메일]');
+  assert.ok(!JSON.stringify(entry).includes('900101-1234567'));
+});
+
+// ── 알림 훅(subscribe) ──────────────────────────────────────────────────────
+test('subscribe: 기록 시 구독자에게 마스킹된 엔트리가 전달된다', () => {
+  const seen = [];
+  const off = subscribe((e) => seen.push(e));
+  captureError(new Error('연락처 010-1234-5678 오류'));
+  off();
+  assert.equal(seen.length, 1);
+  assert.equal(seen[0].level, 'error');
+  assert.ok(!seen[0].message.includes('010-1234-5678'));
+});
+
+test('subscribe: 해지하면 더 이상 전달되지 않는다', () => {
+  let n = 0;
+  const off = subscribe(() => { n += 1; });
+  logInfo('1');
+  off();
+  logInfo('2');
+  assert.equal(n, 1);
+});
+
+test('subscribe: 구독자 예외는 흡수되어 기록을 막지 않는다', () => {
+  const off = subscribe(() => { throw new Error('구독자 폭발'); });
+  assert.doesNotThrow(() => logInfo('정상 기록'));
+  off();
+  assert.equal(getRecentLogs()[0].message, '정상 기록');
+});
+
+test('subscribe: 함수가 아니면 무시하고 안전한 해지 함수를 반환', () => {
+  const before = listenerCount();
+  const off = subscribe(null);
+  assert.equal(listenerCount(), before);
+  assert.doesNotThrow(() => off());
+});
+
+test('[가드] Error 기술 필드(name/stack)는 마스킹 대상이 아니다 — 진단 가능성 유지', () => {
+  const out = scrub({ name: 'TypeError', stack: 'at foo()' });
+  assert.equal(out.name, 'TypeError');
+  assert.equal(out.stack, 'at foo()');
+});
+
+test('[가드] isRemoteSinkReady: 승인 전(스위치 OFF·목적지 미설정)에는 false', () => {
+  assert.equal(isRemoteSinkReady(), false);
 });

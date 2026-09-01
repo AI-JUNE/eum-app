@@ -9,8 +9,10 @@
 - 모든 변경은 테스트·빌드 검증 통과 후 커밋한다.
 
 ## 공통 상용 필수 (전 제품)
-- [ ] **에러 모니터링** — 전역 에러 캡처 + 알림 훅. DSN은 환경변수, 미설정 시 무해하게 no-op
-- [ ] **구조화 로깅** — 요청 ID·소요시간·에러코드. PII 미기록
+- [x] **에러 모니터링** — 전역 에러 캡처 + 알림 훅. DSN은 환경변수, 미설정 시 무해하게 no-op
+  - 근거: `src/eum/telemetry.js`(scrub PII 마스킹·subscribe 알림 훅·VITE_SENTRY_DSN 별칭·미설정 시 no-op) + `src/main.jsx`·`EumApp.jsx` ErrorBoundary 연결, `tests/telemetry.test.mjs` 32건 통과
+- [x] **구조화 로깅** — 요청 ID·소요시간·에러코드. PII 미기록
+  - 근거: `src/eum/reqlog.js`(startRequest/withRequestLog·errorCode 정규화·scrub 경유 PII 미기록), `src/eum/api.js` callClaude 적용, `tests/reqlog.test.mjs` 17건 통과
 - [ ] **/health 확장** — 의존성(DB·외부API) 상태와 버전·커밋 해시 노출(민감정보 제외)
 - [ ] **표준 에러 응답** 전 API 통일 + 입력검증
 - [ ] **rate limit** 공개 API 적용
