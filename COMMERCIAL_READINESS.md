@@ -13,7 +13,8 @@
   - 근거: `src/eum/telemetry.js`(scrub PII 마스킹·subscribe 알림 훅·VITE_SENTRY_DSN 별칭·미설정 시 no-op) + `src/main.jsx`·`EumApp.jsx` ErrorBoundary 연결, `tests/telemetry.test.mjs` 32건 통과
 - [x] **구조화 로깅** — 요청 ID·소요시간·에러코드. PII 미기록
   - 근거: `src/eum/reqlog.js`(startRequest/withRequestLog·errorCode 정규화·scrub 경유 PII 미기록), `src/eum/api.js` callClaude 적용, `tests/reqlog.test.mjs` 17건 통과
-- [ ] **/health 확장** — 의존성(DB·외부API) 상태와 버전·커밋 해시 노출(민감정보 제외)
+- [x] **/health 확장** — 의존성(DB·외부API) 상태와 버전·커밋 해시 노출(민감정보 제외)
+  - 근거: `src/eum/health.js`(describeDependencies/probeDependency·타임아웃·rollupStatus·resolveBuildInfo 커밋7자·브랜치·배포환경, URL/시크릿 미노출을 findSecretLeaks 로 강제) + `vite.config.js` health.json 에 dependencies 포함, `tests/health.test.mjs` 26건 통과
 - [ ] **표준 에러 응답** 전 API 통일 + 입력검증
 - [ ] **rate limit** 공개 API 적용
 - [ ] **접근·감사 로그** — 관리 기능 접근 이력

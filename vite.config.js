@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import { buildHealth, findSecretLeaks } from './src/eum/health.js'
+import { buildHealth, findSecretLeaks, dependencySummary, withDependencies } from './src/eum/health.js'
 import { LEGAL_META } from './src/eum/legal.js'
 
 // ── 배포 헬스체크(공통 P0-5) ────────────────────────────────────────────────
@@ -14,14 +14,26 @@ function healthJson() {
     name: 'eum-health-json',
     apply: 'build',
     configResolved(c) {
-      env = { ...(c.env || {}), MODE: c.mode }
+      // CI/호스팅이 주입하는 빌드 식별 값은 VITE_ 접두사가 없어 c.env 에 안 담긴다.
+      // health.json 의 커밋·브랜치 표기를 위해 화이트리스트로만 끌어온다(시크릿 제외).
+      const p = (typeof process !== 'undefined' && process.env) || {}
+      const ci = {}
+      for (const k of ['VERCEL_GIT_COMMIT_SHA', 'VERCEL_GIT_COMMIT_REF', 'VERCEL_ENV', 'GITHUB_SHA']) {
+        if (p[k]) ci[k] = p[k]
+      }
+      env = { ...ci, ...(c.env || {}), MODE: c.mode }
       mode = c.mode
     },
     generateBundle() {
-      const payload = buildHealth(env, {
-        now: new Date().toISOString(),
-        legal: { status: LEGAL_META.status, effectiveDate: LEGAL_META.effectiveDate },
-      })
+      const now = new Date().toISOString()
+      const payload = withDependencies(
+        buildHealth(env, {
+          now,
+          legal: { status: LEGAL_META.status, effectiveDate: LEGAL_META.effectiveDate },
+        }),
+        dependencySummary(env),
+        { checkedAt: null },
+      )
       const leaks = findSecretLeaks(payload)
       if (leaks.length) {
         // 방어선: 시크릿이 섞이면 조용히 배포되지 않도록 빌드를 중단한다.
