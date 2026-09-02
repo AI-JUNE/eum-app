@@ -204,7 +204,7 @@ function RLImpactBand({ state }) {
   return (
     <Reveal>
       <div style={{ marginBottom: 72 }}>
-        <RLSectionHead kicker="숫자로 보는 이음" title="이미 동네에서 일어나고 있어요" sub="2027 광주 광산구 우산동 파일럿 · 데모 시연용 샘플 데이터입니다." />
+        <RLSectionHead kicker="숫자로 보는 이음" title="이렇게 굴러가는 동네를 그렸어요" sub="2027 광주 광산구 우산동 파일럿 · 데모 시연용 샘플 데이터입니다." />
         <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : isNarrow ? 'repeat(3, 1fr)' : 'repeat(6, 1fr)', gap: 12 }}>
           {tiles.map((t, i) => {
             const Icon = t.icon;
@@ -232,7 +232,7 @@ function RLTestimonialBand() {
   return (
     <Reveal>
       <div style={{ marginBottom: 72, background: C.cream, borderRadius: 28, padding: isMobile ? '36px 22px' : '52px 48px', border: `1px solid ${C.borderSoft}` }}>
-        <RLSectionHead kicker="이웃들의 이야기" title="3세대의 목소리" sub="이음으로 이어진 이웃들이 직접 전해온 이야기예요." />
+        <RLSectionHead kicker="이웃들의 이야기" title="3세대의 목소리" sub="실제 이용 후기가 아니라, 2027 파일럿 시나리오를 바탕으로 구성한 예시 이야기예요." />
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(248px, 1fr))', gap: 16 }}>
           {items.map((t, i) => (
             <div key={i} className="eum-lift" style={{ background: C.card, borderRadius: 20, padding: 26, display: 'flex', flexDirection: 'column', boxShadow: '0 2px 8px -4px rgba(26,26,30,0.08)', border: `1px solid ${C.borderSoft}` }}>
@@ -249,6 +249,9 @@ function RLTestimonialBand() {
               </div>
             </div>
           ))}
+        </div>
+        <div style={{ marginTop: 18, fontSize: 12.5, color: C.mute, lineHeight: 1.7 }}>
+          ※ 위 이야기는 2027 우산동 파일럿 시나리오를 바탕으로 구성한 예시이며, 특정 개인의 실제 이용 후기가 아닙니다.
         </div>
       </div>
     </Reveal>
@@ -999,7 +1002,7 @@ function RLLanding({ state, onSelectRole, onShowApplication }) {
                   {[C.sage, C.lavender, C.peach].map((c, i) => <div key={i} style={{ width: 26, height: 26, borderRadius: '50%', background: c, border: '2px solid #fff', marginLeft: i === 0 ? 0 : -9 }} />)}
                 </div>
                 <div>
-                  <div style={{ fontSize: 13, fontWeight: 800, color: C.ink, lineHeight: 1 }}>우리 동네 15쌍 활동 중</div>
+                  <div style={{ fontSize: 13, fontWeight: 800, color: C.ink, lineHeight: 1 }}>데모 · 3세대 트리오 15쌍</div>
                   <div style={{ fontSize: 11, color: C.sage, fontWeight: 700, marginTop: 4, display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 6, height: 6, borderRadius: '50%', background: C.sage, display: 'inline-block' }} /> 실시간 안전 공유 중</div>
                 </div>
               </div>
@@ -1052,7 +1055,7 @@ function RLLanding({ state, onSelectRole, onShowApplication }) {
           </div>
           <div style={{ flex: 1, minWidth: 240 }}>
             <div style={{ fontSize: 16, fontWeight: 800, color: C.ink, marginBottom: 4 }}>역할을 골라 직접 들어가 보세요</div>
-            <div style={{ fontSize: 13.5, color: C.inkSoft, lineHeight: 1.6 }}>2027 광주 광산구 우산동 파일럿 — 지금 활동 중인 15쌍의 이야기를 그대로 담았습니다. 청년·어르신·양육가정·코디네이터 중 하나로 입장하면 모든 기능을 직접 둘러볼 수 있어요.</div>
+            <div style={{ fontSize: 13.5, color: C.inkSoft, lineHeight: 1.6 }}>2027 광주 광산구 우산동 파일럿 기준으로 구성한 데모 데이터(3세대 트리오 15쌍)입니다. 청년·어르신·양육가정·코디네이터 중 하나로 입장하면 모든 기능을 직접 둘러볼 수 있어요.</div>
           </div>
         </div>
 
