@@ -11,7 +11,7 @@ import { Avatar } from '../avatar.jsx';
 import { AnimatedBar, Badge, Button, Card, Checkbox, CountUp, Empty, Field, InsuranceBadge, KpiStrip, Modal, PageHeader, Panel, Reveal, Ring, Select, Tabs, Textarea } from '../ui.jsx';
 import { CheckInOutCard, HomeHub, Layout, TrustRow, trustStatus } from '../chrome.jsx';
 import { NoticeInbox } from './NoticeInbox.jsx';
-import { EUM_API } from '../eumApi.js';
+import { EUM_API, EUM_API_SAFE } from '../eumApi.js';
 
 // ============================================================================
 // 9. YOUTH DASHBOARD
@@ -779,7 +779,7 @@ function VolunteerHub({ user, totalHours, setView, showToast }) {
         </div>
         <div style={{ fontSize: 13, color: C.navMute, lineHeight: 1.6, marginBottom: 14 }}>이음 활동은 <b style={{ color: C.inkSoft }}>1365 자원봉사 실적</b>으로 인정됩니다. 실적확인서를 발급해 대학·취업·학교생활기록부(나이스)에 활용하세요.</div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          <Button variant="brand" size="sm" icon={<Download size={14} />} loading={issuing} onClick={async()=>{ if (issuing) return; setIssuing(true); try { const r=await EUM_API.v1365.issueCertificate(user.id); showToast ? showToast({ type: 'success', message: '실적확인서 발급 완료 · '+r.certNo }) : setView('settlement'); } finally { setIssuing(false); } }}>실적확인서 발급</Button>
+          <Button variant="brand" size="sm" icon={<Download size={14} />} loading={issuing} onClick={async()=>{ if (issuing) return; setIssuing(true); try { const res=await EUM_API_SAFE.v1365.issueCertificate(user.id); if (!res.ok) { showToast && showToast({ type: 'error', message: res.error.message }); return; } showToast ? showToast({ type: 'success', message: '실적확인서 발급 완료 · '+res.data.certNo }) : setView('settlement'); } finally { setIssuing(false); } }}>실적확인서 발급</Button>
           <Button variant="secondary" size="sm" icon={<Search size={14} />} onClick={() => setView('discover')}>활동 찾기</Button>
         </div>
       </div>

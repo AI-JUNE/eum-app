@@ -8,12 +8,12 @@ import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, Res
 import { C, FONT_STACK, PERSONA, SERIF_STACK, SHADOW } from '../theme.js';
 import { validateResolutionMemo, validateRevisionNote, validateIncidentResolution, validateNoticeFields, throttleAction } from '../validate.js';
 import { TODAY, fmtDate, krw, uid } from '../utils.js';
-import { callClaude } from '../api.js';
+import { callClaude, callClaudeSafe } from '../api.js';
 import { aiAutoTrios, aiDong, aiTrioScore, aiWelfare } from '../matching.js';
 import { Avatar } from '../avatar.jsx';
 import { Badge, Button, Card, Checkbox, CountUp, Empty, Field, Input, KpiStrip, Modal, PageHeader, Panel, Ring, SearchBar, Select, Skeleton, Tabs, Textarea, TrustBadge, useIsMobile } from '../ui.jsx';
 import { Layout, trustStatus } from '../chrome.jsx';
-import { EUM_API } from '../eumApi.js';
+import { EUM_API, EUM_API_SAFE } from '../eumApi.js';
 import CoordAudit from './AuditLog.jsx';
 
 function CoordinatorApp({ state, user, dispatch, showToast }) {
@@ -129,7 +129,7 @@ function CoordAdvisor({ state, showToast }){
                   </div>
                 ))}
               </div>
-              <div style={{ display:'flex', gap:8, marginTop:12 }}><Button variant="brand" size="sm" onClick={async()=>{ await EUM_API.notify.alimtalk(); showToast && showToast('신청 동행 등록 + 알림톡 발송(API)','success'); }}>신청 동행 등록</Button></div>
+              <div style={{ display:'flex', gap:8, marginTop:12 }}><Button variant="brand" size="sm" onClick={async()=>{ const r = await EUM_API_SAFE.notify.alimtalk(); if (!r.ok) { showToast && showToast(r.error.message,'error'); return; } showToast && showToast('신청 동행 등록 + 알림톡 발송(API)','success'); }}>신청 동행 등록</Button></div>
               <div style={{ fontSize:12.5, color:C.mute, marginTop:9, lineHeight:1.5 }}>※ 규칙기반 추정이며 실제 수급 자격은 신청·심사로 확정됩니다. 코디가 최종 확인 후 신청을 동행합니다.</div>
             </AIWrap>
           )}
@@ -1060,12 +1060,17 @@ ${availableChild.slice(0, 8).map(profileText).join('\n')}
 JSON 형식으로만 응답해주세요 (다른 텍스트 없이):
 { "recommendations": [ { "youth_id": "...", "senior_id": "...", "child_id": "...", "score": 0~100, "reason": "..." } ] }`;
 
+    // 표준 판 이관(2026-09-03): callClaudeSafe 는 예외를 던지지 않고 표준 응답만
+    // 돌려준다. 실패 사유(429 한도초과 등)를 그대로 화면 문구로 쓰기 위해 보관한다.
+    let failReason = 'AI 서비스 연결 실패';
     try {
-      const text = await callClaude({
+      const res = await callClaudeSafe({
         system: '당신은 세대 간 상생 매칭 코디네이터를 돕는 AI입니다. 활동 가능 시간, 잘하는 것/관심사의 보완성, 거주 지역, 안전 요소를 고려해 최적의 트리오를 추천합니다. 반드시 JSON 형식으로만 응답하세요.',
         user: userPrompt,
         maxTokens: 1500,
       });
+      if (!res.ok) { failReason = res.error.message; throw res.error; }
+      const text = res.data;
       // JSON 추출
       const cleaned = text.replace(/```json|```/g, '').trim();
       const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
@@ -1087,7 +1092,7 @@ JSON 형식으로만 응답해주세요 (다른 텍스트 없이):
         });
       }
       setAiResult({ recommendations: fallback, fallback: true });
-      setAiError('AI 서비스 연결 실패 - 룰 기반 추천으로 대체');
+      setAiError(`${failReason} - 룰 기반 추천으로 대체`);
     } finally {
       setAiLoading(false);
     }
@@ -2135,8 +2140,10 @@ function CoordReports({ state, dispatch, showToast }) {
       return `${mid.toUpperCase()} 트리오 (${y?.name}-${s?.name}-${c?.name}): ${h}시간, ${logs.length}회 활동. 주요 활동: ${sample}`;
     }).filter(Boolean).join('\n');
 
+    // 표준 판 이관(2026-09-03): 위와 동일하게 표준 응답 분기 하나만 둔다.
+    let failReason = 'AI 서비스 연결 실패';
     try {
-      const text = await callClaude({
+      const res = await callClaudeSafe({
         system: '당신은 광산구 3세대 상생 품앗이 프로그램 "이음"의 월간 리포트 작성을 돕는 AI입니다. 따뜻하지만 구조적이고 객관적인 한국어로 작성하며, 정량 지표와 정성적 변화를 균형 있게 다룹니다.',
         user: `${periodLabel} 이음 프로그램 활동 데이터입니다.
 
@@ -2160,6 +2167,8 @@ JSON 형식으로만 답변:
 { "highlights": "...", "matches": "...", "operations": "...", "next_actions": "..." }`,
         maxTokens: 2000,
       });
+      if (!res.ok) { failReason = res.error.message; throw res.error; }
+      const text = res.data;
       const cleaned = text.replace(/```json|```/g, '').trim();
       const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
       const parsed = JSON.parse(jsonMatch ? jsonMatch[0] : cleaned);
@@ -2174,7 +2183,7 @@ JSON 형식으로만 답변:
         next_actions: `검토 대기 중인 신청자 검증을 우선 처리하고, 매칭별 1차 6개월 평가를 준비할 시기입니다.`,
         fallback: true,
       });
-      setAiError('AI 서비스 연결 실패 - 기본 템플릿으로 대체');
+      setAiError(`${failReason} - 기본 템플릿으로 대체`);
     } finally {
       setAiLoading(false);
     }
