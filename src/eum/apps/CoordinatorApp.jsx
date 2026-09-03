@@ -129,7 +129,7 @@ function CoordAdvisor({ state, showToast }){
                   </div>
                 ))}
               </div>
-              <div style={{ display:'flex', gap:8, marginTop:12 }}><Button variant="brand" size="sm" onClick={async()=>{ const r = await EUM_API_SAFE.notify.alimtalk(); if (!r.ok) { showToast && showToast(r.error.message,'error'); return; } showToast && showToast('신청 동행 등록 + 알림톡 발송(API)','success'); }}>신청 동행 등록</Button></div>
+              <div style={{ display:'flex', gap:8, marginTop:12 }}><Button variant="brand" size="sm" onClick={async()=>{ const res = await EUM_API_SAFE.notify.alimtalk(); if (!res.ok) { showToast && showToast(res.error.message,'error'); return; } showToast && showToast('신청 동행 등록 + 알림톡 발송(API)','success'); }}>신청 동행 등록</Button></div>
               <div style={{ fontSize:12.5, color:C.mute, marginTop:9, lineHeight:1.5 }}>※ 규칙기반 추정이며 실제 수급 자격은 신청·심사로 확정됩니다. 코디가 최종 확인 후 신청을 동행합니다.</div>
             </AIWrap>
           )}

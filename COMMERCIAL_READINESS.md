@@ -19,7 +19,8 @@
   - 근거: `src/eum/apiError.js`(ERROR_CODES 11종·ApiError·`{ok,data}`/`{ok:false,error:{code,message,status,requestId}}` 단일 포맷·normalizeError 로 예외/문자열/HTTP 모두 수렴·validateInput 이 validate.js 규칙을 표준 실패로 환산·callApi 경계 래퍼는 예외를 던지지 않음) + `src/eum/api.js` `callClaudeSafe`, `src/eum/eumApi.js` `callEumApi`/`EUM_API_SAFE`(원본 EUM_API·callClaude 는 무변경), `tests/apiError.test.mjs` 16건 + `tests/eumApiStandard.test.mjs` 6건 통과
 - [x] **rate limit** 공개 API 적용
   - 근거: `src/eum/rateLimit.js`(작업별 정책 RATE_LIMITS·접두 상속 policyFor·슬라이딩 윈도우 consume/peek·429 표준 에러·callApi validate 훅용 gate) 를 `callClaudeSafe`(AI 비용)와 `callEumApi`(알림톡·1365·상품권) 경계에 적용 — 초과분은 연동처로 나가지 않음, `tests/rateLimit.test.mjs` 10건 통과. **서버측 rate limit 대체 아님**(브라우저 메모리 한정) — BFF 신설 시 같은 정책 이관
-- [ ] **표준 판 호출부 이관** — 화면의 기존 try/catch 호출을 `callClaudeSafe`·`EUM_API_SAFE` 로 순차 교체(회당 1~2 화면, 동작 동일 확인 후)
+- [x] **표준 판 호출부 이관** — 화면의 기존 try/catch 호출을 `callClaudeSafe`·`EUM_API_SAFE` 로 순차 교체
+  - 근거: 코디네이터(AI 트리오 추천·월간 리포트 `callClaudeSafe`, 복지 알림톡 `EUM_API_SAFE.notify`)·청년(실적확인서 `EUM_API_SAFE.v1365`) 4개 호출부 이관, 폴백 문구는 표준 `error.message` 를 이어받아 429 한도초과 등 실제 사유를 노출. `tests/callSiteMigration.test.mjs` 7건(소스 수준 회귀 고정 + 응답 모양) 포함 155건 전체 통과, 빌드 EXIT 0
 - [ ] **접근·감사 로그** — 관리 기능 접근 이력
 - [ ] **백업·복구 절차** RUNBOOK.md 문서화 + 복구 리허설 기록
 - [ ] **약관·개인정보 처리방침 확정본 반영** (현재 초안, 문안은 사람이 확정)
