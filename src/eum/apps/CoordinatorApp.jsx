@@ -2,7 +2,7 @@
 // 코디네이터(CoordinatorApp) 콘솔 화면군 — EumApp.jsx 단일파일 분해 4단계 (2026-08-06)
 //   값·로직은 EumApp.jsx 원본과 100% 동일(이동만). 상태·리듀서는 EumApp에 유지.
 // ============================================================================
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Activity, AlertCircle, AlertTriangle, ArrowRight, Award, Bell, Calendar, Camera, Check, CheckCircle2, ChevronRight, ClipboardCheck, Clock, Download, FileText, GraduationCap, Hash, Heart, Info, Loader2, Phone, Printer, Search, Send, ShieldAlert, ShieldCheck, Smile, Sparkles, Star, Trash2, TrendingUp, UserPlus, Users, Wallet, X } from 'lucide-react';
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { C, FONT_STACK, PERSONA, SERIF_STACK, SHADOW } from '../theme.js';
@@ -15,9 +15,17 @@ import { Badge, Button, Card, Checkbox, CountUp, Empty, Field, Input, KpiStrip, 
 import { Layout, trustStatus } from '../chrome.jsx';
 import { EUM_API, EUM_API_SAFE } from '../eumApi.js';
 import CoordAudit from './AuditLog.jsx';
+import { recordViewAccess } from '../audit.js';
 
 function CoordinatorApp({ state, user, dispatch, showToast }) {
   const [view, setView] = useState('overview');
+  const actorId = state && state.currentUserId;
+
+  // 관리 화면 열람 이력(additive) — 개인정보·정산·안전 화면 접근을 감사 로그에 남긴다.
+  // 실패해도 화면 동작에는 영향을 주지 않으며, 조회 조건·검색어는 기록하지 않는다.
+  useEffect(() => {
+    try { recordViewAccess(view, { currentUserId: actorId, currentRole: 'coordinator' }); } catch (e) { /* no-op */ }
+  }, [view, actorId]);
 
   return (
     <Layout role="coordinator" view={view} setView={setView} user={user} dispatch={dispatch} state={state}>

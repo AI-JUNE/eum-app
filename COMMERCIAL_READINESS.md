@@ -21,7 +21,8 @@
   - 근거: `src/eum/rateLimit.js`(작업별 정책 RATE_LIMITS·접두 상속 policyFor·슬라이딩 윈도우 consume/peek·429 표준 에러·callApi validate 훅용 gate) 를 `callClaudeSafe`(AI 비용)와 `callEumApi`(알림톡·1365·상품권) 경계에 적용 — 초과분은 연동처로 나가지 않음, `tests/rateLimit.test.mjs` 10건 통과. **서버측 rate limit 대체 아님**(브라우저 메모리 한정) — BFF 신설 시 같은 정책 이관
 - [x] **표준 판 호출부 이관** — 화면의 기존 try/catch 호출을 `callClaudeSafe`·`EUM_API_SAFE` 로 순차 교체
   - 근거: 코디네이터(AI 트리오 추천·월간 리포트 `callClaudeSafe`, 복지 알림톡 `EUM_API_SAFE.notify`)·청년(실적확인서 `EUM_API_SAFE.v1365`) 4개 호출부 이관, 폴백 문구는 표준 `error.message` 를 이어받아 429 한도초과 등 실제 사유를 노출. `tests/callSiteMigration.test.mjs` 7건(소스 수준 회귀 고정 + 응답 모양) 포함 155건 전체 통과, 빌드 EXIT 0
-- [ ] **접근·감사 로그** — 관리 기능 접근 이력
+- [x] **접근·감사 로그** — 관리 기능 접근 이력
+  - 근거: `src/eum/audit.js` 변경 이력(AUDIT_RULES 18종·자유 텍스트 미기록)에 **열람 이력**을 추가 — `AUDIT_VIEWS` 14개 관리 화면의 `recordViewAccess`(분류 `view`, 60초 중복 억제, 미로그인·저위험 화면 제외, 조회 조건·검색어 미기록)를 `src/eum/apps/CoordinatorApp.jsx` 화면 전환에 연결, 조회·CSV는 기존 감사 화면(`apps/AuditLog.jsx`)에서 그대로 제공. `tests/audit.test.mjs` 15건 포함 162건 전체 통과, 빌드 EXIT 0. **서버 영구 보관·원격 전송은 [승인 필요]** — 현재 세션 메모리 한정
 - [ ] **백업·복구 절차** RUNBOOK.md 문서화 + 복구 리허설 기록
 - [ ] **약관·개인정보 처리방침 확정본 반영** (현재 초안, 문안은 사람이 확정)
 - [ ] **테스트** 핵심 로직 커버리지 확보, CI에서 실행

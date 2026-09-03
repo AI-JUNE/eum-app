@@ -5,6 +5,8 @@ import assert from 'node:assert/strict';
 import {
   AUDIT_CAP, AUDIT_RULES, buildAuditEntry, recordAudit, auditFromAction,
   getAuditLog, clearAuditLog, auditCounts, auditToCsv,
+  AUDIT_VIEWS, AUDIT_CATEGORY_LABEL, VIEW_DEDUPE_MS, VIEW_ACCESS_TYPE,
+  buildViewAccessEntry, recordViewAccess,
 } from '../src/eum/audit.js';
 
 const COORD_STATE = { currentUserId: 'c1', currentRole: 'coordinator' };
@@ -90,4 +92,74 @@ test('REJECT_LOG: 감사 대상이며 보완 요청 사유(자유 텍스트)는 
   assert.ok(e.target.includes('log011'));
   assert.ok(!e.target.includes('시간이 일정과 다릅니다'));
   assert.ok(!JSON.stringify(e).includes('시간이 일정과 다릅니다'));
+});
+
+// --- 관리 기능 접근(열람) 이력 ---------------------------------------------
+
+test('감사 대상 화면 열람은 view 분류로 기록된다', () => {
+  clearAuditLog();
+  const e = recordViewAccess('settlements', COORD_STATE);
+  assert.ok(e);
+  assert.equal(e.type, VIEW_ACCESS_TYPE);
+  assert.equal(e.category, 'view');
+  assert.equal(e.actor_id, 'c1');
+  assert.equal(e.actor_role, 'coordinator');
+  assert.equal(e.target, AUDIT_VIEWS.settlements);
+  assert.equal(getAuditLog().length, 1);
+  assert.ok(AUDIT_CATEGORY_LABEL.view);
+});
+
+test('저위험 화면(대시보드·로드맵)과 미로그인 렌더는 기록하지 않는다', () => {
+  clearAuditLog();
+  assert.equal(recordViewAccess('overview', COORD_STATE), null);
+  assert.equal(recordViewAccess('roadmap', COORD_STATE), null);
+  assert.equal(buildViewAccessEntry('safety', {}), null);
+  assert.equal(buildViewAccessEntry('safety', null), null);
+  assert.equal(getAuditLog().length, 0);
+});
+
+test('같은 화면 재방문은 중복 억제 창 안에서 건너뛰고, 창 밖이면 다시 남는다', () => {
+  clearAuditLog();
+  const t0 = new Date('2026-09-03T10:00:00.000Z');
+  assert.ok(recordViewAccess('applicants', COORD_STATE, t0));
+  // 창 안 재방문 — 건너뜀
+  assert.equal(recordViewAccess('applicants', COORD_STATE, new Date(t0.getTime() + 1000)), null);
+  // 다른 화면은 즉시 기록
+  assert.ok(recordViewAccess('safety', COORD_STATE, new Date(t0.getTime() + 2000)));
+  // 창 밖 재방문 — 다시 기록
+  assert.ok(recordViewAccess('applicants', COORD_STATE, new Date(t0.getTime() + VIEW_DEDUPE_MS + 1)));
+  assert.equal(getAuditLog().filter((x) => x.view === 'applicants').length, 2);
+});
+
+test('행위자가 다르면 같은 화면이라도 각각 기록된다', () => {
+  clearAuditLog();
+  const t0 = new Date('2026-09-03T10:00:00.000Z');
+  assert.ok(recordViewAccess('reports', COORD_STATE, t0));
+  assert.ok(recordViewAccess('reports', { currentUserId: 'c2', currentRole: 'coordinator' }, new Date(t0.getTime() + 500)));
+  assert.equal(getAuditLog().length, 2);
+});
+
+test('열람 기록에는 조회 조건·검색어 같은 자유 텍스트가 없다', () => {
+  clearAuditLog();
+  const e = recordViewAccess('applicants', { ...COORD_STATE, search: '홍길동', filter: '주민번호' });
+  assert.ok(!JSON.stringify(e).includes('홍길동'));
+  assert.ok(!JSON.stringify(e).includes('주민번호'));
+});
+
+test('열람 기록은 집계·CSV 에 함께 반영된다', () => {
+  clearAuditLog();
+  recordViewAccess('settlements', COORD_STATE);
+  auditFromAction({ type: 'LOGIN', payload: { userId: 'c1', role: 'coordinator' } }, {});
+  const counts = auditCounts();
+  assert.equal(counts.view, 1);
+  assert.equal(counts.access, 1);
+  const csv = auditToCsv();
+  assert.equal(csv.split('\n').length, 3);
+  assert.ok(csv.includes(AUDIT_CATEGORY_LABEL.view));
+});
+
+test('모든 AUDIT_VIEWS 항목은 비어있지 않은 라벨을 갖는다', () => {
+  for (const [view, label] of Object.entries(AUDIT_VIEWS)) {
+    assert.ok(typeof label === 'string' && label.length > 0, view);
+  }
 });

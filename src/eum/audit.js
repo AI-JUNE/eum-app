@@ -33,9 +33,38 @@ export const AUDIT_RULES = {
 };
 
 export const AUDIT_CATEGORY_LABEL = {
-  access: '접근', settlement: '정산', notice: '공지', safety: '안전',
+  access: '접근', view: '열람', settlement: '정산', notice: '공지', safety: '안전',
   matching: '매칭', activity: '활동', data: '데이터',
 };
+
+// ---------------------------------------------------------------------------
+// 관리 기능 "접근(열람)" 이력 — 변경 액션뿐 아니라 개인정보·정산·안전 화면을
+// 누가 언제 열었는지도 남긴다. 감사에서 요구하는 것은 변경 이력만이 아니라
+// 접근 이력이기 때문이다. 화면 식별자·라벨만 남기고 조회 조건·검색어는 남기지 않는다.
+// 저위험 집계 화면(대시보드·로드맵)은 소음 방지를 위해 대상에서 제외한다.
+// ---------------------------------------------------------------------------
+export const AUDIT_VIEWS = {
+  applicants: '신청자 관리',
+  matching: '매칭 보드',
+  activities: '활동 승인',
+  settlements: '정산',
+  notices: '공지',
+  safety: '안전 이슈',
+  audit: '감사 로그',
+  reports: '리포트',
+  b2g: '공공 성과·납품',
+  b2b: '기업·기관 복지',
+  'ai-advisor': '복지 어드바이저',
+  'ai-match': 'AI 자동·선택 매칭',
+  'ai-copilot': 'AI 코파일럿',
+  'ai-chaperone': 'AI 안전 채퍼론',
+};
+
+// 같은 사람이 같은 화면을 오가며 생기는 중복 기록을 억제하는 창(ms).
+// 탭 전환마다 한 줄씩 쌓이면 정작 중요한 변경 이력이 묻힌다.
+export const VIEW_DEDUPE_MS = 60 * 1000;
+
+export const VIEW_ACCESS_TYPE = 'VIEW_ACCESS';
 
 const ring = [];
 let seq = 0;
@@ -89,6 +118,47 @@ export function buildAuditEntry(action, state, now = new Date()) {
     category: rule.category,
     target: targetOf(action),
   };
+}
+
+/**
+ * 화면 열람 → 감사 항목. 감사 대상 화면이 아니거나 로그인 상태가 아니면 null.
+ * 순수 함수(기록하지 않음, 중복 억제도 하지 않음).
+ */
+export function buildViewAccessEntry(view, state, now = new Date()) {
+  const label = AUDIT_VIEWS[view];
+  if (!label) return null;
+  const actorId = (state && state.currentUserId) || null;
+  const actorRole = (state && state.currentRole) || null;
+  if (!actorId && !actorRole) return null; // 미로그인 렌더는 기록하지 않는다
+  return {
+    id: `aud_${++seq}`,
+    ts: now.toISOString(),
+    actor_id: actorId,
+    actor_role: actorRole,
+    type: VIEW_ACCESS_TYPE,
+    label: '관리 화면 열람',
+    category: 'view',
+    target: label,
+    view,
+  };
+}
+
+/**
+ * 화면 열람 기록 — 같은 행위자가 같은 화면을 VIEW_DEDUPE_MS 안에 다시 열면 건너뛴다.
+ * 반환: 기록한 항목, 건너뛰었으면 null.
+ */
+export function recordViewAccess(view, state, now = new Date()) {
+  const entry = buildViewAccessEntry(view, state, now);
+  if (!entry) return null;
+  const t = new Date(entry.ts).getTime();
+  for (let i = ring.length - 1; i >= 0; i -= 1) {
+    const prev = ring[i];
+    if (prev.type !== VIEW_ACCESS_TYPE) continue;
+    if (prev.view !== entry.view || prev.actor_id !== entry.actor_id) continue;
+    if (t - new Date(prev.ts).getTime() < VIEW_DEDUPE_MS) return null;
+    break; // 같은 화면의 최근 기록이 창 밖이면 새로 남긴다
+  }
+  return recordAudit(entry);
 }
 
 /** 항목을 링버퍼에 기록. null 은 무시. */

@@ -11,7 +11,7 @@ import { AUDIT_CATEGORY_LABEL, auditCounts, auditToCsv, getAuditLog } from '../a
 
 const ROLE_LABEL = { youth: '청년', senior: '어르신', parent: '학부모', coordinator: '코디네이터' };
 const CAT_COLOR = {
-  access: C.blue, settlement: C.gold, notice: C.brand, safety: C.red,
+  access: C.blue, view: C.mute, settlement: C.gold, notice: C.brand, safety: C.red,
   matching: C.lavender, activity: C.sage, data: C.peach,
 };
 
@@ -83,7 +83,7 @@ function CoordAudit({ state }) {
 
       {list.length === 0 ? (
         <Empty icon={<ScrollText size={28} />} title={cat === 'all' ? '기록된 행위가 없습니다' : '이 분류의 기록이 없습니다'}
-          sub={cat === 'all' ? '로그인·정산 이의·공지 발송 등 운영 행위가 생기면 이곳에 시간순으로 남습니다.' : '다른 분류를 보거나 전체 기록으로 돌아가세요.'}
+          sub={cat === 'all' ? '로그인·관리 화면 열람·정산 이의·공지 발송 등 접근·운영 행위가 생기면 이곳에 시간순으로 남습니다.' : '다른 분류를 보거나 전체 기록으로 돌아가세요.'}
           action={cat !== 'all' ? <Button variant="secondary" size="sm" onClick={() => setCat('all')}>전체 기록 보기</Button> : undefined} />
       ) : (
         <div style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 16, boxShadow: SHADOW.sm, overflow: 'hidden' }}>
@@ -116,7 +116,7 @@ function CoordAudit({ state }) {
       )}
 
       <div style={{ marginTop: 14, fontSize: 11.5, color: C.muteLight, lineHeight: 1.6 }}>
-        개인정보 보호: 이의 사유·공지 본문 등 자유 입력 내용은 기록하지 않으며, 식별자·상태값 수준만 남깁니다.
+        개인정보 보호: 이의 사유·공지 본문 등 자유 입력 내용과 조회 조건·검색어는 기록하지 않으며, 식별자·상태값·화면 이름 수준만 남깁니다.
         기록은 이 세션(메모리)에만 보관됩니다 — 서버측 영구 감사 로그는 [승인 필요] 트랙입니다.
       </div>
     </div>
