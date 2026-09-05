@@ -173,7 +173,9 @@ export function runRestoreRehearsal(state, opts = {}) {
   if (!check.ok) return fail('무결성 검증', check.errors.join('; '));
   steps.push({ step: '무결성 검증', ok: true, detail: '체크섬 ' + parsed.checksum });
 
-  const restored = restoreState(parsed, { normalize: opts.normalize });
+  // 대조는 정규화 이전(원본 그대로)의 복원 결과로 한다.
+  // normalizeState 는 표시용 파생 레코드를 합성하므로 건수 대조 기준으로 쓰면 안 된다.
+  const restored = restoreState(parsed);
   if (!restored.ok) return fail('복원', restored.error.message);
   steps.push({ step: '복원', ok: true, detail: '완료' });
 
@@ -182,8 +184,22 @@ export function runRestoreRehearsal(state, opts = {}) {
     const before = Array.isArray(state?.[t]) ? state[t] : [];
     const after = Array.isArray(restored.state?.[t]) ? restored.state[t] : [];
     if (before.length !== after.length) mismatches.push(t + ': ' + before.length + ' → ' + after.length);
+    else if (stableStringify(before) !== stableStringify(after)) mismatches.push(t + ': 내용 불일치');
   });
-  steps.push({ step: '원본 대조', ok: mismatches.length === 0, detail: mismatches.length ? mismatches.join(', ') : '전 컬렉션 건수 일치' });
+  steps.push({ step: '원본 대조', ok: mismatches.length === 0, detail: mismatches.length ? mismatches.join(', ') : '전 컬렉션 원본 일치' });
+
+  // 화면이 쓰는 정규화 단계까지 실제로 통과하는지 확인한다(파생 레코드 건수는 대조 대상 아님).
+  if (typeof opts.normalize === 'function') {
+    try {
+      const view = opts.normalize({ ...restored.state });
+      const okView = BACKUP_TABLES.every((t) => Array.isArray(view?.[t]));
+      steps.push({ step: '정규화 적용', ok: okView, detail: okView ? '화면 상태 구성 가능' : '정규화 결과 형식 오류' });
+      if (!okView) mismatches.push('정규화 실패');
+    } catch (e) {
+      steps.push({ step: '정규화 적용', ok: false, detail: String(e && e.message || e) });
+      mismatches.push('정규화 예외');
+    }
+  }
 
   // 변조 감지도 함께 확인한다(체크섬이 실제로 작동하는지).
   const tampered = JSON.parse(text);

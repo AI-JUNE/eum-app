@@ -8,6 +8,7 @@ import { Download, ScrollText } from 'lucide-react';
 import { C, FONT_STACK, SHADOW } from '../theme.js';
 import { Badge, Button, Empty, PageHeader } from '../ui.jsx';
 import { AUDIT_CATEGORY_LABEL, auditCounts, auditToCsv, getAuditLog } from '../audit.js';
+import BackupPanel from './BackupPanel.jsx';
 
 const ROLE_LABEL = { youth: '청년', senior: '어르신', parent: '학부모', coordinator: '코디네이터' };
 const CAT_COLOR = {
@@ -119,6 +120,9 @@ function CoordAudit({ state }) {
         개인정보 보호: 이의 사유·공지 본문 등 자유 입력 내용과 조회 조건·검색어는 기록하지 않으며, 식별자·상태값·화면 이름 수준만 남깁니다.
         기록은 이 세션(메모리)에만 보관됩니다 — 서버측 영구 감사 로그는 [승인 필요] 트랙입니다.
       </div>
+
+      {/* 데이터 백업·무결성 확인 — 감사/데이터 거버넌스 화면에 함께 둔다(additive, 상태 변경 없음) */}
+      <BackupPanel state={state} />
     </div>
   );
 }

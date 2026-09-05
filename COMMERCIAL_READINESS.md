@@ -23,9 +23,11 @@
   - 근거: 코디네이터(AI 트리오 추천·월간 리포트 `callClaudeSafe`, 복지 알림톡 `EUM_API_SAFE.notify`)·청년(실적확인서 `EUM_API_SAFE.v1365`) 4개 호출부 이관, 폴백 문구는 표준 `error.message` 를 이어받아 429 한도초과 등 실제 사유를 노출. `tests/callSiteMigration.test.mjs` 7건(소스 수준 회귀 고정 + 응답 모양) 포함 155건 전체 통과, 빌드 EXIT 0
 - [x] **접근·감사 로그** — 관리 기능 접근 이력
   - 근거: `src/eum/audit.js` 변경 이력(AUDIT_RULES 18종·자유 텍스트 미기록)에 **열람 이력**을 추가 — `AUDIT_VIEWS` 14개 관리 화면의 `recordViewAccess`(분류 `view`, 60초 중복 억제, 미로그인·저위험 화면 제외, 조회 조건·검색어 미기록)를 `src/eum/apps/CoordinatorApp.jsx` 화면 전환에 연결, 조회·CSV는 기존 감사 화면(`apps/AuditLog.jsx`)에서 그대로 제공. `tests/audit.test.mjs` 15건 포함 162건 전체 통과, 빌드 EXIT 0. **서버 영구 보관·원격 전송은 [승인 필요]** — 현재 세션 메모리 한정
-- [ ] **백업·복구 절차** RUNBOOK.md 문서화 + 복구 리허설 기록
+- [x] **백업·복구 절차** RUNBOOK.md 문서화 + 복구 리허설 기록
+  - 근거: `RUNBOOK.md`(저장소 위치·주기·장애 유형별 대응·복원 절차[승인 필요]·복원 이력표·미개방 항목) + `src/eum/backup.js`(스냅샷 createSnapshot/체크섬 checksumOf 키순서 무관·건수 대조 verifySnapshot·복원 restoreState 는 검증 실패 시 상태 미변경·반출용 redactSnapshot 은 복원 차단·runRestoreRehearsal) + `src/eum/apps/BackupPanel.jsx`(감사 로그 화면 하단, 백업 생성·마스킹본·무결성 확인 — **복원 버튼은 의도적으로 두지 않음**) + `scripts/rehearse-restore.mjs`(`npm run rehearse:restore`, 실패 시 exit 1). **초회 리허설 2026-09-05 PASS** — 8단계(직렬화→파싱→검증→복원→원본 대조→정규화→변조 감지) 전부 통과, 레코드 155건 원본 일치, 체크섬 4b4c5fad856e2e05. `tests/backup.test.mjs` 14건 포함 176건 전체 통과, 빌드 EXIT 0. **원격 백업 업로드·자동 스케줄·화면 복원 버튼은 [승인 필요]**
 - [ ] **약관·개인정보 처리방침 확정본 반영** (현재 초안, 문안은 사람이 확정)
 - [ ] **테스트** 핵심 로직 커버리지 확보, CI에서 실행
+  - 진행: 순수 모듈 15종 176건 로컬 통과(`npm test`). 남은 것 — 미커버 모듈(`matching.js`·`storage.normalizeState`) 테스트, CI 워크플로 추가. ※ CI 파일(`.github/workflows/*`)은 푸시 토큰에 `workflow` 스코프가 없으면 AutoPush 전체가 막히므로, 스코프 확인 후 추가한다
 
 ## 이음 전용 (준비도 ~72%, B2G)
 - [ ] Supabase 인증·RLS 정책 코드 완성. 활성화 스위치 분리 **[승인 후 ON]**
