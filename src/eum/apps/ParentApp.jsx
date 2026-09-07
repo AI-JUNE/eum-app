@@ -8,7 +8,7 @@ import { C, FONT_STACK, PERSONA, SERIF_STACK, SHADOW } from '../theme.js';
 import { TODAY, fmtDate, fmtRelativeDate, uid } from '../utils.js';
 import { Avatar } from '../avatar.jsx';
 import { BILLING_ENABLED, PLANS, formatKRW, isPaidPlan, requestSubscription } from '../billing.js';
-import { Badge, Button, Card, Empty, Field, Modal, PageHeader, Panel, Select, Textarea, useIsMobile } from '../ui.jsx';
+import { Badge, Button, Card, Empty, Field, Modal, PageHeader, Panel, Reveal, Select, Textarea, useIsMobile } from '../ui.jsx';
 import { HomeHub, Layout, TrustRow, trustStatus } from '../chrome.jsx';
 import { NoticeInbox } from './NoticeInbox.jsx';
 import { TrioMember } from './YouthApp.jsx';
@@ -64,6 +64,8 @@ function ParentApp({ state, user, dispatch, showToast }) {
 }
 
 function ParentDashboard({ user, myChildren, myMatches, todayActivities, upcomingActivities, recentLogs, state, myIncidents, setView }) {
+  // 대시보드 그리드는 fr 고정값이라 좁은 화면에서 카드가 짓눌렸다 → 880px 이하 한 열 스택
+  const isMobile = useIsMobile(880);
   const child = myChildren[0];
   const match = myMatches[0];
   const youth = match ? state.participants.find(p => p.id === match.youth_id) : null;
@@ -81,31 +83,34 @@ function ParentDashboard({ user, myChildren, myMatches, todayActivities, upcomin
 
       {/* 트리오 카드 */}
       {match && (
-        <div style={{ marginBottom: 20, background: C.panel, border: `1px solid ${C.line}`, borderRadius: 16, boxShadow: SHADOW.sm, padding: 24 }}>
+        <Reveal y={16}>
+        <section aria-label="우리 아이의 트리오" style={{ marginBottom: 20, background: C.panel, border: `1px solid ${C.line}`, borderRadius: 16, boxShadow: SHADOW.sm, padding: 24 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 18 }}>
-            <Heart size={16} style={{ color: C.brand }} />
-            <div style={{ fontSize: 13, fontWeight: 700, color: C.headline, letterSpacing: '-0.02em' }}>우리 아이의 트리오</div>
+            <Heart size={16} style={{ color: C.brand }} aria-hidden="true" />
+            <h2 style={{ margin: 0, fontSize: 13, fontWeight: 700, color: C.headline, letterSpacing: '-0.02em' }}>우리 아이의 트리오</h2>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
+          {/* 3열 고정은 모바일에서 아바타·이름이 붙어 읽히지 않았다 → auto-fit 로 2열·1열까지 자연 스택 */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(148px,1fr))', gap: 16 }}>
             <TrioMember person={child} sub="자녀" color={C.peach} trust={trustStatus(state, child?.id)} />
             <TrioMember person={youth} sub={`청년 멘토 · ${youth?.skills?.[0] || '활동'}`} color={C.sage} trust={trustStatus(state, youth?.id)} />
             <TrioMember person={senior} sub={`동네 어르신 · ${senior?.skills?.[0] || ''}`} color={C.lavender} trust={trustStatus(state, senior?.id)} />
           </div>
-          <div style={{ display: 'flex', gap: 12, marginTop: 20, paddingTop: 18, borderTop: `1px solid ${C.lineSoft}` }}>
-            <div style={{ flex: 1 }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginTop: 20, paddingTop: 18, borderTop: `1px solid ${C.lineSoft}` }}>
+            <div style={{ flex: '1 1 140px' }}>
               <div style={{ fontSize: 13, color: C.navMute, fontWeight: 600, marginBottom: 5 }}>이번 달 활동시간</div>
               <div style={{ fontSize: 22, fontWeight: 800, color: C.headline, letterSpacing: '-0.03em', fontVariantNumeric: 'tabular-nums' }}>{totalHoursThisMonth}시간</div>
             </div>
-            <div style={{ flex: 1 }}>
+            <div style={{ flex: '1 1 140px' }}>
               <div style={{ fontSize: 13, color: C.navMute, fontWeight: 600, marginBottom: 5 }}>매칭 시작</div>
               <div style={{ fontSize: 22, fontWeight: 800, color: C.headline, letterSpacing: '-0.03em', fontVariantNumeric: 'tabular-nums' }}>{fmtDate(match.started_at)}</div>
             </div>
           </div>
-        </div>
+        </section>
+        </Reveal>
       )}
 
       {/* 오늘 활동 */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 18, marginBottom: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.4fr 1fr', gap: 18, marginBottom: 20 }}>
         <Card padding={22}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
             <div style={{ fontSize: 15, fontWeight: 700, color: C.ink }}>오늘의 활동</div>
@@ -158,6 +163,7 @@ function ParentDashboard({ user, myChildren, myMatches, todayActivities, upcomin
       </div>
 
       {/* 다가오는 활동 */}
+      <Reveal y={16} delay={60}>
       <Card padding={22} style={{ marginBottom: 20 }}>
         <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 14, color: C.ink }}>다가오는 활동</div>
         {upcomingActivities.length === 0 ? (
@@ -170,7 +176,7 @@ function ParentDashboard({ user, myChildren, myMatches, todayActivities, upcomin
               return (
                 <div key={act.id} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '10px 12px', borderRadius: 8, background: C.bg }}>
                   <div style={{ minWidth: 72, textAlign: 'center', padding: '6px 8px', background: C.card, borderRadius: 6, border: `1px solid ${C.borderSoft}` }}>
-                    <div style={{ fontSize: 12.5, color: C.mute, fontWeight: 600 }}>{fmtRelativeDate(act.date)}</div>
+                    <div style={{ fontSize: 13, color: C.mute, fontWeight: 600 }}>{fmtRelativeDate(act.date)}</div>
                     <div style={{ fontSize: 14, fontWeight: 700, color: C.ink, marginTop: 1 }}>{(act.time || '').slice(0, 5)}</div>
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
@@ -184,8 +190,10 @@ function ParentDashboard({ user, myChildren, myMatches, todayActivities, upcomin
           </div>
         )}
       </Card>
+      </Reveal>
 
       {/* 최근 활동 기록 */}
+      <Reveal y={16} delay={120}>
       <Card padding={22}>
         <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 14, color: C.ink }}>최근 활동 기록</div>
         {recentLogs.length === 0 ? (
@@ -201,7 +209,7 @@ function ParentDashboard({ user, myChildren, myMatches, todayActivities, upcomin
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                       <span style={{ fontSize: 13, fontWeight: 700, color: C.ink }}>{author?.name}</span>
-                      <span style={{ fontSize: 12.5, color: C.mute }}>· {fmtDate(log.date)} · {act?.title}</span>
+                      <span style={{ fontSize: 13, color: C.mute }}>· {fmtDate(log.date)} · {act?.title}</span>
                       {log.approved && <Badge color={C.success} soft={C.successSoft} size="sm">승인</Badge>}
                     </div>
                     <div style={{ fontSize: 13, color: C.inkSoft, lineHeight: 1.5 }}>{log.summary}</div>
@@ -212,6 +220,7 @@ function ParentDashboard({ user, myChildren, myMatches, todayActivities, upcomin
           </div>
         )}
       </Card>
+      </Reveal>
       <TrustRow />
       <ConsumerPricing />
     </>
@@ -286,7 +295,8 @@ function ParentMatchInfo({ myMatches, myChildren, state }) {
                   <div style={{ fontSize: 12, fontWeight: 700, color: C.muteLight, letterSpacing: '0.04em', fontVariantNumeric: 'tabular-nums' }}>매칭 #{match.id.toUpperCase()}</div>
                   <Badge color={C.success} soft={C.successSoft} size="sm">{match.status === 'active' ? '활동 중' : match.status}</Badge>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
+                {/* 3열 고정 → auto-fit. 좁은 화면에서 프로필 카드가 세로로 스택된다 */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(196px,1fr))', gap: 12 }}>
                   {[
                     { p: child, label: '자녀', color: C.peach },
                     { p: youth, label: '청년 멘토', color: C.sage },
@@ -304,7 +314,7 @@ function ParentMatchInfo({ myMatches, myChildren, state }) {
                       {p.skills?.length > 0 && (
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 8 }}>
                           {p.skills.slice(0, 3).map((s, i) => (
-                            <span key={i} style={{ fontSize: 12.5, padding: '2px 8px', background: C.panel, borderRadius: 7, color: C.navMute, border: `1px solid ${C.line}`, fontWeight: 600 }}>{s}</span>
+                            <span key={i} style={{ fontSize: 13, padding: '2px 8px', background: C.panel, borderRadius: 7, color: C.navMute, border: `1px solid ${C.line}`, fontWeight: 600 }}>{s}</span>
                           ))}
                         </div>
                       )}
@@ -395,9 +405,9 @@ function ParentSafety({ user, myMatches, myIncidents, dispatch, showToast }) {
                   <span style={{ fontSize: 13.5, fontWeight: 700, color: C.headline, letterSpacing: '-0.02em' }}>{inc.category}</span>
                   <Badge color={inc.status === 'resolved' ? C.success : C.amber} soft={inc.status === 'resolved' ? C.successSoft : C.amberSoft} size="sm">{inc.status === 'resolved' ? '해결됨' : '처리 중'}</Badge>
                 </div>
-                <div style={{ fontSize: 12.5, color: C.inkSoft, marginBottom: 7, lineHeight: 1.55 }}>{inc.description}</div>
-                <div style={{ fontSize: 12.5, color: C.muteLight, fontWeight: 500, fontVariantNumeric: 'tabular-nums' }}>접수 {inc.reported_at}{inc.resolved_at && ` · 해결 ${inc.resolved_at}`}</div>
-                {inc.resolution && <div style={{ fontSize: 12, color: C.success, marginTop: 8, padding: '8px 10px', background: C.successSoft, borderRadius: 8 }}>처리 내용: {inc.resolution}</div>}
+                <div style={{ fontSize: 13, color: C.inkSoft, marginBottom: 7, lineHeight: 1.55 }}>{inc.description}</div>
+                <div style={{ fontSize: 13, color: C.muteLight, fontWeight: 500, fontVariantNumeric: 'tabular-nums' }}>접수 {inc.reported_at}{inc.resolved_at && ` · 해결 ${inc.resolved_at}`}</div>
+                {inc.resolution && <div style={{ fontSize: 13, lineHeight: 1.6, color: C.success, marginTop: 8, padding: '9px 11px', background: C.successSoft, borderRadius: 8 }}>처리 내용: {inc.resolution}</div>}
               </div>
             ))}
           </div>
@@ -421,13 +431,28 @@ function ParentSafety({ user, myMatches, myIncidents, dispatch, showToast }) {
             ]} />
         </Field>
         <Field label="심각도" required>
-          <div style={{ display: 'flex', gap: 8 }}>
-            {[{ k: 'low', l: '낮음', c: C.success }, { k: 'medium', l: '중간', c: C.amber }, { k: 'high', l: '높음', c: C.red }].map(opt => (
-              <button key={opt.k} onClick={() => setForm({ ...form, severity: opt.k })}
-                style={{ flex: 1, padding: '13px 10px', minHeight: 48, borderRadius: 10, border: form.severity === opt.k ? `2px solid ${opt.c}` : `1px solid ${C.border}`,
-                  background: form.severity === opt.k ? `${opt.c}15` : C.card, color: form.severity === opt.k ? opt.c : C.inkSoft,
-                  fontWeight: form.severity === opt.k ? 700 : 500, cursor: 'pointer', fontFamily: FONT_STACK, fontSize: 14 }}>{opt.l}</button>
-            ))}
+          {/* 세그먼트 컨트롤: 라디오 시맨틱(스크린리더가 "3개 중 2번째"로 읽음) + 화살표 이동 + 선택 전환 모션 */}
+          <div role="radiogroup" aria-label="심각도" style={{ display: 'flex', gap: 8 }}>
+            {[{ k: 'low', l: '낮음', c: C.success }, { k: 'medium', l: '중간', c: C.amber }, { k: 'high', l: '높음', c: C.red }].map((opt, i, arr) => {
+              const on = form.severity === opt.k;
+              return (
+                <button key={opt.k} type="button" role="radio" aria-checked={on} tabIndex={on ? 0 : -1}
+                  onClick={() => setForm({ ...form, severity: opt.k })}
+                  onKeyDown={(e) => {
+                    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+                    e.preventDefault();
+                    const next = arr[(i + (e.key === 'ArrowRight' ? 1 : arr.length - 1)) % arr.length];
+                    setForm({ ...form, severity: next.k });
+                  }}
+                  style={{ flex: 1, padding: '13px 10px', minHeight: 48, borderRadius: 10,
+                    border: on ? `2px solid ${opt.c}` : `1px solid ${C.border}`,
+                    background: on ? `${opt.c}15` : C.card, color: on ? opt.c : C.inkSoft,
+                    fontWeight: on ? 700 : 500, cursor: 'pointer', fontFamily: FONT_STACK, fontSize: 14,
+                    outlineOffset: 2,
+                    transition: 'background-color .18s ease, border-color .18s ease, color .18s ease, transform .18s cubic-bezier(0.22,1,0.36,1)',
+                    transform: on ? 'translateY(-1px)' : 'none' }}>{opt.l}</button>
+              );
+            })}
           </div>
         </Field>
         <Field label="상세 내용" required>
@@ -472,9 +497,9 @@ function ConsumerPricing() {
           const paid = isPaidPlan(t.id);
           return (
             <div key={t.id} style={{ border: `1px solid ${st.hot ? C.brand + '66' : C.border}`, borderRadius: 11, padding: '12px 13px', background: C.card }}>
-              <div style={{ fontSize: 12.5, color: C.mute, fontWeight: 700 }}>{t.sub}</div>
+              <div style={{ fontSize: 13, color: C.mute, fontWeight: 700 }}>{t.sub}</div>
               <div style={{ fontSize: 15, fontWeight: 800, color: st.c, marginTop: 2 }}>{t.name}</div>
-              <div style={{ fontSize: 21, fontWeight: 800, color: C.ink, margin: '4px 0 8px' }}>{formatKRW(t.amount)}<span style={{ fontSize: 12.5, color: C.mute, fontWeight: 600 }}>{paid ? ' /월' : ''}</span></div>
+              <div style={{ fontSize: 21, fontWeight: 800, color: C.ink, margin: '4px 0 8px' }}>{formatKRW(t.amount)}<span style={{ fontSize: 13, color: C.mute, fontWeight: 600 }}>{paid ? ' /월' : ''}</span></div>
               {t.feats.map((f, i) => <div key={i} style={{ fontSize: 13, color: C.inkSoft, marginBottom: 4 }}>· {f}</div>)}
               {paid && (
                 <button
@@ -495,7 +520,7 @@ function ConsumerPricing() {
       {notice && (
         <div role="status" style={{ marginTop: 10, padding: '8px 10px', fontSize: 13, lineHeight: 1.5, color: C.inkSoft, background: C.borderSoft, border: `1px solid ${C.border}`, borderRadius: 8 }}>{notice}</div>
       )}
-      <div style={{ fontSize: 12.5, color: C.mute, marginTop: 10 }}>구독료는 우산동 파일럿 가정 기준 예시이며, 시장조사상 개인 구독은 장기 옵션입니다(B2G·B2B 우선).</div>
+      <div style={{ fontSize: 13, color: C.mute, marginTop: 10 }}>구독료는 우산동 파일럿 가정 기준 예시이며, 시장조사상 개인 구독은 장기 옵션입니다(B2G·B2B 우선).</div>
     </Card>
   );
 }
