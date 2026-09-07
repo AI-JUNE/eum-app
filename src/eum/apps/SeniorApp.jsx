@@ -7,6 +7,7 @@ import { Calendar, Clock, MapPin, Phone, Wallet } from 'lucide-react';
 import { C, SHADOW } from '../theme.js';
 import { validateDisputeReason, throttleAction } from '../validate.js';
 import { TODAY, fmtDate, fmtRelativeDate, krw, uid } from '../utils.js';
+import { statusMeta, normalizeStatus } from '../status.js';
 import { Avatar } from '../avatar.jsx';
 import { Badge, Button, Card, InsuranceBadge, OfficialSenderBadge } from '../ui.jsx';
 import { HomeHub, Layout } from '../chrome.jsx';
@@ -40,7 +41,7 @@ function SeniorApp({ state, user, dispatch, showToast }) {
     if (!match) return [];
     return state.activities.filter((a) => a.match_id === match.id).sort((a, b) => (a.scheduled_at || '').localeCompare(b.scheduled_at || ''));
   }, [state.activities, match]);
-  const nextActivity = myActivities.find((a) => a.status === 'scheduled');
+  const nextActivity = myActivities.find((a) => normalizeStatus('activity', a.status) === 'planned');
   const mySettlements = useMemo(() => state.settlements.filter((s) => s.participant_id === user.id), [state.settlements, user.id]);
   const totalEarned = mySettlements.filter((s) => s.status === 'paid').reduce((s, x) => s + x.amount_krw, 0);
 
@@ -140,7 +141,7 @@ function SeniorApp({ state, user, dispatch, showToast }) {
         <>
           <div style={{ fontSize: 32, fontWeight: 800, color: C.headline, marginBottom: 8, letterSpacing: '-0.04em' }}>다음 만남</div>
           <div style={{ fontSize: 17, color: C.navMute, marginBottom: 24, fontWeight: 500 }}>예정된 만남과 지난 활동을 한눈에 보실 수 있습니다</div>
-          {myActivities.filter(a => a.status === 'scheduled').length === 0 && (
+          {myActivities.filter(a => normalizeStatus('activity', a.status) === 'planned').length === 0 && (
             <SeniorEmpty
               icon={Calendar} color={C.lavender} soft={C.lavenderSoft}
               title="예정된 만남이 없습니다"
@@ -148,7 +149,7 @@ function SeniorApp({ state, user, dispatch, showToast }) {
             />
           )}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-            {myActivities.filter(a => a.status === 'scheduled').map((act) => (
+            {myActivities.filter(a => normalizeStatus('activity', a.status) === 'planned').map((act) => (
               <Card key={act.id} padding={24}>
                 <div style={{ fontSize: 22, fontWeight: 800, color: C.headline, marginBottom: 6, letterSpacing: '-0.03em' }}>{fmtRelativeDate(act.scheduled_at)}</div>
                 <div style={{ fontSize: 18, color: C.inkSoft, marginBottom: 4 }}>{act.scheduled_at.split(' ')[1]} · {act.type}</div>
@@ -156,9 +157,9 @@ function SeniorApp({ state, user, dispatch, showToast }) {
                 <div style={{ marginTop: 12 }}><InsuranceBadge size="md" /></div>
               </Card>
             ))}
-            {myActivities.filter(a => a.status === 'completed').slice(-3).reverse().map((act) => (
+            {myActivities.filter(a => normalizeStatus('activity', a.status) === 'done').slice(-3).reverse().map((act) => (
               <Card key={act.id} padding={20} style={{ background: C.cream }}>
-                <Badge color={C.sage} soft={C.sageSoft} size="md">완료</Badge>
+                <Badge color={C.sage} soft={C.sageSoft} size="md">{statusMeta('activity', act.status).label}</Badge>
                 <div style={{ fontSize: 18, fontWeight: 700, color: C.headline, marginTop: 6, letterSpacing: '-0.02em' }}>{fmtDate(act.scheduled_at)}</div>
                 <div style={{ fontSize: 16, color: C.inkSoft, marginTop: 4 }}>{act.type}</div>
               </Card>

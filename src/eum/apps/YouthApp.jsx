@@ -7,6 +7,7 @@ import { Activity, AlertTriangle, ArrowRight, Award, BookOpen, Calendar, Camera,
 import { C, FONT_STACK, SERIF_STACK, SHADOW } from '../theme.js';
 import { validateDisputeReason, validateIncidentDescription, throttleAction } from '../validate.js';
 import { TODAY, fmtDate, fmtRelativeDate, krw, uid } from '../utils.js';
+import { statusMeta, normalizeStatus } from '../status.js';
 import { Avatar } from '../avatar.jsx';
 import { AnimatedBar, Badge, Button, Card, Checkbox, CountUp, Empty, Field, InsuranceBadge, KpiStrip, Modal, PageHeader, Panel, Reveal, Ring, Select, Tabs, Textarea } from '../ui.jsx';
 import { CheckInOutCard, HomeHub, Layout, TrustRow, trustStatus } from '../chrome.jsx';
@@ -39,7 +40,7 @@ function YouthApp({ state, user, dispatch, showToast }) {
       .reduce((s, l) => s + l.hours, 0);
   }, [state.activity_logs, user.id]);
 
-  const nextActivity = myActivities.find((a) => a.status === 'scheduled');
+  const nextActivity = myActivities.find((a) => normalizeStatus('activity', a.status) === 'planned');
   const totalHours = state.activity_logs.filter((l) => l.participant_id === user.id && l.approved).reduce((s, l) => s + l.hours, 0);
   const totalEarned = mySettlements.filter((s) => s.status === 'paid').reduce((s, x) => s + x.amount_krw, 0);
 
@@ -61,7 +62,7 @@ function YouthApp({ state, user, dispatch, showToast }) {
                   <div>
                     <div style={{ fontSize: 12.5, fontWeight: 700, color: C.brand, letterSpacing: '0.08em', marginBottom: 5 }}>우리 매칭 트리오</div>
                     <div style={{ fontSize: 19, fontWeight: 800, color: C.headline, letterSpacing: '-0.03em' }}>세 세대가 함께하고 있어요</div>
-                    <div style={{ fontSize: 12.5, color: C.muteLight, marginTop: 4, fontWeight: 500 }}>매칭 시작 {fmtDate(match.started_at)} · {myActivities.filter(a => a.status === 'completed').length}회차 진행</div>
+                    <div style={{ fontSize: 12.5, color: C.muteLight, marginTop: 4, fontWeight: 500 }}>매칭 시작 {fmtDate(match.started_at)} · {myActivities.filter(a => normalizeStatus('activity', a.status) === 'done').length}회차 진행</div>
                   </div>
                   <Badge color={C.sage} soft={C.sageSoft} size="md">활동 중</Badge>
                 </div>
@@ -208,7 +209,7 @@ function ActivityTypeCard({ type, icon, desc, color, count }) {
 
 function YouthSchedule({ match, activities, state, user, dispatch, showToast }) {
   const actionable = activities
-    .filter(a => a.status === 'in_progress' || (a.status === 'scheduled' && (a.date || '') >= TODAY))
+    .filter(a => normalizeStatus('activity', a.status) === 'planned' && (a.status === 'in_progress' || (a.date || '') >= TODAY))
     .sort((a, b) => (a.scheduled_at || '').localeCompare(b.scheduled_at || ''))
     .slice(0, 3);
   return (
@@ -231,7 +232,7 @@ function YouthSchedule({ match, activities, state, user, dispatch, showToast }) 
       )}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {activities.map((act) => {
-          const isPast = act.status === 'completed';
+          const isPast = normalizeStatus('activity', act.status) === 'done';
           return (
             <div key={act.id} style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 12, boxShadow: SHADOW.xs, padding: 15 }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
@@ -427,7 +428,7 @@ function YouthLogs({ state, user, match, myLogs, myActivities, dispatch, showToa
     : tab === 'revision' ? myLogs.filter(needsRevision)
       : tab === 'pending' ? myLogs.filter(l => !l.approved && !needsRevision(l)) : myLogs;
 
-  const writableActs = myActivities.filter(a => a.status === 'completed' || a.status === 'scheduled');
+  const writableActs = myActivities.filter(a => ['done', 'planned'].includes(normalizeStatus('activity', a.status)));
   const writableOptions = writableActs.map((a) => {
     const has = myLogs.find((l) => l.activity_id === a.id);
     return { value: a.id, label: `${fmtDate(a.scheduled_at)} · ${a.type}${has ? ' (작성됨)' : ''}` };

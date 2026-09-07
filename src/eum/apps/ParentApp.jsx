@@ -6,6 +6,7 @@ import { useCallback, useState } from 'react';
 import { Activity, AlertTriangle, Calendar, Clock, Coffee, Heart, MapPin, PenLine, Phone, Send, ShieldAlert, ShieldCheck, Users } from 'lucide-react';
 import { C, FONT_STACK, PERSONA, SERIF_STACK, SHADOW } from '../theme.js';
 import { TODAY, fmtDate, fmtRelativeDate, uid } from '../utils.js';
+import { normalizeStatus } from '../status.js';
 import { Avatar } from '../avatar.jsx';
 import { BILLING_ENABLED, PLANS, formatKRW, isPaidPlan, requestSubscription } from '../billing.js';
 import { Badge, Button, Card, Empty, Field, Modal, PageHeader, Panel, Reveal, Select, Textarea, useIsMobile } from '../ui.jsx';
@@ -28,7 +29,7 @@ function ParentApp({ state, user, dispatch, showToast }) {
     a.date === TODAY && myMatches.some(m => m.id === a.match_id)
   );
   const upcomingActivities = state.activities
-    .filter(a => a.date >= TODAY && a.status === 'scheduled' && myMatches.some(m => m.id === a.match_id))
+    .filter(a => a.date >= TODAY && normalizeStatus('activity', a.status) === 'planned' && myMatches.some(m => m.id === a.match_id))
     .sort((a, b) => (a.date || '').localeCompare(b.date || ''))
     .slice(0, 5);
 
