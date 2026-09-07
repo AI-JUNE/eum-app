@@ -18,7 +18,7 @@ import {
   COMPLEMENT_RULES,
 } from '../../packages/matching/index.js';
 
-export { DEFAULT_WEIGHTS, WEIGHTS_VERSION, COMPLEMENT_RULES };
+export { DEFAULT_WEIGHTS, WEIGHTS_VERSION, COMPLEMENT_RULES } from '../../packages/matching/index.js';
 
 export const FACTOR_LABEL = Object.freeze({
   proximity: '근접도',

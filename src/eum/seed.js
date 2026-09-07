@@ -46,13 +46,4 @@ export function freshSeed() {
   return buildSeed(SEED_PALETTE);
 }
 
-export {
-  buildSeed,
-  SEED_META,
-  DEMO_FLAG,
-  isDemoRecord,
-  excludeDemo,
-  onlyDemo,
-  seedTableNames,
-  seedRecordCount,
-};
+export { buildSeed, SEED_META, DEMO_FLAG, isDemoRecord, excludeDemo, onlyDemo, seedTableNames, seedRecordCount } from '../../packages/db/seed.js';
