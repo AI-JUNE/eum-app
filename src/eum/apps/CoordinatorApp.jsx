@@ -10,6 +10,8 @@ import { validateResolutionMemo, validateRevisionNote, validateIncidentResolutio
 import { TODAY, fmtDate, krw, uid } from '../utils.js';
 import { callClaude, callClaudeSafe } from '../api.js';
 import { aiAutoTrios, aiDong, aiTrioScore, aiWelfare } from '../matching.js';
+import { recommendForSenior, normalizeWeights, auditSnapshot, DEFAULT_WEIGHTS, WEIGHTS_VERSION, FACTOR_LABEL } from '../matchingEngine.js';
+import { SEED_META, isDemoRecord } from '../seed.js';
 import { Avatar } from '../avatar.jsx';
 import { Badge, Button, Card, Checkbox, CountUp, Empty, Field, Input, KpiStrip, Modal, PageHeader, Panel, Ring, SearchBar, Select, Skeleton, Tabs, Textarea, TrustBadge, useIsMobile } from '../ui.jsx';
 import { Layout, trustStatus } from '../chrome.jsx';
@@ -147,13 +149,190 @@ function CoordAdvisor({ state, showToast }){
   );
 }
 
+
+// 「데모 데이터」 배지 — 시드 레코드에만 붙는다(§1 원칙 4 · §7-4)
+export function DemoBadge({ row, size='sm' }){
+  if(row && !isDemoRecord(row)) return null;
+  return <Badge color={C.gold} soft={C.goldSoft} size={size}>{SEED_META.badge}</Badge>;
+}
+
+// §5 규칙 기반 추천 — packages/matching 엔진 그대로. 요소별 점수·사유·감사 메타를 화면에 노출.
+function EngineRecommend({ state, showToast }){
+  const seniors = (state.participants||[]).filter(p=>p.type==='senior');
+  const [sid, setSid] = useState((seniors[0]||{}).id);
+  const [weights, setWeights] = useState({ ...DEFAULT_WEIGHTS });
+  const [tune, setTune] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [res, setRes] = useState(null);
+  const [err, setErr] = useState(null);
+
+  const run = (w) => {
+    setBusy(true); setErr(null); setRes(null);
+    try {
+      const out = recommendForSenior(state, sid, { weights: w || weights });
+      if(!out.ok){ setErr(out.error); setBusy(false); return; }
+      setRes(out);
+    } catch(e){
+      setErr('추천 계산에 실패했습니다. 잠시 후 다시 시도해 주세요.');
+      showToast && showToast('추천 계산 실패 — 다시 시도해 주세요','error');
+    }
+    setBusy(false);
+  };
+  useEffect(()=>{ setRes(null); setErr(null); }, [sid]);
+
+  const senior = seniors.find(x=>x.id===sid) || {};
+  const applyWeight = (k, v) => {
+    const next = normalizeWeights({ ...weights, [k]: v });
+    setWeights(next);
+    if(res) run(next);
+  };
+
+  return (
+    <div>
+      <div style={{ display:'grid', gridTemplateColumns:'minmax(220px,300px) 1fr', gap:14 }} className="eum-ai-cols">
+        <Card padding={14}>
+          <div style={{ fontSize:12.5, fontWeight:700, color:C.navMute, marginBottom:9 }}>어르신 선택</div>
+          {seniors.length===0
+            ? <Empty icon={<Users size={22} />} title="등록된 어르신이 없습니다" sub="어르신을 먼저 등록하면 추천을 받을 수 있어요" />
+            : <div style={{ display:'flex', flexDirection:'column', gap:5 }}>
+                {seniors.map(o=>(
+                  <button key={o.id} onClick={()=>setSid(o.id)} style={{ textAlign:'left', cursor:'pointer', fontFamily:FONT_STACK, fontSize:13, fontWeight:sid===o.id?700:500, padding:'9px 11px', borderRadius:9, background:sid===o.id?C.brandSoft:C.panel, border:'1px solid '+(sid===o.id?'transparent':C.line), color:sid===o.id?C.brand:C.ink, minHeight:44 }}>
+                    {o.name} <span style={{ fontSize:12.5, color:C.muteLight, fontWeight:500 }}>{o.age}·{aiDong(o.address)}</span>
+                  </button>
+                ))}
+              </div>}
+          {senior.id && (
+            <div style={{ marginTop:12, paddingTop:12, borderTop:`1px solid ${C.lineSoft}` }}>
+              <div style={{ display:'flex', alignItems:'center', gap:6, flexWrap:'wrap', marginBottom:7 }}>
+                <span style={{ fontSize:13, fontWeight:700, color:C.headline }}>{senior.name}</span>
+                <DemoBadge row={senior} />
+              </div>
+              <div style={{ fontSize:12.5, color:C.navMute, lineHeight:1.6 }}>
+                <div>필요 <b style={{ color:C.inkSoft }}>{(senior.needs||[]).join(', ') || '—'}</b></div>
+                <div>희망 시간 <b style={{ color:C.inkSoft }}>{(senior.availability||[]).join(', ') || '—'}</b></div>
+                <div>생활권 <b style={{ color:C.inkSoft }}>{aiDong(senior.address) || '—'}</b></div>
+              </div>
+            </div>
+          )}
+          <Button variant="brand" fullWidth style={{ marginTop:13 }} loading={busy} disabled={!sid} onClick={()=>run()}>{busy?'후보 계산 중…':'추천 받기'}</Button>
+          <button onClick={()=>setTune(!tune)} style={{ marginTop:9, width:'100%', border:'none', background:'transparent', cursor:'pointer', fontFamily:FONT_STACK, fontSize:12.5, color:C.navMute, textAlign:'left' }}>
+            {tune?'▾':'▸'} 가중치 조정 (담당자)
+          </button>
+          {tune && (
+            <div style={{ marginTop:9, padding:11, borderRadius:10, background:C.lineSoft, border:`1px solid ${C.line}` }}>
+              <div style={{ fontSize:12, color:C.navMute, lineHeight:1.55, marginBottom:9 }}>운영 데이터를 보고 담당자가 직접 조정합니다. 합이 1이 되도록 자동 정규화됩니다. (버전 {WEIGHTS_VERSION})</div>
+              {Object.keys(DEFAULT_WEIGHTS).map(k=>(
+                <div key={k} style={{ display:'flex', alignItems:'center', gap:8, marginBottom:6 }}>
+                  <span style={{ flex:'0 0 88px', fontSize:12, color:C.inkSoft, fontWeight:600 }}>{FACTOR_LABEL[k]}</span>
+                  <input type="range" min="0" max="0.6" step="0.05" value={weights[k]} onChange={e=>applyWeight(k, Number(e.target.value))} style={{ flex:1, minWidth:60 }} aria-label={FACTOR_LABEL[k]+' 가중치'} />
+                  <span style={{ flex:'0 0 34px', textAlign:'right', fontSize:12, fontWeight:800, color:C.blue, fontVariantNumeric:'tabular-nums' }}>{weights[k].toFixed(2)}</span>
+                </div>
+              ))}
+              <Button variant="secondary" size="sm" fullWidth style={{ marginTop:6 }} onClick={()=>{ setWeights({ ...DEFAULT_WEIGHTS }); if(res) run({ ...DEFAULT_WEIGHTS }); }}>기본값으로</Button>
+            </div>
+          )}
+        </Card>
+
+        <div>
+          {busy && <Card><Skeleton height={22} /><div style={{ height:10 }} /><Skeleton height={64} /><div style={{ height:10 }} /><Skeleton height={64} /></Card>}
+          {!busy && err && (
+            <Card padding={0}>
+              <Empty icon={<AlertCircle size={26} />} title="추천을 불러오지 못했습니다" sub={err}
+                action={<Button variant="brand" size="sm" onClick={()=>run()}>다시 시도</Button>} />
+            </Card>
+          )}
+          {!busy && !err && !res && (
+            <Card padding={0}>
+              <Empty icon={<Sparkles size={26} />} title="아직 추천 결과가 없습니다" sub="왼쪽에서 어르신을 고르고 ‘추천 받기’를 누르면 요소별 점수와 사유가 이곳에 표시됩니다" />
+            </Card>
+          )}
+          {!busy && !err && res && res.candidates.length===0 && (
+            <Card padding={0}>
+              <Empty icon={<ShieldAlert size={26} />} title="조건을 만족하는 후보가 없습니다"
+                sub={`후보 ${res.poolSize}명 중 ${res.excluded.length}명이 안전 검증 미완료로 제외되었습니다`}
+                action={<Button variant="secondary" size="sm" onClick={()=>run()}>다시 계산</Button>} />
+            </Card>
+          )}
+          {!busy && !err && res && res.candidates.length>0 && (
+            <>
+              <div style={{ fontSize:12.5, color:C.navMute, lineHeight:1.6, marginBottom:10 }}>
+                후보 <b style={{ color:C.inkSoft }}>{res.poolSize}</b>명 중 <b style={{ color:C.inkSoft }}>{res.evaluated}</b>명 평가 · 안전 검증 미완료 <b style={{ color:C.red }}>{res.excluded.length}</b>명 제외 · 가중치 <b style={{ color:C.inkSoft }}>{res.weights_version}</b>
+              </div>
+              <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
+                {res.candidates.map(c=>(
+                  <Card key={c.participant_id}>
+                    <div style={{ display:'flex', alignItems:'flex-start', gap:11, flexWrap:'wrap' }}>
+                      <Badge color={C.blue} soft={C.blueSoft} size="sm">{c.rank}순위</Badge>
+                      <div style={{ flex:1, minWidth:140 }}>
+                        <div style={{ display:'flex', alignItems:'center', gap:7, flexWrap:'wrap' }}>
+                          <span style={{ fontSize:15, fontWeight:700, color:C.headline, letterSpacing:'-0.02em' }}>{(c.participant||{}).name || c.participant_id}</span>
+                          <DemoBadge row={c.participant} />
+                        </div>
+                        <div style={{ fontSize:12.5, color:C.muteLight, marginTop:2 }}>{(c.participant||{}).age}세 · {(c.participant||{}).occupation}</div>
+                      </div>
+                      <div style={{ textAlign:'right' }}>
+                        <span style={{ fontSize:24, fontWeight:800, color:C.headline, letterSpacing:'-0.03em', fontVariantNumeric:'tabular-nums' }}>{c.score_total.toFixed(3)}</span>
+                        <div style={{ fontSize:12, color:C.muteLight, fontWeight:600 }}>가중 합계 / 1.000</div>
+                      </div>
+                    </div>
+
+                    <div style={{ marginTop:11, padding:'10px 12px', borderRadius:10, background:C.lineSoft, fontSize:13, color:C.inkSoft, lineHeight:1.6 }}>
+                      {c.reason_text}
+                    </div>
+
+                    <div style={{ marginTop:11, display:'flex', flexDirection:'column', gap:6 }}>
+                      {c.factors.map(f=>(
+                        <div key={f.key} style={{ display:'flex', alignItems:'center', gap:9 }} title={f.desc}>
+                          <span style={{ flex:'0 0 96px', fontSize:12.5, color:C.inkSoft, fontWeight:600 }}>{f.label}<span style={{ color:C.mute, fontWeight:500 }}> ×{f.weight}</span></span>
+                          <div style={{ flex:1, height:9, borderRadius:6, background:C.bg, overflow:'hidden' }}>
+                            <div style={{ width:Math.round(f.score*100)+'%', height:'100%', background:f.score>0 ? 'linear-gradient(90deg,#9db4dd,'+C.blue+')' : 'transparent' }} />
+                          </div>
+                          <span style={{ flex:'0 0 66px', textAlign:'right', fontSize:12, color:C.navMute, fontVariantNumeric:'tabular-nums' }}>{f.score.toFixed(2)} → <b style={{ color:C.blue }}>{f.contribution.toFixed(3)}</b></span>
+                        </div>
+                      ))}
+                    </div>
+
+                    <Button variant={c.rank===1?'brand':'secondary'} size="sm" fullWidth style={{ marginTop:12 }} onClick={()=>{
+                      const snap = auditSnapshot(res);
+                      try { console.info('[match_candidates] 감사 스냅샷', snap && snap.weights_version); } catch(e){ /* no-op */ }
+                      showToast && showToast(((c.participant||{}).name||'후보')+' 확정 — 요소별 점수와 사유가 감사 기록에 남았습니다','success');
+                    }}>이 후보로 확정</Button>
+                  </Card>
+                ))}
+              </div>
+
+              {res.excluded.length>0 && (
+                <Card style={{ marginTop:12 }} padding={14}>
+                  <div style={{ display:'flex', alignItems:'center', gap:7, marginBottom:8 }}>
+                    <ShieldAlert size={14} style={{ color:C.red }} />
+                    <span style={{ fontSize:13, fontWeight:700, color:C.headline }}>안전 하드 필터로 제외된 후보 {res.excluded.length}명</span>
+                  </div>
+                  <div style={{ display:'flex', flexDirection:'column', gap:5 }}>
+                    {res.excluded.map((x,i)=>(
+                      <div key={i} style={{ fontSize:12.5, color:C.navMute }}>· <b style={{ color:C.inkSoft }}>{(x.participant||{}).name}</b> — {x.reason}</div>
+                    ))}
+                  </div>
+                </Card>
+              )}
+
+              <div style={{ fontSize:12.5, color:C.mute, marginTop:11, lineHeight:1.6 }}>
+                ※ 가중 점수 + 안전 하드 필터 + 규칙 기반 사유 생성입니다. 스스로 학습하는 모델이 아니며, 가중치는 운영 데이터를 보고 담당자가 조정합니다. 최종 확정은 담당자가 합니다.
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ② 자동 + 선택형 하이브리드 매칭 ----------------------------------------------
 function CoordAIMatch({ state, showToast }){
   const ps = state.participants||[];
   const youths = ps.filter(p=>p.type==='youth');
   const seniors = ps.filter(p=>p.type==='senior');
   const children = ps.filter(p=>p.type==='child');
-  const [mode, setMode] = useState('auto');
+  const [mode, setMode] = useState('engine');
   const [busy, setBusy] = useState(false); const [autoRes, setAutoRes] = useState(null);
   const runAuto = ()=>{ setBusy(true); setAutoRes(null); setTimeout(()=>{ setAutoRes(aiAutoTrios(youths,seniors,children,3)); setBusy(false); }, 650); };
   const [yId,setY]=useState((youths[0]||{}).id); const [sId,setS]=useState((seniors[0]||{}).id); const [cId,setC]=useState((children[0]||{}).id);
@@ -161,8 +340,9 @@ function CoordAIMatch({ state, showToast }){
   const sc=useMemo(()=>aiTrioScore(y,se,ch),[yId,sId,cId]);
   return (
     <div>
-      <PageHeader title="AI 자동 · 선택형 하이브리드 매칭" subtitle="AI가 청년·어르신·아동 세 명을 한 조로 묶어 최적 조합을 자동 추천하고, 직접 골라 구성할 수도 있습니다. 두 방식 모두 같은 점수 엔진·안전 가드레일 위에서 작동합니다."
-        right={<div style={{ display:'inline-flex', gap:2, background:C.lineSoft, padding:4, borderRadius:12, border:`1px solid ${C.line}` }}>{[['auto','AI 자동추천'],['self','직접 선택']].map(([m,t])=><button key={m} onClick={()=>setMode(m)} style={{ border:'none', cursor:'pointer', fontFamily:FONT_STACK, fontWeight:mode===m?700:600, fontSize:13, padding:'7px 13px', borderRadius:9, background:mode===m?C.panel:'transparent', color:mode===m?C.headline:C.navMute, boxShadow:mode===m?SHADOW.sm:'none', transition:'background .16s ease, color .16s ease' }}>{t}</button>)}</div>} />
+      <PageHeader title="매칭 추천" subtitle="규칙 기반 추천입니다. 근접도·일정·관심·안전·보완 5요소에 가중치를 곱해 점수를 내고, 안전 미검증자는 후보에서 제외합니다. 요소별 점수와 사유가 모두 남아 「왜 이 사람인가」를 추적할 수 있습니다."
+        right={<div style={{ display:'inline-flex', gap:2, background:C.lineSoft, padding:4, borderRadius:12, border:`1px solid ${C.line}` }}>{[['engine','규칙기반 추천(어르신↔참여자)'],['auto','3인 조합 자동'],['self','직접 선택']].map(([m,t])=><button key={m} onClick={()=>setMode(m)} style={{ border:'none', cursor:'pointer', fontFamily:FONT_STACK, fontWeight:mode===m?700:600, fontSize:13, padding:'7px 13px', borderRadius:9, background:mode===m?C.panel:'transparent', color:mode===m?C.headline:C.navMute, boxShadow:mode===m?SHADOW.sm:'none', transition:'background .16s ease, color .16s ease' }}>{t}</button>)}</div>} />
+      {mode==='engine' && <EngineRecommend state={state} showToast={showToast} />}
       {mode==='auto' && (
         <div>
           <Button variant="brand" loading={busy} onClick={runAuto}>{busy ? '조합 계산 중…' : 'AI 자동매칭 실행'}</Button>
