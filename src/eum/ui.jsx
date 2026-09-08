@@ -576,7 +576,7 @@ function Ring({ value, max = 100, size = 96, stroke = 9, color = C.brand, track 
   }, [pct, reduce]);
   return (
     <div style={{ position: 'relative', width: size, height: size, flexShrink: 0 }}>
-      <svg width={size} height={size} style={{ transform: 'rotate(-90deg)', display: 'block' }}>
+      <svg width={size} height={size} aria-hidden="true" focusable="false" style={{ transform: 'rotate(-90deg)', display: 'block' }}>
         <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={track} strokeWidth={stroke} />
         <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={color} strokeWidth={stroke} strokeLinecap="round"
           strokeDasharray={circ} strokeDashoffset={circ * (1 - draw)}

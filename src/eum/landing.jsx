@@ -59,7 +59,7 @@ function RLRing({ value, max = 100, size = 96, stroke = 9, color = C.brand, trac
   }, [pct, reduce]);
   return (
     <div style={{ position: 'relative', width: size, height: size, flexShrink: 0 }}>
-      <svg width={size} height={size} style={{ transform: 'rotate(-90deg)', display: 'block' }}>
+      <svg width={size} height={size} aria-hidden="true" focusable="false" style={{ transform: 'rotate(-90deg)', display: 'block' }}>
         <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={track} strokeWidth={stroke} />
         <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={color} strokeWidth={stroke} strokeLinecap="round"
           strokeDasharray={circ} strokeDashoffset={circ * (1 - draw)}
@@ -417,7 +417,7 @@ function RLLoopInfographic() {
       `}</style>
       <div style={{ position: 'absolute', inset: 24, borderRadius: '50%', border: '2px dashed ' + C.brand + '40', animation: 'eumSpinSlow 28s linear infinite' }} />
       <div style={{ position: 'absolute', inset: 50, borderRadius: '50%', border: '1px solid ' + C.borderSoft }} />
-      <svg viewBox="0 0 300 268" width="300" height="268" style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+      <svg viewBox="0 0 300 268" width="300" height="268" aria-hidden="true" focusable="false" style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
         <defs>
           <marker id="eumArrow" markerWidth="9" markerHeight="9" refX="5" refY="4.5" orient="auto">
             <path d="M0,0 L9,4.5 L0,9 Z" fill={C.brand} opacity="0.5" />
