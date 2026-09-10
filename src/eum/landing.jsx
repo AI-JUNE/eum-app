@@ -648,6 +648,7 @@ const PROD_HTML = `<div class="txt">
     </div>
     <div class="mbwait"><span>매칭 대기 · 미배정 1명</span><span class="mbwaitp">👵 정금자 · 75세 · 요리</span></div>
   </div>
+  <p style="margin:12px 2px 0; font-size:12.5px; color:var(--sub); line-height:1.5;">※ 위 화면·이름·적합도 수치는 2027 파일럿 시나리오로 구성한 데모이며, 실제 참여자 정보나 운영 실적이 아닙니다.</p>
 </div>`;
 const KAKAO_PHONE_HTML = `<div class="scr kk">
   <div class="kkTop">
