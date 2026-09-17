@@ -21,10 +21,15 @@ function RLuseCountUp(target, duration = 950) {
   const num = typeof target === 'number' ? target : parseFloat(String(target).replace(/[^0-9.-]/g, '')) || 0;
   // 접근성(WCAG 2.3.3): 모션 최소화 설정 시 애니메이션 없이 최종값을 바로 표시.
   // 동시에 캡처/첫 페인트에서 지표가 0으로 보이는 문제를 방지한다.
-  const [val, setVal] = useState(() => (prefersReducedMotion() ? num : 0));
+  const hiddenAtMount = typeof document !== 'undefined' && document.hidden;
+  const [val, setVal] = useState(() => ((prefersReducedMotion() || hiddenAtMount) ? num : 0));
   const raf = useRef();
+  const timer = useRef();
   useEffect(() => {
-    if (prefersReducedMotion()) { setVal(num); return; }
+    if (prefersReducedMotion()) { setVal(num); return undefined; }
+    // 백그라운드 탭에서는 requestAnimationFrame이 멈춰 지표가 0에 고정된다.
+    // (배경 탭 사전로딩·프리렌더·캡처 봇 등) 애니메이션 없이 최종값을 바로 표시한다.
+    if (typeof document !== 'undefined' && document.hidden) { setVal(num); return undefined; }
     let start;
     const tick = (t) => {
       if (start === undefined) start = t;
@@ -34,7 +39,9 @@ function RLuseCountUp(target, duration = 950) {
       if (p < 1) raf.current = requestAnimationFrame(tick);
     };
     raf.current = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf.current);
+    // 안전망: rAF가 도중에 멈춰도 duration 경과 후에는 최종값을 보장한다.
+    timer.current = setTimeout(() => setVal(num), duration + 400);
+    return () => { cancelAnimationFrame(raf.current); clearTimeout(timer.current); };
   }, [num, duration]);
   return val;
 }
