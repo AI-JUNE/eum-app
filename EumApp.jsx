@@ -3364,6 +3364,9 @@ JSON 형식으로만 답변:
               </div>
             ))}
           </div>
+          <div style={{ marginTop: 18, paddingTop: 14, borderTop: `1px solid ${C.border}`, fontSize: 11, color: C.mute, lineHeight: 1.7 }}>
+            본 요약은 인공지능(AI)이 활동 데이터를 바탕으로 생성한 내용입니다. 사실과 다를 수 있으니 보고·정산에 활용하기 전 담당 코디네이터가 원본 데이터를 확인해 주세요.
+          </div>
         </Card>
       )}
 
