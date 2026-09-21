@@ -370,7 +370,7 @@ function RLBenchmarkBand() {
     { flag: 'US', name: 'Foster Grandparent', country: '미국 · AmeriCorps', adopt: '어르신→아동 1:1 멘토 + 활동비 보상', limit: '두 세대(어르신·아동)만 연결' },
     { flag: 'NL', name: 'Humanitas Deventer', country: '네덜란드', adopt: '청년↔어르신 교류로 무료 거주 교환', limit: '주거 자원에 한정된 1:1 교환' },
     { flag: 'UK', name: 'The Cares Family', country: '영국 런던·맨체스터', adopt: '도시 청년↔어르신 외로움 해소', limit: '아동·양육가정은 포함되지 않음' },
-    { flag: 'KR', name: '케어닥 · 자란다', country: '국내 돌봄 매칭', adopt: '앱으로 간편 매칭·일지 관리', limit: '대가 지불형 일방 돌봄 중개' },
+    { flag: 'KR', name: '국내 돌봄 매칭 플랫폼', country: '국내 민간 돌봄 중개 일반', adopt: '앱으로 간편 매칭·일지 관리', limit: '대가 지불형 일방 돌봄 중개' },
   ];
   return (
     <div style={{ marginBottom: 72 }}>
@@ -452,7 +452,7 @@ function RLPartnerStrip() {
   const partners = ['광주광역시', '광산구청', '광주창조경제혁신센터', '1365 자원봉사포털', '광주상생카드'];
   return (
     <div style={{ marginBottom: 64, textAlign: 'center' }}>
-      <div style={{ fontSize: 13, fontWeight: 700, color: C.mute, marginBottom: 18 }}>함께하는 기관</div>
+      <div style={{ fontSize: 13, fontWeight: 700, color: C.mute, marginBottom: 18 }}>연계 추진 기관</div>
       <div className="eum-marquee-wrap">
         <div className="eum-marquee-track">
           {[...partners, ...partners].map((p, i) => (
@@ -461,6 +461,9 @@ function RLPartnerStrip() {
             </div>
           ))}
         </div>
+      </div>
+      <div style={{ marginTop: 14, fontSize: 12, color: C.mute, lineHeight: 1.6 }}>
+        ※ 2027 우산동 파일럿 추진 과정에서 연계를 협의하는 기관이며, 현재 제휴·후원이 확정된 것은 아닙니다.
       </div>
     </div>
   );
@@ -576,6 +579,7 @@ const AX_ROWS_HTML = `<div class="axrow">
       <div class="axlisten" style="font-size:12px; color:var(--coral); font-weight:700; margin-bottom:16px;">● 듣고 있어요…</div>
       <div style="background:var(--coral-soft); color:var(--coral-d); border-radius:12px; padding:9px 12px; font-size:12px; display:inline-block; margin-bottom:10px;">기초연금 신청하고 싶어요</div>
       <div style="background:#fff; border:1px solid #E5E9F1; border-radius:12px; padding:10px 12px; font-size:12px; color:var(--sub); text-align:left;">네, 기초연금 신청을 도와드릴게요. 생년월일을 말씀해 주세요.</div>
+      <div style="margin-top:10px; font-size:10.5px; color:var(--sub); line-height:1.5; text-align:left;">🤖 본 상담은 인공지능(AI)이 응대합니다. AI가 생성한 안내가 포함될 수 있습니다.</div>
     </div>
   </div></div>
 </div>
@@ -1144,7 +1148,7 @@ function RLLanding({ state, onSelectRole, onShowApplication }) {
               </div>
             </div>
             <div>
-              <div style={{ fontSize: 12, fontWeight: 800, color: C.ink, letterSpacing: '0.02em', marginBottom: 14 }}>함께하는 기관</div>
+              <div style={{ fontSize: 12, fontWeight: 800, color: C.ink, letterSpacing: '0.02em', marginBottom: 14 }}>연계 추진 기관</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {['광주광역시 · 광산구청', '광주창조경제혁신센터', '1365 자원봉사포털', '광주상생카드'].map((p, i) => (
                   <span key={i} style={{ fontSize: 13.5, color: C.mute, fontWeight: 500 }}>{p}</span>
