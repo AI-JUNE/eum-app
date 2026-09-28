@@ -1,0 +1,49 @@
+{
+  "ok": true,
+  "service": "eum",
+  "version": "dev",
+  "commit": "unknown",
+  "commitFull": null,
+  "branch": null,
+  "environment": null,
+  "builtAt": "2026-09-28T00:39:14.205Z",
+  "mode": "production",
+  "flags": {
+    "auth": false,
+    "billing": false,
+    "telemetry": false
+  },
+  "configured": {
+    "supabaseUrl": false,
+    "supabaseAnonKey": false,
+    "telemetryEndpoint": false,
+    "paymentKeys": false
+  },
+  "paymentProvider": "portone",
+  "legal": {
+    "status": "draft",
+    "effectiveDate": "2027-07-15"
+  },
+  "status": "ok",
+  "dependencies": [
+    {
+      "name": "database",
+      "kind": "db",
+      "required": false,
+      "configured": false,
+      "status": "unchecked",
+      "latencyMs": null,
+      "code": null
+    },
+    {
+      "name": "ai-proxy",
+      "kind": "external-api",
+      "required": false,
+      "configured": false,
+      "status": "unchecked",
+      "latencyMs": null,
+      "code": null
+    }
+  ],
+  "checkedAt": null
+}
