@@ -24,20 +24,24 @@ if (TEST_FILES.length === 0) { console.error('테스트 파일이 없습니다 (
 const STEPS = [
   {
     name: '빌드(esbuild 번들)',
+    // npx 는 Windows 에서 .cmd 래퍼라 셸이 필요하다
     cmd: 'npx',
+    shell: process.platform === 'win32',
     args: ['--yes', 'esbuild@0.23.0', 'src/EumApp.jsx', '--bundle', '--format=esm', '--jsx=automatic',
       '--external:react', '--external:react-dom', '--external:lucide-react', '--external:recharts',
       '--loader:.jsx=jsx', '--outfile=' + join(OUT_DIR, 'eumcheck.js')],
   },
-  { name: `테스트(node --test, ${TEST_FILES.length}개 파일)`, cmd: process.execPath, args: ['--test', ...TEST_FILES] },
-  { name: '복구 리허설', cmd: process.execPath, args: ['scripts/rehearse-restore.mjs'] },
+  // process.execPath 는 "C:\Program Files\nodejs\node.exe" 처럼 공백을 포함한다 —
+  // shell 을 켜면 cmd.exe 가 공백에서 잘라 'C:\Program' 을 찾다 실패한다. 셸 없이 직접 실행한다.
+  { name: `테스트(node --test, ${TEST_FILES.length}개 파일)`, cmd: process.execPath, shell: false, args: ['--test', ...TEST_FILES] },
+  { name: '복구 리허설', cmd: process.execPath, shell: false, args: ['scripts/rehearse-restore.mjs'] },
 ];
 
 let failed = 0;
 const results = [];
 for (const s of STEPS) {
   const t0 = Date.now();
-  const r = spawnSync(s.cmd, s.args, { stdio: 'inherit', shell: process.platform === 'win32' });
+  const r = spawnSync(s.cmd, s.args, { stdio: 'inherit', shell: s.shell === true });
   const ok = r.status === 0;
   if (!ok) failed += 1;
   results.push({ name: s.name, ok, ms: Date.now() - t0, code: r.status });
